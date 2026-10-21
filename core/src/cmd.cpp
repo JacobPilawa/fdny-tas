@@ -123,6 +123,10 @@ bool ExecFile(const char* name) {
 
 bool g_loading = false;  // while FDNYCore.cfg itself is being executed: don't rewrite it
 
+constexpr int kMaxWriters = 16;
+ConfigWriter g_writers[kMaxWriters];
+int g_nWriters = 0;
+
 Cvar g_fdVersion = {"fd_version", "", "FDNYCore version", true, false, nullptr, {0}};
 Cvar g_fdLogCommands = {"fd_log_commands", "1", "log every FDNYCore console command to FDNYCore.log (0/1)",
                         false, true, nullptr, {0}};
@@ -139,6 +143,10 @@ Cvar g_fdHooksFrame = {"fd_hooks_frame", "1", "frame hooks on/off (debugging; di
                        false, false, OnHooksFrame, {0}};
 
 } // namespace
+
+void RegisterConfigWriter(ConfigWriter fn) {
+    if (g_nWriters < kMaxWriters) g_writers[g_nWriters++] = fn;
+}
 
 void RegisterCommand(const char* name, const char* help, CommandFn fn) {
     if (g_nCommands < kMaxCommands) g_commands[g_nCommands++] = {name, help, fn};
@@ -179,6 +187,7 @@ bool SaveConfig() {
         o += wsprintfA(buf + o, "%s \"%s\"\r\n", v->name, v->value);
     }
     o += binds::AppendConfig(buf + o, static_cast<int>(sizeof(buf)) - o);
+    for (int i = 0; i < g_nWriters; ++i) o += g_writers[i](buf + o, static_cast<int>(sizeof(buf)) - o);
     char path[MAX_PATH];
     wsprintfA(path, "%s%s", console::GameDir(), kConfigName);
     HANDLE f = CreateFileA(path, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);

@@ -35,6 +35,11 @@ void RegisterBuiltins();
 constexpr const char* kConfigName = "FDNYCore.cfg";
 // Writes FDNYCore.cfg (archived non-default vars + binds). False while loading it.
 bool SaveConfig();
+// Modules that persist more than variables (binds, spawn pins) append their own
+// FDNYCore.cfg lines; returns chars written.
+using ConfigWriter = int (*)(char* out, int cap);
+void RegisterConfigWriter(ConfigWriter fn);
+
 // Runs FDNYCore.cfg, then autoexec.cfg (game thread, once the console exists).
 void ExecStartup();
 

@@ -49,7 +49,10 @@ bool StrEq(const char* a, const char* b) {
     return *a == *b;
 }
 
+constexpr uint8_t kModuleField = 2;  // struct offset entry: nothing to verify in memory
+
 bool VerifySig(const Entry& e) {
+    if (e.module == kModuleField) return true;
     if (!e.sigRva || !e.sigLen) return false;
     if (e.exportName) {
         // Hooked exports are resolved by name; the table's rva must agree.
@@ -69,9 +72,14 @@ bool OccupiedByOtherMod(const Entry& e) {
     const char* p = "patch.";
     for (int i = 0; p[i]; ++i)
         if (e.name[i] != p[i]) return false;
-    uint8_t live[2];
-    if (!SafeRead(g_bases[e.module] + e.sigRva, live, 2)) return false;
-    return (live[0] == 0x90 && live[1] == 0x90) || live[0] == 0xE9 || live[0] == 0xE8;
+    uint8_t live[kMaxSig];
+    if (!e.sigLen || !SafeRead(g_bases[e.module] + e.sigRva, live, e.sigLen)) return false;
+    if ((live[0] == 0x90 && live[1] == 0x90) || live[0] == 0xE9 || live[0] == 0xE8) return true;
+    // A 1-byte patch (e.g. asi/FDNYDeterministic's ret / imm8): only the first
+    // byte differs, everything after it is still the original code.
+    for (int i = 1; i < e.sigLen; ++i)
+        if (live[i] != e.sig[i]) return false;
+    return true;
 }
 
 } // namespace
@@ -170,6 +178,8 @@ bool Resolve(Id id, uintptr_t* out) {
     *out = p + e.chain[e.nchain - 1];
     return true;
 }
+
+uint32_t Field(Id id) { return kVersions[0].entries[static_cast<int>(id)].rva; }
 
 uintptr_t EarlyCodeAddress(Id id) {
     uintptr_t exe = reinterpret_cast<uintptr_t>(GetModuleHandleA(nullptr));

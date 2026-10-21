@@ -202,6 +202,26 @@ class Run:
             self.record("assert_cursor", abs(x - ex) <= tol and abs(y - ey) <= tol,
                         f"cursor ({x},{y}) expected ({ex},{ey}) +/-{tol}"
                         + (" [game window centre]" if arg.get("window_centre") else ""))
+        elif kind == "sample_victims":
+            vs = self.resolver.victims()
+            self.samples[f"victims.{arg}"] = [[n, round(x, 2), round(y, 2), round(z, 2), round(sx, 2), round(sz, 2)]
+                                              for n, x, y, z, sx, sz in vs]
+            self.record("sample_victims", len(vs) > 0, f"{arg}: {len(vs)} victim(s)")
+        elif kind == "assert_victims_equal":
+            runs = [self.samples.get(f"victims.{l}") for l in arg["runs"]]
+            tol = float(arg.get("tolerance", 0.5))
+            ok = all(runs) and all(len(r) == len(runs[0]) for r in runs)
+            if ok:
+                for r in runs[1:]:
+                    for a, b in zip(runs[0], r):
+                        ok = ok and a[0] == b[0] and all(abs(a[i] - b[i]) <= tol for i in (1, 2, 3))
+            self.record("assert_victims_equal", ok,
+                        f"{arg['runs']}: positions {'identical' if ok else 'DIFFER'} (+/-{tol} u): {runs}")
+        elif kind == "assert_victims_at_spot0":
+            vs = self.samples.get(f"victims.{arg}") or []
+            ok = bool(vs) and all(abs(v[1] - v[4]) <= 0.5 and abs(v[3] - v[5]) <= 0.5 for v in vs)
+            self.record("assert_victims_at_spot0", ok,
+                        f"{arg}: every victim at its spot 0 (x,z; y is floor-snapped): {vs}")
         elif kind == "run_setup":
             with open(os.path.join(SETUPS_DIR, f"{arg}.yaml"), encoding="utf-8") as fh:
                 for sub in yaml.safe_load(fh)["steps"]:

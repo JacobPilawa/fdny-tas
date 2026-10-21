@@ -678,6 +678,190 @@
           },
           "ghidra": "GameControls::PollFrame 0x00439330: 0x00439347 push 0xC8; push 0xC8; call [0x004DC3A4 SetCursorPos] (every frame, even unfocused); returns to 0x00439357 pop esi. alttabfix.asi patches exactly these 16 bytes (11 NOP + jmp)",
           "note": "16 bytes replaced at DllMain by FDNYCore window module (11 NOP + call to its cursor routine)"
+        },
+        "entities.head": {
+          "module": "exe",
+          "rva": "0x102AAC",
+          "chain": [
+            "0x64"
+          ],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x2465a",
+            "bytes": "8B 0D AC 2A 50 00 57 50 81 C1 AC 06",
+            "ref": "instruction at 0x0042465a embeds 0x00502aac"
+          },
+          "ghidra": "GameSession 0x00502AAC +0x64: entity list head node (node: elem @+0, next @+4); walked live 2026-10-21 (70 nodes in Training)",
+          "note": "first node of the level entity list"
+        },
+        "node.elem": {
+          "module": "field",
+          "rva": "0x0",
+          "chain": [],
+          "type": "ptr",
+          "sig": null,
+          "ghidra": "entity list node layout (live walk)",
+          "note": "node -> entity"
+        },
+        "node.next": {
+          "module": "field",
+          "rva": "0x4",
+          "chain": [],
+          "type": "ptr",
+          "sig": null,
+          "ghidra": "entity list node layout (live walk)",
+          "note": "node -> next node"
+        },
+        "entity.kind": {
+          "module": "field",
+          "rva": "0x18",
+          "chain": [],
+          "type": "i32",
+          "sig": null,
+          "ghidra": "PlayerRescueEnt::EndMission 0x0044FBA0 counts [elem+0x18]==2 as victims",
+          "note": "entity kind: 2 = VictimRescueEnt"
+        },
+        "victim.pos": {
+          "module": "field",
+          "rva": "0x4C",
+          "chain": [],
+          "type": "f32",
+          "sig": null,
+          "ghidra": "VictimRescueEnt::SpawnAtSpot 0x0045D5B0 copies the spot record here before SnapToFloor (0x0045D717)",
+          "note": "x,y,z floats"
+        },
+        "victim.state": {
+          "module": "field",
+          "rva": "0x120",
+          "chain": [],
+          "type": "i32",
+          "sig": null,
+          "ghidra": "Spawn sets 4; TryStartRescue accepts 4/7; BeginRescue path sets 6",
+          "note": "4 idle, 5 carried, 6 bot-claimed/delivered, 7 roaming"
+        },
+        "victim.def": {
+          "module": "field",
+          "rva": "0x150",
+          "chain": [],
+          "type": "ptr",
+          "sig": null,
+          "ghidra": "SpawnAtSpot log strings use def+0x10 (name)",
+          "note": "definition record pointer"
+        },
+        "def.name": {
+          "module": "field",
+          "rva": "0x10",
+          "chain": [],
+          "type": "ptr",
+          "sig": null,
+          "ghidra": "def+0x10 = victim name char*",
+          "note": "e.g. victim1"
+        },
+        "victim.spots": {
+          "module": "field",
+          "rva": "0x200",
+          "chain": [],
+          "type": "ptr",
+          "sig": null,
+          "ghidra": "VictimRescueEnt spot pointer array (+0x204 = count)",
+          "note": "array of spot records {x,y,z,angle}"
+        },
+        "victim.spot_count": {
+          "module": "field",
+          "rva": "0x204",
+          "chain": [],
+          "type": "i32",
+          "sig": null,
+          "ghidra": "VictimRescueEnt",
+          "note": "number of authored spots (0 = editor origin, 1..N alt spots)"
+        },
+        "patch.victim_spawn": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x5D717",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x5D717",
+            "bytes": "8B CD E8 E2 02 04 00 8B 95 D0 00 00 00 8B 82 94",
+            "ref": "first 16 bytes of the function at 0x0045d717"
+          },
+          "ghidra": "VictimRescueEnt::SpawnAtSpot 0x0045D5B0: 0x0045D717 mov ecx,ebp; call ModelEntity::SnapToFloor 0x0049DA00 (EBP = victim this, spot coords already copied to +0x4C..+0x54); resume 0x0045D71E. Same site asi/FDNYDeterministic hooks (verified live 2026-10-21)",
+          "note": "7 bytes replaced by jmp trampoline + 2 NOP (speedrun module, DllMain)"
+        },
+        "game.snap_to_floor": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x9DA00",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x9DA00",
+            "bytes": "6A FF 68 90 47 4D 00 64 A1 00 00 00 00 50 64 89",
+            "ref": "first 16 bytes of the function at 0x0049da00"
+          },
+          "ghidra": "ModelEntity::SnapToFloor 0x0049DA00 (thiscall ECX=entity)",
+          "note": "called from the spawn trampoline"
+        },
+        "patch.rescuebot_trystart": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x55230",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x55230",
+            "bytes": "6A FF 68 29 09 4D 00 64 A1 00 00 00 00 50 64 89",
+            "ref": "first 16 bytes of the function at 0x00455230"
+          },
+          "ghidra": "RescueBot::TryStartRescue 0x00455230 (sole gateway to BeginRescue); first byte 6A (push -1) -> C3 (ret) disables bot claims (asi/FDNYDeterministic, verified live)",
+          "note": "byte 0 toggled by fd_rescuebot"
+        },
+        "patch.rescuebot_ctor_enable": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x514F3",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x514F3",
+            "bytes": "01 5F 8B C6 64 89 0D 00 00 00 00 5E 83 C4 0C C3",
+            "ref": "first 16 bytes of the function at 0x004514f3"
+          },
+          "ghidra": "RescueBot::Construct 0x004514F0 mov byte [esi+0x18],1: imm8 at 0x004514F3 01 -> 00 = new bots start disabled",
+          "note": "byte 0 toggled by fd_rescuebot"
+        },
+        "rescuebot.enabled": {
+          "module": "exe",
+          "rva": "0x103A78",
+          "chain": [
+            "0x30",
+            "0x3424"
+          ],
+          "type": "u8",
+          "sig": {
+            "rva": "0x274c2",
+            "bytes": "8B 15 78 3A 50 00 8B 12 83 F8 02 0F",
+            "ref": "instruction at 0x004274c2 embeds 0x00503a78"
+          },
+          "ghidra": "PlayerRescueEnt [[g_everGame]+0x30] +0x340C = RescueBot (ctor call 0x00453F67), +0x18 enabled byte (Construct 0x004514F0; Think gate). Live 2026-10-21: bank stock = 1, with FDNYDeterministic = 0, Training = 0 (setrescuebot 0)",
+          "note": "RescueBot enabled flag of the current level"
+        },
+        "rescuebot.claimed": {
+          "module": "exe",
+          "rva": "0x103A78",
+          "chain": [
+            "0x30",
+            "0x3530"
+          ],
+          "type": "i32",
+          "sig": {
+            "rva": "0x274c2",
+            "bytes": "8B 15 78 3A 50 00 8B 12 83 F8 02 0F",
+            "ref": "instruction at 0x004274c2 embeds 0x00503a78"
+          },
+          "ghidra": "PlayerRescueEnt +0x3530 incremented by RescueBot::BeginRescue 0x00454750",
+          "note": "victims claimed by the bot this level"
         }
       }
     }

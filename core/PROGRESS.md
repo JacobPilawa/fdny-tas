@@ -21,8 +21,9 @@ cause of RESEARCH.md growing to 465 MB.
 | 5 | Variables, config, binds | **DONE 2026-10-21**: live-tested, suite green (11/11), committed |
 | 6 | fov module | **DONE 2026-10-21**: parity with the original fix measured, suite green (13/13), committed |
 | 7 | window module | **DONE 2026-10-21**: alttabfix parity (same 5-cycle script), suite green (15/15), committed |
-| 8 | speedrun module | next |
-| 9-12 | — | not started |
+| 8 | speedrun module | **DONE 2026-10-21**: FDNYDeterministic proven live, then exact parity; suite green (18/18), committed. On-screen bot check substituted by memory evidence (see item 8) |
+| 9 | Game state snapshot | next |
+| 10-12 | — | not started |
 | 13 | Teleporter (save location / teleport, map-gated), owner request 2026-10-21 | not started (needs 5, 9) |
 
 **Mid-item:** no.
@@ -349,6 +350,38 @@ Live 2026-10-21: in Training, gameState = 1 and mapName = `training`. All 12 cha
   - New rule: a `patch.*` code site whose live bytes start with another mod's detour shape (NOP run, or JMP/CALL rel32) is logged "occupied by another mod". It stays unusable and is excluded from the mismatch count (`all OK (41/41, 1 patch site(s) occupied by other mods)`).
   - Every other byte difference is still a real mismatch. The `addr_bad_signature` test covers a non-patch entry.
 
+## Item 8: speedrun module (FDNYDeterministic parity)
+
+- **Baseline first: `asi/FDNYDeterministic.asi` verified live for the first time** (`speedrun_reference_deterministic`).
+  - Setup: skeleton ini (every victim on spot 0), Training loaded 3× (initial + 2× console `loadmap training`, the game's own verb).
+  - Both victims at identical positions every time, each on its spot 0: victim1 (1104, −230.9, −4976), victim2 (1656, −230.9, −4968).
+  - Negative control without any spawn mod (explore, not in the suite since it's random): positions changed across loads (victim1 1300→1300→1104, victim2 1820→1972→1820).
+- **Measurement independent of either implementation.** Victims = entities of kind 2 (`entity.kind` +0x18, per `EndMission` 0x0044FBA0) in the level entity list `[GameSession]+0x64` (node: elem +0, next +4).
+  - Fields: `victim.pos` +0x4C, `victim.state` +0x120, `victim.def` +0x150 → name +0x10, `victim.spots` +0x200 / `victim.spot_count` +0x204.
+  - These are new **field** entries in the address table (module `field` = struct offset; always usable; the core reads them via `addr::Field()`).
+  - Harness steps: `sample_victims`, `assert_victims_equal`, `assert_victims_at_spot0`.
+- **RescueBot enabled byte resolved live.**
+  - Haiku found two candidates (PRE+0x340C+0x18 from the ctor site vs +0x32CC+0x18 from the Think call site).
+  - In `bank` (bot ships ON): stock `[PRE+0x3424]` = 1, with FDNYDeterministic = 0. +0x32E4 stayed 0 in both.
+  - So `rescuebot.enabled` = `[[g_everGame]+0x30]+0x3424`. Training reads 0 (its script runs `setrescuebot 0`).
+  - research.db's Think note ("+0x3424 blocking-surface SArray") conflicts with this and needs correcting in the decomp loop.
+- **speedrun module (`src/speedrun.cpp`)**, a direct port:
+  - **Spawn hook:** a byte-assembled trampoline at `patch.victim_spawn` 0x0045D717, installed in DllMain. It runs pushfd/pushad, calls the handler with EBP = victim, then executes the displaced `mov ecx,ebp; call SnapToFloor` and jumps back.
+  - **Handler** (same semantics as the original): ordinal reset after a >2 s gap; map from `game.map_name`; copy spot[i] x/y/z before the game's floor snap; RNG untouched.
+  - **`fd_static_spawns`** (archived, default 0). **`fd_spawns <map> <spot …>`** pins per map: −1/x = random, `default` resets; with no pins, every victim gets spot 0, exactly the original's shipped skeleton ini. Persisted to FDNYCore.cfg through a new `cmd::RegisterConfigWriter`.
+  - **`fd_rescuebot`** (archived, default 1 = as shipped). 0 makes `TryStartRescue` byte 0 `6A→C3`, ctor imm8 `01→00`, and clears the live level's enabled byte. 1 restores the code bytes; the live byte follows the next level load. These are single-byte runtime writes.
+- **Coexistence:** if FDNYDeterministic is installed (it hooks/patches the same sites), the spawn site reads as a foreign detour (E9) and the RescueBot sites as 1-byte patches. A new address-table rule treats "only byte 0 differs" as occupied by another mod. The core's features then stay off, so the two never fight.
+- **Suite finding → deferral rule.** With both installed, the ASI loader loads plugins **alphabetically**: `FDNYCore.asi` before `FDNYDeterministic.asi`.
+  - The core grabbed the spawn site first, FDNYDeterministic aborted its own hook, and the victims went random (the reference test failed in the suite). A player who kept FDNYDeterministic would silently lose static spawns.
+  - Fix: if `FDNYDeterministic.asi` or `FDNYVictimSpawns.asi` is in the game folder, the speedrun module defers to it entirely (no hook, no cvars) and logs why. `speedrun_reference_deterministic` now asserts that deferral line.
+  - alttabfix loads before the core, and the FOV fix hooks a different spot, so neither had this problem.
+- **Tests (live):**
+  - `speedrun_static_spawns` (FDNYDeterministic absent, `fd_static_spawns 1`): identical positions across 3 loads, each at spot 0, **the same numbers as the original plugin**.
+  - `speedrun_rescuebot`: bank with `fd_rescuebot 0` → enabled 0, claimed 0. `fd_rescuebot 1` + reload → 1 (as shipped). `fd_rescuebot 0` live → 0 at once; claimed 0.
+  - Red (item-7 core): bank enabled = 1.
+- **Deviation from the done-when "absent on screen":** the research found **no bot body or actor**. RescueBot is invisible logic whose only on-screen trace is the "RESCUEBOT: Rescuing …" HUD subtitle (string 0x004E1CC8, posted only by `BeginRescue`). With `TryStartRescue` returning immediately, `BeginRescue` can't run, so the subtitle can't appear.
+  - Proving it on screen would mean waiting minutes on the easiest difficulty for a random claim in a stock run; it's not scripted. Memory evidence (enabled 0, claimed 0, byte 0 = C3) stands in. Flagged for the owner.
+
 ## Assumptions / workarounds
 
 - **"Behaves the same" (item 1c) definition**, chosen by the agent at the owner's request. These are LOOP.md's 7 criteria, with two calibrations:
@@ -404,3 +437,9 @@ Live 2026-10-21: in Training, gameState = 1 and mapName = `training`. All 12 cha
   - Wrong HWND entry removed.
   - Red (cursor trapped at 200,200) → reference (alttabfix) PASS → FDNYCore PASS; suite 15/15; Release EQUIVALENT.
   - Evidence in `core/evidence/item07/`.
+- 2026-10-21 it9: **item 8 DONE**. FDNYCore 0.8.0 adds the speedrun module (FDNYDeterministic port):
+  - `fd_static_spawns` / `fd_spawns` / `fd_rescuebot`; victim_spawn event; field entries in the address table.
+  - FDNYDeterministic was verified live for the first time, then the core matched its victim positions exactly. The RescueBot enabled byte was resolved live.
+  - Suite-found coexistence bug fixed: the core defers if FDNYDeterministic is installed.
+  - Suite 18/18 PASS; Release EQUIVALENT.
+  - Evidence in `core/evidence/item08/`.

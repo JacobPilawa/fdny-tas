@@ -55,6 +55,37 @@ class Resolver:
             p = self.pm.read_uint(p + off)
         return p + chain[-1] if p else None
 
+    def field(self, name):
+        """Offset of a struct-field entry (module "field")."""
+        return int(self.entries[name]["rva"], 16)
+
+    def victims(self):
+        """Walk the level entity list; return [(name, x, y, z, spot0_x, spot0_z)] for every
+        entity of kind 2 (victim), in list order."""
+        rd = lambda a: struct.unpack("<I", self.pm.read_bytes(a, 4))[0]
+        rf = lambda a: struct.unpack("<f", self.pm.read_bytes(a, 4))[0]
+        out = []
+        try:
+            node = rd(self.address("entities.head"))
+            for _ in range(10000):
+                if not node:
+                    break
+                ent = rd(node + self.field("node.elem"))
+                if struct.unpack("<i", self.pm.read_bytes(ent + self.field("entity.kind"), 4))[0] == 2:
+                    p = ent + self.field("victim.pos")
+                    name = ""
+                    try:
+                        s = rd(rd(ent + self.field("victim.def")) + self.field("def.name"))
+                        name = self.pm.read_bytes(s, 32).split(b"\0", 1)[0].decode("latin-1")
+                    except pymem.exception.MemoryReadError:
+                        pass
+                    spot0 = rd(rd(ent + self.field("victim.spots")))
+                    out.append((name, rf(p), rf(p + 4), rf(p + 8), rf(spot0), rf(spot0 + 8)))
+                node = rd(node + self.field("node.next"))
+        except pymem.exception.MemoryReadError:
+            pass
+        return out
+
     def read(self, name):
         e = self.entries[name]
         addr = self.address(name)

@@ -1,0 +1,22 @@
+name: speedrun_reference_deterministic
+# Item 8 baseline: prove the ORIGINAL asi/FDNYDeterministic.asi works live
+# (it was only ever test-host verified). With its skeleton ini (every victim
+# pinned to spot 0), victim positions are identical across three loads of
+# Training and every victim sits at its spot 0.
+pre_files:
+  - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
+  - {src: ../asi/FDNYDeterministic.asi, dst: FDNYDeterministic.asi}
+  - {src: ../asi/FDNYDeterministic.ini, dst: FDNYDeterministic.ini}
+  - {src: null, dst: FDNYCore.cfg}
+setup: load_training
+record: true
+steps:
+  # FDNYCore is loaded too (it loads first, alphabetically) and must defer to it
+  - assert_log: {contains: "speedrun: FDNYDeterministic.asi is installed; static spawns and RescueBot left to it"}
+  - run_setup: reload_training_3x
+  - assert_victims_equal: {runs: [run1, run2, run3], tolerance: 0.5}
+  - assert_victims_at_spot0: run1
+  - assert_victims_at_spot0: run3
+expect:
+  no_crash: true
+  log_errors: 0

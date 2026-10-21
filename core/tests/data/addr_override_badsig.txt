@@ -43,3 +43,19 @@ entry controls.block_input 0 3 1 0x103A78 0x274c2 8B15783A50008B1283F8020F - 0x0
 entry genesis.camera_set_attributes 1 2 1 0x1350 0x1350 83EC0C8B4204562B028B72088944240C @geCamera_SetAttributes@12
 entry camera.fov 0 4 1 0x103A78 0x274c2 8B15783A50008B1283F8020F - 0x288 0x8 0x5C 0x0
 entry patch.cursor_warp 0 2 1 0x39347 0x39347 68C800000068C8000000FF15A4C34D00 -
+entry entities.head 0 2 1 0x102AAC 0x2465a 8B0DAC2A5000575081C1AC06 - 0x64
+entry node.elem 2 2 1 0x0 0x0 - -
+entry node.next 2 2 1 0x4 0x0 - -
+entry entity.kind 2 0 1 0x18 0x0 - -
+entry victim.pos 2 4 1 0x4C 0x0 - -
+entry victim.state 2 0 1 0x120 0x0 - -
+entry victim.def 2 2 1 0x150 0x0 - -
+entry def.name 2 2 1 0x10 0x0 - -
+entry victim.spots 2 2 1 0x200 0x0 - -
+entry victim.spot_count 2 0 1 0x204 0x0 - -
+entry patch.victim_spawn 0 2 1 0x5D717 0x5D717 8BCDE8E20204008B95D00000008B8294 -
+entry game.snap_to_floor 0 2 1 0x9DA00 0x9DA00 6AFF6890474D0064A100000000506489 -
+entry patch.rescuebot_trystart 0 2 1 0x55230 0x55230 6AFF6829094D0064A100000000506489 -
+entry patch.rescuebot_ctor_enable 0 2 1 0x514F3 0x514F3 015F8BC664890D000000005E83C40CC3 -
+entry rescuebot.enabled 0 3 1 0x103A78 0x274c2 8B15783A50008B1283F8020F - 0x30 0x3424
+entry rescuebot.claimed 0 0 1 0x103A78 0x274c2 8B15783A50008B1283F8020F - 0x30 0x3530

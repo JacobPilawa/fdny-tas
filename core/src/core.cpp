@@ -13,6 +13,7 @@
 #include "log.h"
 #include "modules.h"
 #include "patches.h"
+#include "speedrun.h"
 #include "testpipe.h"
 #include "window.h"
 
@@ -96,6 +97,7 @@ DWORD WINAPI InitThread(LPVOID) {
         fdcore::console::Init(g_dir, FDCORE_VERSION);
         fdcore::fov::Init();
         fdcore::window::Init();
+        fdcore::speedrun::Init();
     }
     fdcore::modules::StartAll();
 #ifdef FDCORE_DEBUG
@@ -129,6 +131,7 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID) {
         // g_console are still null here), so startup patches go in now.
         fdcore::patches::ApplyEarly();
         fdcore::window::ApplyEarlyPatch();
+        fdcore::speedrun::ApplyEarlyPatch(g_dir);
 
         HANDLE t = CreateThread(nullptr, 0, InitThread, nullptr, 0, nullptr);
         if (t) CloseHandle(t);

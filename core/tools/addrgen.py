@@ -16,7 +16,7 @@ import sys
 
 CORE_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 TABLE = os.path.join(CORE_DIR, "addresses.json")
-MODULE_IDS = {"exe": 0, "genesis": 1}
+MODULE_IDS = {"exe": 0, "genesis": 1, "field": 2}  # field = struct offset (rva), no signature
 TYPE_IDS = {"i32": 0, "u32": 1, "ptr": 2, "u8": 3, "f32": 4, "i16": 5}
 MAX_CHAIN = 6
 MAX_SIG = 16
@@ -120,7 +120,7 @@ def cmd_sigs(exe):
     t = load_table()
     for vname, v in t["versions"].items():
         for name, e in v["entries"].items():
-            if e.get("sig"):
+            if e.get("sig") or e["module"] == "field":
                 continue
             if e["module"] == "genesis" and e.get("export"):
                 rva = int(e["rva"], 16)

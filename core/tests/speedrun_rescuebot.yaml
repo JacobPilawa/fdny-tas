@@ -1,0 +1,32 @@
+name: speedrun_rescuebot
+# Item 8: fd_rescuebot 0 turns the AI RescueBot off in memory on a level
+# where the game ships it ON (bank; Training ships it off via its script):
+# enabled byte 0, no claims. Runtime round-trip: fd_rescuebot 1 + reload ->
+# the bot is back as shipped (1); fd_rescuebot 0 live -> 0 at once.
+# (There is no bot body to see: the bot is invisible logic whose only
+# on-screen trace is a "RESCUEBOT:" subtitle when it claims a victim, which
+# TryStartRescue -> ret makes impossible. See PROGRESS.md item 8.)
+pre_files:
+  - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
+  - {src: null, dst: FDNYDeterministic.asi}
+  - {src: tests/data/fdcore_rescuebot_off.cfg, dst: FDNYCore.cfg}
+setup: load_training
+record: true
+steps:
+  - console: "loadmap bank"
+  - wait_s: 40
+  - assert_mem: {name: game.map_name, equals: bank}
+  - assert_mem: {name: rescuebot.enabled, equals: 0}
+  - assert_mem: {name: rescuebot.claimed, equals: 0}
+  - screenshot: bank_bot_off
+  - console: "fd_rescuebot 1"
+  - console: "loadmap bank"
+  - wait_s: 40
+  - assert_mem: {name: rescuebot.enabled, equals: 1}
+  - console: "fd_rescuebot 0"
+  - wait_s: 0.5
+  - assert_mem: {name: rescuebot.enabled, equals: 0}
+  - assert_mem: {name: rescuebot.claimed, equals: 0}
+expect:
+  no_crash: true
+  log_errors: 0
