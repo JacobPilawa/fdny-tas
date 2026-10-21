@@ -623,6 +623,40 @@ Structural map (Haiku, line-referenced) of `fdny_collision_overlay.py` (1748 lin
   - on bank: "saved on training, this is bank -- refused", position unchanged.
   - Screenshots saved and loaded are identical views.
 
+## Owner decisions after the backlog (2026-10-21)
+
+- **Old tools stay installed** (FOV fix, alttabfix, FDNYDeterministic, Python overlays): no further development on them, but they work, so they're not deleted yet.
+- **Revisit on-screen text drawing:** investigate how the game draws text, measure where the cost is (e.g. updating every 5 ticks), and find a way to make in-frame text affordable. See "In-frame text investigation" below.
+
+## In-frame text investigation (owner request, 2026-10-21)
+
+Debug-only benchmarks in `src/bench.cpp` (`fd_bench_text`, `fd_bench_blit`, `fd_bench_bmp`) and `tests/bench/*.yaml`, which aren't in the suite (the suite globs `tests/*.yaml` only). Frame rate comes from pipe `stats` frame_end deltas over 6 s, in Training with the watermark off. Base is 57.5 fps (the game's frame cap).
+
+- **How Genesis draws Printf text** (Haiku, hand-decoded from bytes):
+  - `geEngine_Printf` 0x10024B60 only queues: store 0x10024AE0 keeps at most 40 strings of at most 80 characters per frame (entries at engine+0x33AB4, 0x58 bytes, count at +0x34874). Anything beyond is dropped silently.
+  - The drawer 0x10025C60 then calls `geEngine_DrawBitmap` once per character, spaces included. It reads the glyph origin from engine+0x336B4[c], blits from the font bitmap at engine+0x336B0 (1024×14, 8-bit palettized, colour key 0, i.e. data\sprites\confont.bmp) and advances 8 px.
+  - Each DrawBitmap is one immediate DirectDraw `Blt` in D3DDrv (slot +0x88, RVA 0x7DE0), which dgVoodoo emulates.
+- **Cost model (measured): about 29 µs per blit; area doesn't matter.**
+  - Printf 31×65 characters = 12 fps; 8×65 = 35 fps; 1×65 = no visible cost.
+  - Blits of font rects: 2000 = 11.8 fps; 400 = 45 fps; 40 = 57.5. 40 blits of 128×128 = 57.7, so area is free.
+  - "2000 × 1-char Printf" was free only because the queue keeps 40 strings.
+- **"Update every N ticks" with Printf doesn't work.** The queue is drained every frame, so text exists only in frames where it was printed. Every 5 frames = text missing on 4 of 5 frames (screenshot shows none), and the cost becomes a periodic spike: 36 fps average for the 31-line box.
+- **Why our own bitmaps never showed (items 11d / this pass): no `geEngine_FlushPipeline` before the blit.**
+  - At the EndFrame hook the engine's 3D polys are still cached; they're flushed inside EndFrame and paint over an immediate Blt done earlier.
+  - With `geEngine_FlushPipeline(engine)` first, blits of the engine font bitmap and of our own bitmaps are visible.
+  - GE_Rect is {Left, Right, Top, Bottom}, inclusive.
+  - The Printf text survives because its drawer runs after that flush. The exe imports FlushPipeline for its own HUD.
+- **Our own GDI-rendered bitmap, one blit per frame after the flush:** a 400×346 box (26 text lines, changing every frame) runs at 57.5 fps.
+  - 32-bit XRGB, uploaded every frame: 1.6 ms upload (Debug).
+  - 565, uploaded every frame: 0.6 ms.
+  - Every 5 frames: same per-upload cost, 1/5 as often.
+  - No colour key needed (57.3 fps, visible).
+  - AddBitmap still needs a couple of frames before the first blit (earlier crash).
+- **Conclusion:** in-frame text is affordable. Render text with GDI into one geBitmap when it changes (or at most every N frames), then FlushPipeline + one blit per frame.
+  - This can replace the overlay window for hud_glitch (and lift the windowed / fake-fullscreen requirement).
+  - It should also replace the Printf path for hud_player (~150 chars ≈ 150 blits ≈ 4 ms/frame) and the watermark (~70 ≈ 2 ms/frame). Those costs are hidden today by the frame-cap headroom on this VM.
+- **New address entries:** `genesis.flush_pipeline`, the bitmap API (create / lock / unlock / bits / info / destroy / add / remove / set_color_key / draw_bitmap), and engine fields `engine.f_font_bitmap` / `f_font_glyphs` / `f_printf_count`.
+
 ## Assumptions / workarounds
 
 - **"Behaves the same" (item 1c) definition**, chosen by the agent at the owner's request. These are LOOP.md's 7 criteria, with two calibrations:

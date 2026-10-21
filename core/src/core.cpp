@@ -17,6 +17,9 @@
 #include "patches.h"
 #include "profile.h"
 #include "tp.h"
+#ifdef FDCORE_DEBUG
+namespace fdcore::bench { void Init(); }
+#endif
 #include "speedrun.h"
 #include "state.h"
 #include "testpipe.h"
@@ -108,6 +111,9 @@ DWORD WINAPI InitThread(LPVOID) {
         fdcore::glitch::Init();
         fdcore::patches::Init();
         fdcore::tp::Init();
+#ifdef FDCORE_DEBUG
+        fdcore::bench::Init();  // fd_bench_text (text-drawing cost)
+#endif
         fdcore::profile::Init();  // last: gates + watermark see every module's variables
     }
     fdcore::modules::StartAll();
