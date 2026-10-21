@@ -2,67 +2,40 @@
 
 #include <windows.h>
 
-#include "addr.h"
 #include "cmd.h"
 #include "console.h"
-#include "fov.h"
+#include "gfx.h"
 #include "hooks.h"
 #include "log.h"
 
 namespace fdcore::textdraw {
 namespace {
 
-using addr::Id;
-
-// Genesis bitmap API (ABI read from Genesis.dll, see addresses.json "ghidra").
-struct GeRect {
-    int32_t left, right, top, bottom;  // GE_Rect, inclusive
-};
-using CreateFn = void*(__fastcall*)(int width, int height, int maxMip, int format);
-using LockFn = int(__fastcall*)(void* bmp, void** target, int minMip, int maxMip, int format);
-using BmpFn = int(__fastcall*)(void* bmp);
-using GetBitsFn = void*(__fastcall*)(void* bmp);
-using GetInfoFn = int(__fastcall*)(void* bmp, uint32_t* info, uint32_t* info2);
-using DestroyFn = void(__fastcall*)(void** bmp);
-using DrawFn = int(__fastcall*)(void* engine, void* bmp, const GeRect* src, uint32_t x, uint32_t y);
-using EngineBmpFn = int(__cdecl*)(void* engine, void* bmp);
-using FlushFn = int(__cdecl*)(void* engine);
-
-CreateFn g_create;
-LockFn g_lock;
-BmpFn g_unlock;
-GetBitsFn g_bits;
-GetInfoFn g_info;
-DestroyFn g_destroy;
-DrawFn g_draw;
-EngineBmpFn g_add, g_remove;
-FlushFn g_flush;
-bool g_ok = false;
-
-constexpr int kFormat565 = 5;  // gePixelFormat "565 RGB": the driver's own format, cheapest upload
-constexpr int kPad = 4;        // around the text, like the original Text widget
-constexpr int kSettle = 2;     // frames between geEngine_AddBitmap and the first blit (D3DDrv crashed earlier)
+constexpr int kPad = 4;  // around the text, like the original Text widget
 
 // The original collision overlay's colours (COLORS / SOURCE_COLORS / PLAYER_COLORS), by tag.
-constexpr COLORREF Hex(uint32_t rgb) { return RGB((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF); }
-const COLORREF kFg[T_COUNT] = {
-    Hex(0x7c8894), Hex(0xd8e0e8), Hex(0x8a96a2), Hex(0xe8e8e8), Hex(0x5c646c), Hex(0xff3b3b), Hex(0x7fd17f),
-    Hex(0xffcc4d), Hex(0xffffff),
-    Hex(0xffa040), Hex(0xff5a5a), Hex(0x5aaaff), Hex(0x3f7fbf), Hex(0xffd84a), Hex(0xd0d0d0), Hex(0x8a8a8a),
-    Hex(0xb48cff),
-    Hex(0x7fd17f), Hex(0x5ad1d1), Hex(0x5aaaff), Hex(0xff5a5a), Hex(0xb48cff), Hex(0xff8c1a), Hex(0x7fd17f),
-    Hex(0xffcc4d),
+const uint32_t kFg[T_COUNT] = {
+    0x7c8894, 0xd8e0e8, 0x8a96a2, 0xe8e8e8, 0x5c646c, 0xff3b3b, 0x7fd17f, 0xffcc4d, 0xffffff,
+    0xffa040, 0xff5a5a, 0x5aaaff, 0x3f7fbf, 0xffd84a, 0xd0d0d0, 0x8a8a8a, 0xb48cff,
+    0x7fd17f, 0x5ad1d1, 0x5aaaff, 0xff5a5a, 0xb48cff, 0xff8c1a, 0x7fd17f, 0xffcc4d,
 };
-const COLORREF kBg = Hex(0x101418), kWarpBg = Hex(0x5a1010), kFlashBg = Hex(0xb02020);
+constexpr uint32_t kBg = 0x101418, kWarpBg = 0x5a1010, kFlashBg = 0xb02020;
+constexpr uint8_t kAlertAlpha = 230;  // warp / flash backgrounds stay nearly opaque
 
 bool Bold(uint8_t a) {  // title / alert / warp / flash / Bugged are bold in the original
     const uint8_t t = a & TAG_MASK;
     return t == T_TITLE || t == T_ALERT || t == T_PL_BUGGED || (a & (BG_WARP | BG_FLASH));
 }
 
+void OnAlpha(cmd::Cvar&);
+cmd::Cvar g_fdTextAlpha = {"fd_text_alpha", "160",
+                           "panel background opacity 0-255 (translucent panels; 255 = solid)", false, true, OnAlpha,
+                           {0}};
+
 struct Panel {
     char name[24];
     Anchor anchor;
+    Style style;
     int dx, dy, minFrames;
     uint8_t defTag;
     bool visible;
@@ -71,228 +44,133 @@ struct Panel {
     int n;
     bool dirty;
     unsigned long lastRender;
-    // rendered image (GDI) and its engine bitmap
-    HBITMAP dib;
-    uint32_t* px;
-    int w, h;            // content size in pixels
-    int dibW, dibH;      // DIB / bitmap capacity
-    void* bmp;
-    void* engine;
-    int settle;
-    bool uploaded;
-    int x, y;            // last draw position (fd_textdraw)
-    bool reported;       // first draw / first failure logged
+    gfx::Canvas canvas;
+    gfx::AlphaSurface surf;
+    gfx::Decal decal;
+    bool rendered;      // the canvas holds the current text
+    bool alphaReady;    // surf holds it
+    bool decalStale;    // decal doesn't (translucent panels upload it only for the fallback)
+    bool translucent;   // how it was drawn last frame (fd_textdraw, logged on change)
+    int x, y;           // last draw position
+    bool reported, failed;
 };
 constexpr int kMaxPanels = 8;
 Panel g_panels[kMaxPanels];
 int g_nPanels = 0;
 unsigned long g_frame = 0;
+unsigned g_fontGen = 0;
 
-HDC g_dc;
-HFONT g_font, g_bold;
-int g_cw = 6, g_ch = 13;
+void DirtyAll() {
+    for (int i = 0; i < g_nPanels; ++i) g_panels[i].dirty = true;
+}
+void OnAlpha(cmd::Cvar&) { DirtyAll(); }
 
-bool Gdi() {
-    if (g_dc) return true;
-    g_dc = CreateCompatibleDC(nullptr);
-    if (!g_dc) return false;
-    g_font = CreateFontA(-11, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-                         NONANTIALIASED_QUALITY, FIXED_PITCH | FF_MODERN, "Consolas");
-    g_bold = CreateFontA(-11, 0, 0, 0, FW_BOLD, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-                         NONANTIALIASED_QUALITY, FIXED_PITCH | FF_MODERN, "Consolas");
-    SelectObject(g_dc, g_font);
-    TEXTMETRICA tm;
-    GetTextMetricsA(g_dc, &tm);
-    g_cw = tm.tmAveCharWidth, g_ch = tm.tmHeight;
-    return true;
+int Alpha() {
+    int v = 0;
+    for (const char* s = g_fdTextAlpha.value; *s >= '0' && *s <= '9'; ++s) v = v * 10 + (*s - '0');
+    return v > 255 ? 255 : v;
 }
 
-int RoundUp(int v, int m) { return (v + m - 1) / m * m; }
-
-void DropBitmap(Panel& p) {
-    if (!p.bmp) return;
-    if (p.engine) g_remove(p.engine, p.bmp);
-    g_destroy(&p.bmp);
-    p.bmp = nullptr, p.engine = nullptr;
-}
-
-// GDI: runs of equal tag, opaque cells on the exact column grid.
-void Render(Panel& p) {
+// Runs of equal tag, opaque cells on the exact column grid.
+bool Render(Panel& p) {
     int cols = 0;
     for (int i = 0; i < p.n; ++i) {
         const int len = lstrlenA(p.text[i]);
         if (len > cols) cols = len;
     }
-    p.w = cols * g_cw + 2 * kPad, p.h = p.n * g_ch + 2 * kPad;
-    if (p.w > p.dibW || p.h > p.dibH || !p.dib) {  // grow in steps so changing line lengths don't churn
-        if (p.dib) DeleteObject(p.dib);
-        p.dibW = RoundUp(p.w, 64), p.dibH = RoundUp(p.h, 32);
-        BITMAPINFO bi{};
-        bi.bmiHeader.biSize = sizeof(bi.bmiHeader);
-        bi.bmiHeader.biWidth = p.dibW, bi.bmiHeader.biHeight = -p.dibH;  // top-down
-        bi.bmiHeader.biPlanes = 1, bi.bmiHeader.biBitCount = 32, bi.bmiHeader.biCompression = BI_RGB;
-        p.dib = CreateDIBSection(g_dc, &bi, DIB_RGB_COLORS, reinterpret_cast<void**>(&p.px), nullptr, 0);
-        DropBitmap(p);  // the engine bitmap is the DIB's size
-        if (!p.dib) return;
-    }
-    SelectObject(g_dc, p.dib);
-    RECT all = {0, 0, p.w, p.h};
-    SetBkColor(g_dc, kBg);
-    ExtTextOutA(g_dc, 0, 0, ETO_OPAQUE, &all, "", 0, nullptr);
-    static INT dx[kLineLen];
-    for (int i = 0; i < kLineLen; ++i) dx[i] = g_cw;
+    if (!p.canvas.Begin(cols, p.n, kPad, kBg)) return false;
     for (int r = 0; r < p.n; ++r) {
         const int len = lstrlenA(p.text[r]);
         for (int c = 0; c < len;) {
             const uint8_t a = p.attr[r][c];
             int e = c + 1;
             while (e < len && p.attr[r][e] == a) ++e;
-            SelectObject(g_dc, Bold(a) ? g_bold : g_font);
-            SetTextColor(g_dc, kFg[(a & TAG_MASK) < T_COUNT ? (a & TAG_MASK) : T_TEXT]);
-            SetBkColor(g_dc, (a & BG_FLASH) ? kFlashBg : (a & BG_WARP) ? kWarpBg : kBg);
-            RECT rc = {kPad + c * g_cw, kPad + r * g_ch, kPad + e * g_cw, kPad + (r + 1) * g_ch};
-            ExtTextOutA(g_dc, rc.left, rc.top, ETO_OPAQUE | ETO_CLIPPED, &rc, p.text[r] + c, e - c, dx);
+            const uint8_t tag = (a & TAG_MASK) < T_COUNT ? (a & TAG_MASK) : T_TEXT;
+            p.canvas.Text(c, r, p.text[r] + c, e - c, kFg[tag], (a & BG_FLASH) ? kFlashBg : (a & BG_WARP) ? kWarpBg : kBg,
+                          Bold(a));
             c = e;
         }
     }
-    GdiFlush();
-}
-
-bool Upload(Panel& p) {  // DIB -> engine bitmap (565)
-    void* target = nullptr;
-    if (!g_lock(p.bmp, &target, 0, 0, kFormat565) || !target) return false;
-    uint32_t info[9] = {};
-    g_info(target, info, nullptr);
-    const int stride = static_cast<int>(info[2]);
-    auto* dst = static_cast<uint16_t*>(g_bits(target));
-    if (dst && stride >= p.w)
-        for (int y = 0; y < p.h; ++y) {
-            const uint32_t* s = p.px + y * p.dibW;
-            uint16_t* d = dst + y * stride;
-            for (int x = 0; x < p.w; ++x) {
-                const uint32_t c = s[x];  // DIB 0x00RRGGBB
-                d[x] = static_cast<uint16_t>(((c >> 8) & 0xF800) | ((c >> 5) & 0x07E0) | ((c >> 3) & 0x001F));
-            }
-        }
-    g_unlock(target);
-    return dst != nullptr;
-}
-
-// The render size: the camera's rect. The window's client area is only a
-// fallback (before the first camera): it is the render size windowed through
-// dgVoodoo, but larger when the image is scaled up (driver / wrapper resolution
-// override), which put right / bottom anchored panels outside the frame.
-int g_vw = 640, g_vh = 480;
-bool g_vCamera = false;
-void ViewSize(int* w, int* h) {
-    int vw = 0, vh = 0;
-    RECT rc;
-    const bool camera = fov::ViewSize(&vw, &vh);
-    if (!camera) {
-        if (HWND wnd = GetActiveWindow(); wnd && GetClientRect(wnd, &rc) && rc.right > 0 && rc.bottom > 0)
-            vw = rc.right, vh = rc.bottom;
-        else
-            vw = g_vw, vh = g_vh;
-    }
-    if (vw != g_vw || vh != g_vh || camera != g_vCamera) {
-        RECT cr = {};
-        if (HWND wnd = GetActiveWindow()) GetClientRect(wnd, &cr);
-        log::Info("textdraw: view %dx%d (%s; window client %ldx%ld)", vw, vh, camera ? "camera" : "window", cr.right,
-                  cr.bottom);
-        g_vw = vw, g_vh = vh, g_vCamera = camera;
-    }
-    *w = vw, *h = vh;
+    p.canvas.Finish();
+    return true;
 }
 
 void Fail(Panel& p, const char* what) {  // once per panel, not every frame
-    if (p.reported) return;
-    p.reported = true;
-    log::Warn("textdraw: %s: %s (%dx%d)", p.name, what, p.dibW, p.dibH);
+    if (p.failed) return;
+    p.failed = true;
+    log::Warn("textdraw: %s: %s (%dx%d)", p.name, what, p.canvas.Width(), p.canvas.Height());
 }
 
 void Draw() {
     ++g_frame;
-    if (!g_ok) return;
-    void* engine = hooks::CurrentEngine();
-    if (!engine) return;
-    bool any = false;
+    if (!gfx::Ready() || !gfx::Engine()) return;
+    if (const unsigned gen = gfx::FontGeneration(); gen != g_fontGen) g_fontGen = gen, DirtyAll();
+    int vw, vh;
+    gfx::ViewSize(&vw, &vh);
+    const uint8_t alpha = static_cast<uint8_t>(Alpha());
+    const gfx::AlphaKey keys[] = {{kBg, alpha},
+                                  {kWarpBg, alpha > kAlertAlpha ? alpha : kAlertAlpha},
+                                  {kFlashBg, alpha > kAlertAlpha ? alpha : kAlertAlpha}};
     for (int i = 0; i < g_nPanels; ++i) {
         Panel& p = g_panels[i];
         if (!p.visible || p.n <= 0) continue;
-        if (p.dirty && (!p.uploaded || g_frame - p.lastRender >= static_cast<unsigned long>(p.minFrames))) {
-            if (!Gdi()) return;
-            Render(p);
-            if (!p.dib) {
-                Fail(p, "GDI could not create its image");
+        if (p.dirty && (!p.rendered || g_frame - p.lastRender >= static_cast<unsigned long>(p.minFrames))) {
+            if (!Render(p)) {
+                Fail(p, "GDI could not render it");
                 continue;
             }
-            if (p.bmp && p.engine != engine) DropBitmap(p);
-            if (!p.bmp) {
-                p.bmp = g_create(p.dibW, p.dibH, 1, kFormat565);
-                if (!p.bmp) {
-                    Fail(p, "geBitmap_Create failed");
-                    continue;
-                }
-                if (!Upload(p) || !g_add(engine, p.bmp)) {
-                    Fail(p, "could not upload / add its bitmap");
-                    g_destroy(&p.bmp);
-                    p.bmp = nullptr;
-                    continue;
-                }
-                p.engine = engine, p.settle = kSettle;
-            } else {
-                Upload(p);
-            }
-            p.dirty = false, p.uploaded = true, p.lastRender = g_frame;
+            p.rendered = true, p.dirty = false, p.lastRender = g_frame;
+            const uint32_t* px = p.canvas.Pixels();
+            const int stride = p.canvas.Stride(), w = p.canvas.Width(), h = p.canvas.Height();
+            p.alphaReady = p.style == STYLE_TRANSLUCENT && p.surf.Upload(px, stride, w, h, keys, 3);
+            p.decalStale = true;
+            if (!p.alphaReady && !p.decal.Upload(px, stride, w, h)) Fail(p, "could not create / upload its bitmap");
+            else if (!p.alphaReady) p.decalStale = false;
         }
-        any |= p.bmp && p.uploaded;
-    }
-    if (!any) return;
-    g_flush(engine);  // the cached 3D polys first, or they're drawn over the blits
-    int vw, vh;
-    ViewSize(&vw, &vh);
-    for (int i = 0; i < g_nPanels; ++i) {
-        Panel& p = g_panels[i];
-        if (!p.visible || p.n <= 0 || !p.bmp || !p.uploaded) continue;
-        if (p.settle > 0) {
-            --p.settle;
-            continue;
-        }
+        if (!p.rendered) continue;
+        const int w = p.canvas.Width(), h = p.canvas.Height();
         int x = p.dx, y = p.dy;
-        if (p.anchor == TOP_RIGHT) x = vw - p.dx - p.w;
-        if (p.anchor == BOTTOM_LEFT) y = vh - p.dy - p.h;
+        if (p.anchor == TOP_RIGHT) x = vw - p.dx - w;
+        if (p.anchor == BOTTOM_LEFT) y = vh - p.dy - h;
         if (x < 0) x = 0;
         if (y < 0) y = 0;
-        const GeRect src = {0, p.w - 1, 0, p.h - 1};
-        const int ok = g_draw(engine, p.bmp, &src, static_cast<uint32_t>(x), static_cast<uint32_t>(y));
         p.x = x, p.y = y;
-        if (!ok) {
-            Fail(p, "geEngine_DrawBitmap failed");
-        } else if (!p.reported) {
-            p.reported = true;
-            log::Info("textdraw: %s: %dx%d at %d,%d (view %dx%d)", p.name, p.w, p.h, x, y, vw, vh);
+        // Translucent when the frame has a world; otherwise the opaque decal (menus).
+        bool translucent = p.alphaReady && p.surf.Draw(x, y);
+        if (!translucent) {
+            if (p.decalStale && p.decal.Upload(p.canvas.Pixels(), p.canvas.Stride(), w, h)) p.decalStale = false;
+            p.decal.Draw(x, y);
         }
+        if (!p.reported || translucent != p.translucent) {
+            p.reported = true;
+            log::Info("textdraw: %s: %dx%d at %d,%d (view %dx%d), %s", p.name, w, h, x, y, vw, vh,
+                      translucent ? "translucent" : "opaque");
+        }
+        p.translucent = translucent;
     }
 }
 
 void CmdInfo(int, const char* const*) {
-    int vw, vh;
-    ViewSize(&vw, &vh);
-    console::Print("textdraw: view %dx%d (%s)", vw, vh, g_vCamera ? "camera" : "window");
+    int vw, vh, cw, ch;
+    gfx::ViewSize(&vw, &vh);
+    gfx::CellSize(&cw, &ch);
+    console::Print("textdraw: view %dx%d, cell %dx%d, fd_text_alpha %d", vw, vh, cw, ch, Alpha());
     for (int i = 0; i < g_nPanels; ++i) {
         const Panel& p = g_panels[i];
-        console::Print("  %s: %s, %d line(s), %dx%d at %d,%d, bitmap %s", p.name, p.visible ? "shown" : "hidden", p.n,
-                       p.w, p.h, p.x, p.y, p.bmp ? (p.settle ? "settling" : "ok") : "none");
+        console::Print("  %s: %s, %d line(s), %dx%d at %d,%d, %s", p.name, p.visible ? "shown" : "hidden", p.n,
+                       p.canvas.Width(), p.canvas.Height(), p.x, p.y,
+                       !p.rendered ? "not drawn yet" : p.translucent ? "translucent" : "opaque");
     }
 }
 
 } // namespace
 
-int Create(const char* name, Anchor anchor, int dx, int dy, int minFrames, uint8_t defaultTag) {
+int Create(const char* name, Anchor anchor, int dx, int dy, int minFrames, uint8_t defaultTag, Style style) {
     if (g_nPanels >= kMaxPanels) return -1;
     Panel& p = g_panels[g_nPanels];
     lstrcpynA(p.name, name, sizeof(p.name));
-    p.anchor = anchor, p.dx = dx, p.dy = dy, p.minFrames = minFrames < 1 ? 1 : minFrames, p.defTag = defaultTag;
+    p.anchor = anchor, p.style = style, p.dx = dx, p.dy = dy, p.minFrames = minFrames < 1 ? 1 : minFrames;
+    p.defTag = defaultTag;
     p.visible = true;
     return g_nPanels++;
 }
@@ -328,27 +206,10 @@ void Show(int panel, bool visible) {
 }
 
 bool Init() {
-    const Id needs[] = {Id::genesis_bitmap_create, Id::genesis_bitmap_lock_write_format, Id::genesis_bitmap_unlock,
-                        Id::genesis_bitmap_get_bits, Id::genesis_bitmap_get_info, Id::genesis_bitmap_destroy,
-                        Id::genesis_draw_bitmap, Id::genesis_add_bitmap, Id::genesis_remove_bitmap,
-                        Id::genesis_flush_pipeline};
-    for (Id id : needs)
-        if (!addr::Usable(id)) {
-            log::Warn("textdraw: disabled, no on-screen text (needs %s)", addr::Name(id));
-            return false;
-        }
-    g_create = reinterpret_cast<CreateFn>(addr::ExportAddress(Id::genesis_bitmap_create));
-    g_lock = reinterpret_cast<LockFn>(addr::ExportAddress(Id::genesis_bitmap_lock_write_format));
-    g_unlock = reinterpret_cast<BmpFn>(addr::ExportAddress(Id::genesis_bitmap_unlock));
-    g_bits = reinterpret_cast<GetBitsFn>(addr::ExportAddress(Id::genesis_bitmap_get_bits));
-    g_info = reinterpret_cast<GetInfoFn>(addr::ExportAddress(Id::genesis_bitmap_get_info));
-    g_destroy = reinterpret_cast<DestroyFn>(addr::ExportAddress(Id::genesis_bitmap_destroy));
-    g_draw = reinterpret_cast<DrawFn>(addr::ExportAddress(Id::genesis_draw_bitmap));
-    g_add = reinterpret_cast<EngineBmpFn>(addr::ExportAddress(Id::genesis_add_bitmap));
-    g_remove = reinterpret_cast<EngineBmpFn>(addr::ExportAddress(Id::genesis_remove_bitmap));
-    g_flush = reinterpret_cast<FlushFn>(addr::ExportAddress(Id::genesis_flush_pipeline));
-    g_ok = true;
-    cmd::RegisterCommand("fd_textdraw", "list the on-screen text panels: shown, size, position, view size", CmdInfo);
+    if (!gfx::Init()) return false;
+    cmd::RegisterCvar(&g_fdTextAlpha);
+    cmd::RegisterCommand("fd_textdraw", "list the on-screen text panels: shown, size, position, translucent/opaque",
+                         CmdInfo);
     hooks::OnFrameEnd(Draw);
     log::Info("textdraw: ready (%d panel(s))", g_nPanels);
     return true;

@@ -1,6 +1,7 @@
 // In-frame text panels (after item 13, owner request "cut it over"): every
 // on-screen text of the core (hud_glitch boxes, hud_player, watermark) is drawn
-// through here.
+// through here, on the gfx blocks (gfx.h). 0.15: translucent panels (owner: smaller
+// font, watermark stays opaque, reusable helpers per rendering type).
 //
 // Why: geEngine_Printf blits one glyph per character (~29 us per blit through
 // D3DDrv/dgVoodoo, area free) and keeps at most 40 strings x 80 chars, so a
@@ -30,10 +31,14 @@ enum Tag : uint8_t {
 constexpr uint8_t BG_WARP = 0x40, BG_FLASH = 0x80, TAG_MASK = 0x3F;
 
 enum Anchor : uint8_t { TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT };
+// STYLE_TRANSLUCENT: gfx::AlphaSurface (background at fd_text_alpha) while the frame has a
+// world, the opaque decal otherwise (menus). STYLE_OPAQUE: always the decal.
+enum Style : uint8_t { STYLE_TRANSLUCENT, STYLE_OPAQUE };
 
 // A panel: anchor + offset (pixels from that corner of the view), how often its
-// bitmap may be re-rendered, and the tag for lines set without attrs.
-int Create(const char* name, Anchor anchor, int dx, int dy, int minFrames, uint8_t defaultTag);
+// bitmap may be re-rendered, the tag for lines set without attrs, and its style.
+int Create(const char* name, Anchor anchor, int dx, int dy, int minFrames, uint8_t defaultTag,
+           Style style = STYLE_TRANSLUCENT);
 // New content. Re-rendered (at most every minFrames frames) only if it changed.
 void Set(int panel, const char (*lines)[kLineLen], const uint8_t (*attrs)[kLineLen], int n);
 void SetLines(int panel, const char* const* lines, int n);  // plain text, the panel's default tag

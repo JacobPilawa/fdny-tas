@@ -1370,6 +1370,71 @@
           "ghidra": "Genesis.dll export geEngine_FlushPipeline; cdecl (engine): flushes the engine's cached 3D polys to the driver now; imported by the exe",
           "note": "in-frame text investigation"
         },
+        "genesis.render_poly": {
+          "module": "genesis",
+          "rva": "0x24170",
+          "export": "@geEngine_RenderPoly@20",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x24170",
+            "bytes": "8B 4C 24 08 85 C9 56 8B F2 74 1C E8 D0 30 FF FF",
+            "ref": "first 16 bytes of Genesis.dll export @geEngine_RenderPoly@20"
+          },
+          "ghidra": "capstone 2026-10-21: fastcall ECX=engine (unused), EDX=GE_TLVertex* {x,y,z,u,v,r,g,b,a} floats; stack (NumPoints, geBitmap* or NULL, Flags); RET 0xC. Flags bit 0 = straight to the driver (vtbl +0x84 textured / +0x7C gouraud), else queued. Textured path ORs 0xC (no z-mask/z-write)",
+          "note": "gfx alpha surfaces / solid quads (core/evidence/alpha_spike)"
+        },
+        "genesis.render_world": {
+          "module": "genesis",
+          "rva": "0x24950",
+          "export": "geEngine_RenderWorld",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x24950",
+            "bytes": "83 EC 0C 53 8B 5C 24 18 85 DB 56 57 0F 84 A3 00",
+            "ref": "first 16 bytes of Genesis.dll export geEngine_RenderWorld"
+          },
+          "ghidra": "capstone 2026-10-21: cdecl (engine, world, camera, ...); hooked to learn the frame's geWorld*",
+          "note": "gfx alpha surfaces attach to the rendered world"
+        },
+        "genesis.world_add_bitmap": {
+          "module": "genesis",
+          "rva": "0x3CF10",
+          "export": "geWorld_AddBitmap",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x3CF10",
+            "bytes": "56 8B 74 24 08 8B 86 1C 0C 00 00 85 C0 75 24 6A",
+            "ref": "first 16 bytes of Genesis.dll export geWorld_AddBitmap"
+          },
+          "ghidra": "capstone 2026-10-21: cdecl (world, bitmap); sets driver flags 0x40002 (3D texture) via 0x100171E0, then marks the world changed; handle at [bmp+0xAC] 2 frames later",
+          "note": "gfx alpha surfaces (geEngine_AddBitmap gives only a 2D decal handle; RenderPoly with it crashes D3DDrv)"
+        },
+        "genesis.world_remove_bitmap": {
+          "module": "genesis",
+          "rva": "0x3CF80",
+          "export": "geWorld_RemoveBitmap",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x3CF80",
+            "bytes": "56 8B 74 24 08 8B 86 1C 0C 00 00 85 C0 75 02 5E",
+            "ref": "first 16 bytes of Genesis.dll export geWorld_RemoveBitmap"
+          },
+          "ghidra": "Genesis.dll export geWorld_RemoveBitmap (cdecl world, bitmap; same prologue as geWorld_AddBitmap)",
+          "note": "gfx alpha surfaces: detach when a surface is destroyed"
+        },
+        "bitmap.f_driver_handle": {
+          "module": "field",
+          "rva": "0xAC",
+          "chain": [],
+          "type": "u32",
+          "sig": null,
+          "ghidra": "geBitmap: driver handle (read by 0x10017250 for RenderPoly); 0 until attached; handle +4 w, +8 h, +0x18 driver format (7 = 4444), +0x1C flags (capstone + live probe 2026-10-21)",
+          "note": "offset into the geBitmap*; gfx skips drawing an alpha surface while it is 0"
+        },
         "genesis.add_bitmap": {
           "module": "genesis",
           "rva": "0x24000",

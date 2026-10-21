@@ -1,4 +1,4 @@
-# FDNYCore quickstart (0.14.0)
+# FDNYCore quickstart (0.15.0)
 
 FDNYCore is one `.asi` plugin for *FDNY Firefighter: American Hero* that adds a
 console command layer, practice tools and speedrun options. Everything is driven
@@ -117,7 +117,9 @@ Put anything you want applied on a switch (binds, settings) in
 | `fd_window_cursor 1` | cursor kept in the window only while focused (hold **O** to free it); `0` = game default |
 | `fd_skip_intro 1` | skip the intro movies (next launch) |
 | `fd_log_commands 0/1` | log every console command (default 1) |
-| `fd_textdraw` | list the on-screen text panels: shown/hidden, size, position, view size (troubleshooting) |
+| `fd_text_size <px>` | on-screen text height, 7–16 (default 9) |
+| `fd_text_alpha <0-255>` | background opacity of the player HUD and collision boxes (default 160; 255 = solid). The watermark is always opaque |
+| `fd_textdraw` | list the on-screen text panels: shown/hidden, size, position, translucent/opaque (troubleshooting) |
 | `fd_version` | read-only core version |
 
 ## 6. Suggested first session
@@ -157,3 +159,18 @@ result: 28/28 pass (Debug).
 - Teleporter: single slot, no stance.
 - In-frame text verified windowed through dgVoodoo only; real fullscreen and OBS
   game capture untested.
+- Translucent panels need a loaded world; in menus they are drawn opaque. Their
+  colours are 4 bits per channel (the driver's only alpha format), so dim greys band.
+
+## For module authors: drawing blocks (`src/gfx.h`)
+
+| Block | Use it for |
+|---|---|
+| `gfx::Canvas` | GDI text on a monospace grid (the shared `fd_text_size` font) → 32-bit pixels |
+| `gfx::Decal` | opaque bitmap (`geEngine_DrawBitmap`); works everywhere, drawn on top |
+| `gfx::AlphaSurface` | per-pixel alpha (256 px 4444 tiles on the rendered world, `geEngine_RenderPoly`); only changed tiles re-upload; `Draw` returns false without a world, so fall back to a Decal |
+| `gfx::SolidRect` | untextured opaque rectangle |
+| `gfx::BeginDraw` / `World` / `ViewSize` | per-frame flush (once), the frame's world, render size |
+
+Text panels should normally go through `textdraw::Create(...)` with `STYLE_TRANSLUCENT`
+(default) or `STYLE_OPAQUE`, rather than using the blocks directly.

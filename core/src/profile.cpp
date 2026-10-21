@@ -200,7 +200,8 @@ bool Init() {
     cmd::RegisterConfigWriter(WriteConfig);
     cmd::SetGates(CvarGate, CommandGate);
     FindMods();
-    g_panel = textdraw::Create("watermark", textdraw::BOTTOM_LEFT, 8, 60, 1, textdraw::T_WHITE);
+    // Opaque (owner: the watermark stays on the decal path; it must show in menus too).
+    g_panel = textdraw::Create("watermark", textdraw::BOTTOM_LEFT, 8, 60, 1, textdraw::T_WHITE, textdraw::STYLE_OPAQUE);
     hooks::OnFrameEnd(Draw);
     log::Info("profile: ready (fd_profile, fd_watermark); other asi: %s", g_mods[0] ? g_mods : "none");
     return true;
