@@ -1,0 +1,1764 @@
+{
+    "bank":  {
+                 "bounds":  {
+                                "x":  [
+                                          -2726.2,
+                                          1643.2
+                                      ],
+                                "z":  [
+                                          -2502,
+                                          2168
+                                      ]
+                            },
+                 "floors":  2,
+                 "victims":  [
+                                 {
+                                     "label":  "A",
+                                     "index":  0,
+                                     "name":  "betty",
+                                     "type":  "girl",
+                                     "n_spots":  2,
+                                     "spots":  [
+                                                   {
+                                                       "spot":  0,
+                                                       "label":  "A0",
+                                                       "floor":  1,
+                                                       "x":  1176,
+                                                       "y":  0,
+                                                       "z":  -672
+                                                   },
+                                                   {
+                                                       "spot":  1,
+                                                       "label":  "A1",
+                                                       "floor":  1,
+                                                       "x":  1192,
+                                                       "y":  1,
+                                                       "z":  -772
+                                                   }
+                                               ]
+                                 },
+                                 {
+                                     "label":  "B",
+                                     "index":  1,
+                                     "name":  "\u003cnull\u003e",
+                                     "type":  "woman",
+                                     "n_spots":  1,
+                                     "spots":  [
+                                                   {
+                                                       "spot":  0,
+                                                       "label":  "B0",
+                                                       "floor":  1,
+                                                       "x":  -331,
+                                                       "y":  0,
+                                                       "z":  -287
+                                                   }
+                                               ]
+                                 },
+                                 {
+                                     "label":  "C",
+                                     "index":  2,
+                                     "name":  "\u003cnull\u003e",
+                                     "type":  "girl",
+                                     "n_spots":  2,
+                                     "spots":  [
+                                                   {
+                                                       "spot":  0,
+                                                       "label":  "C0",
+                                                       "floor":  1,
+                                                       "x":  735,
+                                                       "y":  0,
+                                                       "z":  -2184
+                                                   },
+                                                   {
+                                                       "spot":  1,
+                                                       "label":  "C1",
+                                                       "floor":  2,
+                                                       "x":  -511,
+                                                       "y":  172,
+                                                       "z":  -578
+                                                   }
+                                               ]
+                                 },
+                                 {
+                                     "label":  "D",
+                                     "index":  3,
+                                     "name":  "\u003cnull\u003e",
+                                     "type":  "boy",
+                                     "n_spots":  2,
+                                     "spots":  [
+                                                   {
+                                                       "spot":  0,
+                                                       "label":  "D0",
+                                                       "floor":  1,
+                                                       "x":  -768,
+                                                       "y":  0,
+                                                       "z":  -2160
+                                                   },
+                                                   {
+                                                       "spot":  1,
+                                                       "label":  "D1",
+                                                       "floor":  1,
+                                                       "x":  -2423,
+                                                       "y":  -6,
+                                                       "z":  -1914
+                                                   }
+                                               ]
+                                 },
+                                 {
+                                     "label":  "E",
+                                     "index":  4,
+                                     "name":  "\u003cnull\u003e",
+                                     "type":  "man",
+                                     "n_spots":  2,
+                                     "spots":  [
+                                                   {
+                                                       "spot":  0,
+                                                       "label":  "E0",
+                                                       "floor":  2,
+                                                       "x":  1128,
+                                                       "y":  284,
+                                                       "z":  684
+                                                   },
+                                                   {
+                                                       "spot":  1,
+                                                       "label":  "E1",
+                                                       "floor":  2,
+                                                       "x":  1256,
+                                                       "y":  312,
+                                                       "z":  -1312
+                                                   }
+                                               ]
+                                 },
+                                 {
+                                     "label":  "F",
+                                     "index":  5,
+                                     "name":  "\u003cnull\u003e",
+                                     "type":  "fatman",
+                                     "n_spots":  1,
+                                     "spots":  [
+                                                   {
+                                                       "spot":  0,
+                                                       "label":  "F0",
+                                                       "floor":  2,
+                                                       "x":  -2213,
+                                                       "y":  314,
+                                                       "z":  699
+                                                   }
+                                               ]
+                                 }
+                             ]
+             },
+    "bar_r":  {
+                  "bounds":  {
+                                 "x":  [
+                                           -1733.3,
+                                           3629.3
+                                       ],
+                                 "z":  [
+                                           -2699.1,
+                                           2343.1
+                                       ]
+                             },
+                  "floors":  2,
+                  "victims":  [
+                                  {
+                                      "label":  "A",
+                                      "index":  0,
+                                      "name":  "Victim01",
+                                      "type":  "fatman",
+                                      "n_spots":  1,
+                                      "spots":  [
+                                                    {
+                                                        "spot":  0,
+                                                        "label":  "A0",
+                                                        "floor":  2,
+                                                        "x":  1980,
+                                                        "y":  420,
+                                                        "z":  -80
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "label":  "B",
+                                      "index":  1,
+                                      "name":  "Victim02",
+                                      "type":  "woman",
+                                      "n_spots":  2,
+                                      "spots":  [
+                                                    {
+                                                        "spot":  0,
+                                                        "label":  "B0",
+                                                        "floor":  1,
+                                                        "x":  96,
+                                                        "y":  40,
+                                                        "z":  -1700
+                                                    },
+                                                    {
+                                                        "spot":  1,
+                                                        "label":  "B1",
+                                                        "floor":  1,
+                                                        "x":  424,
+                                                        "y":  92,
+                                                        "z":  -1720
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "label":  "C",
+                                      "index":  2,
+                                      "name":  "Victim03",
+                                      "type":  "man",
+                                      "n_spots":  1,
+                                      "spots":  [
+                                                    {
+                                                        "spot":  0,
+                                                        "label":  "C0",
+                                                        "floor":  2,
+                                                        "x":  2164,
+                                                        "y":  304,
+                                                        "z":  -176
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "label":  "D",
+                                      "index":  3,
+                                      "name":  "Victim04",
+                                      "type":  "man",
+                                      "n_spots":  1,
+                                      "spots":  [
+                                                    {
+                                                        "spot":  0,
+                                                        "label":  "D0",
+                                                        "floor":  2,
+                                                        "x":  516,
+                                                        "y":  304,
+                                                        "z":  -1756
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "label":  "E",
+                                      "index":  4,
+                                      "name":  "Victim05",
+                                      "type":  "fatman",
+                                      "n_spots":  3,
+                                      "spots":  [
+                                                    {
+                                                        "spot":  0,
+                                                        "label":  "E0",
+                                                        "floor":  1,
+                                                        "x":  2104,
+                                                        "y":  40,
+                                                        "z":  -1368
+                                                    },
+                                                    {
+                                                        "spot":  1,
+                                                        "label":  "E1",
+                                                        "floor":  1,
+                                                        "x":  1736,
+                                                        "y":  96,
+                                                        "z":  -720
+                                                    },
+                                                    {
+                                                        "spot":  2,
+                                                        "label":  "E2",
+                                                        "floor":  1,
+                                                        "x":  2160,
+                                                        "y":  140,
+                                                        "z":  -1064
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "label":  "F",
+                                      "index":  5,
+                                      "name":  "Victim06",
+                                      "type":  "woman",
+                                      "n_spots":  2,
+                                      "spots":  [
+                                                    {
+                                                        "spot":  0,
+                                                        "label":  "F0",
+                                                        "floor":  1,
+                                                        "x":  1792,
+                                                        "y":  40,
+                                                        "z":  -324
+                                                    },
+                                                    {
+                                                        "spot":  1,
+                                                        "label":  "F1",
+                                                        "floor":  1,
+                                                        "x":  84,
+                                                        "y":  92,
+                                                        "z":  -536
+                                                    }
+                                                ]
+                                  }
+                              ]
+              },
+    "boat_a":  {
+                   "bounds":  {
+                                  "x":  [
+                                            -1803.9,
+                                            2136.9
+                                        ],
+                                  "z":  [
+                                            -471.7,
+                                            9070.2
+                                        ]
+                              },
+                   "floors":  5,
+                   "victims":  [
+                                   {
+                                       "label":  "A",
+                                       "index":  0,
+                                       "name":  "victimfork",
+                                       "type":  "boy",
+                                       "n_spots":  2,
+                                       "spots":  [
+                                                     {
+                                                         "spot":  0,
+                                                         "label":  "A0",
+                                                         "floor":  3,
+                                                         "x":  698,
+                                                         "y":  -293,
+                                                         "z":  2393
+                                                     },
+                                                     {
+                                                         "spot":  1,
+                                                         "label":  "A1",
+                                                         "floor":  2,
+                                                         "x":  -127,
+                                                         "y":  -765,
+                                                         "z":  2628
+                                                     }
+                                                 ]
+                                   },
+                                   {
+                                       "label":  "B",
+                                       "index":  1,
+                                       "name":  "girl",
+                                       "type":  "girl",
+                                       "n_spots":  2,
+                                       "spots":  [
+                                                     {
+                                                         "spot":  0,
+                                                         "label":  "B0",
+                                                         "floor":  4,
+                                                         "x":  -1551,
+                                                         "y":  -72,
+                                                         "z":  456
+                                                     },
+                                                     {
+                                                         "spot":  1,
+                                                         "label":  "B1",
+                                                         "floor":  4,
+                                                         "x":  153,
+                                                         "y":  -44,
+                                                         "z":  463
+                                                     }
+                                                 ]
+                                   },
+                                   {
+                                       "label":  "C",
+                                       "index":  2,
+                                       "name":  "victim3",
+                                       "type":  "girl",
+                                       "n_spots":  2,
+                                       "spots":  [
+                                                     {
+                                                         "spot":  0,
+                                                         "label":  "C0",
+                                                         "floor":  5,
+                                                         "x":  1359,
+                                                         "y":  105,
+                                                         "z":  6149
+                                                     },
+                                                     {
+                                                         "spot":  1,
+                                                         "label":  "C1",
+                                                         "floor":  4,
+                                                         "x":  1159,
+                                                         "y":  -63,
+                                                         "z":  5502
+                                                     }
+                                                 ]
+                                   },
+                                   {
+                                       "label":  "D",
+                                       "index":  3,
+                                       "name":  "boy2",
+                                       "type":  "boy",
+                                       "n_spots":  2,
+                                       "spots":  [
+                                                     {
+                                                         "spot":  0,
+                                                         "label":  "D0",
+                                                         "floor":  1,
+                                                         "x":  308,
+                                                         "y":  -1018,
+                                                         "z":  3784
+                                                     },
+                                                     {
+                                                         "spot":  1,
+                                                         "label":  "D1",
+                                                         "floor":  1,
+                                                         "x":  1274,
+                                                         "y":  -963,
+                                                         "z":  4082
+                                                     }
+                                                 ]
+                                   },
+                                   {
+                                       "label":  "E",
+                                       "index":  4,
+                                       "name":  "fatty",
+                                       "type":  "fatman",
+                                       "n_spots":  1,
+                                       "spots":  [
+                                                     {
+                                                         "spot":  0,
+                                                         "label":  "E0",
+                                                         "floor":  4,
+                                                         "x":  119,
+                                                         "y":  -115,
+                                                         "z":  6541
+                                                     }
+                                                 ]
+                                   },
+                                   {
+                                       "label":  "F",
+                                       "index":  5,
+                                       "name":  "fatman",
+                                       "type":  "fatman",
+                                       "n_spots":  2,
+                                       "spots":  [
+                                                     {
+                                                         "spot":  0,
+                                                         "label":  "F0",
+                                                         "floor":  3,
+                                                         "x":  551,
+                                                         "y":  -280,
+                                                         "z":  1632
+                                                     },
+                                                     {
+                                                         "spot":  1,
+                                                         "label":  "F1",
+                                                         "floor":  3,
+                                                         "x":  529,
+                                                         "y":  -260,
+                                                         "z":  1507
+                                                     }
+                                                 ]
+                                   },
+                                   {
+                                       "label":  "G",
+                                       "index":  6,
+                                       "name":  "fatman1",
+                                       "type":  "fatman",
+                                       "n_spots":  2,
+                                       "spots":  [
+                                                     {
+                                                         "spot":  0,
+                                                         "label":  "G0",
+                                                         "floor":  4,
+                                                         "x":  451,
+                                                         "y":  -52,
+                                                         "z":  1344
+                                                     },
+                                                     {
+                                                         "spot":  1,
+                                                         "label":  "G1",
+                                                         "floor":  4,
+                                                         "x":  -579,
+                                                         "y":  -31,
+                                                         "z":  784
+                                                     }
+                                                 ]
+                                   },
+                                   {
+                                       "label":  "H",
+                                       "index":  7,
+                                       "name":  "fat",
+                                       "type":  "fatman",
+                                       "n_spots":  2,
+                                       "spots":  [
+                                                     {
+                                                         "spot":  0,
+                                                         "label":  "H0",
+                                                         "floor":  2,
+                                                         "x":  1056,
+                                                         "y":  -730,
+                                                         "z":  4532
+                                                     },
+                                                     {
+                                                         "spot":  1,
+                                                         "label":  "H1",
+                                                         "floor":  1,
+                                                         "x":  1468,
+                                                         "y":  -994,
+                                                         "z":  3346
+                                                     }
+                                                 ]
+                                   },
+                                   {
+                                       "label":  "I",
+                                       "index":  8,
+                                       "name":  "girl",
+                                       "type":  "girl",
+                                       "n_spots":  1,
+                                       "spots":  [
+                                                     {
+                                                         "spot":  0,
+                                                         "label":  "I0",
+                                                         "floor":  1,
+                                                         "x":  -12,
+                                                         "y":  -1042,
+                                                         "z":  4501
+                                                     }
+                                                 ]
+                                   }
+                               ]
+               },
+    "boat_b":  {
+                   "bounds":  {
+                                  "x":  [
+                                            -1824.4,
+                                            788.4
+                                        ],
+                                  "z":  [
+                                            1463.3,
+                                            9032.3
+                                        ]
+                              },
+                   "floors":  4,
+                   "victims":  [
+                                   {
+                                       "label":  "A",
+                                       "index":  0,
+                                       "name":  "victim3",
+                                       "type":  "girl",
+                                       "n_spots":  2,
+                                       "spots":  [
+                                                     {
+                                                         "spot":  0,
+                                                         "label":  "A0",
+                                                         "floor":  1,
+                                                         "x":  -271,
+                                                         "y":  -788,
+                                                         "z":  6405
+                                                     },
+                                                     {
+                                                         "spot":  1,
+                                                         "label":  "A1",
+                                                         "floor":  1,
+                                                         "x":  -1625,
+                                                         "y":  -943,
+                                                         "z":  6563
+                                                     }
+                                                 ]
+                                   },
+                                   {
+                                       "label":  "B",
+                                       "index":  1,
+                                       "name":  "boy2",
+                                       "type":  "boy",
+                                       "n_spots":  2,
+                                       "spots":  [
+                                                     {
+                                                         "spot":  0,
+                                                         "label":  "B0",
+                                                         "floor":  2,
+                                                         "x":  106,
+                                                         "y":  -551,
+                                                         "z":  3794
+                                                     },
+                                                     {
+                                                         "spot":  1,
+                                                         "label":  "B1",
+                                                         "floor":  4,
+                                                         "x":  414,
+                                                         "y":  -126,
+                                                         "z":  3727
+                                                     }
+                                                 ]
+                                   },
+                                   {
+                                       "label":  "C",
+                                       "index":  2,
+                                       "name":  "fatty",
+                                       "type":  "fatman",
+                                       "n_spots":  2,
+                                       "spots":  [
+                                                     {
+                                                         "spot":  0,
+                                                         "label":  "C0",
+                                                         "floor":  2,
+                                                         "x":  -1151,
+                                                         "y":  -578,
+                                                         "z":  3462
+                                                     },
+                                                     {
+                                                         "spot":  1,
+                                                         "label":  "C1",
+                                                         "floor":  4,
+                                                         "x":  -1545,
+                                                         "y":  -126,
+                                                         "z":  3207
+                                                     }
+                                                 ]
+                                   },
+                                   {
+                                       "label":  "D",
+                                       "index":  3,
+                                       "name":  "\u003cnull\u003e",
+                                       "type":  "man",
+                                       "n_spots":  2,
+                                       "spots":  [
+                                                     {
+                                                         "spot":  0,
+                                                         "label":  "D0",
+                                                         "floor":  3,
+                                                         "x":  -783,
+                                                         "y":  -291,
+                                                         "z":  4517
+                                                     },
+                                                     {
+                                                         "spot":  1,
+                                                         "label":  "D1",
+                                                         "floor":  3,
+                                                         "x":  -1001,
+                                                         "y":  -325,
+                                                         "z":  2889
+                                                     }
+                                                 ]
+                                   },
+                                   {
+                                       "label":  "E",
+                                       "index":  4,
+                                       "name":  "erg",
+                                       "type":  "woman",
+                                       "n_spots":  2,
+                                       "spots":  [
+                                                     {
+                                                         "spot":  0,
+                                                         "label":  "E0",
+                                                         "floor":  1,
+                                                         "x":  -910,
+                                                         "y":  -843,
+                                                         "z":  7760
+                                                     },
+                                                     {
+                                                         "spot":  1,
+                                                         "label":  "E1",
+                                                         "floor":  2,
+                                                         "x":  -254,
+                                                         "y":  -616,
+                                                         "z":  7447
+                                                     }
+                                                 ]
+                                   }
+                               ]
+               },
+    "gas_r":  {
+                  "bounds":  {
+                                 "x":  [
+                                           -2429.8,
+                                           3789.8
+                                       ],
+                                 "z":  [
+                                           -2664.8,
+                                           2881.8
+                                       ]
+                             },
+                  "floors":  1,
+                  "victims":  [
+                                  {
+                                      "label":  "A",
+                                      "index":  0,
+                                      "name":  "Victim1",
+                                      "type":  "man",
+                                      "n_spots":  1,
+                                      "spots":  [
+                                                    {
+                                                        "spot":  0,
+                                                        "label":  "A0",
+                                                        "floor":  1,
+                                                        "x":  1404,
+                                                        "y":  -172,
+                                                        "z":  24
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "label":  "B",
+                                      "index":  1,
+                                      "name":  "Victim2",
+                                      "type":  "woman",
+                                      "n_spots":  1,
+                                      "spots":  [
+                                                    {
+                                                        "spot":  0,
+                                                        "label":  "B0",
+                                                        "floor":  1,
+                                                        "x":  1576,
+                                                        "y":  -80,
+                                                        "z":  512
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "label":  "C",
+                                      "index":  2,
+                                      "name":  "Victim3",
+                                      "type":  "man",
+                                      "n_spots":  1,
+                                      "spots":  [
+                                                    {
+                                                        "spot":  0,
+                                                        "label":  "C0",
+                                                        "floor":  1,
+                                                        "x":  756,
+                                                        "y":  -64,
+                                                        "z":  648
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "label":  "D",
+                                      "index":  3,
+                                      "name":  "Victim4",
+                                      "type":  "man",
+                                      "n_spots":  1,
+                                      "spots":  [
+                                                    {
+                                                        "spot":  0,
+                                                        "label":  "D0",
+                                                        "floor":  1,
+                                                        "x":  1269,
+                                                        "y":  -172,
+                                                        "z":  1404
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "label":  "E",
+                                      "index":  4,
+                                      "name":  "Victim6",
+                                      "type":  "woman",
+                                      "n_spots":  1,
+                                      "spots":  [
+                                                    {
+                                                        "spot":  0,
+                                                        "label":  "E0",
+                                                        "floor":  1,
+                                                        "x":  1988,
+                                                        "y":  -172,
+                                                        "z":  480
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "label":  "F",
+                                      "index":  5,
+                                      "name":  "Victim7",
+                                      "type":  "woman",
+                                      "n_spots":  1,
+                                      "spots":  [
+                                                    {
+                                                        "spot":  0,
+                                                        "label":  "F0",
+                                                        "floor":  1,
+                                                        "x":  1972,
+                                                        "y":  -172,
+                                                        "z":  -204
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "label":  "G",
+                                      "index":  6,
+                                      "name":  "Victim5",
+                                      "type":  "man",
+                                      "n_spots":  1,
+                                      "spots":  [
+                                                    {
+                                                        "spot":  0,
+                                                        "label":  "G0",
+                                                        "floor":  1,
+                                                        "x":  -404,
+                                                        "y":  -120,
+                                                        "z":  1164
+                                                    }
+                                                ]
+                                  }
+                              ]
+              },
+    "mbase":  {
+                  "bounds":  {
+                                 "x":  [
+                                           -857.5,
+                                           2723
+                                       ],
+                                 "z":  [
+                                           -7442.2,
+                                           1505.9
+                                       ]
+                             },
+                  "floors":  3,
+                  "victims":  [
+                                  {
+                                      "label":  "A",
+                                      "index":  0,
+                                      "name":  "victim1",
+                                      "type":  "man",
+                                      "n_spots":  1,
+                                      "spots":  [
+                                                    {
+                                                        "spot":  0,
+                                                        "label":  "A0",
+                                                        "floor":  3,
+                                                        "x":  348,
+                                                        "y":  -136,
+                                                        "z":  -3068
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "label":  "B",
+                                      "index":  1,
+                                      "name":  "victim3",
+                                      "type":  "man",
+                                      "n_spots":  1,
+                                      "spots":  [
+                                                    {
+                                                        "spot":  0,
+                                                        "label":  "B0",
+                                                        "floor":  1,
+                                                        "x":  1796,
+                                                        "y":  -540,
+                                                        "z":  -3284
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "label":  "C",
+                                      "index":  2,
+                                      "name":  "victim4",
+                                      "type":  "man",
+                                      "n_spots":  1,
+                                      "spots":  [
+                                                    {
+                                                        "spot":  0,
+                                                        "label":  "C0",
+                                                        "floor":  2,
+                                                        "x":  840,
+                                                        "y":  -260,
+                                                        "z":  -4812
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "label":  "D",
+                                      "index":  3,
+                                      "name":  "victim5",
+                                      "type":  "man",
+                                      "n_spots":  1,
+                                      "spots":  [
+                                                    {
+                                                        "spot":  0,
+                                                        "label":  "D0",
+                                                        "floor":  3,
+                                                        "x":  1852,
+                                                        "y":  -112,
+                                                        "z":  -5732
+                                                    }
+                                                ]
+                                  },
+                                  {
+                                      "label":  "E",
+                                      "index":  4,
+                                      "name":  "victim10",
+                                      "type":  "man",
+                                      "n_spots":  1,
+                                      "spots":  [
+                                                    {
+                                                        "spot":  0,
+                                                        "label":  "E0",
+                                                        "floor":  2,
+                                                        "x":  292,
+                                                        "y":  -320,
+                                                        "z":  -1320
+                                                    }
+                                                ]
+                                  }
+                              ]
+              },
+    "oil_rig_a":  {
+                      "bounds":  {
+                                     "x":  [
+                                               -2965.5,
+                                               1577.5
+                                           ],
+                                     "z":  [
+                                               -2687.3,
+                                               1531.3
+                                           ]
+                                 },
+                      "floors":  1,
+                      "victims":  [
+                                      {
+                                          "label":  "A",
+                                          "index":  0,
+                                          "name":  "\u003cnull\u003e",
+                                          "type":  "woman",
+                                          "n_spots":  2,
+                                          "spots":  [
+                                                        {
+                                                            "spot":  0,
+                                                            "label":  "A0",
+                                                            "floor":  1,
+                                                            "x":  -236,
+                                                            "y":  590,
+                                                            "z":  -262
+                                                        },
+                                                        {
+                                                            "spot":  1,
+                                                            "label":  "A1",
+                                                            "floor":  1,
+                                                            "x":  -1076,
+                                                            "y":  612,
+                                                            "z":  -260
+                                                        }
+                                                    ]
+                                      },
+                                      {
+                                          "label":  "B",
+                                          "index":  1,
+                                          "name":  "\u003cnull\u003e17",
+                                          "type":  "girl",
+                                          "n_spots":  2,
+                                          "spots":  [
+                                                        {
+                                                            "spot":  0,
+                                                            "label":  "B0",
+                                                            "floor":  1,
+                                                            "x":  -228,
+                                                            "y":  590,
+                                                            "z":  -508
+                                                        },
+                                                        {
+                                                            "spot":  1,
+                                                            "label":  "B1",
+                                                            "floor":  1,
+                                                            "x":  -600,
+                                                            "y":  612,
+                                                            "z":  -852
+                                                        }
+                                                    ]
+                                      },
+                                      {
+                                          "label":  "C",
+                                          "index":  2,
+                                          "name":  "\u003cnull\u003e18",
+                                          "type":  "man",
+                                          "n_spots":  3,
+                                          "spots":  [
+                                                        {
+                                                            "spot":  0,
+                                                            "label":  "C0",
+                                                            "floor":  1,
+                                                            "x":  -742,
+                                                            "y":  608,
+                                                            "z":  -762
+                                                        },
+                                                        {
+                                                            "spot":  1,
+                                                            "label":  "C1",
+                                                            "floor":  1,
+                                                            "x":  -744,
+                                                            "y":  612,
+                                                            "z":  -648
+                                                        },
+                                                        {
+                                                            "spot":  2,
+                                                            "label":  "C2",
+                                                            "floor":  1,
+                                                            "x":  -746,
+                                                            "y":  612,
+                                                            "z":  -874
+                                                        }
+                                                    ]
+                                      }
+                                  ]
+                  },
+    "oil_rig_b":  {
+                      "bounds":  {
+                                     "x":  [
+                                               -3501.1,
+                                               2269.1
+                                           ],
+                                     "z":  [
+                                               -3195.4,
+                                               2067.4
+                                           ]
+                                 },
+                      "floors":  3,
+                      "victims":  [
+                                      {
+                                          "label":  "A",
+                                          "index":  0,
+                                          "name":  "\u003cnull\u003e2",
+                                          "type":  "man",
+                                          "n_spots":  1,
+                                          "spots":  [
+                                                        {
+                                                            "spot":  0,
+                                                            "label":  "A0",
+                                                            "floor":  2,
+                                                            "x":  1144,
+                                                            "y":  496,
+                                                            "z":  628
+                                                        }
+                                                    ]
+                                      },
+                                      {
+                                          "label":  "B",
+                                          "index":  1,
+                                          "name":  "\u003cnull\u003e3",
+                                          "type":  "dog",
+                                          "n_spots":  2,
+                                          "spots":  [
+                                                        {
+                                                            "spot":  0,
+                                                            "label":  "B0",
+                                                            "floor":  3,
+                                                            "x":  876,
+                                                            "y":  832,
+                                                            "z":  416
+                                                        },
+                                                        {
+                                                            "spot":  1,
+                                                            "label":  "B1",
+                                                            "floor":  3,
+                                                            "x":  802,
+                                                            "y":  776,
+                                                            "z":  1046
+                                                        }
+                                                    ]
+                                      },
+                                      {
+                                          "label":  "C",
+                                          "index":  2,
+                                          "name":  "woman",
+                                          "type":  "woman",
+                                          "n_spots":  1,
+                                          "spots":  [
+                                                        {
+                                                            "spot":  0,
+                                                            "label":  "C0",
+                                                            "floor":  1,
+                                                            "x":  1080,
+                                                            "y":  288,
+                                                            "z":  1032
+                                                        }
+                                                    ]
+                                      }
+                                  ]
+                  },
+    "oil_rig_c":  {
+                      "bounds":  {
+                                     "x":  [
+                                               -3501.1,
+                                               2269.1
+                                           ],
+                                     "z":  [
+                                               -3195.4,
+                                               2067.4
+                                           ]
+                                 },
+                      "floors":  9,
+                      "victims":  [
+                                      {
+                                          "label":  "A",
+                                          "index":  0,
+                                          "name":  "\u003cnull\u003e4",
+                                          "type":  "fatman",
+                                          "n_spots":  3,
+                                          "spots":  [
+                                                        {
+                                                            "spot":  0,
+                                                            "label":  "A0",
+                                                            "floor":  5,
+                                                            "x":  857,
+                                                            "y":  1345,
+                                                            "z":  -320
+                                                        },
+                                                        {
+                                                            "spot":  1,
+                                                            "label":  "A1",
+                                                            "floor":  4,
+                                                            "x":  837,
+                                                            "y":  1072,
+                                                            "z":  -296
+                                                        },
+                                                        {
+                                                            "spot":  2,
+                                                            "label":  "A2",
+                                                            "floor":  6,
+                                                            "x":  845,
+                                                            "y":  1584,
+                                                            "z":  -344
+                                                        }
+                                                    ]
+                                      },
+                                      {
+                                          "label":  "B",
+                                          "index":  1,
+                                          "name":  "\u003cnull\u003e5",
+                                          "type":  "man",
+                                          "n_spots":  3,
+                                          "spots":  [
+                                                        {
+                                                            "spot":  0,
+                                                            "label":  "B0",
+                                                            "floor":  7,
+                                                            "x":  1073,
+                                                            "y":  1904,
+                                                            "z":  -364
+                                                        },
+                                                        {
+                                                            "spot":  1,
+                                                            "label":  "B1",
+                                                            "floor":  8,
+                                                            "x":  885,
+                                                            "y":  2112,
+                                                            "z":  -384
+                                                        },
+                                                        {
+                                                            "spot":  2,
+                                                            "label":  "B2",
+                                                            "floor":  9,
+                                                            "x":  885,
+                                                            "y":  2392,
+                                                            "z":  -416
+                                                        }
+                                                    ]
+                                      },
+                                      {
+                                          "label":  "C",
+                                          "index":  2,
+                                          "name":  "fatman behind rubble",
+                                          "type":  "fatman",
+                                          "n_spots":  1,
+                                          "spots":  [
+                                                        {
+                                                            "spot":  0,
+                                                            "label":  "C0",
+                                                            "floor":  1,
+                                                            "x":  1076,
+                                                            "y":  -256,
+                                                            "z":  496
+                                                        }
+                                                    ]
+                                      },
+                                      {
+                                          "label":  "D",
+                                          "index":  3,
+                                          "name":  "man on ledge1",
+                                          "type":  "man",
+                                          "n_spots":  3,
+                                          "spots":  [
+                                                        {
+                                                            "spot":  0,
+                                                            "label":  "D0",
+                                                            "floor":  3,
+                                                            "x":  1048,
+                                                            "y":  312,
+                                                            "z":  -120
+                                                        },
+                                                        {
+                                                            "spot":  1,
+                                                            "label":  "D1",
+                                                            "floor":  3,
+                                                            "x":  624,
+                                                            "y":  312,
+                                                            "z":  -1040
+                                                        },
+                                                        {
+                                                            "spot":  2,
+                                                            "label":  "D2",
+                                                            "floor":  3,
+                                                            "x":  456,
+                                                            "y":  312,
+                                                            "z":  -104
+                                                        }
+                                                    ]
+                                      },
+                                      {
+                                          "label":  "E",
+                                          "index":  4,
+                                          "name":  "woman at console",
+                                          "type":  "woman",
+                                          "n_spots":  1,
+                                          "spots":  [
+                                                        {
+                                                            "spot":  0,
+                                                            "label":  "E0",
+                                                            "floor":  2,
+                                                            "x":  926,
+                                                            "y":  40,
+                                                            "z":  -864
+                                                        }
+                                                    ]
+                                      },
+                                      {
+                                          "label":  "F",
+                                          "index":  5,
+                                          "name":  "other man in A1",
+                                          "type":  "man",
+                                          "n_spots":  1,
+                                          "spots":  [
+                                                        {
+                                                            "spot":  0,
+                                                            "label":  "F0",
+                                                            "floor":  2,
+                                                            "x":  508,
+                                                            "y":  60,
+                                                            "z":  -1418
+                                                        }
+                                                    ]
+                                      }
+                                  ]
+                  },
+    "oil_rig_d":  {
+                      "bounds":  {
+                                     "x":  [
+                                               -3501.1,
+                                               2269.1
+                                           ],
+                                     "z":  [
+                                               -3195.4,
+                                               2067.4
+                                           ]
+                                 },
+                      "floors":  3,
+                      "victims":  [
+                                      {
+                                          "label":  "A",
+                                          "index":  0,
+                                          "name":  "man",
+                                          "type":  "man",
+                                          "n_spots":  3,
+                                          "spots":  [
+                                                        {
+                                                            "spot":  0,
+                                                            "label":  "A0",
+                                                            "floor":  3,
+                                                            "x":  1072,
+                                                            "y":  864,
+                                                            "z":  -1464
+                                                        },
+                                                        {
+                                                            "spot":  1,
+                                                            "label":  "A1",
+                                                            "floor":  3,
+                                                            "x":  -130,
+                                                            "y":  856,
+                                                            "z":  -1472
+                                                        },
+                                                        {
+                                                            "spot":  2,
+                                                            "label":  "A2",
+                                                            "floor":  3,
+                                                            "x":  -880,
+                                                            "y":  856,
+                                                            "z":  -1472
+                                                        }
+                                                    ]
+                                      },
+                                      {
+                                          "label":  "B",
+                                          "index":  1,
+                                          "name":  "man1",
+                                          "type":  "man",
+                                          "n_spots":  3,
+                                          "spots":  [
+                                                        {
+                                                            "spot":  0,
+                                                            "label":  "B0",
+                                                            "floor":  1,
+                                                            "x":  1072,
+                                                            "y":  304,
+                                                            "z":  -1464
+                                                        },
+                                                        {
+                                                            "spot":  1,
+                                                            "label":  "B1",
+                                                            "floor":  1,
+                                                            "x":  338,
+                                                            "y":  312,
+                                                            "z":  -1470
+                                                        },
+                                                        {
+                                                            "spot":  2,
+                                                            "label":  "B2",
+                                                            "floor":  1,
+                                                            "x":  -584,
+                                                            "y":  312,
+                                                            "z":  -1480
+                                                        }
+                                                    ]
+                                      },
+                                      {
+                                          "label":  "C",
+                                          "index":  2,
+                                          "name":  "woman",
+                                          "type":  "woman",
+                                          "n_spots":  1,
+                                          "spots":  [
+                                                        {
+                                                            "spot":  0,
+                                                            "label":  "C0",
+                                                            "floor":  2,
+                                                            "x":  -128,
+                                                            "y":  584,
+                                                            "z":  -1608
+                                                        }
+                                                    ]
+                                      }
+                                  ]
+                  },
+    "subway_a":  {
+                     "bounds":  {
+                                    "x":  [
+                                              -2443.1,
+                                              3858.3
+                                          ],
+                                    "z":  [
+                                              -6881,
+                                              2781
+                                          ]
+                                },
+                     "floors":  2,
+                     "victims":  [
+                                     {
+                                         "label":  "A",
+                                         "index":  0,
+                                         "name":  "Victim1",
+                                         "type":  "fatman",
+                                         "n_spots":  3,
+                                         "spots":  [
+                                                       {
+                                                           "spot":  0,
+                                                           "label":  "A0",
+                                                           "floor":  1,
+                                                           "x":  1180,
+                                                           "y":  -532,
+                                                           "z":  -1452
+                                                       },
+                                                       {
+                                                           "spot":  1,
+                                                           "label":  "A1",
+                                                           "floor":  1,
+                                                           "x":  1844,
+                                                           "y":  -532,
+                                                           "z":  -804
+                                                       },
+                                                       {
+                                                           "spot":  2,
+                                                           "label":  "A2",
+                                                           "floor":  1,
+                                                           "x":  1766,
+                                                           "y":  -462,
+                                                           "z":  153
+                                                       }
+                                                   ]
+                                     },
+                                     {
+                                         "label":  "B",
+                                         "index":  1,
+                                         "name":  "Victim2",
+                                         "type":  "man",
+                                         "n_spots":  1,
+                                         "spots":  [
+                                                       {
+                                                           "spot":  0,
+                                                           "label":  "B0",
+                                                           "floor":  2,
+                                                           "x":  -1777,
+                                                           "y":  0,
+                                                           "z":  1549
+                                                       }
+                                                   ]
+                                     },
+                                     {
+                                         "label":  "C",
+                                         "index":  2,
+                                         "name":  "Victim3",
+                                         "type":  "woman",
+                                         "n_spots":  1,
+                                         "spots":  [
+                                                       {
+                                                           "spot":  0,
+                                                           "label":  "C0",
+                                                           "floor":  1,
+                                                           "x":  2100,
+                                                           "y":  -516,
+                                                           "z":  -864
+                                                       }
+                                                   ]
+                                     },
+                                     {
+                                         "label":  "D",
+                                         "index":  3,
+                                         "name":  "Victim4",
+                                         "type":  "woman",
+                                         "n_spots":  1,
+                                         "spots":  [
+                                                       {
+                                                           "spot":  0,
+                                                           "label":  "D0",
+                                                           "floor":  1,
+                                                           "x":  2302,
+                                                           "y":  -441,
+                                                           "z":  105
+                                                       }
+                                                   ]
+                                     },
+                                     {
+                                         "label":  "E",
+                                         "index":  4,
+                                         "name":  "Victim5",
+                                         "type":  "man",
+                                         "n_spots":  1,
+                                         "spots":  [
+                                                       {
+                                                           "spot":  0,
+                                                           "label":  "E0",
+                                                           "floor":  2,
+                                                           "x":  -852,
+                                                           "y":  12,
+                                                           "z":  408
+                                                       }
+                                                   ]
+                                     },
+                                     {
+                                         "label":  "F",
+                                         "index":  5,
+                                         "name":  "Victim7",
+                                         "type":  "man",
+                                         "n_spots":  1,
+                                         "spots":  [
+                                                       {
+                                                           "spot":  0,
+                                                           "label":  "F0",
+                                                           "floor":  1,
+                                                           "x":  2438,
+                                                           "y":  -412,
+                                                           "z":  -3175
+                                                       }
+                                                   ]
+                                     }
+                                 ]
+                 },
+    "subway_b":  {
+                     "bounds":  {
+                                    "x":  [
+                                              -3608.8,
+                                              1986.8
+                                          ],
+                                    "z":  [
+                                              -6833.6,
+                                              6814.6
+                                          ]
+                                },
+                     "floors":  1,
+                     "victims":  [
+                                     {
+                                         "label":  "A",
+                                         "index":  0,
+                                         "name":  "Victim1",
+                                         "type":  "fatman",
+                                         "n_spots":  1,
+                                         "spots":  [
+                                                       {
+                                                           "spot":  0,
+                                                           "label":  "A0",
+                                                           "floor":  1,
+                                                           "x":  -2668,
+                                                           "y":  -117,
+                                                           "z":  868
+                                                       }
+                                                   ]
+                                     },
+                                     {
+                                         "label":  "B",
+                                         "index":  1,
+                                         "name":  "Victim2",
+                                         "type":  "fatman",
+                                         "n_spots":  2,
+                                         "spots":  [
+                                                       {
+                                                           "spot":  0,
+                                                           "label":  "B0",
+                                                           "floor":  1,
+                                                           "x":  -1376,
+                                                           "y":  -100,
+                                                           "z":  3392
+                                                       },
+                                                       {
+                                                           "spot":  1,
+                                                           "label":  "B1",
+                                                           "floor":  1,
+                                                           "x":  -1857,
+                                                           "y":  -53,
+                                                           "z":  4118
+                                                       }
+                                                   ]
+                                     },
+                                     {
+                                         "label":  "C",
+                                         "index":  2,
+                                         "name":  "Victim4",
+                                         "type":  "dog",
+                                         "n_spots":  2,
+                                         "spots":  [
+                                                       {
+                                                           "spot":  0,
+                                                           "label":  "C0",
+                                                           "floor":  1,
+                                                           "x":  -68,
+                                                           "y":  0,
+                                                           "z":  -3804
+                                                       },
+                                                       {
+                                                           "spot":  1,
+                                                           "label":  "C1",
+                                                           "floor":  1,
+                                                           "x":  584,
+                                                           "y":  -53,
+                                                           "z":  -5389
+                                                       }
+                                                   ]
+                                     },
+                                     {
+                                         "label":  "D",
+                                         "index":  3,
+                                         "name":  "Victim5",
+                                         "type":  "boy1",
+                                         "n_spots":  2,
+                                         "spots":  [
+                                                       {
+                                                           "spot":  0,
+                                                           "label":  "D0",
+                                                           "floor":  1,
+                                                           "x":  541,
+                                                           "y":  66,
+                                                           "z":  4070
+                                                       },
+                                                       {
+                                                           "spot":  1,
+                                                           "label":  "D1",
+                                                           "floor":  1,
+                                                           "x":  178,
+                                                           "y":  -53,
+                                                           "z":  3213
+                                                       }
+                                                   ]
+                                     },
+                                     {
+                                         "label":  "E",
+                                         "index":  4,
+                                         "name":  "Victim6",
+                                         "type":  "woman",
+                                         "n_spots":  2,
+                                         "spots":  [
+                                                       {
+                                                           "spot":  0,
+                                                           "label":  "E0",
+                                                           "floor":  1,
+                                                           "x":  38,
+                                                           "y":  0,
+                                                           "z":  1804
+                                                       },
+                                                       {
+                                                           "spot":  1,
+                                                           "label":  "E1",
+                                                           "floor":  1,
+                                                           "x":  583,
+                                                           "y":  -53,
+                                                           "z":  1868
+                                                       }
+                                                   ]
+                                     },
+                                     {
+                                         "label":  "F",
+                                         "index":  5,
+                                         "name":  "Victim7",
+                                         "type":  "woman",
+                                         "n_spots":  1,
+                                         "spots":  [
+                                                       {
+                                                           "spot":  0,
+                                                           "label":  "F0",
+                                                           "floor":  1,
+                                                           "x":  -1,
+                                                           "y":  -53,
+                                                           "z":  4082
+                                                       }
+                                                   ]
+                                     },
+                                     {
+                                         "label":  "G",
+                                         "index":  6,
+                                         "name":  "Victim9",
+                                         "type":  "woman",
+                                         "n_spots":  1,
+                                         "spots":  [
+                                                       {
+                                                           "spot":  0,
+                                                           "label":  "G0",
+                                                           "floor":  1,
+                                                           "x":  -2014,
+                                                           "y":  -82,
+                                                           "z":  -605
+                                                       }
+                                                   ]
+                                     },
+                                     {
+                                         "label":  "H",
+                                         "index":  7,
+                                         "name":  "Victim10",
+                                         "type":  "man",
+                                         "n_spots":  1,
+                                         "spots":  [
+                                                       {
+                                                           "spot":  0,
+                                                           "label":  "H0",
+                                                           "floor":  1,
+                                                           "x":  -742,
+                                                           "y":  -53,
+                                                           "z":  -5269
+                                                       }
+                                                   ]
+                                     },
+                                     {
+                                         "label":  "I",
+                                         "index":  8,
+                                         "name":  "Victim11",
+                                         "type":  "woman",
+                                         "n_spots":  1,
+                                         "spots":  [
+                                                       {
+                                                           "spot":  0,
+                                                           "label":  "I0",
+                                                           "floor":  1,
+                                                           "x":  -211,
+                                                           "y":  -53,
+                                                           "z":  -4266
+                                                       }
+                                                   ]
+                                     },
+                                     {
+                                         "label":  "J",
+                                         "index":  9,
+                                         "name":  "Victim12",
+                                         "type":  "man",
+                                         "n_spots":  1,
+                                         "spots":  [
+                                                       {
+                                                           "spot":  0,
+                                                           "label":  "J0",
+                                                           "floor":  1,
+                                                           "x":  542,
+                                                           "y":  37,
+                                                           "z":  -4819
+                                                       }
+                                                   ]
+                                     }
+                                 ]
+                 },
+    "training":  {
+                     "bounds":  {
+                                    "x":  [
+                                              -1775.8,
+                                              2263.8
+                                          ],
+                                    "z":  [
+                                              -5268.2,
+                                              5028.2
+                                          ]
+                                },
+                     "floors":  1,
+                     "victims":  [
+                                     {
+                                         "label":  "A",
+                                         "index":  0,
+                                         "name":  "victim1",
+                                         "type":  "man",
+                                         "n_spots":  3,
+                                         "spots":  [
+                                                       {
+                                                           "spot":  0,
+                                                           "label":  "A0",
+                                                           "floor":  1,
+                                                           "x":  1104,
+                                                           "y":  -60,
+                                                           "z":  -4976
+                                                       },
+                                                       {
+                                                           "spot":  1,
+                                                           "label":  "A1",
+                                                           "floor":  1,
+                                                           "x":  1300,
+                                                           "y":  -120,
+                                                           "z":  -4952
+                                                       },
+                                                       {
+                                                           "spot":  2,
+                                                           "label":  "A2",
+                                                           "floor":  1,
+                                                           "x":  1472,
+                                                           "y":  -120,
+                                                           "z":  -4972
+                                                       }
+                                                   ]
+                                     },
+                                     {
+                                         "label":  "B",
+                                         "index":  1,
+                                         "name":  "victim2",
+                                         "type":  "man",
+                                         "n_spots":  3,
+                                         "spots":  [
+                                                       {
+                                                           "spot":  0,
+                                                           "label":  "B0",
+                                                           "floor":  1,
+                                                           "x":  1656,
+                                                           "y":  -120,
+                                                           "z":  -4968
+                                                       },
+                                                       {
+                                                           "spot":  1,
+                                                           "label":  "B1",
+                                                           "floor":  1,
+                                                           "x":  1820,
+                                                           "y":  -120,
+                                                           "z":  -4960
+                                                       },
+                                                       {
+                                                           "spot":  2,
+                                                           "label":  "B2",
+                                                           "floor":  1,
+                                                           "x":  1972,
+                                                           "y":  -120,
+                                                           "z":  -4960
+                                                       }
+                                                   ]
+                                     }
+                                 ]
+                 }
+}

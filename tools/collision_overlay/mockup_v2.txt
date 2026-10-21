@@ -1,0 +1,24 @@
++-- PLAYER ------------------------------------------------+
+|                          X         Y         Z           |
+|                     1204.5     -88.0    3310.2           |
+| Standing  |  In the air  |  ** INSIDE SOLID **           |
++----------------------------------------------------------+
++-- IF YOU WARP NOW, YOU GO HERE --------------------------+
+|   Tick  Source           X         Y         Z  Surface  |
+|  18342  Hose         980.0     -30.0    3102.7  Wall     |
+| Wall/Slope = warp allowed     Floor = blocked            |
++----------------------------------------------------------+
++-- LAST WARP  -  4 ticks ago -----------------------------+
+|   Tick  Source           X         Y         Z  Surface  |
+|  18338  Victim       870.2     -12.4    2998.1  Wall     |
+|   from              1204.5     -88.0    3310.2           |
++----------------------------------------------------------+
++-- HISTORY  (newest first) -------------------------------+
+|   Tick  Source           X         Y         Z  Surface  |
+|  18342  Hose         980.0     -30.0    3102.7  Wall     |
+|  18341  Fire        1010.0    -118.0    3220.0  Floor    |
+|  18338  >>>>> WARP: player moved to Victim hit <<<<<     |
+|  18338  Player  reused the Victim hit from 18337         |
+|  18337  Victim       870.2     -12.4    2998.1  Wall     |
+|  18335  Axe         1190.4     -60.0    3301.9  Slope    |
++----------------------------------------------------------+

@@ -1,0 +1,20 @@
+{
+  "_README": "spawns.json for fdny_spawns.py: one map = a list of spot indices in .bsp spawn order. N = force that authored spawn point (0 is the editor origin, 1..N are the alt-spot markers). null = leave that victim on the RNG pick. Which index maps to which victim: see victims_reference.md. Skeleton is all 0 (every victim at its editor origin).",
+  "bank": [0, 0, 0, 0, 0, 0],
+  "bar_r": [0, 0, 0, 0, 0, 0],
+  "boat_a": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  "boat_b": [0, 0, 0, 0, 0],
+  "city_h": [],
+  "const_h": [],
+  "dock_h": [],
+  "gas_r": [0, 0, 0, 0, 0, 0, 0],
+  "mbase": [0, 0, 0, 0, 0],
+  "oil_rig_a": [0, 0, 0],
+  "oil_rig_b": [0, 0, 0],
+  "oil_rig_c": [0, 0, 0, 0, 0, 0],
+  "oil_rig_d": [0, 0, 0],
+  "oil_rig_h": [],
+  "subway_a": [0, 0, 0, 0, 0, 0],
+  "subway_b": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  "training": [0, 0]
+}

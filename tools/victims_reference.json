@@ -1,0 +1,1482 @@
+{
+    "bank":  [
+                 {
+                     "name":  "betty",
+                     "type":  "girl",
+                     "heading":  "9",
+                     "id":  "RCS_VictimRescue1",
+                     "count":  2,
+                     "spots":  [
+                                   [
+                                       1176,
+                                       0,
+                                       -672
+                                   ],
+                                   [
+                                       1192,
+                                       1,
+                                       -772
+                                   ]
+                               ],
+                     "alt_ids":  [
+                                     "RCS_VictimAltSpot2"
+                                 ]
+                 },
+                 {
+                     "name":  "\u003cnull\u003e",
+                     "type":  "woman",
+                     "heading":  "0",
+                     "id":  "RCS_VictimRescue2",
+                     "count":  1,
+                     "spots":  [
+                                   [
+                                       -331,
+                                       0,
+                                       -287
+                                   ]
+                               ],
+                     "alt_ids":  [
+
+                                 ]
+                 },
+                 {
+                     "name":  "\u003cnull\u003e",
+                     "type":  "girl",
+                     "heading":  "0",
+                     "id":  "RCS_VictimRescue3",
+                     "count":  2,
+                     "spots":  [
+                                   [
+                                       735,
+                                       0,
+                                       -2184
+                                   ],
+                                   [
+                                       -511,
+                                       172,
+                                       -578
+                                   ]
+                               ],
+                     "alt_ids":  [
+                                     "RCS_VictimAltSpot4"
+                                 ]
+                 },
+                 {
+                     "name":  "\u003cnull\u003e",
+                     "type":  "boy",
+                     "heading":  "0",
+                     "id":  "RCS_VictimRescue4",
+                     "count":  2,
+                     "spots":  [
+                                   [
+                                       -768,
+                                       0,
+                                       -2160
+                                   ],
+                                   [
+                                       -2423,
+                                       -6,
+                                       -1914
+                                   ]
+                               ],
+                     "alt_ids":  [
+                                     "RCS_VictimAltSpot1"
+                                 ]
+                 },
+                 {
+                     "name":  "\u003cnull\u003e",
+                     "type":  "man",
+                     "heading":  "0",
+                     "id":  "RCS_VictimRescue5",
+                     "count":  2,
+                     "spots":  [
+                                   [
+                                       1128,
+                                       284,
+                                       684
+                                   ],
+                                   [
+                                       1256,
+                                       312,
+                                       -1312
+                                   ]
+                               ],
+                     "alt_ids":  [
+                                     "RCS_VictimAltSpot3"
+                                 ]
+                 },
+                 {
+                     "name":  "\u003cnull\u003e",
+                     "type":  "fatman",
+                     "heading":  "0",
+                     "id":  "RCS_VictimRescue6",
+                     "count":  1,
+                     "spots":  [
+                                   [
+                                       -2213,
+                                       314,
+                                       699
+                                   ]
+                               ],
+                     "alt_ids":  [
+
+                                 ]
+                 }
+             ],
+    "bar_r":  [
+                  {
+                      "name":  "Victim01",
+                      "type":  "fatman",
+                      "heading":  "9",
+                      "id":  "RCS_VictimRescue1",
+                      "count":  1,
+                      "spots":  [
+                                    [
+                                        1980,
+                                        420,
+                                        -80
+                                    ]
+                                ],
+                      "alt_ids":  [
+
+                                  ]
+                  },
+                  {
+                      "name":  "Victim02",
+                      "type":  "woman",
+                      "heading":  "5",
+                      "id":  "RCS_VictimRescue2",
+                      "count":  2,
+                      "spots":  [
+                                    [
+                                        96,
+                                        40,
+                                        -1700
+                                    ],
+                                    [
+                                        424,
+                                        92,
+                                        -1720
+                                    ]
+                                ],
+                      "alt_ids":  [
+                                      "RCS_VictimAltSpot2"
+                                  ]
+                  },
+                  {
+                      "name":  "Victim03",
+                      "type":  "man",
+                      "heading":  "12",
+                      "id":  "RCS_VictimRescue3",
+                      "count":  1,
+                      "spots":  [
+                                    [
+                                        2164,
+                                        304,
+                                        -176
+                                    ]
+                                ],
+                      "alt_ids":  [
+
+                                  ]
+                  },
+                  {
+                      "name":  "Victim04",
+                      "type":  "man",
+                      "heading":  "6",
+                      "id":  "RCS_VictimRescue4",
+                      "count":  1,
+                      "spots":  [
+                                    [
+                                        516,
+                                        304,
+                                        -1756
+                                    ]
+                                ],
+                      "alt_ids":  [
+
+                                  ]
+                  },
+                  {
+                      "name":  "Victim05",
+                      "type":  "fatman",
+                      "heading":  "7",
+                      "id":  "RCS_VictimRescue5",
+                      "count":  3,
+                      "spots":  [
+                                    [
+                                        2104,
+                                        40,
+                                        -1368
+                                    ],
+                                    [
+                                        1736,
+                                        96,
+                                        -720
+                                    ],
+                                    [
+                                        2160,
+                                        140,
+                                        -1064
+                                    ]
+                                ],
+                      "alt_ids":  [
+                                      "RCS_VictimAltSpot3",
+                                      "RCS_VictimAltSpot4"
+                                  ]
+                  },
+                  {
+                      "name":  "Victim06",
+                      "type":  "woman",
+                      "heading":  "11",
+                      "id":  "RCS_VictimRescue6",
+                      "count":  2,
+                      "spots":  [
+                                    [
+                                        1792,
+                                        40,
+                                        -324
+                                    ],
+                                    [
+                                        84,
+                                        92,
+                                        -536
+                                    ]
+                                ],
+                      "alt_ids":  [
+                                      "RCS_VictimAltSpot1"
+                                  ]
+                  }
+              ],
+    "boat_a":  [
+                   {
+                       "name":  "victimfork",
+                       "type":  "boy",
+                       "heading":  "0",
+                       "id":  "RCS_VictimRescue1",
+                       "count":  2,
+                       "spots":  [
+                                     [
+                                         698,
+                                         -293,
+                                         2393
+                                     ],
+                                     [
+                                         -127,
+                                         -765,
+                                         2628
+                                     ]
+                                 ],
+                       "alt_ids":  [
+                                       "RCS_VictimAltSpot4"
+                                   ]
+                   },
+                   {
+                       "name":  "girl",
+                       "type":  "girl",
+                       "heading":  "0",
+                       "id":  "RCS_VictimRescue2",
+                       "count":  2,
+                       "spots":  [
+                                     [
+                                         -1551,
+                                         -72,
+                                         456
+                                     ],
+                                     [
+                                         153,
+                                         -44,
+                                         463
+                                     ]
+                                 ],
+                       "alt_ids":  [
+                                       "RCS_VictimAltSpot1"
+                                   ]
+                   },
+                   {
+                       "name":  "victim3",
+                       "type":  "girl",
+                       "heading":  "0",
+                       "id":  "RCS_VictimRescue3",
+                       "count":  2,
+                       "spots":  [
+                                     [
+                                         1359,
+                                         105,
+                                         6149
+                                     ],
+                                     [
+                                         1159,
+                                         -63,
+                                         5502
+                                     ]
+                                 ],
+                       "alt_ids":  [
+                                       "RCS_VictimAltSpot7"
+                                   ]
+                   },
+                   {
+                       "name":  "boy2",
+                       "type":  "boy",
+                       "heading":  "0",
+                       "id":  "RCS_VictimRescue4",
+                       "count":  2,
+                       "spots":  [
+                                     [
+                                         308,
+                                         -1018,
+                                         3784
+                                     ],
+                                     [
+                                         1274,
+                                         -963,
+                                         4082
+                                     ]
+                                 ],
+                       "alt_ids":  [
+                                       "RCS_VictimAltSpot6"
+                                   ]
+                   },
+                   {
+                       "name":  "fatty",
+                       "type":  "fatman",
+                       "heading":  "0",
+                       "id":  "RCS_VictimRescue5",
+                       "count":  1,
+                       "spots":  [
+                                     [
+                                         119,
+                                         -115,
+                                         6541
+                                     ]
+                                 ],
+                       "alt_ids":  [
+
+                                   ]
+                   },
+                   {
+                       "name":  "fatman",
+                       "type":  "fatman",
+                       "heading":  "0",
+                       "id":  "RCS_VictimRescue6",
+                       "count":  2,
+                       "spots":  [
+                                     [
+                                         551,
+                                         -280,
+                                         1632
+                                     ],
+                                     [
+                                         529,
+                                         -260,
+                                         1507
+                                     ]
+                                 ],
+                       "alt_ids":  [
+                                       "RCS_VictimAltSpot3"
+                                   ]
+                   },
+                   {
+                       "name":  "fatman1",
+                       "type":  "fatman",
+                       "heading":  "0",
+                       "id":  "RCS_VictimRescue7",
+                       "count":  2,
+                       "spots":  [
+                                     [
+                                         451,
+                                         -52,
+                                         1344
+                                     ],
+                                     [
+                                         -579,
+                                         -31,
+                                         784
+                                     ]
+                                 ],
+                       "alt_ids":  [
+                                       "RCS_VictimAltSpot2"
+                                   ]
+                   },
+                   {
+                       "name":  "fat",
+                       "type":  "fatman",
+                       "heading":  "0",
+                       "id":  "RCS_VictimRescue9",
+                       "count":  2,
+                       "spots":  [
+                                     [
+                                         1056,
+                                         -730,
+                                         4532
+                                     ],
+                                     [
+                                         1468,
+                                         -994,
+                                         3346
+                                     ]
+                                 ],
+                       "alt_ids":  [
+                                       "RCS_VictimAltSpot5"
+                                   ]
+                   },
+                   {
+                       "name":  "girl",
+                       "type":  "girl",
+                       "heading":  "0",
+                       "id":  "RCS_VictimRescue12",
+                       "count":  1,
+                       "spots":  [
+                                     [
+                                         -12,
+                                         -1042,
+                                         4501
+                                     ]
+                                 ],
+                       "alt_ids":  [
+
+                                   ]
+                   }
+               ],
+    "boat_b":  [
+                   {
+                       "name":  "victim3",
+                       "type":  "girl",
+                       "heading":  "0",
+                       "id":  "RCS_VictimRescue3",
+                       "count":  2,
+                       "spots":  [
+                                     [
+                                         -271,
+                                         -788,
+                                         6405
+                                     ],
+                                     [
+                                         -1625,
+                                         -943,
+                                         6563
+                                     ]
+                                 ],
+                       "alt_ids":  [
+                                       "RCS_VictimAltSpot6"
+                                   ]
+                   },
+                   {
+                       "name":  "boy2",
+                       "type":  "boy",
+                       "heading":  "0",
+                       "id":  "RCS_VictimRescue4",
+                       "count":  2,
+                       "spots":  [
+                                     [
+                                         106,
+                                         -551,
+                                         3794
+                                     ],
+                                     [
+                                         414,
+                                         -126,
+                                         3727
+                                     ]
+                                 ],
+                       "alt_ids":  [
+                                       "RCS_VictimAltSpot2"
+                                   ]
+                   },
+                   {
+                       "name":  "fatty",
+                       "type":  "fatman",
+                       "heading":  "0",
+                       "id":  "RCS_VictimRescue5",
+                       "count":  2,
+                       "spots":  [
+                                     [
+                                         -1151,
+                                         -578,
+                                         3462
+                                     ],
+                                     [
+                                         -1545,
+                                         -126,
+                                         3207
+                                     ]
+                                 ],
+                       "alt_ids":  [
+                                       "RCS_VictimAltSpot4"
+                                   ]
+                   },
+                   {
+                       "name":  "\u003cnull\u003e",
+                       "type":  "man",
+                       "heading":  "0",
+                       "id":  "RCS_VictimRescue6",
+                       "count":  2,
+                       "spots":  [
+                                     [
+                                         -783,
+                                         -291,
+                                         4517
+                                     ],
+                                     [
+                                         -1001,
+                                         -325,
+                                         2889
+                                     ]
+                                 ],
+                       "alt_ids":  [
+                                       "RCS_VictimAltSpot3"
+                                   ]
+                   },
+                   {
+                       "name":  "erg",
+                       "type":  "woman",
+                       "heading":  "0",
+                       "id":  "RCS_VictimRescue7",
+                       "count":  2,
+                       "spots":  [
+                                     [
+                                         -910,
+                                         -843,
+                                         7760
+                                     ],
+                                     [
+                                         -254,
+                                         -616,
+                                         7447
+                                     ]
+                                 ],
+                       "alt_ids":  [
+                                       "RCS_VictimAltSpot5"
+                                   ]
+                   }
+               ],
+    "city_h":  [
+
+               ],
+    "const_h":  [
+
+                ],
+    "dock_h":  [
+
+               ],
+    "gas_r":  [
+                  {
+                      "name":  "Victim1",
+                      "type":  "man",
+                      "heading":  "0",
+                      "id":  "RCS_VictimRescue1",
+                      "count":  1,
+                      "spots":  [
+                                    [
+                                        1404,
+                                        -172,
+                                        24
+                                    ]
+                                ],
+                      "alt_ids":  [
+
+                                  ]
+                  },
+                  {
+                      "name":  "Victim2",
+                      "type":  "woman",
+                      "heading":  "0",
+                      "id":  "RCS_VictimRescue2",
+                      "count":  1,
+                      "spots":  [
+                                    [
+                                        1576,
+                                        -80,
+                                        512
+                                    ]
+                                ],
+                      "alt_ids":  [
+
+                                  ]
+                  },
+                  {
+                      "name":  "Victim3",
+                      "type":  "man",
+                      "heading":  "0",
+                      "id":  "RCS_VictimRescue3",
+                      "count":  1,
+                      "spots":  [
+                                    [
+                                        756,
+                                        -64,
+                                        648
+                                    ]
+                                ],
+                      "alt_ids":  [
+
+                                  ]
+                  },
+                  {
+                      "name":  "Victim4",
+                      "type":  "man",
+                      "heading":  "0",
+                      "id":  "RCS_VictimRescue4",
+                      "count":  1,
+                      "spots":  [
+                                    [
+                                        1269,
+                                        -172,
+                                        1404
+                                    ]
+                                ],
+                      "alt_ids":  [
+
+                                  ]
+                  },
+                  {
+                      "name":  "Victim6",
+                      "type":  "woman",
+                      "heading":  "0",
+                      "id":  "RCS_VictimRescue6",
+                      "count":  1,
+                      "spots":  [
+                                    [
+                                        1988,
+                                        -172,
+                                        480
+                                    ]
+                                ],
+                      "alt_ids":  [
+
+                                  ]
+                  },
+                  {
+                      "name":  "Victim7",
+                      "type":  "woman",
+                      "heading":  "0",
+                      "id":  "RCS_VictimRescue7",
+                      "count":  1,
+                      "spots":  [
+                                    [
+                                        1972,
+                                        -172,
+                                        -204
+                                    ]
+                                ],
+                      "alt_ids":  [
+
+                                  ]
+                  },
+                  {
+                      "name":  "Victim5",
+                      "type":  "man",
+                      "heading":  "0",
+                      "id":  "RCS_VictimRescue8",
+                      "count":  1,
+                      "spots":  [
+                                    [
+                                        -404,
+                                        -120,
+                                        1164
+                                    ]
+                                ],
+                      "alt_ids":  [
+
+                                  ]
+                  }
+              ],
+    "mbase":  [
+                  {
+                      "name":  "victim1",
+                      "type":  "man",
+                      "heading":  "3",
+                      "id":  "RCS_VictimRescue1",
+                      "count":  1,
+                      "spots":  [
+                                    [
+                                        348,
+                                        -136,
+                                        -3068
+                                    ]
+                                ],
+                      "alt_ids":  [
+
+                                  ]
+                  },
+                  {
+                      "name":  "victim3",
+                      "type":  "man",
+                      "heading":  "9",
+                      "id":  "RCS_VictimRescue3",
+                      "count":  1,
+                      "spots":  [
+                                    [
+                                        1796,
+                                        -540,
+                                        -3284
+                                    ]
+                                ],
+                      "alt_ids":  [
+
+                                  ]
+                  },
+                  {
+                      "name":  "victim4",
+                      "type":  "man",
+                      "heading":  "6",
+                      "id":  "RCS_VictimRescue4",
+                      "count":  1,
+                      "spots":  [
+                                    [
+                                        840,
+                                        -260,
+                                        -4812
+                                    ]
+                                ],
+                      "alt_ids":  [
+
+                                  ]
+                  },
+                  {
+                      "name":  "victim5",
+                      "type":  "man",
+                      "heading":  "10",
+                      "id":  "RCS_VictimRescue5",
+                      "count":  1,
+                      "spots":  [
+                                    [
+                                        1852,
+                                        -112,
+                                        -5732
+                                    ]
+                                ],
+                      "alt_ids":  [
+
+                                  ]
+                  },
+                  {
+                      "name":  "victim10",
+                      "type":  "man",
+                      "heading":  "0",
+                      "id":  "RCS_VictimRescue6",
+                      "count":  1,
+                      "spots":  [
+                                    [
+                                        292,
+                                        -320,
+                                        -1320
+                                    ]
+                                ],
+                      "alt_ids":  [
+
+                                  ]
+                  }
+              ],
+    "oil_rig_a":  [
+                      {
+                          "name":  "\u003cnull\u003e",
+                          "type":  "woman",
+                          "heading":  "10",
+                          "id":  "RCS_VictimRescue1",
+                          "count":  2,
+                          "spots":  [
+                                        [
+                                            -236,
+                                            590,
+                                            -262
+                                        ],
+                                        [
+                                            -1076,
+                                            612,
+                                            -260
+                                        ]
+                                    ],
+                          "alt_ids":  [
+                                          "RCS_VictimAltSpot8"
+                                      ]
+                      },
+                      {
+                          "name":  "\u003cnull\u003e17",
+                          "type":  "girl",
+                          "heading":  "10",
+                          "id":  "RCS_VictimRescue16",
+                          "count":  2,
+                          "spots":  [
+                                        [
+                                            -228,
+                                            590,
+                                            -508
+                                        ],
+                                        [
+                                            -600,
+                                            612,
+                                            -852
+                                        ]
+                                    ],
+                          "alt_ids":  [
+                                          "RCS_VictimAltSpot7"
+                                      ]
+                      },
+                      {
+                          "name":  "\u003cnull\u003e18",
+                          "type":  "man",
+                          "heading":  "10",
+                          "id":  "RCS_VictimRescue17",
+                          "count":  3,
+                          "spots":  [
+                                        [
+                                            -742,
+                                            608,
+                                            -762
+                                        ],
+                                        [
+                                            -744,
+                                            612,
+                                            -648
+                                        ],
+                                        [
+                                            -746,
+                                            612,
+                                            -874
+                                        ]
+                                    ],
+                          "alt_ids":  [
+                                          "RCS_VictimAltSpot5",
+                                          "RCS_VictimAltSpot6"
+                                      ]
+                      }
+                  ],
+    "oil_rig_b":  [
+                      {
+                          "name":  "\u003cnull\u003e2",
+                          "type":  "man",
+                          "heading":  "7",
+                          "id":  "RCS_VictimRescue2",
+                          "count":  1,
+                          "spots":  [
+                                        [
+                                            1144,
+                                            496,
+                                            628
+                                        ]
+                                    ],
+                          "alt_ids":  [
+
+                                      ]
+                      },
+                      {
+                          "name":  "\u003cnull\u003e3",
+                          "type":  "dog",
+                          "heading":  "7",
+                          "id":  "RCS_VictimRescue3",
+                          "count":  2,
+                          "spots":  [
+                                        [
+                                            876,
+                                            832,
+                                            416
+                                        ],
+                                        [
+                                            802,
+                                            776,
+                                            1046
+                                        ]
+                                    ],
+                          "alt_ids":  [
+                                          "RCS_VictimAltSpot1"
+                                      ]
+                      },
+                      {
+                          "name":  "woman",
+                          "type":  "woman",
+                          "heading":  "10",
+                          "id":  "RCS_VictimRescue18",
+                          "count":  1,
+                          "spots":  [
+                                        [
+                                            1080,
+                                            288,
+                                            1032
+                                        ]
+                                    ],
+                          "alt_ids":  [
+
+                                      ]
+                      }
+                  ],
+    "oil_rig_c":  [
+                      {
+                          "name":  "\u003cnull\u003e4",
+                          "type":  "fatman",
+                          "heading":  "10",
+                          "id":  "RCS_VictimRescue4",
+                          "count":  3,
+                          "spots":  [
+                                        [
+                                            857,
+                                            1345,
+                                            -320
+                                        ],
+                                        [
+                                            837,
+                                            1072,
+                                            -296
+                                        ],
+                                        [
+                                            845,
+                                            1584,
+                                            -344
+                                        ]
+                                    ],
+                          "alt_ids":  [
+                                          "RCS_VictimAltSpot11",
+                                          "RCS_VictimAltSpot12"
+                                      ]
+                      },
+                      {
+                          "name":  "\u003cnull\u003e5",
+                          "type":  "man",
+                          "heading":  "10",
+                          "id":  "RCS_VictimRescue5",
+                          "count":  3,
+                          "spots":  [
+                                        [
+                                            1073,
+                                            1904,
+                                            -364
+                                        ],
+                                        [
+                                            885,
+                                            2112,
+                                            -384
+                                        ],
+                                        [
+                                            885,
+                                            2392,
+                                            -416
+                                        ]
+                                    ],
+                          "alt_ids":  [
+                                          "RCS_VictimAltSpot13",
+                                          "RCS_VictimAltSpot14"
+                                      ]
+                      },
+                      {
+                          "name":  "fatman behind rubble",
+                          "type":  "fatman",
+                          "heading":  "0",
+                          "id":  "RCS_VictimRescue6",
+                          "count":  1,
+                          "spots":  [
+                                        [
+                                            1076,
+                                            -256,
+                                            496
+                                        ]
+                                    ],
+                          "alt_ids":  [
+
+                                      ]
+                      },
+                      {
+                          "name":  "man on ledge1",
+                          "type":  "man",
+                          "heading":  "0",
+                          "id":  "RCS_VictimRescue9",
+                          "count":  3,
+                          "spots":  [
+                                        [
+                                            1048,
+                                            312,
+                                            -120
+                                        ],
+                                        [
+                                            624,
+                                            312,
+                                            -1040
+                                        ],
+                                        [
+                                            456,
+                                            312,
+                                            -104
+                                        ]
+                                    ],
+                          "alt_ids":  [
+                                          "RCS_VictimAltSpot9",
+                                          "RCS_VictimAltSpot10"
+                                      ]
+                      },
+                      {
+                          "name":  "woman at console",
+                          "type":  "woman",
+                          "heading":  "3",
+                          "id":  "RCS_VictimRescue11",
+                          "count":  1,
+                          "spots":  [
+                                        [
+                                            926,
+                                            40,
+                                            -864
+                                        ]
+                                    ],
+                          "alt_ids":  [
+
+                                      ]
+                      },
+                      {
+                          "name":  "other man in A1",
+                          "type":  "man",
+                          "heading":  "11",
+                          "id":  "RCS_VictimRescue13",
+                          "count":  1,
+                          "spots":  [
+                                        [
+                                            508,
+                                            60,
+                                            -1418
+                                        ]
+                                    ],
+                          "alt_ids":  [
+
+                                      ]
+                      }
+                  ],
+    "oil_rig_d":  [
+                      {
+                          "name":  "man",
+                          "type":  "man",
+                          "heading":  "6",
+                          "id":  "RCS_VictimRescue15",
+                          "count":  3,
+                          "spots":  [
+                                        [
+                                            1072,
+                                            864,
+                                            -1464
+                                        ],
+                                        [
+                                            -130,
+                                            856,
+                                            -1472
+                                        ],
+                                        [
+                                            -880,
+                                            856,
+                                            -1472
+                                        ]
+                                    ],
+                          "alt_ids":  [
+                                          "RCS_VictimAltSpot15",
+                                          "RCS_VictimAltSpot16"
+                                      ]
+                      },
+                      {
+                          "name":  "man1",
+                          "type":  "man",
+                          "heading":  "6",
+                          "id":  "RCS_VictimRescue19",
+                          "count":  3,
+                          "spots":  [
+                                        [
+                                            1072,
+                                            304,
+                                            -1464
+                                        ],
+                                        [
+                                            338,
+                                            312,
+                                            -1470
+                                        ],
+                                        [
+                                            -584,
+                                            312,
+                                            -1480
+                                        ]
+                                    ],
+                          "alt_ids":  [
+                                          "RCS_VictimAltSpot17",
+                                          "RCS_VictimAltSpot18"
+                                      ]
+                      },
+                      {
+                          "name":  "woman",
+                          "type":  "woman",
+                          "heading":  "6",
+                          "id":  "RCS_VictimRescue20",
+                          "count":  1,
+                          "spots":  [
+                                        [
+                                            -128,
+                                            584,
+                                            -1608
+                                        ]
+                                    ],
+                          "alt_ids":  [
+
+                                      ]
+                      }
+                  ],
+    "oil_rig_h":  [
+
+                  ],
+    "subway_a":  [
+                     {
+                         "name":  "Victim1",
+                         "type":  "fatman",
+                         "heading":  "4",
+                         "id":  "RCS_VictimRescue2",
+                         "count":  3,
+                         "spots":  [
+                                       [
+                                           1180,
+                                           -532,
+                                           -1452
+                                       ],
+                                       [
+                                           1844,
+                                           -532,
+                                           -804
+                                       ],
+                                       [
+                                           1766,
+                                           -462,
+                                           153
+                                       ]
+                                   ],
+                         "alt_ids":  [
+                                         "RCS_VictimAltSpot1",
+                                         "RCS_VictimAltSpot2"
+                                     ]
+                     },
+                     {
+                         "name":  "Victim2",
+                         "type":  "man",
+                         "heading":  "1",
+                         "id":  "RCS_VictimRescue3",
+                         "count":  1,
+                         "spots":  [
+                                       [
+                                           -1777,
+                                           0,
+                                           1549
+                                       ]
+                                   ],
+                         "alt_ids":  [
+
+                                     ]
+                     },
+                     {
+                         "name":  "Victim3",
+                         "type":  "woman",
+                         "heading":  "11",
+                         "id":  "RCS_VictimRescue4",
+                         "count":  1,
+                         "spots":  [
+                                       [
+                                           2100,
+                                           -516,
+                                           -864
+                                       ]
+                                   ],
+                         "alt_ids":  [
+
+                                     ]
+                     },
+                     {
+                         "name":  "Victim4",
+                         "type":  "woman",
+                         "heading":  "1",
+                         "id":  "RCS_VictimRescue5",
+                         "count":  1,
+                         "spots":  [
+                                       [
+                                           2302,
+                                           -441,
+                                           105
+                                       ]
+                                   ],
+                         "alt_ids":  [
+
+                                     ]
+                     },
+                     {
+                         "name":  "Victim5",
+                         "type":  "man",
+                         "heading":  "1",
+                         "id":  "RCS_VictimRescue6",
+                         "count":  1,
+                         "spots":  [
+                                       [
+                                           -852,
+                                           12,
+                                           408
+                                       ]
+                                   ],
+                         "alt_ids":  [
+
+                                     ]
+                     },
+                     {
+                         "name":  "Victim7",
+                         "type":  "man",
+                         "heading":  "1",
+                         "id":  "RCS_VictimRescue8",
+                         "count":  1,
+                         "spots":  [
+                                       [
+                                           2438,
+                                           -412,
+                                           -3175
+                                       ]
+                                   ],
+                         "alt_ids":  [
+
+                                     ]
+                     }
+                 ],
+    "subway_b":  [
+                     {
+                         "name":  "Victim1",
+                         "type":  "fatman",
+                         "heading":  "3",
+                         "id":  "RCS_VictimRescue1",
+                         "count":  1,
+                         "spots":  [
+                                       [
+                                           -2668,
+                                           -117,
+                                           868
+                                       ]
+                                   ],
+                         "alt_ids":  [
+
+                                     ]
+                     },
+                     {
+                         "name":  "Victim2",
+                         "type":  "fatman",
+                         "heading":  "0",
+                         "id":  "RCS_VictimRescue2",
+                         "count":  2,
+                         "spots":  [
+                                       [
+                                           -1376,
+                                           -100,
+                                           3392
+                                       ],
+                                       [
+                                           -1857,
+                                           -53,
+                                           4118
+                                       ]
+                                   ],
+                         "alt_ids":  [
+                                         "RCS_VictimAltSpot3"
+                                     ]
+                     },
+                     {
+                         "name":  "Victim4",
+                         "type":  "dog",
+                         "heading":  "11",
+                         "id":  "RCS_VictimRescue4",
+                         "count":  2,
+                         "spots":  [
+                                       [
+                                           -68,
+                                           0,
+                                           -3804
+                                       ],
+                                       [
+                                           584,
+                                           -53,
+                                           -5389
+                                       ]
+                                   ],
+                         "alt_ids":  [
+                                         "RCS_VictimAltSpot5"
+                                     ]
+                     },
+                     {
+                         "name":  "Victim5",
+                         "type":  "boy1",
+                         "heading":  "1",
+                         "id":  "RCS_VictimRescue5",
+                         "count":  2,
+                         "spots":  [
+                                       [
+                                           541,
+                                           66,
+                                           4070
+                                       ],
+                                       [
+                                           178,
+                                           -53,
+                                           3213
+                                       ]
+                                   ],
+                         "alt_ids":  [
+                                         "RCS_VictimAltSpot2"
+                                     ]
+                     },
+                     {
+                         "name":  "Victim6",
+                         "type":  "woman",
+                         "heading":  "6",
+                         "id":  "RCS_VictimRescue6",
+                         "count":  2,
+                         "spots":  [
+                                       [
+                                           38,
+                                           0,
+                                           1804
+                                       ],
+                                       [
+                                           583,
+                                           -53,
+                                           1868
+                                       ]
+                                   ],
+                         "alt_ids":  [
+                                         "RCS_VictimAltSpot1"
+                                     ]
+                     },
+                     {
+                         "name":  "Victim7",
+                         "type":  "woman",
+                         "heading":  "1",
+                         "id":  "RCS_VictimRescue7",
+                         "count":  1,
+                         "spots":  [
+                                       [
+                                           -1,
+                                           -53,
+                                           4082
+                                       ]
+                                   ],
+                         "alt_ids":  [
+
+                                     ]
+                     },
+                     {
+                         "name":  "Victim9",
+                         "type":  "woman",
+                         "heading":  "1",
+                         "id":  "RCS_VictimRescue9",
+                         "count":  1,
+                         "spots":  [
+                                       [
+                                           -2014,
+                                           -82,
+                                           -605
+                                       ]
+                                   ],
+                         "alt_ids":  [
+
+                                     ]
+                     },
+                     {
+                         "name":  "Victim10",
+                         "type":  "man",
+                         "heading":  "1",
+                         "id":  "RCS_VictimRescue10",
+                         "count":  1,
+                         "spots":  [
+                                       [
+                                           -742,
+                                           -53,
+                                           -5269
+                                       ]
+                                   ],
+                         "alt_ids":  [
+
+                                     ]
+                     },
+                     {
+                         "name":  "Victim11",
+                         "type":  "woman",
+                         "heading":  "1",
+                         "id":  "RCS_VictimRescue11",
+                         "count":  1,
+                         "spots":  [
+                                       [
+                                           -211,
+                                           -53,
+                                           -4266
+                                       ]
+                                   ],
+                         "alt_ids":  [
+
+                                     ]
+                     },
+                     {
+                         "name":  "Victim12",
+                         "type":  "man",
+                         "heading":  "1",
+                         "id":  "RCS_VictimRescue12",
+                         "count":  1,
+                         "spots":  [
+                                       [
+                                           542,
+                                           37,
+                                           -4819
+                                       ]
+                                   ],
+                         "alt_ids":  [
+
+                                     ]
+                     }
+                 ],
+    "training":  [
+                     {
+                         "name":  "victim1",
+                         "type":  "man",
+                         "heading":  "6",
+                         "id":  "RCS_VictimRescue1",
+                         "count":  3,
+                         "spots":  [
+                                       [
+                                           1104,
+                                           -60,
+                                           -4976
+                                       ],
+                                       [
+                                           1300,
+                                           -120,
+                                           -4952
+                                       ],
+                                       [
+                                           1472,
+                                           -120,
+                                           -4972
+                                       ]
+                                   ],
+                         "alt_ids":  [
+                                         "RCS_VictimAltSpot1",
+                                         "RCS_VictimAltSpot2"
+                                     ]
+                     },
+                     {
+                         "name":  "victim2",
+                         "type":  "man",
+                         "heading":  "6",
+                         "id":  "RCS_VictimRescue2",
+                         "count":  3,
+                         "spots":  [
+                                       [
+                                           1656,
+                                           -120,
+                                           -4968
+                                       ],
+                                       [
+                                           1820,
+                                           -120,
+                                           -4960
+                                       ],
+                                       [
+                                           1972,
+                                           -120,
+                                           -4960
+                                       ]
+                                   ],
+                         "alt_ids":  [
+                                         "RCS_VictimAltSpot3",
+                                         "RCS_VictimAltSpot4"
+                                     ]
+                     }
+                 ]
+}

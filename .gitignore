@@ -1,0 +1,16 @@
+# Machine-generated state: downloads, installed tools, Ghidra projects.
+environment/local/
+
+# The game itself (third-party binaries).
+FDNY SP 1.1/
+FDNYSP1.1_*.zip
+
+# GhidrAssist plugin runtime state (written to whatever dir Ghidra ran from).
+ghidrassist_*.db
+
+__pycache__/
+*.pyc
+
+# Claude Code per-machine state.
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
