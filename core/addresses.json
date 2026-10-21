@@ -1035,6 +1035,20 @@
           },
           "ghidra": "WinMain 0x0042C800: 0x0042CC5C mov al,[ImADeveloper]; test; 0x0042CC63 jne 0x0042CD63 skips the block that plays Data\\\\Movies\\\\ActiValue.avi (0x004DFADC) and Data\\\\Movies\\\\Mekada.avi (0x004DFAC4) (capstone disassembly 2026-10-21)",
           "note": "6-byte jne rel32 -> nop; jmp rel32 when fd_skip_intro is 1 (DllMain)"
+        },
+        "genesis.printf": {
+          "module": "genesis",
+          "rva": "0x24B60",
+          "export": "geEngine_Printf",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x24B60",
+            "bytes": "81 EC 04 04 00 00 A1 F0 A8 0A 10 33 84 24 04 04",
+            "ref": "first 16 bytes of Genesis.dll export geEngine_Printf"
+          },
+          "ghidra": "Genesis.dll export geEngine_Printf (ordinal 451, RVA 0x24B60, core/notes/genesis_exports.txt); imported by the exe; Genesis3D 1.1: geBoolean geEngine_Printf(geEngine*, int32 x, int32 y, const char* fmt, ...) cdecl (bare export name)",
+          "note": "in-frame debug text (engine font); used by the HUDs"
         }
       }
     }

@@ -71,3 +71,4 @@ entry menu.screen_count 0 0 1 0x102AAC 0x2465a 8B0DAC2A5000575081C1AC06 - 0x524
 entry fire.mode 2 0 1 0x70 0x0 - -
 entry fire.intensity 2 4 1 0x128 0x0 - -
 entry patch.intro_movies 0 2 1 0x2CC63 0x2CC63 0F85FA000000FF15B0C34D008B4F7451 -
+entry genesis.printf 1 2 1 0x24B60 0x24B60 81EC04040000A1F0A80A103384240404 geEngine_Printf

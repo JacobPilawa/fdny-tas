@@ -33,6 +33,7 @@ bool g_groupOn[kMaxGroups];
 int g_nGroups = 0;
 
 Counters g_stats;
+void* g_engine = nullptr;  // geEngine* of the frame in progress (from Begin/EndFrame)
 
 constexpr int kMaxSubs = 32;
 FrameFn g_frameSubs[kMaxSubs];
@@ -44,12 +45,14 @@ int g_nLevelSubs = 0;
 
 int __cdecl BeginFrameDetour(void* engine, void* camera, int clear) {
     InterlockedIncrement(&g_stats.beginFrame);
+    g_engine = engine;
     for (int i = 0; i < g_nBeginSubs; ++i) g_beginSubs[i]();
     return g_origBegin(engine, camera, clear);
 }
 
 int __cdecl EndFrameDetour(void* engine) {
     InterlockedIncrement(&g_stats.endFrame);
+    g_engine = engine;
     for (int i = 0; i < g_nFrameSubs; ++i) g_frameSubs[i]();
     InterlockedIncrement(&g_stats.frameEndEvents);
     return g_origEnd(engine);
@@ -158,5 +161,7 @@ void RaiseLevelLoad(const char* map) {
 }
 
 const Counters& Stats() { return g_stats; }
+
+void* CurrentEngine() { return g_engine; }
 
 } // namespace fdcore::hooks

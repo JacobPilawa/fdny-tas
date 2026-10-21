@@ -23,8 +23,9 @@ cause of RESEARCH.md growing to 465 MB.
 | 7 | window module | **DONE 2026-10-21**: alttabfix parity (same 5-cycle script), suite green (15/15), committed |
 | 8 | speedrun module | **DONE 2026-10-21**: FDNYDeterministic proven live, then exact parity; suite green (18/18), committed. On-screen bot check substituted by memory evidence (see item 8) |
 | 9 | Game state snapshot | **DONE 2026-10-21**: snapshot == direct reads (0 mismatches), suite green (20/20), committed. Also fixed a SafeRead race crash, added fd_skip_intro |
-| 10 | hud_player | next |
-| 11-12 | — | not started |
+| 10 | hud_player | **DONE 2026-10-21**: every old-overlay field in-game via geEngine_Printf; drawn == same-frame values (also moving) and == memory at rest; suite green (21/21), committed |
+| 11 | hud_glitch | next |
+| 12 | Profiles + watermark | not started |
 | 13 | Teleporter (save location / teleport, map-gated), owner request 2026-10-21 | not started (needs 5, 9) |
 
 **Mid-item:** no.
@@ -424,6 +425,29 @@ Live 2026-10-21: in Training, gameState = 1 and mapName = `training`. All 12 cha
   - Test `skip_intro` (env switch **off**, player cfg line `fd_skip_intro "1"`): movies skipped, menus and Training reached, value shown in cvarlist. Its first run caught a case-fold bug: `'_' | 0x20` = 0x7F, so the key never matched.
   - Useful for speedrunners anyway: no unskippable intro.
 
+## Item 10: hud_player (the old Python player overlay, in-game)
+
+- **Drawing:** Genesis' own `geEngine_Printf` (export, RVA 0x24B60, cdecl variadic; the exe already imports it; table entry `genesis.printf` with a prologue signature).
+  - Called with `"%s"` and a string the core formats itself.
+  - Called from frame_end, **before** the original `geEngine_EndFrame`, with the `geEngine*` the hook manager now keeps from the Begin/EndFrame arguments (`hooks::CurrentEngine()`).
+  - Renders in-frame in the engine font on the D3D/dgVoodoo driver (screenshot `hud_after_move`).
+- **`src/hud.cpp`:** `fd_hud_player` (archived, default 0).
+  - Five lines at (8, 52), below the game's mission timer: `pos x y z`, `vel x y z`, `speed <xy>`, `state <name> (<n>) ground|air`, `screen <in level|loading|menu-screen name>`.
+  - These are exactly the owner's field list for the old overlay: X/Y/Z position, player state, screen state, X/Y/Z velocity, XY speed.
+  - Values come from the item-9 snapshot, and the HUD registers after it, so the HUD shows that frame's values.
+  - The Debug pipe `hud` returns the lines actually drawn last frame plus their frame number.
+- **Test `hud_player`** (`assert_hud_matches`: drawn lines vs direct reads; numbers have 1 decimal, so the tolerance is 0.06 + one frame of motion). Three checks pass:
+  - idle;
+  - right after moving (vel 349.4 drawn; HUD frame == snapshot frame);
+  - after a state change (crouched (3) → standing (4)).
+
+  Screenshots show the text in-frame, plus one with `fd_hud_player 0`.
+- No red run against item-9: the test's first assertion is the `hud: ready` log line, which item-9 never emits, and its pipe `hud` command didn't exist.
+- **Suite finding (test design, not a HUD bug):** the first version compared the HUD (frame N) with a snapshot and memory read *later*. The player was still decelerating after W was released (350 → 298 u/s), so the reads spanned 3 frames. A Python harness can't sample memory at the exact frame the HUD drew.
+  - Fix: the pipe `hud` now returns, with the drawn lines, the **same-frame source values** they were drawn from (3 decimals).
+  - `assert_hud_matches` checks (1) drawn == same-frame source (±0.051 for 1-decimal rounding), **including mid-motion** via new `key_down`/`key_up` steps and `{moving: true}`: 366.8/367.2 u/s drawn == source. It checks (2) drawn == direct memory **at rest** (the test waits 1 s after moves).
+  - Together with item 9's snapshot == memory, that is "equals memory within one frame".
+
 ## Assumptions / workarounds
 
 - **"Behaves the same" (item 1c) definition**, chosen by the agent at the owner's request. These are LOOP.md's 7 criteria, with two calibrations:
@@ -491,3 +515,7 @@ Live 2026-10-21: in Training, gameState = 1 and mapName = `training`. All 12 cha
   - Equivalence: Genesis.dll may legitimately relocate (seen at 0x02390000). `baseline_route` stages the dev cfg like the item-1 baselines.
   - Suite 20/20 PASS; Release EQUIVALENT.
   - Evidence in `core/evidence/item09/`.
+- 2026-10-21 it11: **item 10 DONE**. FDNYCore 0.10.0 adds hud_player (`fd_hud_player`): pos / vel / XY speed / player state / screen state, drawn in-frame with Genesis' `geEngine_Printf`.
+  - Test redesigned after a suite-found measurement race: same-frame source check, also mid-motion.
+  - Suite 21/21 PASS; Release EQUIVALENT.
+  - Evidence in `core/evidence/item10/`.

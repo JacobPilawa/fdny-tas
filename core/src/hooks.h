@@ -39,4 +39,8 @@ struct Counters {
 };
 const Counters& Stats();
 
+// geEngine* passed to the current frame's Begin/EndFrame (for in-frame drawing
+// from frame_end subscribers); null before the first frame.
+void* CurrentEngine();
+
 } // namespace fdcore::hooks

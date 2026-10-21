@@ -84,6 +84,10 @@ class Run:
                 inputs.key_up(arg["key"])
             else:
                 inputs.tap(arg)
+        elif kind == "key_down":
+            inputs.key_down(arg)
+        elif kind == "key_up":
+            inputs.key_up(arg)
         elif kind == "type":
             inputs.type_text(str(arg))
         elif kind == "click":
@@ -230,6 +234,8 @@ class Run:
             ok = bool(vs) and all(abs(v[1] - v[4]) <= 0.5 and abs(v[3] - v[5]) <= 0.5 for v in vs)
             self.record("assert_victims_at_spot0", ok,
                         f"{arg}: every victim at its spot 0 (x,z; y is floor-snapped): {vs}")
+        elif kind == "assert_hud_matches":
+            self.assert_hud(arg if isinstance(arg, dict) else {})
         elif kind == "assert_snapshot_matches":
             self.assert_snapshot(arg if isinstance(arg, dict) else {})
         elif kind == "run_setup":
@@ -345,6 +351,76 @@ class Run:
         self.samples.setdefault("snapshots", []).append(snap)
         self.record("assert_snapshot_matches", not fails,
                     f"{n} fields compared at frame {snap.get('frame')}; mismatches: {fails or 'none'}")
+
+    def assert_hud(self, opt):
+        """Item 10, two links:
+        (1) same frame: every number the HUD drew equals the snapshot value it
+            was drawn from (1-decimal rounding: +/-0.051) -- holds while moving;
+        (2) at rest: the drawn values equal direct memory reads (the snapshot
+            == memory link is item 9's guarantee). Call with the player idle."""
+        raw = pipe.call("hud")
+        parts = raw.split("|")
+        hud_frame = int(parts[0].split("=", 1)[1]) if parts and parts[0].startswith("frame=") else -1
+        lines = {p.split(" ", 1)[0]: p.split(" ", 1)[1].strip() if " " in p else "" for p in parts[1:]}
+        r = self.resolver
+        fails = []
+        if not lines:
+            fails.append(f"no HUD lines drawn ({raw!r})")
+        src = [float(t) for t in lines.get("src", "").split()]
+        drawn = []
+        for key, n in (("pos", 3), ("vel", 3), ("speed", 1)):
+            try:
+                drawn += [float(t) for t in lines.get(key, "").split()[:n]]
+            except ValueError:
+                pass
+        if len(src) < 10 or len(drawn) != 7:
+            fails.append(f"same-frame check: drawn {drawn} / src {src} incomplete")
+        else:
+            bad = [(d, s) for d, s in zip(drawn, src[:7]) if abs(d - s) > 0.051]
+            if bad:
+                fails.append(f"same-frame drawn != source: {bad}")
+            if f"({int(src[7])})" not in lines.get("state", ""):
+                fails.append(f"same-frame state {lines.get('state')!r} vs source {int(src[7])}")
+        if opt.get("moving"):
+            # mid-motion: only the same-frame link is meaningful (and must hold)
+            if len(src) >= 7 and abs(src[6]) < 1.0:
+                fails.append(f"expected motion but source speed is {src[6]}")
+            self.samples.setdefault("hud", []).append(raw)
+            self.record("assert_hud_matches", not fails,
+                        f"[moving] HUD frame {hud_frame}: {lines}; mismatches: {fails or 'none'}")
+            return
+        # (2) at rest vs direct memory
+        vel = [r.read(f"player.vel_{c}") or 0.0 for c in "xyz"]
+        tol = 0.06
+
+        def nums(key, n):
+            try:
+                return [float(t) for t in lines.get(key, "").split()[:n]]
+            except ValueError:
+                return []
+
+        pos = nums("pos", 3)
+        direct_pos = [r.read(f"player.pos_{c}") for c in "xyz"]
+        if len(pos) != 3 or any(abs(a - b) > tol for a, b in zip(pos, direct_pos)):
+            fails.append(f"pos drawn {pos} vs memory {direct_pos} (tol {tol:.2f})")
+        v = nums("vel", 3)
+        if len(v) != 3 or any(abs(a - b) > 0.06 + abs(b) * 0.1 for a, b in zip(v, vel)):
+            fails.append(f"vel drawn {v} vs memory {vel}")
+        sp = nums("speed", 1)
+        direct_sp = (vel[0] ** 2 + vel[2] ** 2) ** 0.5
+        if len(sp) != 1 or abs(sp[0] - direct_sp) > 0.06 + direct_sp * 0.1:
+            fails.append(f"speed drawn {sp} vs memory {direct_sp:.2f}")
+        st = lines.get("state", "")
+        mstate = r.read("player.state")
+        if f"({mstate})" not in st:
+            fails.append(f"state drawn {st!r} vs memory move_state {mstate}")
+        gs = r.read("game.state")
+        want = "in level" if gs == 1 else ("loading" if gs in (2, 3) else None)
+        if want and lines.get("screen") != want:
+            fails.append(f"screen drawn {lines.get('screen')!r} vs game state {gs}")
+        self.samples.setdefault("hud", []).append(raw)
+        self.record("assert_hud_matches", not fails,
+                    f"HUD frame {hud_frame}: {lines}; mismatches: {fails or 'none'}")
 
     def assert_value(self, a, val):
         name, tol = a["name"], float(a.get("tolerance", 0))

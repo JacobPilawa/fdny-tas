@@ -1,0 +1,128 @@
+#include "hud.h"
+
+#include <windows.h>
+
+#include "addr.h"
+#include "cmd.h"
+#include "hooks.h"
+#include "log.h"
+#include "state.h"
+
+namespace fdcore::hud {
+namespace {
+
+using addr::Id;
+// geBoolean geEngine_Printf(geEngine*, int32 x, int32 y, const char* fmt, ...): cdecl.
+using PrintfFn = int(__cdecl*)(void* engine, int x, int y, const char* fmt, ...);
+PrintfFn g_printf = nullptr;
+
+volatile long g_on = 0;  // fd_hud_player
+void OnToggle(cmd::Cvar& v) { InterlockedExchange(&g_on, v.value[0] != '0'); }
+cmd::Cvar g_fdHudPlayer = {"fd_hud_player", "0",
+                           "1 = show player info in-game: position, velocity, XY speed, player state, screen state",
+                           false, true, OnToggle, {0}};
+
+constexpr int kLines = 6, kLineLen = 96;
+char g_lines[kLines][kLineLen];
+int g_nLines = 0;
+uint32_t g_drawnFrame = 0;
+state::State g_drawnFrom;  // the snapshot the last HUD was drawn from
+CRITICAL_SECTION g_lock;  // the pipe thread reads what the game thread drew
+
+// "-123.4" (wsprintf has no %f)
+int F1(char* out, float v) {
+    long m = static_cast<long>(v * 10.0f + (v >= 0 ? 0.5f : -0.5f));
+    long a = m < 0 ? -m : m;
+    return wsprintfA(out, "%s%ld.%ld", m < 0 ? "-" : "", a / 10, a % 10);
+}
+
+const char* MoveStateName(int s) {
+    switch (s) {
+    case 3: return "crouched";
+    case 4: return "standing";
+    case 5: return "climbing/spectator";
+    case 6: return "passed out";
+    case 7: return "jumping";
+    default: return "?";
+    }
+}
+
+const char* ScreenName(const state::State& s) {
+    static const char* const kMenus[] = {"main menu", "career", "briefing", "options", "level list",
+                                         "results", "video", "credits", "screen 8", "splash"};
+    switch (s.gameState) {
+    case 1: return "in level";
+    case 2:
+    case 3: return "loading";
+    default: return s.menuScreen >= 0 && s.menuScreen < 10 ? kMenus[s.menuScreen] : "menu";
+    }
+}
+
+void Draw() {
+    if (!g_on) return;
+    void* engine = hooks::CurrentEngine();
+    const state::State& s = state::Current();
+    if (!engine || !g_printf) return;
+
+    char lines[kLines][kLineLen];
+    int n = 0, o;
+    o = wsprintfA(lines[n], "pos   ");
+    o += F1(lines[n] + o, s.pos[0]); lines[n][o++] = ' ';
+    o += F1(lines[n] + o, s.pos[1]); lines[n][o++] = ' ';
+    o += F1(lines[n] + o, s.pos[2]); lines[n++][o] = 0;
+    o = wsprintfA(lines[n], "vel   ");
+    o += F1(lines[n] + o, s.vel[0]); lines[n][o++] = ' ';
+    o += F1(lines[n] + o, s.vel[1]); lines[n][o++] = ' ';
+    o += F1(lines[n] + o, s.vel[2]); lines[n++][o] = 0;
+    o = wsprintfA(lines[n], "speed ");
+    o += F1(lines[n] + o, s.speedXY); lines[n++][o] = 0;
+    wsprintfA(lines[n++], "state %s (%ld) %s", MoveStateName(s.moveState), static_cast<long>(s.moveState),
+              s.onGround ? "ground" : "air");
+    wsprintfA(lines[n++], "screen %s", ScreenName(s));
+
+    // Below the game's mission timer (top-left), in the engine's own font.
+    for (int i = 0; i < n; ++i) g_printf(engine, 8, 52 + i * 12, "%s", lines[i]);
+
+    EnterCriticalSection(&g_lock);
+    for (int i = 0; i < n; ++i) lstrcpynA(g_lines[i], lines[i], kLineLen);
+    g_nLines = n;
+    g_drawnFrame = s.frame;
+    g_drawnFrom = s;
+    LeaveCriticalSection(&g_lock);
+}
+
+} // namespace
+
+bool Init() {
+    if (!addr::Usable(Id::genesis_printf)) {
+        log::Warn("hud: disabled (needs genesis.printf)");
+        return false;
+    }
+    g_printf = reinterpret_cast<PrintfFn>(addr::ExportAddress(Id::genesis_printf));
+    InitializeCriticalSection(&g_lock);
+    cmd::RegisterCvar(&g_fdHudPlayer);
+    hooks::OnFrameEnd(Draw);
+    log::Info("hud: ready (fd_hud_player)");
+    return true;
+}
+
+int LastDrawn(char* out, int cap) {
+    EnterCriticalSection(&g_lock);
+    int o = wsprintfA(out, "frame=%lu", static_cast<unsigned long>(g_drawnFrame));
+    for (int i = 0; i < g_nLines && o + kLineLen + 2 < cap; ++i) o += wsprintfA(out + o, "|%s", g_lines[i]);
+    // The same-frame source values, 3 decimals: tests check drawn == source.
+    const state::State& s = g_drawnFrom;
+    const float src[] = {s.pos[0], s.pos[1], s.pos[2], s.vel[0], s.vel[1], s.vel[2], s.speedXY};
+    o += wsprintfA(out + o, "|src");
+    for (float v : src) {
+        long m = static_cast<long>(v * 1000.0f + (v >= 0 ? 0.5f : -0.5f));
+        long a = m < 0 ? -m : m;
+        o += wsprintfA(out + o, " %s%ld.%03ld", m < 0 ? "-" : "", a / 1000, a % 1000);
+    }
+    o += wsprintfA(out + o, " %ld %ld %ld", static_cast<long>(s.moveState), static_cast<long>(s.gameState),
+                   static_cast<long>(s.menuScreen));
+    LeaveCriticalSection(&g_lock);
+    return o;
+}
+
+} // namespace fdcore::hud

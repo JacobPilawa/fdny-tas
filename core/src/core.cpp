@@ -10,6 +10,7 @@
 #include "fov.h"
 #include "gen/version_gen.h"
 #include "hooks.h"
+#include "hud.h"
 #include "log.h"
 #include "modules.h"
 #include "patches.h"
@@ -100,6 +101,7 @@ DWORD WINAPI InitThread(LPVOID) {
         fdcore::window::Init();
         fdcore::speedrun::Init();
         fdcore::state::Init();
+        fdcore::hud::Init();
         fdcore::patches::Init();
     }
     fdcore::modules::StartAll();
