@@ -234,6 +234,21 @@ class Run:
             ok = bool(vs) and all(abs(v[1] - v[4]) <= 0.5 and abs(v[3] - v[5]) <= 0.5 for v in vs)
             self.record("assert_victims_at_spot0", ok,
                         f"{arg}: every victim at its spot 0 (x,z; y is floor-snapped): {vs}")
+        elif kind == "sample_pipe":
+            # {cmd, as}: store a "k=v k=v" pipe reply as a dict
+            reply = pipe.call(arg["cmd"])
+            self.samples[arg["as"]] = dict(kv.split("=", 1) for kv in reply.split() if "=" in kv)
+        elif kind == "assert_pipe_stat":
+            # {cmd, key, min|equals, since: <sample label>} numeric field of a pipe reply
+            reply = dict(kv.split("=", 1) for kv in pipe.call(arg["cmd"]).split() if "=" in kv)
+            val = int(reply.get(arg["key"], "-1"))
+            base = int(self.samples.get(arg["since"], {}).get(arg["key"], 0)) if arg.get("since") else 0
+            d = val - base
+            ok = d >= int(arg["min"]) if "min" in arg else d == int(arg["equals"])
+            want = f">= {arg['min']}" if "min" in arg else f"== {arg['equals']}"
+            self.record("assert_pipe_stat", ok,
+                        f"{arg['cmd']}.{arg['key']} = {val}" + (f" ({d:+d} since {arg['since']})" if arg.get("since") else "")
+                        + f", want {want}")
         elif kind == "assert_hud_matches":
             self.assert_hud(arg if isinstance(arg, dict) else {})
         elif kind == "assert_snapshot_matches":

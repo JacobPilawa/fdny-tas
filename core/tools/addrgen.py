@@ -137,6 +137,19 @@ def cmd_sigs(exe):
                             "ref": f"first {len(ins)} bytes of the function at {image_base + rva:#010x}"}
                 print(f"{vname}:{name}: code {image_base + rva:#010x}  {ins.hex(' ').upper()}")
                 continue
+            if e["module"] == "genesis":
+                # Genesis data global: an instruction in Genesis' code that embeds it.
+                gdata = open(genesis, "rb").read()
+                gbase, _ = pe_sections(gdata)
+                root = gbase + int(e["rva"], 16)
+                rva, ins = find_sig(gdata, root)
+                if rva is None:
+                    print(f"{vname}:{name}: no Genesis code reference to {root:#x} found")
+                    continue
+                e["sig"] = {"rva": f"{rva:#x}", "bytes": ins.hex(" ").upper(),
+                            "ref": f"Genesis instruction at {gbase + rva:#010x} embeds {root:#010x}"}
+                print(f"{vname}:{name}: Genesis {gbase + rva:#010x}  {ins.hex(' ').upper()}")
+                continue
             if e["module"] != "exe":
                 continue
             root = image_base + int(e["rva"], 16)

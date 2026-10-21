@@ -448,6 +448,52 @@ Live 2026-10-21: in Training, gameState = 1 and mapName = `training`. All 12 cha
   - `assert_hud_matches` checks (1) drawn == same-frame source (±0.051 for 1-decimal rounding), **including mid-motion** via new `key_down`/`key_up` steps and `{moving: true}`: 366.8/367.2 u/s drawn == source. It checks (2) drawn == direct memory **at rest** (the test waits 1 s after moves).
   - Together with item 9's snapshot == memory, that is "equals memory within one frame".
 
+## Item 11: hud_glitch (port of tools/collision_overlay), split
+
+Structural map (Haiku, line-referenced) of `fdny_collision_overlay.py` (1748 lines):
+
+- **Hooks:** 8 hook sites write 128-byte records (`REC_FMT "<11I3f3ff3fI3f7I"`) into a 16384-entry ring:
+  - entry / x_box / x_ray / x_miss / boxw / rayw in Genesis (`geWorld_Collision` body + writers);
+  - commit `0x0043F9C7` and tick `0x0042AF0F` in the exe.
+- **Analysis seam:** `GameSource.poll` turns records into `Ev` → `FrameAnalyzer.feed` / `end_of_poll` → Model / TextLog / `Overlay.build()`.
+- **Determinism:** given the record stream plus per-poll snapshots (player pos/state/box/disp, tick, slot plane ny, map), the log and box text are deterministic apart from timestamps.
+- **Bsp:** about 175 lines (literal port of Genesis' box clip + `.bsp` parser). MapFinder matches the live plane array against the `.bsp` files.
+- **Doc/code discrepancies, kept as in the CODE** (parity is with the code): "Bugged" text only in state 3; no "too low" status; "Target -" fallback row.
+
+**Parity strategy (the owner's "same outputs as the old overlay"):** identical-input replay.
+
+- The core produces the same raw record stream.
+- A Python replay driver feeds that stream, with the core's per-frame snapshots, through the **original overlay's own classes** (Model / FrameAnalyzer / TextLog / Bsp / `build()`).
+- Its outputs are diffed against the core's for the same frames.
+- In-process, a "poll" is one frame.
+- Known risk: Python `round(x,1)` on doubles is used for writer-lookup keys; the C++ must round identically or attributions can differ on ties.
+
+**Sub-items:**
+
+| # | What | Done when |
+|---|---|---|
+| 11a | Record layer: the 8 hooks in the core, same record format, per-frame snapshot; Debug dump `FDNYCore.glitchrec` | Records flow live in Training (player sweeps, commits, ticks = frames); hook sites signature-verified; no crash; suite green |
+| 11b | Analysis port (Ev/Model/FrameAnalyzer/classify/TextLog) | Replay of a recorded stream through the Python classes == core log lines |
+| 11c | Bsp + MapFinder port (WARP prediction) | Replay: status text / gap / sweeps identical |
+| 11d | In-game boxes (WARP / LAST WARP / HISTORY) + `fd_hud_glitch` + F9/F10/F12 equivalents | Box text == `build()` on replay; screenshots |
+
+**11a (record layer): done.**
+
+- **`src/glitch.cpp`:** the 8 hook sites are address-table code entries (Genesis + exe), signature-verified. The Genesis data globals `genesis.impact` / `.plane` / `.planes_ptr` have signatures from Genesis code that embeds them (addrgen now handles Genesis data).
+- **Cave code:** a byte-for-byte port of the Python `Asm` emitter: same layout (TICK/HEAD/INCALL/FRESH, scratch record, ring of 16384 × 128 bytes), the LOG routine, entry/exit/boxw/rayw/commit/tick tails, displaced bytes taken live.
+  - Installed by `fd_hud_glitch 1` (archived, default 0) and removed by `0`.
+  - Every other thread is suspended while patching (`Freeze` checks that no thread's EIP is inside a site; retries).
+  - The cave stays allocated after removal, as in the Python tool.
+- **Reading:** the ring is read at frame_end; in-process, a "poll" = one frame.
+- **Debug dump:** `FDNYCore.glitchrec` (records + one KIND 0xF0 snapshot per frame: tick, player ptr/state/ground/spectator, pos/mins/maxs/disp, slot impact/plane, Genesis base) for the 11b replay. Pipe `glitch` returns counters.
+- **Relocation-aware Genesis signatures** (`addr::VerifySig`): Genesis really relocates (seen at 0x02390000), and sigs such as `glitch.rayw`, `glitch.exit_box` and **`genesis.printf`** contain absolute Genesis pointers.
+  - A 4-byte window that differs by exactly the base delta (and held a 0x100xxxxx address) is accepted as relocated.
+  - Before this, a relocated Genesis would have silently disabled the HUD.
+- **Test `glitch_records`:** hooks install; +353 traces and +174 ticks over 3 s of movement, 0 dropped; off → 0 new traces; on → flowing again; no crash.
+  - Two test-authoring errors fixed: commits ≥ 10 was a wrong expectation (commits are rare on flat ground, so they're left to the 11b replay), and the YAML label `off` parsed as boolean.
+- **Stream check** with the overlay's own `REC_FMT` (`harness/glitchrec_check.py`): kinds trace / engine-ray / commit / snapshot.
+  - Per frame, traces carry tick N and engine rays N+1. That matches the game loop: TickSubsystems → tick hook at 0x0042AF0F → RenderFrame, the same as the Python poll order.
+
 ## Assumptions / workarounds
 
 - **"Behaves the same" (item 1c) definition**, chosen by the agent at the owner's request. These are LOOP.md's 7 criteria, with two calibrations:

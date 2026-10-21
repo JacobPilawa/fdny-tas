@@ -45,8 +45,22 @@ bool VerifySig(const Entry& e) {
     }
     uint8_t live[kMaxSig];
     if (!SafeRead(g_bases[e.module] + e.sigRva, live, e.sigLen)) return false;
+    // Genesis.dll is loaded dynamically and relocates when its preferred base
+    // 0x10000000 is taken (seen live: 0x02390000). The loader then rebases
+    // every absolute pointer in its code, so a 4-byte window that differs from
+    // the file bytes by exactly the base delta (and held a Genesis address) is
+    // a relocated pointer, not a mismatch.
+    const uint32_t delta = static_cast<uint32_t>(g_bases[1] - 0x10000000u);
+    bool relocOk[kMaxSig] = {};
+    if (e.module == 1 && delta)
+        for (int j = 0; j + 4 <= e.sigLen; ++j) {
+            uint32_t f = 0, l = 0;
+            for (int k = 0; k < 4; ++k) f |= uint32_t(e.sig[j + k]) << (8 * k), l |= uint32_t(live[j + k]) << (8 * k);
+            if (f >= 0x10000000u && f < 0x10400000u && l - f == delta)
+                for (int k = 0; k < 4; ++k) relocOk[j + k] = true;
+        }
     for (int i = 0; i < e.sigLen; ++i)
-        if (live[i] != e.sig[i]) return false;
+        if (live[i] != e.sig[i] && !relocOk[i]) return false;
     return true;
 }
 
@@ -165,6 +179,8 @@ bool Resolve(Id id, uintptr_t* out) {
     *out = p + e.chain[e.nchain - 1];
     return true;
 }
+
+uintptr_t ModuleBase(int module) { return module == 0 || module == 1 ? g_bases[module] : 0; }
 
 uint32_t Field(Id id) { return kVersions[0].entries[static_cast<int>(id)].rva; }
 

@@ -8,6 +8,7 @@
 #include "console.h"
 #include "crashlog.h"
 #include "fov.h"
+#include "glitch.h"
 #include "gen/version_gen.h"
 #include "hooks.h"
 #include "hud.h"
@@ -102,6 +103,7 @@ DWORD WINAPI InitThread(LPVOID) {
         fdcore::speedrun::Init();
         fdcore::state::Init();
         fdcore::hud::Init();
+        fdcore::glitch::Init();
         fdcore::patches::Init();
     }
     fdcore::modules::StartAll();

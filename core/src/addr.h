@@ -27,6 +27,9 @@ bool Resolve(Id id, uintptr_t* out);
 // any table version, else 0. The signature check alone guards the patch.
 uintptr_t EarlyCodeAddress(Id id);
 
+// Load base of a module (0 = exe, 1 = Genesis.dll).
+uintptr_t ModuleBase(int module);
+
 // Offset of a struct-field entry (module "field" in addresses.json).
 uint32_t Field(Id id);
 

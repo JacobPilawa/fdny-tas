@@ -6,6 +6,7 @@
 
 #include <windows.h>
 
+#include "glitch.h"
 #include "hooks.h"
 #include "hud.h"
 #include "log.h"
@@ -30,6 +31,8 @@ void Handle(const char* req, char* resp) {
         wsprintfA(resp, "begin=%ld end=%ld events=%ld levels=%ld toggles=%ld frame=%s", c.beginFrame,
                   c.endFrame, c.frameEndEvents, c.levelLoads, c.toggles,
                   hooks::IsEnabled("frame") ? "on" : "off");
+    } else if (StartsWith(req, "glitch")) {
+        glitch::Stats(resp, kResp);
     } else if (StartsWith(req, "hud")) {
         hud::LastDrawn(resp, kResp);
     } else if (StartsWith(req, "snapshot")) {

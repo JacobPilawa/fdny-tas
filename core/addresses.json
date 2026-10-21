@@ -1049,6 +1049,235 @@
           },
           "ghidra": "Genesis.dll export geEngine_Printf (ordinal 451, RVA 0x24B60, core/notes/genesis_exports.txt); imported by the exe; Genesis3D 1.1: geBoolean geEngine_Printf(geEngine*, int32 x, int32 y, const char* fmt, ...) cdecl (bare export name)",
           "note": "in-frame debug text (engine font); used by the HUDs"
+        },
+        "glitch.entry": {
+          "module": "genesis",
+          "kind": "code",
+          "rva": "0x38C10",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x38C10",
+            "bytes": "83 EC 24 8B 4C 24 28 8B 51 18 8B 44 24 3C 81 C2",
+            "ref": "first 16 bytes of the function at 0x00438c10"
+          },
+          "ghidra": "geWorld_Collision body entry (83EC24 8B4C2428, 7 bytes; resume +7); tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "note": "records caller stack + impact slot before the call"
+        },
+        "glitch.exit_box": {
+          "module": "genesis",
+          "kind": "code",
+          "rva": "0x38D0A",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x38D0A",
+            "bytes": "5E 83 C4 24 C3 A1 C4 2E 36 10 8B 54 24 54 52 8B",
+            "ref": "first 16 bytes of the function at 0x00438d0a"
+          },
+          "ghidra": "geWorld_Collision exit (box hit): 5E 83C424 C3; tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "note": "records result, Col impact/plane, global plane, fresh count"
+        },
+        "glitch.exit_ray": {
+          "module": "genesis",
+          "kind": "code",
+          "rva": "0x38DB6",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x38DB6",
+            "bytes": "5E 83 C4 24 C3 5F 33 C0 5E 83 C4 24 C3 90 90 90",
+            "ref": "first 16 bytes of the function at 0x00438db6"
+          },
+          "ghidra": "geWorld_Collision exit (ray hit): 5E 83C424 C3; tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "note": "same as exit_box"
+        },
+        "glitch.exit_miss": {
+          "module": "genesis",
+          "kind": "code",
+          "rva": "0x38DBE",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x38DBE",
+            "bytes": "5E 83 C4 24 C3 90 90 90 90 90 90 90 90 90 90 90",
+            "ref": "first 16 bytes of the function at 0x00438dbe"
+          },
+          "ghidra": "geWorld_Collision exit (miss): 5E 83C424 C3; tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "note": "same as exit_box"
+        },
+        "glitch.boxw": {
+          "module": "genesis",
+          "kind": "code",
+          "rva": "0x371C2",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x371C2",
+            "bytes": "5B 83 C4 2C C3 DD D8 5F 5E B8 01 00 00 00 5D A3",
+            "ref": "first 16 bytes of the function at 0x004371c2"
+          },
+          "ghidra": "box-clip fresh-write epilogue: 5B 83C42C C3; tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "note": "counts fresh impact writes"
+        },
+        "glitch.rayw": {
+          "module": "genesis",
+          "kind": "code",
+          "rva": "0x36633",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x36633",
+            "bytes": "C7 05 44 2F 36 10 01 00 00 00 5D 5B 5F B8 01 00",
+            "ref": "first 16 bytes of the function at 0x00436633"
+          },
+          "ghidra": "ray-clip write: C705 <latch 0x10362F44> 01000000 (10 bytes; absolute operand is relocated); resume +10; tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "note": "counts fresh writes; outside a call = engine lighting ray record"
+        },
+        "glitch.commit": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x3F9C7",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x3F9C7",
+            "bytes": "8D 46 4C 8B C8 89 11 8B 54 24 14 89 51 04 8B 54",
+            "ref": "first 16 bytes of the function at 0x0043f9c7"
+          },
+          "ghidra": "BModelEnt::Think step-down commit 0x0043F9C7: 8D464C 8BC8 8911 (7 bytes; resume +7); ESI = entity; tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "note": "records the warp commit (impact, normal, old position)"
+        },
+        "glitch.tick": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x2AF0F",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x2AF0F",
+            "bytes": "A1 78 3A 50 00 8B 48 04 6A 00 E8 52 97 06 00 83",
+            "ref": "first 16 bytes of the function at 0x0042af0f"
+          },
+          "ghidra": "GameSession::RunFrame 0x0042AF0F: A1 783A5000 (mov eax,[g_everGame]; 5 bytes; resume +5); tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "note": "per-simulated-frame tick counter"
+        },
+        "genesis.impact": {
+          "module": "genesis",
+          "rva": "0x362E9C",
+          "chain": [],
+          "type": "f32",
+          "sig": {
+            "rva": "0x36603",
+            "bytes": "A3 9C 2E 36 10 8B 44 24 2C 89 0D",
+            "ref": "Genesis instruction at 0x10036603 embeds 0x10362e9c"
+          },
+          "ghidra": "Genesis global last-collision impact point x,y,z (G_IMPACT 0x10362E9C); tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "note": "the stale-hit slot"
+        },
+        "genesis.plane": {
+          "module": "genesis",
+          "rva": "0x362F48",
+          "chain": [],
+          "type": "f32",
+          "sig": {
+            "rva": "0x365f8",
+            "bytes": "BF 48 2F 36 10 F3 A5 8B 4C 24 18",
+            "ref": "Genesis instruction at 0x100365f8 embeds 0x10362f48"
+          },
+          "ghidra": "Genesis global last-collision plane normal x,y,z + dist (G_PLANE 0x10362F48); tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "note": "plane the warp gate sees"
+        },
+        "genesis.planes_ptr": {
+          "module": "genesis",
+          "rva": "0x362EF8",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x353d5",
+            "bytes": "A1 F8 2E 36 10 8D 34 88 8B 42 04",
+            "ref": "Genesis instruction at 0x100353d5 embeds 0x10362ef8"
+          },
+          "ghidra": "Genesis pointer to the loaded world plane array (G_PLANES_PTR 0x10362EF8); MapFinder compares its first 16 KB with each .bsp; tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "note": "map recognition"
+        },
+        "player.object": {
+          "module": "exe",
+          "rva": "0x103A78",
+          "chain": [
+            "0x30"
+          ],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x274c2",
+            "bytes": "8B 15 78 3A 50 00 8B 12 83 F8 02 0F",
+            "ref": "instruction at 0x004274c2 embeds 0x00503a78"
+          },
+          "ghidra": "g_everGame 0x00503A78 +0x30 = PlayerRescueEnt*",
+          "note": "address of the player pointer slot; read it for the player object (commit records are filtered by it)"
+        },
+        "player.f_pos": {
+          "module": "field",
+          "rva": "0x4C",
+          "chain": [],
+          "type": "f32",
+          "sig": null,
+          "ghidra": "PlayerRescueEnt position (collision overlay OFF_POS)",
+          "note": "x,y,z"
+        },
+        "player.f_mins": {
+          "module": "field",
+          "rva": "0x78",
+          "chain": [],
+          "type": "f32",
+          "sig": null,
+          "ghidra": "collision box mins (overlay OFF_MINS)",
+          "note": "x,y,z"
+        },
+        "player.f_maxs": {
+          "module": "field",
+          "rva": "0x84",
+          "chain": [],
+          "type": "f32",
+          "sig": null,
+          "ghidra": "collision box maxs (overlay OFF_MAXS; y 85 standing, 25 crouched)",
+          "note": "x,y,z"
+        },
+        "player.f_disp": {
+          "module": "field",
+          "rva": "0x90",
+          "chain": [],
+          "type": "f32",
+          "sig": null,
+          "ghidra": "this frame's displacement (overlay OFF_DISP)",
+          "note": "x,y,z"
+        },
+        "player.f_ground": {
+          "module": "field",
+          "rva": "0x12C",
+          "chain": [],
+          "type": "u8",
+          "sig": null,
+          "ghidra": "on-ground byte (overlay OFF_GROUND)",
+          "note": "u8"
+        },
+        "player.f_state": {
+          "module": "field",
+          "rva": "0x18C",
+          "chain": [],
+          "type": "i32",
+          "sig": null,
+          "ghidra": "movement state (overlay OFF_STATE)",
+          "note": "int"
+        },
+        "player.f_spectator": {
+          "module": "field",
+          "rva": "0x380",
+          "chain": [],
+          "type": "u8",
+          "sig": null,
+          "ghidra": "spectator flag: nonzero = DepenetrateFromWorld skipped (overlay OFF_SPECTATOR)",
+          "note": "u8"
         }
       }
     }

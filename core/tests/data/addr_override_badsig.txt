@@ -72,3 +72,22 @@ entry fire.mode 2 0 1 0x70 0x0 - -
 entry fire.intensity 2 4 1 0x128 0x0 - -
 entry patch.intro_movies 0 2 1 0x2CC63 0x2CC63 0F85FA000000FF15B0C34D008B4F7451 -
 entry genesis.printf 1 2 1 0x24B60 0x24B60 81EC04040000A1F0A80A103384240404 geEngine_Printf
+entry glitch.entry 1 2 1 0x38C10 0x38C10 83EC248B4C24288B51188B44243C81C2 -
+entry glitch.exit_box 1 2 1 0x38D0A 0x38D0A 5E83C424C3A1C42E36108B542454528B -
+entry glitch.exit_ray 1 2 1 0x38DB6 0x38DB6 5E83C424C35F33C05E83C424C3909090 -
+entry glitch.exit_miss 1 2 1 0x38DBE 0x38DBE 5E83C424C39090909090909090909090 -
+entry glitch.boxw 1 2 1 0x371C2 0x371C2 5B83C42CC3DDD85F5EB8010000005DA3 -
+entry glitch.rayw 1 2 1 0x36633 0x36633 C705442F3610010000005D5B5FB80100 -
+entry glitch.commit 0 2 1 0x3F9C7 0x3F9C7 8D464C8BC889118B5424148951048B54 -
+entry glitch.tick 0 2 1 0x2AF0F 0x2AF0F A1783A50008B48046A00E85297060083 -
+entry genesis.impact 1 4 1 0x362E9C 0x36603 A39C2E36108B44242C890D -
+entry genesis.plane 1 4 1 0x362F48 0x365f8 BF482F3610F3A58B4C2418 -
+entry genesis.planes_ptr 1 2 1 0x362EF8 0x353d5 A1F82E36108D34888B4204 -
+entry player.object 0 2 1 0x103A78 0x274c2 8B15783A50008B1283F8020F - 0x30
+entry player.f_pos 2 4 1 0x4C 0x0 - -
+entry player.f_mins 2 4 1 0x78 0x0 - -
+entry player.f_maxs 2 4 1 0x84 0x0 - -
+entry player.f_disp 2 4 1 0x90 0x0 - -
+entry player.f_ground 2 3 1 0x12C 0x0 - -
+entry player.f_state 2 0 1 0x18C 0x0 - -
+entry player.f_spectator 2 3 1 0x380 0x0 - -

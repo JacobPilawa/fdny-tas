@@ -1,0 +1,3 @@
+7032 blocks: kinds {240: 2454, 1: 3058, 3: 1518, 2: 2}; snapshot ticks 0..135 monotonic=False
+player sweep roles (via S30): {'-': 3058}
+trace ticks within snapshot range: 0..1386
