@@ -26,7 +26,7 @@ cause of RESEARCH.md growing to 465 MB.
 | 10 | hud_player | **DONE 2026-10-21**: every old-overlay field in-game via geEngine_Printf; drawn == same-frame values (also moving) and == memory at rest; suite green (21/21), committed |
 | 11 | hud_glitch | **DONE 2026-10-21**: record layer, analysis, warp window, boxes + keys; log and per-frame box text identical to the original overlay (live + synthetic), suite green, committed |
 | 12 | Profiles + watermark | **DONE 2026-10-21**: run/practice sets, refusals, in-frame watermark, persistence; suite green, committed. Practice-only list = agent default, owner to confirm |
-| 13 | Teleporter (save location / teleport, map-gated), owner request 2026-10-21 | not started (needs 5, 9) |
+| 13 | Teleporter (save location / teleport, map-gated), owner request 2026-10-21 | **DONE 2026-10-21**: fd_tp_save / fd_tp_load, map-gated, practice-only, bindable; suite green, committed |
 
 **Mid-item:** no.
 
@@ -596,6 +596,33 @@ Structural map (Haiku, line-referenced) of `fdny_collision_overlay.py` (1748 lin
   - screenshots of both profiles.
   - New harness step `assert_pipe_contains`; Debug pipe `watermark`.
 
+## Item 13: teleporter (owner request)
+
+- **Research (Haiku, Ghidra, read-only):**
+  - **No native teleport verb.** PlayerRescueEnt::OnScriptCommand's verbs are jump, crouch, uncrouch, push, climb, unclimb, oxyon/oxyoff, hint, equip, select, touchhose, toolcmd, setashdensity, addbonus, printstats, finalexit(loadmap), setrescuebot, reset and escape. "moveto" is FireRescueEnt's NPC path walk. So the owner's default names stand: `fd_tp_save` / `fd_tp_load`.
+  - **The game's reset isn't reusable.** `Verb_Reset` 0x0044FF10 → `ResetLocomotionState` 0x0044CD10 does all of this:
+    - moves to the spawn anchor (+0x534.., which Verb_Escape mutates at runtime);
+    - sets yaw from the anchor heading (+0x530);
+    - drops held liftables and the carried victim;
+    - sets +0x3450 = 1.0, move state 3 and the on-ground latch;
+    - resets SFX volumes, rebuilds zone occupants and calls OnLevelWon;
+    - calls `SnapToFloor` 0x0049DA00, which commits (0,1,0) when the floor trace misses (confirmed).
+  - +0x24 is an inline geXForm3d (rotation +0x28..+0x48, translation = position +0x4C); no other position cache was found.
+  - Side note: the reset's position mirror at +0x3400 overlaps the RadioChatter object at the same offset (decompile reading, impact not verified).
+- **Implementation (`src/tp.{h,cpp}`):**
+  - `fd_tp_save` reads position + pitch + yaw and tags them with the current map (state snapshot).
+  - `fd_tp_load` is refused without a save, outside a level, or on any other map ("saved on X, this is Y -- refused", no state change). Otherwise it queues the load for frame end (after Think, before the next).
+  - The load writes position, pitch and yaw, and zeroes velocity (+0xFC), displacement (+0x90) and the impulse accumulator (+0x5B8). Nothing else (health, carried victim, checkpoint) is touched.
+  - New field entries: `player.f_vel` / `f_impulse` / `f_pitch` / `f_yaw`. New `addr::SafeWrite` (kernel-copied, like SafeRead).
+  - Practice-only via the item-12 gate.
+  - Stance is not saved: loading while crouched keeps the crouched box.
+- **Test `tp_teleport`:**
+  - save → move 730 u and turn → load: position back to 0.0 u (x/z) and y, yaw −270 restored; still there 1 s later;
+  - `bind f5 "fd_tp_load"` works;
+  - refused in run;
+  - on bank: "saved on training, this is bank -- refused", position unchanged.
+  - Screenshots saved and loaded are identical views.
+
 ## Assumptions / workarounds
 
 - **"Behaves the same" (item 1c) definition**, chosen by the agent at the owner's request. These are LOOP.md's 7 criteria, with two calibrations:
@@ -687,3 +714,4 @@ Structural map (Haiku, line-referenced) of `fdny_collision_overlay.py` (1748 lin
   - Evidence in `core/evidence/item11d/`.
   - Next: item 12 (profiles + watermark).
 - 2026-10-21 it16: **item 12 DONE** (FDNYCore 0.12.0): fd_profile run/practice (gated vars/commands, remembered practice set, persisted, profile_<name>.cfg), in-frame watermark (version, profile, non-default vars, other .asi). Test `profile_run`. Suite 26/26 PASS (Debug); Release EQUIVALENT with the watermark on (fps 57.2 vs 55.6). Practice-only list is the agent's default, owner to confirm. Evidence `core/evidence/item12/`. Next: item 13 (teleporter).
+- 2026-10-21 it17: **item 13 DONE** (FDNYCore 0.13.0): fd_tp_save / fd_tp_load (position + view, frame-end write, velocity/displacement/impulse zeroed; refused on another map and in run). Test tp_teleport. Suite 27/27 PASS (Debug); Release EQUIVALENT (fps 55.6 vs 55.6). Evidence core/evidence/item13/. **Backlog complete; loop stopped.**

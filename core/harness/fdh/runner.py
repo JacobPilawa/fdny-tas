@@ -459,8 +459,8 @@ class Run:
         name, tol = a["name"], float(a.get("tolerance", 0))
         if val is None:
             return self.record("assert_mem", False, f"{name} unresolved (null pointer in chain)")
-        if "equals" in a:
-            exp = a["equals"]
+        if "equals" in a or "equals_sample" in a:
+            exp = self.samples[a["equals_sample"]] if "equals_sample" in a else a["equals"]
             ok = abs(val - exp) <= tol if isinstance(val, (int, float)) and not isinstance(exp, str) else val == exp
             return self.record("assert_mem", ok, f"{name}={val!r} expected {exp!r} +/-{tol}")
         if "not_equals" in a:

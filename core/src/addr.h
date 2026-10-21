@@ -42,6 +42,7 @@ bool ReadStr(Id id, char* out, int cap);
 
 // Guarded memory read: false if any byte isn't committed+readable.
 bool SafeRead(uintptr_t addr, void* out, uint32_t size);
+bool SafeWrite(uintptr_t addr, const void* in, uint32_t size);
 // Guarded write of a table entry's value (data entries only).
 bool WriteU8(Id id, uint8_t v);
 bool WriteI32(Id id, int32_t v);

@@ -1278,6 +1278,42 @@
           "sig": null,
           "ghidra": "spectator flag: nonzero = DepenetrateFromWorld skipped (overlay OFF_SPECTATOR)",
           "note": "u8"
+        },
+        "player.f_vel": {
+          "module": "field",
+          "rva": "0xFC",
+          "chain": [],
+          "type": "f32",
+          "sig": null,
+          "ghidra": "PlayerRescueEnt velocity (Entity::IntegrateVelocity 0x0049DBC0; zeroed by the teleporter)",
+          "note": "x,y,z units/s"
+        },
+        "player.f_impulse": {
+          "module": "field",
+          "rva": "0x5B8",
+          "chain": [],
+          "type": "f32",
+          "sig": null,
+          "ghidra": "PlayerRescueEnt impulse accumulator (Think: v += impulse*dt; ResetLocomotionState 0x0044CD10 zeroes it)",
+          "note": "x,y,z"
+        },
+        "player.f_pitch": {
+          "module": "field",
+          "rva": "0x3430",
+          "chain": [],
+          "type": "f32",
+          "sig": null,
+          "ghidra": "PlayerRescueEnt view pitch, degrees (Think accumulates STEER_PITCH)",
+          "note": "f32"
+        },
+        "player.f_yaw": {
+          "module": "field",
+          "rva": "0x3434",
+          "chain": [],
+          "type": "f32",
+          "sig": null,
+          "ghidra": "PlayerRescueEnt view yaw, degrees (Think STEER_YAW; ResetLocomotionState copies the anchor heading +0x530 here)",
+          "note": "f32"
         }
       },
       "classify": {

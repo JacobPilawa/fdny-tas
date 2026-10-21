@@ -82,6 +82,13 @@ bool OccupiedByOtherMod(const Entry& e) {
 
 } // namespace
 
+// Same as SafeRead, for data the core changes (teleporter): a fault is a failure.
+bool SafeWrite(uintptr_t addr, const void* in, uint32_t size) {
+    if (!addr) return false;
+    SIZE_T n = 0;
+    return WriteProcessMemory(GetCurrentProcess(), reinterpret_cast<void*>(addr), in, size, &n) && n == size;
+}
+
 bool SafeRead(uintptr_t addr, void* out, uint32_t size) {
     // ReadProcessMemory on our own process: the kernel copies and reports a
     // fault as failure. A VirtualQuery check followed by a plain read raced
