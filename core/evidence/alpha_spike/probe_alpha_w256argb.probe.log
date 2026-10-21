@@ -1,0 +1,14 @@
+[22:05:13.388] alphaprobe loaded
+[22:05:13.691] EndFrame entry byte E9 (already hooked: core present)
+[22:05:13.699] hook geEngine_EndFrame: MH_OK
+[22:05:13.706] hook geEngine_RenderWorld: MH_OK
+[22:05:14.841] world 03887B28 (camera 038C7C00)
+[22:05:17.878] world 0390D008 (camera 06F2E840)
+[22:05:34.512] world 06F2E9A8 (camera 0BBD2FD0)
+[22:05:57.136] cmd (console): mode 0 alpha 128 z 0 count 1 format 7
+[22:06:07.604] cmd (console): mode 6 alpha 128 z 0 count 1 format 17
+[22:06:07.615] mode4/6/7: texture 256x256 format 17 (locked format 17, stride 256), attach 1 (world 06F2E9A8), ok 1
+[22:06:07.615] draw: mode 6 first frame: RenderPoly returned -1, view 640x480, 1344 us
+[22:06:07.822] handle: bmp 0BB02930 [+0xAC] = 03A55BA0; fields 00000001 00000100 00000100 00000100 00000801 06A78F40 00000007 00040002
+[22:06:15.928] cost: mode 6 count 1: 992.48 us/frame avg, 4008 us max over 300 frames
+[22:06:17.100] cmd (console): mode 0 alpha 128 z 0 count 1 format 7
