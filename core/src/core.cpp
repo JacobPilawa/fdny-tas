@@ -17,6 +17,7 @@
 #include "patches.h"
 #include "profile.h"
 #include "tp.h"
+#include "textdraw.h"
 #ifdef FDCORE_DEBUG
 namespace fdcore::bench { void Init(); }
 #endif
@@ -114,7 +115,8 @@ DWORD WINAPI InitThread(LPVOID) {
 #ifdef FDCORE_DEBUG
         fdcore::bench::Init();  // fd_bench_text (text-drawing cost)
 #endif
-        fdcore::profile::Init();  // last: gates + watermark see every module's variables
+        fdcore::profile::Init();  // gates + watermark see every module's variables
+        fdcore::textdraw::Init();  // last: draws after every module updated its panels
     }
     fdcore::modules::StartAll();
 #ifdef FDCORE_DEBUG

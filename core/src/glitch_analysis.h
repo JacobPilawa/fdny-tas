@@ -7,6 +7,8 @@
 
 #include <stdint.h>
 
+#include "textdraw.h"
+
 namespace fdcore::glitch::analysis {
 
 // One frame of input, as GameSource._read_live + _records see it.
@@ -35,15 +37,9 @@ const char* VerdictText();
 
 // Overlay.build() as text (11d): the WARP / LAST WARP / HISTORY boxes, one
 // line per row (tags/colours dropped). Returns the line count.
-constexpr int kBoxLines = 40, kBoxLineLen = 160;
-// Per character: the original Text widget's tag (colour), plus a background bit.
-enum BoxTag : uint8_t {
-    T_FRAME, T_TITLE, T_HEADER, T_TEXT, T_DIM, T_ALERT, T_OK, T_WARN, T_WHITE,
-    T_SRC_VICTIM, T_SRC_FIRE, T_SRC_HOSE, T_SRC_HOSEROPE, T_SRC_AXE, T_SRC_PLAYER, T_SRC_ENGINE, T_SRC_OTHER,
-    T_PL_STANDING, T_PL_CROUCHED, T_PL_CLIMBING, T_PL_OUTCOLD, T_PL_SCRIPTED, T_PL_BUGGED, T_PL_GROUND, T_PL_INAIR,
-    T_COUNT
-};
-constexpr uint8_t BG_WARP = 0x40, BG_FLASH = 0x80, TAG_MASK = 0x3F;
+constexpr int kBoxLines = textdraw::kMaxLines, kBoxLineLen = textdraw::kLineLen;
+// Per character: the original Text widget's tag (colour) + background bit (textdraw's palette).
+using namespace fdcore::textdraw;  // T_* tags, BG_WARP / BG_FLASH
 int BuildBox(char (*lines)[kBoxLineLen], uint8_t (*attrs)[kBoxLineLen] = nullptr);
 // F12: Model.clear() + the "history cleared (F12)" note.
 void ClearHistory();

@@ -1,7 +1,7 @@
 name: glitch_box_cost
 # Item 11d: the boxes must not cost frame rate. Drawn in-frame with
-# geEngine_Printf they cut simulated ticks from ~346 to 84 per 6 s; the overlay
-# window (glitch_draw) keeps ~346. Guard: >= 250 ticks in 6 s while shown,
+# geEngine_Printf they cut simulated ticks from ~346 to 84 per 6 s; drawn as one
+# in-frame bitmap (textdraw) they keep ~346. Guard: >= 250 ticks in 6 s while shown,
 # and the same window hidden (F9) for comparison.
 pre_files:
   - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}

@@ -657,6 +657,22 @@ Debug-only benchmarks in `src/bench.cpp` (`fd_bench_text`, `fd_bench_blit`, `fd_
   - It should also replace the Printf path for hud_player (~150 chars ≈ 150 blits ≈ 4 ms/frame) and the watermark (~70 ≈ 2 ms/frame). Those costs are hidden today by the frame-cap headroom on this VM.
 - **New address entries:** `genesis.flush_pipeline`, the bitmap API (create / lock / unlock / bits / info / destroy / add / remove / set_color_key / draw_bitmap), and engine fields `engine.f_font_bitmap` / `f_font_glyphs` / `f_printf_count`.
 
+## Cut-over: all on-screen text in-frame (owner request "cut it over", 2026-10-21)
+
+- **`src/textdraw.{h,cpp}`:** in-frame text panels.
+  - Each panel is GDI-rendered (Consolas 11 px, the original overlay's palette and bold tags) into one 565 Genesis bitmap, only when its text changes and at most every `minFrames` frames.
+  - Every frame: one `geEngine_FlushPipeline`, then one `geEngine_DrawBitmap` per visible panel.
+  - Anchors: top-left / top-right / bottom-left, from the game's client size.
+  - Bitmaps grow in 64×32 steps; AddBitmap waits 2 frames before the first blit.
+  - Registered last, so its frame-end draw runs after every module updated its panel.
+- **Panels:**
+  - **hud_glitch boxes:** top-right, 12 px; re-rendered at most every 3 frames, about the original's 50 ms REFRESH_MS (the text is still built every frame for the log/box parity).
+  - **hud_player:** top-left 8,52.
+  - **Watermark:** bottom-left, above the tool icons; the asi list wraps to a second line beyond 100 cells.
+- **Removed:** the item-11d overlay window (`glitch_draw`, its UI thread) and the remaining geEngine_Printf use. The windowed / fake-fullscreen requirement is gone.
+- **Test `text_panels`:** all three panels on: 346 frames / 6 s in Training and in bank, the frame cap (12 fps before with Printf boxes). F9 hides the boxes. The panels survive a level change.
+- **Still open:** the player HUD calls move state 3 "crouched" while the collision box says "Standing" (movement research: 3 = stand). Side by side on screen now, for the owner to rule on.
+
 ## Assumptions / workarounds
 
 - **"Behaves the same" (item 1c) definition**, chosen by the agent at the owner's request. These are LOOP.md's 7 criteria, with two calibrations:
@@ -749,3 +765,4 @@ Debug-only benchmarks in `src/bench.cpp` (`fd_bench_text`, `fd_bench_blit`, `fd_
   - Next: item 12 (profiles + watermark).
 - 2026-10-21 it16: **item 12 DONE** (FDNYCore 0.12.0): fd_profile run/practice (gated vars/commands, remembered practice set, persisted, profile_<name>.cfg), in-frame watermark (version, profile, non-default vars, other .asi). Test `profile_run`. Suite 26/26 PASS (Debug); Release EQUIVALENT with the watermark on (fps 57.2 vs 55.6). Practice-only list is the agent's default, owner to confirm. Evidence `core/evidence/item12/`. Next: item 13 (teleporter).
 - 2026-10-21 it17: **item 13 DONE** (FDNYCore 0.13.0): fd_tp_save / fd_tp_load (position + view, frame-end write, velocity/displacement/impulse zeroed; refused on another map and in run). Test tp_teleport. Suite 27/27 PASS (Debug); Release EQUIVALENT (fps 55.6 vs 55.6). Evidence core/evidence/item13/. **Backlog complete; loop stopped.**
+- 2026-10-21 it18: in-frame text investigation (eca4653) then **cut-over** (FDNYCore 0.14.0): textdraw panels for the collision boxes, hud_player and watermark (one bitmap blit each after FlushPipeline); overlay window and Printf removed. Test text_panels (346 frames / 6 s with all three on, Training and bank). Suite 28/28 PASS (Debug); Release EQUIVALENT (fps 57.2 vs 55.6). Evidence core/evidence/text_cutover/.

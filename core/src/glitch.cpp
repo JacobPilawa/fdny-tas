@@ -16,7 +16,7 @@
 #include "console.h"
 #include "glitch_analysis.h"
 #include "glitch_bsp.h"
-#include "glitch_draw.h"
+#include "textdraw.h"
 #include "binds.h"
 #include "hooks.h"
 #include "log.h"
@@ -276,7 +276,7 @@ bool PatchAll(bool install) {
 
 bool g_boxDump = false;  // Debug: FDNYCORE_TEST_GLITCHBOX=1 -> FDNYCore.glitchbox
 int g_nShown = 0;        // box lines currently drawn
-bool g_drawOk = false;   // the box window (glitch_draw) is available
+int g_panel = -1;        // the boxes' in-frame text panel (textdraw)
 #ifdef FDCORE_DEBUG
 void DumpSessionStart();
 void DumpMarker(uint32_t kind);
@@ -340,7 +340,7 @@ void Uninstall() {
                   static_cast<unsigned long>(g_pollFrames ? g_pollUsSum / g_pollFrames : 0.0),
                   static_cast<unsigned long>(g_pollUsMax), static_cast<unsigned long>(g_pollFrames));
         analysis::EndSession();
-        if (g_drawOk) draw::Hide();
+        textdraw::Show(g_panel, false);
         g_nShown = 0;
 #ifdef FDCORE_DEBUG
         DumpMarker(0xF4);
@@ -548,10 +548,10 @@ void FrameEnd() {
             g_nShown = nb;
             g_shownTick = snap.tick;
             LeaveCriticalSection(&g_boxLock);
-            if (g_drawOk) draw::Update(g_build, g_buildA, nb, true, GetActiveWindow());
+            textdraw::Set(g_panel, g_build, g_buildA, nb);
         }
     }
-    if (g_drawOk && (g_frozen || g_hidden)) draw::Update(nullptr, nullptr, -1, !g_hidden, GetActiveWindow());
+    textdraw::Show(g_panel, !g_hidden);  // frozen: the panel keeps its last text
     QueryPerformanceCounter(&t1);
     g_drawUsSum += static_cast<double>(t1.QuadPart - t0.QuadPart) * 1e6 / static_cast<double>(fq.QuadPart);
     ++g_drawFrames;
@@ -571,7 +571,10 @@ cmd::Cvar g_fdHudGlitch = {"fd_hud_glitch", "0",
 
 bool Init() {
     InitializeCriticalSection(&g_boxLock);
-    g_drawOk = draw::Init();
+    // Top-right, 12 px margin (the original's corner); re-rendered at most every 3 frames,
+    // about the original's 50 ms refresh (REFRESH_MS). The text itself is built every frame.
+    g_panel = textdraw::Create("glitch", textdraw::TOP_RIGHT, 12, 12, 3, textdraw::T_TEXT);
+    textdraw::Show(g_panel, false);
 #ifdef FDCORE_DEBUG
     char env[8];
     g_boxDump = GetEnvironmentVariableA("FDNYCORE_TEST_GLITCHBOX", env, sizeof(env)) && env[0] == '1';

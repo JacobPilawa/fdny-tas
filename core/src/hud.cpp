@@ -7,17 +7,19 @@
 #include "hooks.h"
 #include "log.h"
 #include "state.h"
+#include "textdraw.h"
 
 namespace fdcore::hud {
 namespace {
 
 using addr::Id;
-// geBoolean geEngine_Printf(geEngine*, int32 x, int32 y, const char* fmt, ...): cdecl.
-using PrintfFn = int(__cdecl*)(void* engine, int x, int y, const char* fmt, ...);
-PrintfFn g_printf = nullptr;
+int g_panel = -1;  // in-frame text panel (textdraw)
 
 volatile long g_on = 0;  // fd_hud_player
-void OnToggle(cmd::Cvar& v) { InterlockedExchange(&g_on, v.value[0] != '0'); }
+void OnToggle(cmd::Cvar& v) {
+    InterlockedExchange(&g_on, v.value[0] != '0');
+    textdraw::Show(g_panel, g_on != 0);
+}
 cmd::Cvar g_fdHudPlayer = {"fd_hud_player", "0",
                            "1 = show player info in-game: position, velocity, XY speed, player state, screen state",
                            false, true, OnToggle, {0}};
@@ -62,7 +64,7 @@ void Draw() {
     if (!g_on) return;
     void* engine = hooks::CurrentEngine();
     const state::State& s = state::Current();
-    if (!engine || !g_printf) return;
+    if (!engine) return;
 
     char lines[kLines][kLineLen];
     int n = 0, o;
@@ -80,8 +82,10 @@ void Draw() {
               s.onGround ? "ground" : "air");
     wsprintfA(lines[n++], "screen %s", ScreenName(s));
 
-    // Below the game's mission timer (top-left), in the engine's own font.
-    for (int i = 0; i < n; ++i) g_printf(engine, 8, 52 + i * 12, "%s", lines[i]);
+    // Below the game's mission timer (top-left), one in-frame text panel.
+    const char* rows[kLines];
+    for (int i = 0; i < n; ++i) rows[i] = lines[i];
+    textdraw::SetLines(g_panel, rows, n);
 
     EnterCriticalSection(&g_lock);
     for (int i = 0; i < n; ++i) lstrcpynA(g_lines[i], lines[i], kLineLen);
@@ -94,11 +98,8 @@ void Draw() {
 } // namespace
 
 bool Init() {
-    if (!addr::Usable(Id::genesis_printf)) {
-        log::Warn("hud: disabled (needs genesis.printf)");
-        return false;
-    }
-    g_printf = reinterpret_cast<PrintfFn>(addr::ExportAddress(Id::genesis_printf));
+    g_panel = textdraw::Create("hud_player", textdraw::TOP_LEFT, 8, 52, 1, textdraw::T_TEXT);
+    textdraw::Show(g_panel, false);
     InitializeCriticalSection(&g_lock);
     cmd::RegisterCvar(&g_fdHudPlayer);
     hooks::OnFrameEnd(Draw);

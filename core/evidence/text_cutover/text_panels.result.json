@@ -1,0 +1,78 @@
+{
+  "test": "text_panels",
+  "core": "Debug",
+  "pass": true,
+  "crash": null,
+  "assertions": [
+    {
+      "step": "focus",
+      "pass": true,
+      "detail": "game window foreground at launch"
+    },
+    {
+      "step": "core_ready",
+      "pass": true,
+      "detail": "ready line seen"
+    },
+    {
+      "step": "address_table_version",
+      "pass": true,
+      "detail": "retail-1.1"
+    },
+    {
+      "step": "assert_log",
+      "pass": true,
+      "detail": "contains 'textdraw: ready'"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "stats.end = 2609 (+346 since all_on), want >= 300"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "glitch_box.hidden = 1, want == 1"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "stats.end = 5410 (+345 since bank), want >= 300"
+    },
+    {
+      "step": "no_crash",
+      "pass": true,
+      "detail": "no crash, hang or dialog"
+    },
+    {
+      "step": "log_errors",
+      "pass": true,
+      "detail": "0 ERROR line(s), limit 0"
+    }
+  ],
+  "samples": {
+    "module.exe": "0x400000",
+    "module.genesis": "0x10000000",
+    "all_on": {
+      "begin": "2263",
+      "end": "2263",
+      "events": "2263",
+      "levels": "1",
+      "toggles": "3",
+      "frame": "on"
+    },
+    "screenshot.01_all_panels_training.luma": 59.2,
+    "screenshot.02_moving.luma": 57.2,
+    "screenshot.03_boxes_hidden.luma": 89.1,
+    "bank": {
+      "begin": "5065",
+      "end": "5065",
+      "events": "5065",
+      "levels": "2",
+      "toggles": "3",
+      "frame": "on"
+    },
+    "screenshot.04_all_panels_bank.luma": 43.4
+  },
+  "video": "C:\\fdny-decomp\\core\\runs\\2026-10-21-164103-text_panels-core14\\run.mp4"
+}

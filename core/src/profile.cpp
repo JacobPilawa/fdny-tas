@@ -8,6 +8,7 @@
 #include "console.h"
 #include "hooks.h"
 #include "log.h"
+#include "textdraw.h"
 
 namespace fdcore::profile {
 namespace {
@@ -128,8 +129,7 @@ int WriteConfig(char* out, int cap) {
 }
 
 // --- watermark ---------------------------------------------------------------------
-using PrintfFn = int(__cdecl*)(void* engine, int x, int y, const char* fmt, ...);
-PrintfFn g_printf = nullptr;
+int g_panel = -1;          // in-frame text panel (textdraw)
 char g_mods[256];          // other .asi modules, found once
 char g_text[512];          // the drawn line
 CRITICAL_SECTION g_lock;  // the pipe thread reads g_text
@@ -165,13 +165,25 @@ void Build(char* out, int cap) {
 }
 
 void Draw() {
-    if (!g_run && g_fdWatermark.value[0] == '0') return;
-    void* engine = hooks::CurrentEngine();
-    if (!engine || !g_printf) return;
+    const bool on = g_run || g_fdWatermark.value[0] != '0';
+    textdraw::Show(g_panel, on);
+    if (!on) return;
     static char text[512];
     Build(text, sizeof(text));
-    // Bottom-left, above the game's tool icons, in the engine's own font.
-    g_printf(engine, 8, 400, "%s", text);
+    // Bottom-left, above the game's tool icons; re-rendered only when it changes.
+    // Too wide for the view (100 cells = 600 px at 640): the asi list goes on a
+    // second line so nothing is cut off.
+    static char first[512];
+    const char* rows[2] = {text, nullptr};
+    int n = 1;
+    const char* asi = nullptr;
+    for (const char* s = text; *s; ++s)
+        if (s[0] == ' ' && s[1] == '|' && s[2] == ' ' && s[3] == 'a' && s[4] == 's' && s[5] == 'i') asi = s;
+    if (lstrlenA(text) > 100 && asi) {
+        lstrcpynA(first, text, static_cast<int>(asi - text) + 1);
+        rows[0] = first, rows[1] = asi + 3, n = 2;  // "asi: ..."
+    }
+    textdraw::SetLines(g_panel, rows, n);
     EnterCriticalSection(&g_lock);
     lstrcpynA(g_text, text, sizeof(g_text));
     LeaveCriticalSection(&g_lock);
@@ -188,12 +200,8 @@ bool Init() {
     cmd::RegisterConfigWriter(WriteConfig);
     cmd::SetGates(CvarGate, CommandGate);
     FindMods();
-    if (addr::Usable(Id::genesis_printf)) {
-        g_printf = reinterpret_cast<PrintfFn>(addr::ExportAddress(Id::genesis_printf));
-        hooks::OnFrameEnd(Draw);
-    } else {
-        log::Warn("profile: watermark unavailable (needs genesis.printf)");
-    }
+    g_panel = textdraw::Create("watermark", textdraw::BOTTOM_LEFT, 8, 60, 1, textdraw::T_WHITE);
+    hooks::OnFrameEnd(Draw);
     log::Info("profile: ready (fd_profile, fd_watermark); other asi: %s", g_mods[0] ? g_mods : "none");
     return true;
 }
