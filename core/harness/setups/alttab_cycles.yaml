@@ -1,0 +1,17 @@
+# Five alt-tab cycles, identical for the FDNYCore test and the alttabfix.asi
+# reference. Away: the cursor must move freely (a user moving the mouse to
+# (900,700) keeps it there). Back: the cursor is held at the game window
+# centre, the game renders, and keeps the cursor there.
+steps:
+  - repeat:
+      times: 5
+      steps:
+        - alt_tab: {wait_s: 1.5}
+        - assert_foreground: false
+        - set_cursor: [900, 700]
+        - wait_s: 1.0
+        - assert_cursor: {at: [900, 700], tolerance: 1}
+        - alt_tab: {wait_s: 1.5}
+        - assert_foreground: true
+        - assert_cursor: {window_centre: true, tolerance: 1}
+        - assert_screen_nonblack: back_in_game

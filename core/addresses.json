@@ -664,6 +664,20 @@
           },
           "ghidra": "root g_everGame 0x00503A78 (Ghidra); [EG+0x288]+0x8 = camera controller found by live pointer scan (harness/pointer_scan.py, 2026-10-21; same object also reachable as g_mainWindow+0x3A0->+0x8). Controller+0x5C = geCamera* (geCamera_Create result stored at 0x00491BE0, Ghidra); Genesis stores Fov at geCamera+0 (geCamera_SetAttributes 0x1000138D)",
           "note": "in-level player camera FOV as stored by Genesis = 2*tan(hfov/2). (A static GameSession+0x64 list walk was a dead end: that list is the entity list.)"
+        },
+        "patch.cursor_warp": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x39347",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x39347",
+            "bytes": "68 C8 00 00 00 68 C8 00 00 00 FF 15 A4 C3 4D 00",
+            "ref": "first 16 bytes of the function at 0x00439347"
+          },
+          "ghidra": "GameControls::PollFrame 0x00439330: 0x00439347 push 0xC8; push 0xC8; call [0x004DC3A4 SetCursorPos] (every frame, even unfocused); returns to 0x00439357 pop esi. alttabfix.asi patches exactly these 16 bytes (11 NOP + jmp)",
+          "note": "16 bytes replaced at DllMain by FDNYCore window module (11 NOP + call to its cursor routine)"
         }
       }
     }

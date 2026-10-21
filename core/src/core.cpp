@@ -14,6 +14,7 @@
 #include "modules.h"
 #include "patches.h"
 #include "testpipe.h"
+#include "window.h"
 
 #ifndef FDCORE_VERSION
 #error FDCORE_VERSION must come from core/VERSION (build.ps1)
@@ -94,6 +95,7 @@ DWORD WINAPI InitThread(LPVOID) {
     if (fdcore::addr::VersionKnown() && fdcore::hooks::Init()) {
         fdcore::console::Init(g_dir, FDCORE_VERSION);
         fdcore::fov::Init();
+        fdcore::window::Init();
     }
     fdcore::modules::StartAll();
 #ifdef FDCORE_DEBUG
@@ -126,6 +128,7 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID) {
         // DllMain runs before WinMain (verified 2026-10-21: g_mainWindow and
         // g_console are still null here), so startup patches go in now.
         fdcore::patches::ApplyEarly();
+        fdcore::window::ApplyEarlyPatch();
 
         HANDLE t = CreateThread(nullptr, 0, InitThread, nullptr, 0, nullptr);
         if (t) CloseHandle(t);

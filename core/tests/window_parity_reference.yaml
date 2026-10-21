@@ -1,0 +1,21 @@
+name: window_parity_reference
+# Item 7 parity baseline: the ORIGINAL alttabfix.asi runs the identical
+# alt-tab script. FDNYCore sees the site already patched and stays out of
+# the way (window module inactive), so this measures alttabfix alone.
+pre_files:
+  - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
+  - {src: null, dst: FDNYCore.cfg}
+setup: load_training
+record: true
+steps:
+  - assert_log: {contains: "window: cursor-warp site doesn't match"}
+  - wait_s: 0.5
+  - assert_cursor: {window_centre: true, tolerance: 1}
+  - run_setup: alttab_cycles
+  - sample_mem: {name: player.pos_x, as: x0}
+  - sample_mem: {name: player.pos_z, as: z0}
+  - key: {key: w, hold: 1.5}
+  - assert_moved: {x: x0, z: z0, min: 20}
+expect:
+  no_crash: true
+  log_errors: 0

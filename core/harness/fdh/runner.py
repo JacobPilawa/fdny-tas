@@ -12,6 +12,8 @@ Steps (one key per list item):
   assert_log: {contains: "text"}    FDNYCore.log must contain text
   console: "fd_fov 90"              open the game console, type, Enter, close (item 4+)
 """
+import ctypes
+import ctypes.wintypes as wt
 import datetime
 import json
 import os
@@ -179,6 +181,27 @@ class Run:
                 self.resolver = addrtable.Resolver(self.g.pm, self.resolver_version, bases)
                 if arg.get("wait_s"):
                     time.sleep(float(arg["wait_s"]))
+        elif kind == "alt_tab":
+            inputs.alt_tab()
+            time.sleep(float(arg.get("wait_s", 1.5)) if isinstance(arg, dict) else 1.5)
+        elif kind == "assert_foreground":
+            is_game = inputs.foreground() == self.g.hwnd
+            self.record("assert_foreground", is_game == bool(arg),
+                        f"game {'is' if is_game else 'is not'} the foreground window (expected {'game' if arg else 'other'})")
+        elif kind == "set_cursor":
+            inputs.set_cursor(*arg)
+        elif kind == "assert_cursor":
+            x, y = inputs.cursor_pos()
+            if arg.get("window_centre"):
+                r = wt.RECT()
+                ctypes.windll.user32.GetWindowRect(self.g.hwnd, ctypes.byref(r))
+                ex, ey = (r.left + r.right) >> 1, (r.top + r.bottom) >> 1
+            else:
+                ex, ey = arg["at"]
+            tol = int(arg.get("tolerance", 1))
+            self.record("assert_cursor", abs(x - ex) <= tol and abs(y - ey) <= tol,
+                        f"cursor ({x},{y}) expected ({ex},{ey}) +/-{tol}"
+                        + (" [game window centre]" if arg.get("window_centre") else ""))
         elif kind == "run_setup":
             with open(os.path.join(SETUPS_DIR, f"{arg}.yaml"), encoding="utf-8") as fh:
                 for sub in yaml.safe_load(fh)["steps"]:

@@ -20,8 +20,9 @@ cause of RESEARCH.md growing to 465 MB.
 | 4 | Console (on the game's console) | **DONE 2026-10-21**: live-tested in player config, suite green, committed |
 | 5 | Variables, config, binds | **DONE 2026-10-21**: live-tested, suite green (11/11), committed |
 | 6 | fov module | **DONE 2026-10-21**: parity with the original fix measured, suite green (13/13), committed |
-| 7 | window module | next |
-| 8-12 | — | not started |
+| 7 | window module | **DONE 2026-10-21**: alttabfix parity (same 5-cycle script), suite green (15/15), committed |
+| 8 | speedrun module | next |
+| 9-12 | — | not started |
 | 13 | Teleporter (save location / teleport, map-gated), owner request 2026-10-21 | not started (needs 5, 9) |
 
 **Mid-item:** no.
@@ -324,6 +325,30 @@ Live 2026-10-21: in Training, gameState = 1 and mapName = `training`. All 12 cha
   - Red run against the item-5 core: no fov module, so the assertions fail.
 - **Both fixes active at once:** the old fix's mid-hook runs inside the original, so its value wins and the owner's current behaviour is unchanged. The old .asi stays installed until the owner retires it; the profiles item (12) should decide what ships.
 
+## Item 7: window module (alttabfix parity)
+
+- **alttabfix.asi, reverse-engineered** (Haiku, capstone; MSVC, no source).
+  - In DllMain it replaces the 16 bytes at `0x00439347` with 11 NOPs + `jmp` to its routine. Those bytes are `push 200; push 200; call [SetCursorPos]` in `GameControls::PollFrame`, which runs every frame, **even when the game isn't focused**: that's the "mouse trapped after alt-tab" bug.
+  - Its routine (pushad): if the foreground window is the game window and `GetAsyncKeyState('O') == 0`, `SetCursorPos` to the centre of the window's **outer rect**.
+  - A thread finds the window once, via `FindWindowA(NULL, "FDNY Firefighter")`, polling every 100 ms.
+  - Nothing else: the clock pause and rendering are untouched.
+- **window module (`src/window.cpp`).**
+  - **Patch:** at DllMain, the same 16 bytes become 11 NOPs + a 5-byte `call CursorWarp` (stdcall, no args, so the stack is balanced like the original call; the caller ignores EAX/ECX/EDX after SetCursorPos). It's guarded by the signature of the original bytes (`patch.cursor_warp`).
+  - **Behaviour:** CursorWarp mirrors alttabfix exactly, 'O' key included. It finds the window by title too, but also requires it to belong to our process.
+  - **`fd_window_cursor`** (archived, default 1): 0 = the game's own (200,200) warp.
+  - **Coexistence:** if alttabfix (loaded earlier, alphabetically) has already patched the site, the signature doesn't match. The module logs it and stays out, so the two never fight; the owner's current setup behaves as before.
+- **Corrected research:** `[g_mainWindow 0x00503A70]+0x74` is **not** the HWND (live it read `03570048`, a heap pointer, while the real HWND was `001E00D6`). The entry was removed. `+0x70` = console is still verified every run by the console self-check.
+- **First live run failed.** The cursor was never recentred because of the bad HWND, so the menu `gclick` relative moves walked the OS cursor to the bottom-right corner, and the click there hit "show desktop", minimizing the game. With alttabfix (and now FDNYCore) the cursor is held at the window centre, so this can't happen.
+- **Harness:** `alt_tab` (a real Alt+Tab via SendInput), `assert_foreground`, `set_cursor`, `assert_cursor` (point, or `window_centre` from GetWindowRect); the shared script is `setups/alttab_cycles.yaml`.
+- **Tests (live):**
+  - Red run, game default: the cursor stays trapped at **(200,200)** while away and while back, which demonstrates the bug.
+  - `window_parity_reference` (original alttabfix, same script): **PASS**, all 5 cycles.
+  - `window_alttab` (alttabfix removed, FDNYCore): **PASS**, all 5 cycles. Away, the cursor stays where the user puts it (900,700); back, it's held at the window centre (330,261); the screen is non-black; afterwards W still moves the player.
+
+- **Suite finding → address-table rule.** In the default game folder (alttabfix installed), `patch.cursor_warp` held alttabfix's detour, so `addr_verified`/`console_basic` failed on "signatures: all OK" (41/42).
+  - New rule: a `patch.*` code site whose live bytes start with another mod's detour shape (NOP run, or JMP/CALL rel32) is logged "occupied by another mod". It stays unusable and is excluded from the mismatch count (`all OK (41/41, 1 patch site(s) occupied by other mods)`).
+  - Every other byte difference is still a real mismatch. The `addr_bad_signature` test covers a non-patch entry.
+
 ## Assumptions / workarounds
 
 - **"Behaves the same" (item 1c) definition**, chosen by the agent at the owner's request. These are LOOP.md's 7 criteria, with two calibrations:
@@ -372,3 +397,10 @@ Live 2026-10-21: in Training, gameState = 1 and mapName = `training`. All 12 cha
   - `camera.fov` chain found by pointer scan.
   - Red then green; suite 13/13 PASS; Release EQUIVALENT.
   - Evidence in `core/evidence/item06/`.
+- 2026-10-21 it8: **item 7 DONE**. FDNYCore 0.7.0 adds the window module, which replaces alttabfix:
+  - The same 16-byte site becomes NOPs + a call to the core's cursor routine (alttabfix logic, 'O' key included).
+  - `fd_window_cursor`; it stands aside if alttabfix already patched the site.
+  - New address-table rule: patch sites occupied by other mods are reported, not counted as mismatches.
+  - Wrong HWND entry removed.
+  - Red (cursor trapped at 200,200) → reference (alttabfix) PASS → FDNYCore PASS; suite 15/15; Release EQUIVALENT.
+  - Evidence in `core/evidence/item07/`.
