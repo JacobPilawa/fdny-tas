@@ -3,6 +3,11 @@ name: baseline_route
 # once with the core removed (--core none) and once with it (--core Release),
 # then compared by harness/compare_runs.py. On its own it asserts only that
 # the run completes in-level without a crash.
+pre_files:
+  # Same conditions as the item-1 baselines (base_a/base_b): ImADeveloper on,
+  # which also skips the intro movies (they can stall on the VM) -- applies to
+  # no-core runs, which no FDNYCore setting can affect.
+  - {src: tests/data/game_cfg_dev.cfg, dst: FDNYFireFighter.cfg}
 setup: load_training
 record: true
 steps:

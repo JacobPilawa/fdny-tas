@@ -82,9 +82,16 @@ class Game:
         self.hwnd = 0
         self.pm = None
 
-    def launch(self):
+    def launch(self, env_overrides=None):
         self.hwnd = 0  # a stale handle from a previous launch would read as "hung"
-        self.proc = subprocess.Popen([self.exe], cwd=self.dir)
+        env = dict(os.environ)
+        # The intro movies intermittently stall on the VM (DirectShow + virtual
+        # audio) and the game never reaches its menus; Debug cores skip them
+        # when this is set (FDNYCore fd_skip_intro, test-only switch).
+        env["FDNYCORE_TEST_SKIP_INTRO"] = "1"
+        env.update(env_overrides or {})
+        self.env_overrides = env_overrides
+        self.proc = subprocess.Popen([self.exe], cwd=self.dir, env=env)
         self.started = time.time()
         return self.proc.pid
 

@@ -146,6 +146,29 @@ def foreground():
     return user32.GetForegroundWindow()
 
 
-def focus(hwnd):
-    user32.SetForegroundWindow(hwnd)
-    return user32.GetForegroundWindow() == hwnd
+def focus(hwnd, attempts=6):
+    """Bring the game to the foreground. Windows' foreground lock can refuse
+    SetForegroundWindow from a background process. Workaround: temporarily
+    attach our input queue to the foreground window's thread (no synthetic
+    keys -- a lone Alt press would put the game window into menu mode and
+    swallow the next clicks, which broke menu setup on 2026-10-21)."""
+    SW_RESTORE = 9
+    kernel32 = ctypes.windll.kernel32
+    for _ in range(attempts):
+        if user32.IsIconic(hwnd):
+            user32.ShowWindow(hwnd, SW_RESTORE)
+        user32.SetForegroundWindow(hwnd)
+        time.sleep(0.2)
+        if user32.GetForegroundWindow() == hwnd:
+            return True
+        fg = user32.GetForegroundWindow()
+        fg_thread = user32.GetWindowThreadProcessId(fg, None) if fg else 0
+        me = kernel32.GetCurrentThreadId()
+        if fg_thread and fg_thread != me and user32.AttachThreadInput(me, fg_thread, True):
+            user32.BringWindowToTop(hwnd)
+            user32.SetForegroundWindow(hwnd)
+            user32.AttachThreadInput(me, fg_thread, False)
+        time.sleep(0.3)
+        if user32.GetForegroundWindow() == hwnd:
+            return True
+    return False

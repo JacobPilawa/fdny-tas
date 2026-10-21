@@ -22,8 +22,9 @@ cause of RESEARCH.md growing to 465 MB.
 | 6 | fov module | **DONE 2026-10-21**: parity with the original fix measured, suite green (13/13), committed |
 | 7 | window module | **DONE 2026-10-21**: alttabfix parity (same 5-cycle script), suite green (15/15), committed |
 | 8 | speedrun module | **DONE 2026-10-21**: FDNYDeterministic proven live, then exact parity; suite green (18/18), committed. On-screen bot check substituted by memory evidence (see item 8) |
-| 9 | Game state snapshot | next |
-| 10-12 | — | not started |
+| 9 | Game state snapshot | **DONE 2026-10-21**: snapshot == direct reads (0 mismatches), suite green (20/20), committed. Also fixed a SafeRead race crash, added fd_skip_intro |
+| 10 | hud_player | next |
+| 11-12 | — | not started |
 | 13 | Teleporter (save location / teleport, map-gated), owner request 2026-10-21 | not started (needs 5, 9) |
 
 **Mid-item:** no.
@@ -382,6 +383,47 @@ Live 2026-10-21: in Training, gameState = 1 and mapName = `training`. All 12 cha
 - **Deviation from the done-when "absent on screen":** the research found **no bot body or actor**. RescueBot is invisible logic whose only on-screen trace is the "RESCUEBOT: Rescuing …" HUD subtitle (string 0x004E1CC8, posted only by `BeginRescue`). With `TryStartRescue` returning immediately, `BeginRescue` can't run, so the subtitle can't appear.
   - Proving it on screen would mean waiting minutes on the easiest difficulty for a random claim in a stock run; it's not scripted. Memory evidence (enabled 0, claimed 0, byte 0 = C3) stands in. Flagged for the owner.
 
+## Item 9: game state snapshot
+
+- **Fields researched** (Haiku Ghidra pass) **and verified live** with `harness/probe_state.py`:
+  - **Velocity** `PRE+0xFC/+0x100/+0x104`, units/s (written by `Entity::IntegrateVelocity` 0x0049DBC0). Live: 367 u/s with W held, 0 idle. Displacement +0x90 = v·dt (6.6 ≈ 367×0.018).
+  - **View** pitch `+0x3430`, yaw `+0x3434` (degrees).
+  - **Mission timer** `+0x343C`, float seconds, decremented by Think. Live it counts down in real time. Training's limit is about 12.5 h (44979 s), and the HUD shows mm:ss within the hour ("29:39").
+  - **Menu screen**: the current screen `[GameSession+0x3C8]+0x10`, indexed in the screen array at MM+0x158/+0x15C. In a level it stays on the last menu screen (2 = Title).
+  - **Fires:** FireRescueEnt, identified by vptr 0x004E1780. They are entity **kind 6** (84 in bank), with mode +0x70 (0 idle, 4 burning, 5 out) and intensity +0x128. WindowFire is kind 7 (hose maps).
+  - **Open:** fire position. FireRescueEnt's +0x4C reads 0 for all of them, so the root position lives elsewhere.
+  - Training reports 7 kind-6 entities; whether all of them are fires is unverified. A vptr filter would be stricter but needs a data-pointer table entry; left for when the glitch HUD needs fires.
+- **research.db corrections to apply in the decomp loop:**
+  - 0x00456090 "MissionSummary::SetTimeRemaining (+0x3538)" is wrong: it's `RescueHud::DamagePanels_Update`, and PRE+0x3538 is the fire-burn accumulator.
+  - The "+0x3424 blocking-surface SArray" note conflicts with the live-verified RescueBot enabled byte.
+- **`src/state.cpp`:** `state::State`, a POD refreshed at every frame end on the game thread, read through address-table entries only.
+  - Contents: frame, game state, map, menu screen; player pos/vel/XY speed/pitch/yaw/move state/ground; time left; victims total/rescued plus up to 24 listed (pos, state); fires total/burning/out; bot enabled/claimed.
+  - One entity-list walk per frame. Modules read it with `state::Current()`.
+  - The Debug pipe gains `snapshot` (key=value line; 4 KB response buffer). It runs under a critical section because the pipe thread formats while the game thread refreshes.
+- **Test `state_snapshot`** (harness `assert_snapshot_matches`: snapshot via pipe, then the harness's own direct reads straight after):
+  - Training idle, Training after movement, and bank twice: **24 / 24 / 28 / 28 fields, 0 mismatches**.
+  - Real values in bank: 6 victims (one roaming, state 7), 83 fires, bot enabled 1.
+  - Tolerances: exact for static fields; the timer ±0.5 s (it counts down between the two reads); motion fields ±1 u (the player is idle).
+- **Suite finding: a crash in our own `SafeRead`** (`FDNYCore.asi+0x3822`, AV reading 0x0700010B, at the menu). Located with the crashlog + capstone, no debugger needed.
+  - The VirtualQuery check said readable, but the page changed before the byte-copy loop ran. That's a race with another thread, most likely the D3D wrapper.
+  - The snapshot triggered it by walking the entity list **at the menus**, where the list head is stale and every frame chased up to 20,000 junk pointers. That also slowed the menus.
+  - Fixes:
+    1. `SafeRead`/`WriteU8`/`WriteI32` use `ReadProcessMemory`/`WriteProcessMemory` on our own process. The kernel copies and reports a fault as failure, atomically.
+    2. The snapshot walks entities only in a level (game state 1), capped at 4096 nodes.
+- **Harness hardening (a flake surfaced by the same suite run):** Windows' foreground lock sometimes refused `SetForegroundWindow` at launch. Clicks then went to another window, and a click in the screen corner minimized the game.
+  - `inputs.focus` now restores the window, sends a synthetic Alt press (lifts the foreground lock), and retries 6×.
+  - If focus still fails, the run aborts as "harness: could not focus" and `run_test.py` retries the test once. This is an environment flake, so it isn't reported as a test result.
+  - **Correction:** the synthetic Alt press itself broke menu setup. A lone Alt activates the window's system menu ("menu mode"), which swallows the next clicks. Replaced with the `AttachThreadInput` technique, which sends no keystrokes.
+- **More menu-setup flakes, diagnosed from the run videos** (ffmpeg contact sheets):
+  1. **Start menu.** `gclick`'s relative moves can leave the **OS** cursor outside the game window (e.g. if something warps it mid-move), and the click then lands on the taskbar. `gclick` now parks the OS cursor at the window centre with an absolute `SetCursorPos` before clicking. That produces no DirectInput delta, so the game's menu cursor is unaffected.
+  2. **Intro-movie stall.** With `ImADeveloper` off (player config, since item 4), WinMain plays `Data\Movies\ActiValue.avi` + `Mekada.avi`. On the VM playback sometimes freezes on the "GENESIS" frame forever (DirectShow + the virtual audio device), so the game never reaches its menus.
+- **New feature `fd_skip_intro`** (archived, default 0, takes effect next launch):
+  - At DllMain it replaces WinMain's `jne` at 0x0042CC63 (`patch.intro_movies`) with `nop; jmp` to the same target. That's the branch developer mode takes, skipping exactly the movie block.
+  - It must act before WinMain, long before the console runs FDNYCore.cfg, so it peeks `fd_skip_intro` in FDNYCore.cfg and then autoexec.cfg directly.
+  - Debug builds also honour `FDNYCORE_TEST_SKIP_INTRO=1`. The harness sets it on every launch, and a test can override it via a new `env:` key.
+  - Test `skip_intro` (env switch **off**, player cfg line `fd_skip_intro "1"`): movies skipped, menus and Training reached, value shown in cvarlist. Its first run caught a case-fold bug: `'_' | 0x20` = 0x7F, so the key never matched.
+  - Useful for speedrunners anyway: no unskippable intro.
+
 ## Assumptions / workarounds
 
 - **"Behaves the same" (item 1c) definition**, chosen by the agent at the owner's request. These are LOOP.md's 7 criteria, with two calibrations:
@@ -443,3 +485,9 @@ Live 2026-10-21: in Training, gameState = 1 and mapName = `training`. All 12 cha
   - Suite-found coexistence bug fixed: the core defers if FDNYDeterministic is installed.
   - Suite 18/18 PASS; Release EQUIVALENT.
   - Evidence in `core/evidence/item08/`.
+- 2026-10-21 it10: **item 9 DONE**. FDNYCore 0.9.0 adds the state snapshot (`state::Current()`, Debug pipe `snapshot`). It matches direct memory reads with 0 mismatches in Training and bank.
+  - The suite found a race crash in SafeRead → kernel-copied reads/writes; the entity walk now runs in-level only.
+  - Harness hardened, diagnosed from videos: focus without keystrokes; `gclick` parks the OS cursor in the window; intro movies skipped via the new player feature `fd_skip_intro`.
+  - Equivalence: Genesis.dll may legitimately relocate (seen at 0x02390000). `baseline_route` stages the dev cfg like the item-1 baselines.
+  - Suite 20/20 PASS; Release EQUIVALENT.
+  - Evidence in `core/evidence/item09/`.

@@ -14,6 +14,7 @@
 #include "modules.h"
 #include "patches.h"
 #include "speedrun.h"
+#include "state.h"
 #include "testpipe.h"
 #include "window.h"
 
@@ -98,6 +99,8 @@ DWORD WINAPI InitThread(LPVOID) {
         fdcore::fov::Init();
         fdcore::window::Init();
         fdcore::speedrun::Init();
+        fdcore::state::Init();
+        fdcore::patches::Init();
     }
     fdcore::modules::StartAll();
 #ifdef FDCORE_DEBUG
@@ -130,6 +133,7 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID) {
         // DllMain runs before WinMain (verified 2026-10-21: g_mainWindow and
         // g_console are still null here), so startup patches go in now.
         fdcore::patches::ApplyEarly();
+        fdcore::patches::ApplyIntroSkip(g_dir);
         fdcore::window::ApplyEarlyPatch();
         fdcore::speedrun::ApplyEarlyPatch(g_dir);
 

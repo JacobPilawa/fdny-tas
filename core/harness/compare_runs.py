@@ -58,8 +58,12 @@ def main():
           states(a) == states(b) == states(c) and None not in states(a)[:2] and states(a)[2],
           f"base={states(a)} core={states(c)}")
     # 3
-    mods = [(r["samples"].get("module.exe"), r["samples"].get("module.genesis")) for r in (a, b, c)]
-    check("3 module_bases", len(set(mods)) == 1, f"{mods}")
+    # The exe never relocates. Genesis.dll is loaded dynamically and does
+    # relocate when something already holds 0x10000000 (seen 2026-10-21:
+    # 0x02390000) -- legitimate, so it's reported, not required equal.
+    exes = {r["samples"].get("module.exe") for r in (a, b, c)}
+    gens = [r["samples"].get("module.genesis") for r in (a, b, c)]
+    check("3 module_bases", len(exes) == 1 and None not in exes, f"exe {exes}; Genesis.dll {gens}")
     # 4
     keys = sorted(k for k in a["samples"] if k.startswith("addr."))
     unresolved = [k for k in keys for r in (a, b, c) if r["samples"].get(k) is None]

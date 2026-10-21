@@ -1,0 +1,21 @@
+[2026-10-21 07:40:34.316] [INFO] FDNYCore loaded from C:\fdny-decomp\FDNY SP 1.1\FDNYCore.asi
+[2026-10-21 07:40:34.386] [INFO] patches: console creation ungated at 00499370
+[2026-10-21 07:40:34.431] [WARN] window: cursor-warp site doesn't match (already patched by another mod, e.g. alttabfix.asi?); window module inactive
+[2026-10-21 07:40:34.470] [INFO] speedrun: victim-spawn hook at 0045d717 -> trampoline 020b0000
+[2026-10-21 07:40:34.513] [INFO] FDNYCore 0.9.0 (Debug) exe=C:\fdny-decomp\FDNY SP 1.1\FDNYFirefighter.exe sha256=4b3b4dc1cc0b05bcb42c8e27ac6f6ca72fe5f7064ca8122fda7d41e7f6d2fc3e base=00400000
+[2026-10-21 07:40:34.544] [INFO] Genesis.dll sha256=5014bb879706bfb5ae6cf9ce1de63dc3deebdcc5b8e1b41f247b284a336c4643 base=10000000
+[2026-10-21 07:40:34.581] [INFO] address table: version retail-1.1 selected
+[2026-10-21 07:40:34.631] [INFO] patch site patch.cursor_warp occupied by another mod; left alone
+[2026-10-21 07:40:34.698] [INFO] signatures: all OK (67/67, 1 patch site(s) occupied by other mods)
+[2026-10-21 07:40:34.739] [INFO] hooks: created genesis.begin_frame at 10025b70 (group frame)
+[2026-10-21 07:40:34.797] [INFO] hooks: created genesis.end_frame at 100260e0 (group frame)
+[2026-10-21 07:40:34.850] [INFO] hooks: created con.exec_line at 00470f10 (group console)
+[2026-10-21 07:40:34.904] [INFO] console: ready (game console; FDNYCore commands intercepted at ScriptEngine::ExecLine)
+[2026-10-21 07:40:34.928] [INFO] hooks: created genesis.camera_set_attributes at 10001350 (group fov)
+[2026-10-21 07:40:34.971] [INFO] fov: ready (geCamera_SetAttributes hooked)
+[2026-10-21 07:40:35.002] [INFO] speedrun: ready (static spawns available, rescuebot available)
+[2026-10-21 07:40:35.038] [INFO] state: snapshot ready (refreshed at frame end)
+[2026-10-21 07:40:35.085] [INFO] module levelwatch: enabled
+[2026-10-21 07:40:35.122] [INFO] testpipe: listening on \\.\pipe\FDNYCore (Debug build)
+[2026-10-21 07:40:35.177] [INFO] FDNYCore ready
+[2026-10-21 07:40:35.810] [INFO] levelwatch: map '' state -1

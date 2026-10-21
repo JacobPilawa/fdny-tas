@@ -11,11 +11,16 @@ def call(cmd, retries=20):
         try:
             with open(PIPE, "r+b", buffering=0) as p:
                 p.write(cmd.encode("ascii"))
-                return p.read(512).decode("ascii", "replace")
+                return p.read(8192).decode("ascii", "replace")
         except OSError as e:  # server busy between clients
             last = e
             time.sleep(0.05)
     raise OSError(f"test pipe unavailable: {last}")
+
+
+def snapshot():
+    """The core's state snapshot as a dict of strings."""
+    return dict(kv.split("=", 1) for kv in call("snapshot").split() if "=" in kv)
 
 
 def stats():

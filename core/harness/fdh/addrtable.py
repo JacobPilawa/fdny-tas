@@ -86,6 +86,39 @@ class Resolver:
             pass
         return out
 
+    def fires(self):
+        """(total, burning, out) over entities of kind 6 (FireRescueEnt)."""
+        rd = lambda a: struct.unpack("<I", self.pm.read_bytes(a, 4))[0]
+        ri = lambda a: struct.unpack("<i", self.pm.read_bytes(a, 4))[0]
+        total = burning = out = 0
+        try:
+            node = rd(self.address("entities.head"))
+            for _ in range(20000):
+                if not node:
+                    break
+                ent = rd(node + self.field("node.elem"))
+                if ent and ri(ent + self.field("entity.kind")) == 6:
+                    mode = ri(ent + self.field("fire.mode"))
+                    total += 1
+                    burning += mode == 4
+                    out += mode == 5
+                node = rd(node + self.field("node.next"))
+        except pymem.exception.MemoryReadError:
+            pass
+        return total, burning, out
+
+    def menu_screen(self):
+        try:
+            cur = self.read("menu.screen_current")
+            lst = self.read("menu.screen_list")
+            n = self.read("menu.screen_count")
+            for i in range(n or 0):
+                if struct.unpack("<I", self.pm.read_bytes(lst + 4 * i, 4))[0] == cur:
+                    return i
+        except (pymem.exception.MemoryReadError, TypeError):
+            pass
+        return -1
+
     def read(self, name):
         e = self.entries[name]
         addr = self.address(name)

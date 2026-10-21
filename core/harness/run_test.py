@@ -27,7 +27,14 @@ def main():
     a = ap.parse_args()
     paths = sorted(glob.glob(os.path.join(runner.CORE_DIR, "tests", "*.yaml"))) if a.suite else a.tests
     core = None if a.core == "none" else a.core
-    results = [runner.Run(p, a.game_dir, core, a.tag).execute() for p in paths]
+    results = []
+    for p in paths:
+        r = runner.Run(p, a.game_dir, core, a.tag).execute()
+        if not r["pass"] and str(r.get("crash", "")).startswith("harness: could not focus"):
+            # An environment flake (the game never got focus), not a test result: retry once.
+            print(f"   retrying {r['test']} (focus failure)")
+            r = runner.Run(p, a.game_dir, core, a.tag + "-retry").execute()
+        results.append(r)
     print(json.dumps({r["test"]: r["pass"] for r in results}, indent=2))
     return 0 if results and all(r["pass"] for r in results) else 1
 

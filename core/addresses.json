@@ -862,6 +862,179 @@
           },
           "ghidra": "PlayerRescueEnt +0x3530 incremented by RescueBot::BeginRescue 0x00454750",
           "note": "victims claimed by the bot this level"
+        },
+        "player.vel_x": {
+          "module": "exe",
+          "rva": "0x103A78",
+          "chain": [
+            "0x30",
+            "0xFC"
+          ],
+          "type": "f32",
+          "sig": {
+            "rva": "0x274c2",
+            "bytes": "8B 15 78 3A 50 00 8B 12 83 F8 02 0F",
+            "ref": "instruction at 0x004274c2 embeds 0x00503a78"
+          },
+          "ghidra": "PlayerRescueEnt [[g_everGame]+0x30] +0xFC: Entity::IntegrateVelocity 0x0049DBC0 / Think 0x00452570 (verified live 2026-10-21: 367 u/s with W held, 0 idle)",
+          "note": "velocity x, units/s"
+        },
+        "player.vel_y": {
+          "module": "exe",
+          "rva": "0x103A78",
+          "chain": [
+            "0x30",
+            "0x100"
+          ],
+          "type": "f32",
+          "sig": {
+            "rva": "0x274c2",
+            "bytes": "8B 15 78 3A 50 00 8B 12 83 F8 02 0F",
+            "ref": "instruction at 0x004274c2 embeds 0x00503a78"
+          },
+          "ghidra": "PlayerRescueEnt [[g_everGame]+0x30] +0x100 (gravity axis)",
+          "note": "velocity y (up), units/s"
+        },
+        "player.vel_z": {
+          "module": "exe",
+          "rva": "0x103A78",
+          "chain": [
+            "0x30",
+            "0x104"
+          ],
+          "type": "f32",
+          "sig": {
+            "rva": "0x274c2",
+            "bytes": "8B 15 78 3A 50 00 8B 12 83 F8 02 0F",
+            "ref": "instruction at 0x004274c2 embeds 0x00503a78"
+          },
+          "ghidra": "PlayerRescueEnt [[g_everGame]+0x30] +0x104",
+          "note": "velocity z, units/s"
+        },
+        "player.pitch": {
+          "module": "exe",
+          "rva": "0x103A78",
+          "chain": [
+            "0x30",
+            "0x3430"
+          ],
+          "type": "f32",
+          "sig": {
+            "rva": "0x274c2",
+            "bytes": "8B 15 78 3A 50 00 8B 12 83 F8 02 0F",
+            "ref": "instruction at 0x004274c2 embeds 0x00503a78"
+          },
+          "ghidra": "PlayerRescueEnt [[g_everGame]+0x30] +0x3430: Think accumulates STEER_PITCH (clamped by difficulty)",
+          "note": "view pitch, degrees"
+        },
+        "player.yaw": {
+          "module": "exe",
+          "rva": "0x103A78",
+          "chain": [
+            "0x30",
+            "0x3434"
+          ],
+          "type": "f32",
+          "sig": {
+            "rva": "0x274c2",
+            "bytes": "8B 15 78 3A 50 00 8B 12 83 F8 02 0F",
+            "ref": "instruction at 0x004274c2 embeds 0x00503a78"
+          },
+          "ghidra": "PlayerRescueEnt [[g_everGame]+0x30] +0x3434: Think accumulates STEER_YAW (live: changes with mouse turn)",
+          "note": "view yaw, degrees, wrapped +/-360"
+        },
+        "mission.time_left": {
+          "module": "exe",
+          "rva": "0x103A78",
+          "chain": [
+            "0x30",
+            "0x343C"
+          ],
+          "type": "f32",
+          "sig": {
+            "rva": "0x274c2",
+            "bytes": "8B 15 78 3A 50 00 8B 12 83 F8 02 0F",
+            "ref": "instruction at 0x004274c2 embeds 0x00503a78"
+          },
+          "ghidra": "PlayerRescueEnt [[g_everGame]+0x30] +0x343C: Think subtracts g_frameDeltaTime each tick; <0 -> 0 and +0x3438 = 2 (live: counts down 1 s/s; HUD shows mm:ss)",
+          "note": "mission time remaining, seconds"
+        },
+        "menu.screen_current": {
+          "module": "exe",
+          "rva": "0x102AAC",
+          "chain": [
+            "0x3D8"
+          ],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x2465a",
+            "bytes": "8B 0D AC 2A 50 00 57 50 81 C1 AC 06",
+            "ref": "instruction at 0x0042465a embeds 0x00502aac"
+          },
+          "ghidra": "GameSession+0x3C8 = MenuManager (RunFrame); MM+0x10 = current screen (GotoScreen 0x0042D3E0)",
+          "note": "current menu screen object"
+        },
+        "menu.screen_list": {
+          "module": "exe",
+          "rva": "0x102AAC",
+          "chain": [
+            "0x520"
+          ],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x2465a",
+            "bytes": "8B 0D AC 2A 50 00 57 50 81 C1 AC 06",
+            "ref": "instruction at 0x0042465a embeds 0x00502aac"
+          },
+          "ghidra": "MenuManager+0x158 SArray data (GotoScreen searches it for the index)",
+          "note": "menu screen pointer array; index of current = screen id (0 Main .. 9 Splash)"
+        },
+        "menu.screen_count": {
+          "module": "exe",
+          "rva": "0x102AAC",
+          "chain": [
+            "0x524"
+          ],
+          "type": "i32",
+          "sig": {
+            "rva": "0x2465a",
+            "bytes": "8B 0D AC 2A 50 00 57 50 81 C1 AC 06",
+            "ref": "instruction at 0x0042465a embeds 0x00502aac"
+          },
+          "ghidra": "MenuManager+0x15C SArray count",
+          "note": "number of menu screens (10)"
+        },
+        "fire.mode": {
+          "module": "field",
+          "rva": "0x70",
+          "chain": [],
+          "type": "i32",
+          "sig": null,
+          "ghidra": "FireRescueEnt (vptr 0x004E1780; entity kind 6, verified live in bank: 84 instances): mode 0 idle, 4 advancing/burning, 5 extinguished",
+          "note": "fire state"
+        },
+        "fire.intensity": {
+          "module": "field",
+          "rva": "0x128",
+          "chain": [],
+          "type": "f32",
+          "sig": null,
+          "ghidra": "FireRescueEnt intensity (Think shows +0x104 = 0x128 - 0x24 sub-object)",
+          "note": "fire intensity 0..1"
+        },
+        "patch.intro_movies": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x2CC63",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x2CC63",
+            "bytes": "0F 85 FA 00 00 00 FF 15 B0 C3 4D 00 8B 4F 74 51",
+            "ref": "first 16 bytes of the function at 0x0042cc63"
+          },
+          "ghidra": "WinMain 0x0042C800: 0x0042CC5C mov al,[ImADeveloper]; test; 0x0042CC63 jne 0x0042CD63 skips the block that plays Data\\\\Movies\\\\ActiValue.avi (0x004DFADC) and Data\\\\Movies\\\\Mekada.avi (0x004DFAC4) (capstone disassembly 2026-10-21)",
+          "note": "6-byte jne rel32 -> nop; jmp rel32 when fd_skip_intro is 1 (DllMain)"
         }
       }
     }

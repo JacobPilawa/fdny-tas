@@ -1,0 +1,28 @@
+name: state_snapshot
+# Item 9: the core's typed per-frame snapshot (player, victims, fires, rescue
+# bot, mission timer, game/menu state) matches the harness's own direct memory
+# reads. Compared while the player is idle (exact for static fields; the
+# mission timer counts down, so +/-0.5 s), in Training and in bank (6
+# victims, 84 FireRescueEnt fires, RescueBot shipped ON).
+pre_files:
+  - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
+  - {src: null, dst: FDNYCore.cfg}
+  - {src: null, dst: FDNYDeterministic.asi}
+setup: load_training
+record: true
+steps:
+  - assert_log: {contains: "state: snapshot ready"}
+  - wait_s: 1
+  - assert_snapshot_matches: {}
+  - key: {key: w, hold: 1.5}
+  - wait_s: 1.5
+  - assert_snapshot_matches: {}
+  - console: "loadmap bank"
+  - wait_s: 40
+  - assert_mem: {name: game.map_name, equals: bank}
+  - assert_snapshot_matches: {}
+  - wait_s: 2
+  - assert_snapshot_matches: {}
+expect:
+  no_crash: true
+  log_errors: 0

@@ -100,6 +100,14 @@ class Run:
             time.sleep(0.15)
             inputs.mouse_move_rel(*arg)
             time.sleep(0.25)
+            # The click lands wherever the OS cursor is. Relative moves can leave
+            # it outside the game window (e.g. if it was warped mid-move), and a
+            # stray click on the taskbar opened the Start menu (2026-10-21). An
+            # absolute SetCursorPos yields no DirectInput delta, so park the OS
+            # cursor inside the window: the game's own menu cursor stays put.
+            cx, cy, cw, ch = self.g.client_rect()
+            inputs.set_cursor(cx + cw // 2, cy + ch // 2)
+            time.sleep(0.1)
             inputs.mouse_click_here()
         elif kind == "screenshot":
             path, luma = capture.screenshot(self.g.client_rect(), os.path.join(self.out, f"{arg}.png"))
@@ -168,7 +176,7 @@ class Run:
             # Kill and relaunch inside one test (persistence checks); setup is not re-run.
             self.g.kill()
             time.sleep(1.0)
-            self.g.launch()
+            self.g.launch(self.test.get("env"))
             crash = self.g.wait_window()
             if not crash:
                 time.sleep(1.0)
@@ -222,6 +230,8 @@ class Run:
             ok = bool(vs) and all(abs(v[1] - v[4]) <= 0.5 and abs(v[3] - v[5]) <= 0.5 for v in vs)
             self.record("assert_victims_at_spot0", ok,
                         f"{arg}: every victim at its spot 0 (x,z; y is floor-snapped): {vs}")
+        elif kind == "assert_snapshot_matches":
+            self.assert_snapshot(arg if isinstance(arg, dict) else {})
         elif kind == "run_setup":
             with open(os.path.join(SETUPS_DIR, f"{arg}.yaml"), encoding="utf-8") as fh:
                 for sub in yaml.safe_load(fh)["steps"]:
@@ -284,6 +294,58 @@ class Run:
                     f"{seconds}s: clock ticks={ticks} BeginFrame={db} EndFrame={de} frame_end events={dv} "
                     f"(tolerance {tolerance} for window-edge races)")
 
+    def assert_snapshot(self, opt):
+        """Item 9: the core's per-frame snapshot (Debug pipe) vs. the harness's
+        own direct memory reads, taken immediately after. Exact for fields that
+        don't change frame to frame while the player is idle; time_left within
+        `time_tol` (it counts down) and motion fields within `motion_tol`."""
+        snap = pipe.snapshot()
+        r = self.resolver
+        time_tol, motion_tol = float(opt.get("time_tol", 0.5)), float(opt.get("motion_tol", 1.0))
+        fails, n = [], 0
+
+        def cmp(key, direct, tol=0.0):
+            nonlocal n
+            n += 1
+            got = snap.get(key)
+            if got is None or direct is None:
+                fails.append(f"{key}: snapshot={got} direct={direct}")
+                return
+            if isinstance(direct, str):
+                ok = got == (direct or "-")
+            else:
+                ok = abs(float(got) - float(direct)) <= tol + 1e-3
+            if not ok:
+                fails.append(f"{key}: snapshot={got} direct={direct} (tol {tol})")
+
+        cmp("game_state", r.read("game.state"))
+        cmp("map", r.read("game.map_name"))
+        cmp("menu", r.menu_screen())
+        for k, name, tol in (("pos_x", "player.pos_x", motion_tol), ("pos_y", "player.pos_y", motion_tol),
+                             ("pos_z", "player.pos_z", motion_tol), ("vel_x", "player.vel_x", motion_tol),
+                             ("vel_y", "player.vel_y", motion_tol), ("vel_z", "player.vel_z", motion_tol),
+                             ("pitch", "player.pitch", motion_tol), ("yaw", "player.yaw", motion_tol),
+                             ("time_left", "mission.time_left", time_tol), ("move_state", "player.state", 0),
+                             ("victims_total", "victims.total", 0), ("victims_rescued", "victims.rescued", 0),
+                             ("bot_enabled", "rescuebot.enabled", 0), ("bot_claimed", "rescuebot.claimed", 0)):
+            cmp(k, r.read(name), tol)
+        vx, vz = r.read("player.vel_x") or 0.0, r.read("player.vel_z") or 0.0
+        cmp("speed_xy", (vx * vx + vz * vz) ** 0.5, motion_tol)
+        vs = r.victims()
+        cmp("victims", len(vs))
+        for i, (_, x, y, z, _, _) in enumerate(vs):
+            got = [float(c) for c in snap.get(f"v{i}", "nan,nan,nan,0").split(",")[:3]]
+            n += 1
+            if any(abs(a - b) > motion_tol for a, b in zip(got, (x, y, z))):
+                fails.append(f"v{i}: snapshot={got} direct={(x, y, z)}")
+        total, burning, out = r.fires()
+        cmp("fires", total)
+        cmp("fires_burning", burning)
+        cmp("fires_out", out)
+        self.samples.setdefault("snapshots", []).append(snap)
+        self.record("assert_snapshot_matches", not fails,
+                    f"{n} fields compared at frame {snap.get('frame')}; mismatches: {fails or 'none'}")
+
     def assert_value(self, a, val):
         name, tol = a["name"], float(a.get("tolerance", 0))
         if val is None:
@@ -343,13 +405,17 @@ class Run:
         rec = None
         print(f"== {self.test['name']} (core={self.core_config}) -> {self.out}")
         try:
-            self.g.launch()
+            self.g.launch(self.test.get("env"))
             crash = self.g.wait_window()
             if not crash:
                 # Screenshots/video grab the screen region, and input goes to the
                 # foreground window: the game must be on top.
                 time.sleep(1.0)
-                self.record("focus", inputs.focus(self.g.hwnd), "game window foreground at launch")
+                focused = inputs.focus(self.g.hwnd)
+                self.record("focus", focused, "game window foreground at launch")
+                if not focused:
+                    # Every later step would type/click into another window: stop here.
+                    crash = "harness: could not focus the game window (Windows foreground lock)"
             if not crash and self.core_config:
                 crash = self.g.wait_ready()
                 self.record("core_ready", crash is None, crash or "ready line seen")

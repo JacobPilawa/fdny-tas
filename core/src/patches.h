@@ -9,4 +9,10 @@ void ApplyEarly();
 
 bool ConsoleGatePatched();
 
+// DllMain: fd_skip_intro, peeked from FDNYCore.cfg / autoexec.cfg.
+void ApplyIntroSkip(const char* gameDir);
+
+// Registers fd_skip_intro with the console (after cmd builtins).
+void Init();
+
 } // namespace fdcore::patches

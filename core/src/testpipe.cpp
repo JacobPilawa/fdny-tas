@@ -8,6 +8,7 @@
 
 #include "hooks.h"
 #include "log.h"
+#include "state.h"
 
 namespace fdcore::testpipe {
 namespace {
@@ -18,6 +19,8 @@ bool StartsWith(const char* s, const char* p) {
     return true;
 }
 
+constexpr int kResp = 4096;
+
 void Handle(const char* req, char* resp) {
     const hooks::Counters& c = hooks::Stats();
     if (StartsWith(req, "ping")) {
@@ -26,6 +29,8 @@ void Handle(const char* req, char* resp) {
         wsprintfA(resp, "begin=%ld end=%ld events=%ld levels=%ld toggles=%ld frame=%s", c.beginFrame,
                   c.endFrame, c.frameEndEvents, c.levelLoads, c.toggles,
                   hooks::IsEnabled("frame") ? "on" : "off");
+    } else if (StartsWith(req, "snapshot")) {
+        state::Format(resp, kResp);
     } else if (StartsWith(req, "hook ")) {
         // hook <group> on|off
         char group[32];
@@ -44,14 +49,14 @@ void Handle(const char* req, char* resp) {
 DWORD WINAPI Server(LPVOID) {
     for (;;) {
         HANDLE p = CreateNamedPipeA("\\\\.\\pipe\\FDNYCore", PIPE_ACCESS_DUPLEX,
-                                    PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT, 1, 4096,
-                                    4096, 0, nullptr);
+                                    PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT, 1, kResp,
+                                    512, 0, nullptr);
         if (p == INVALID_HANDLE_VALUE) {
             log::Error("testpipe: CreateNamedPipe failed (%lu)", GetLastError());
             return 0;
         }
         if (ConnectNamedPipe(p, nullptr) || GetLastError() == ERROR_PIPE_CONNECTED) {
-            char req[512], resp[512];
+            static char req[512], resp[kResp];
             DWORD got = 0;
             while (ReadFile(p, req, sizeof(req) - 1, &got, nullptr) && got) {
                 while (got && (req[got - 1] == '\n' || req[got - 1] == '\r')) --got;

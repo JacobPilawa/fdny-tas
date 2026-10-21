@@ -28,22 +28,6 @@ Version g_override;
 char g_overrideStrings[32 * 1024];
 #endif
 
-bool Readable(uintptr_t addr, uint32_t size) {
-    while (size) {
-        MEMORY_BASIC_INFORMATION mbi;
-        if (!VirtualQuery(reinterpret_cast<void*>(addr), &mbi, sizeof(mbi))) return false;
-        if (mbi.State != MEM_COMMIT || (mbi.Protect & (PAGE_NOACCESS | PAGE_GUARD))) return false;
-        const DWORD readable = PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY | PAGE_EXECUTE_READ |
-                               PAGE_EXECUTE_READWRITE | PAGE_EXECUTE_WRITECOPY;
-        if (!(mbi.Protect & readable)) return false;
-        uintptr_t end = reinterpret_cast<uintptr_t>(mbi.BaseAddress) + mbi.RegionSize;
-        uint32_t chunk = end - addr < size ? static_cast<uint32_t>(end - addr) : size;
-        addr += chunk;
-        size -= chunk;
-    }
-    return true;
-}
-
 bool StrEq(const char* a, const char* b) {
     while (*a && *a == *b) ++a, ++b;
     return *a == *b;
@@ -85,11 +69,14 @@ bool OccupiedByOtherMod(const Entry& e) {
 } // namespace
 
 bool SafeRead(uintptr_t addr, void* out, uint32_t size) {
-    if (!addr || !Readable(addr, size)) return false;
-    auto* src = reinterpret_cast<const volatile uint8_t*>(addr);
-    auto* dst = static_cast<uint8_t*>(out);
-    for (uint32_t i = 0; i < size; ++i) dst[i] = src[i];
-    return true;
+    // ReadProcessMemory on our own process: the kernel copies and reports a
+    // fault as failure. A VirtualQuery check followed by a plain read raced
+    // (2026-10-21: AV inside the copy loop on a page another thread -- the D3D
+    // wrapper -- changed between the check and the read).
+    if (!addr) return false;
+    SIZE_T got = 0;
+    return ReadProcessMemory(GetCurrentProcess(), reinterpret_cast<const void*>(addr), out, size, &got) &&
+           got == size;
 }
 
 void Init(const char* exeSha256, const char* genesisSha256, uintptr_t exeBase,
@@ -206,16 +193,14 @@ uintptr_t ExportAddress(Id id) {
 
 bool WriteU8(Id id, uint8_t v) {
     uintptr_t a;
-    if (!Resolve(id, &a) || !Readable(a, 1)) return false;
-    *reinterpret_cast<volatile uint8_t*>(a) = v;
-    return true;
+    SIZE_T n = 0;
+    return Resolve(id, &a) && WriteProcessMemory(GetCurrentProcess(), reinterpret_cast<void*>(a), &v, 1, &n) && n == 1;
 }
 
 bool WriteI32(Id id, int32_t v) {
     uintptr_t a;
-    if (!Resolve(id, &a) || !Readable(a, 4)) return false;
-    *reinterpret_cast<volatile int32_t*>(a) = v;
-    return true;
+    SIZE_T n = 0;
+    return Resolve(id, &a) && WriteProcessMemory(GetCurrentProcess(), reinterpret_cast<void*>(a), &v, 4, &n) && n == 4;
 }
 
 bool ReadI32(Id id, int32_t* out) {
