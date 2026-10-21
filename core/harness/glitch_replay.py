@@ -33,23 +33,42 @@ ov.datetime = types.SimpleNamespace(datetime=types.SimpleNamespace(now=lambda: _
 
 
 SESSION = 0xF1
+MAPCHECK = 0xF2      # MapFinder.update ran this frame; b[1] = readable, b[2] bytes of planes follow
+SESSION_END = 0xF4   # hooks removed (the old tool's exit notes)
+
+
+class Frame:
+    def __init__(self, snap):
+        self.snap, self.records = snap, []
+        self.map_check, self.planes = False, None
 
 
 def sessions(path):
-    """[[(snapshot_bytes, [record tuples...]), ...] per hook install] in stream order."""
+    """[(frames, ended)] per hook install, in stream order."""
     data = open(path, "rb").read()
-    out = [[]]
-    for off in range(0, len(data) - 127, 128):
+    out = [[[], False]]
+    off = 0
+    while off + 128 <= len(data):
         blk = data[off:off + 128]
+        off += 128
         kind = struct.unpack_from("<I", blk, 0)[0]
+        cur = out[-1]
         if kind == SESSION:
-            if out[-1]:
-                out.append([])
+            if cur[0] or cur[1]:
+                out.append([[], False])
+        elif kind == SESSION_END:
+            cur[1] = True
+        elif kind == MAPCHECK:
+            ok, n = struct.unpack_from("<II", blk, 4)
+            if cur[0]:
+                cur[0][-1].map_check = True
+                cur[0][-1].planes = data[off:off + n] if ok and off + n <= len(data) else None
+            off += n
         elif kind == SNAP:
-            out[-1].append((blk, []))
-        elif out[-1]:
-            out[-1][-1][1].append(struct.unpack(ov.REC_FMT, blk))
-    return [s for s in out if s]
+            cur[0].append(Frame(blk))
+        elif cur[0]:
+            cur[0][-1].records.append(struct.unpack(ov.REC_FMT, blk))
+    return [s for s in out if s[0] or s[1]]
 
 
 class ReplaySource(ov.GameSource):
@@ -87,24 +106,52 @@ class ReplaySource(ov.GameSource):
             m.slot = (tuple(round(v, 1) for v in imp), nrm)
             m.slot_writer = None
 
+    def _predict(self):
+        """GameSource._predict with its two live reads replaced by the stream:
+        the plane array (only on frames where the core ran MapFinder.update --
+        the 1 s wall-clock throttle is the core's) and the slot plane's ny
+        (the snapshot's). MapFinder / Bsp / describe_window run unmodified."""
+        m, p, f = self.m, self.m.player, self.frame
+        # MapFinder.update checks only when the throttle allows it: open the
+        # throttle on the core's check frames, keep it shut on the others.
+        self.maps.last_check = -1e9 if f.map_check else ov.time.monotonic()
+        bsp = self.maps.update(lambda n: f.planes)
+        if p is None:
+            m.set_window(None)
+            return
+        if bsp is None:
+            m.set_window({"map": None, "level": "none",
+                          "text": "map not recognised" if self.maps.sigs else "Data\\Maps not found (use --maps)"})
+            return
+        if p["spectator"]:
+            m.set_window({"map": bsp.name, "level": "none", "text": "spectator - no collision"})
+            return
+        slot_ny = struct.unpack_from("<3f", self.cur, 21 * 4)[1]
+        m.set_window(bsp.predict(p["pos"], p["mins"], p["maxs"], p["disp"], slot_ny))
+
     def _records(self):
-        return self.cur_records
+        return self.frame.records
 
 
-def replay_session(frames_, predict_maps=None):
+def replay_session(frames_, ended=False, predict_maps=None):
     out = io.StringIO()
     m = ov.Model()
     log = ov.TextLog(out)
     src = ReplaySource(m, log, predict_maps)
-    for snap, recs in frames_:
-        src.cur, src.cur_records = snap, recs
+    for fr in frames_:
+        src.frame, src.cur = fr, fr.snap
         src.poll()
+    if ended:   # main()'s finally: source.close() + the prediction summary
+        log.note("hooks removed, original bytes restored")
+        s = m.pred_stats
+        log.note("warp window: %d predictions, %d said WARP NEXT FRAME; %d warps, %d of them "
+                 "predicted" % (s["polls"], s["warp_polls"], s["warps"], s["warps_predicted"]))
     return out.getvalue(), m
 
 
 def replay(path, predict_maps=None):
     """One TextLog text per hook-install session."""
-    return [replay_session(s, predict_maps) for s in sessions(path)]
+    return [replay_session(fr, ended, predict_maps) for fr, ended in sessions(path)]
 
 
 if __name__ == "__main__":

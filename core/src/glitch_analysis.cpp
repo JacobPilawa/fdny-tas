@@ -3,6 +3,7 @@
 #include <windows.h>
 
 #include "addr.h"
+#include "glitch_bsp.h"
 #include "log.h"
 
 namespace fdcore::glitch::analysis {
@@ -18,14 +19,15 @@ constexpr uint32_t GENESIS_PREF = 0x10000000;
 
 // ---------------------------------------------------------------------------
 // Number formatting identical to Python's %.Nf: round the exact binary value
-// half-to-even. Every value here comes from a float32, so v * 10^d (d <= 3)
-// is exact in double and an integer half-even rounding reproduces Python.
+// half-to-even.
 bool SignBit(double v) {
     uint64_t b;
     __builtin_memcpy(&b, &v, 8);
     return (b >> 63) != 0;
 }
 
+// For float32-sourced values v * 10 is exact, so an integer half-even
+// rounding reproduces Python's round(x, 1) (writer keys).
 bool HalfEven(double t, long* out) {
     if (!(t > -2.0e9 && t < 2.0e9)) return false;
     long ip = static_cast<long>(t);       // truncates toward zero
@@ -36,19 +38,49 @@ bool HalfEven(double t, long* out) {
     return true;
 }
 
-const long kPow10[] = {1, 10, 100, 1000};
+const uint64_t kPow10[] = {1, 10, 100, 1000};
 
-// "%.<d>f" of v into out (no padding).
+// "%.<d>f" (d <= 3) of any double into out (no padding): the exact value
+// m * 2^e scaled by 10^d in integers, rounded half-to-even. |v| >= 2^53 is
+// out of range here (never a coordinate) and printed via its integer part.
 int Fixed(char* out, double v, int d) {
-    if (v != v) return wsprintfA(out, "nan");
-    long r;
-    if (!HalfEven(v * kPow10[d], &r)) return wsprintfA(out, v < 0 ? "-inf" : "inf");
-    bool neg = r < 0 || (r == 0 && SignBit(v));
-    unsigned long a = r < 0 ? static_cast<unsigned long>(-r) : static_cast<unsigned long>(r);
-    if (d == 0) return wsprintfA(out, "%s%lu", neg ? "-" : "", a);
-    char fmt[16];
-    wsprintfA(fmt, "%%s%%lu.%%0%dlu", d);
-    return wsprintfA(out, fmt, neg ? "-" : "", a / kPow10[d], a % kPow10[d]);
+    uint64_t bits;
+    __builtin_memcpy(&bits, &v, 8);
+    const bool neg = (bits >> 63) != 0;
+    const int ex = static_cast<int>((bits >> 52) & 0x7FF);
+    uint64_t m = bits & ((1ULL << 52) - 1);
+    if (ex == 0x7FF) return wsprintfA(out, m ? "nan" : (neg ? "-inf" : "inf"));
+    int e;
+    if (ex == 0) e = -1074;
+    else m |= 1ULL << 52, e = ex - 1075;
+    uint64_t q;
+    if (e >= 0) {
+        if (e > 10) return wsprintfA(out, "%s%lu", neg ? "-" : "", 0xFFFFFFFFUL);  // unreachable for our values
+        q = (m * kPow10[d]) << e;
+    } else {
+        const uint64_t M = m * kPow10[d];  // < 2^63
+        const int s = -e;
+        if (s >= 64) {
+            q = 0;  // M < 2^63 <= half: rounds down
+        } else {
+            q = M >> s;
+            const uint64_t rem = M & ((1ULL << s) - 1), half = 1ULL << (s - 1);
+            if (rem > half || (rem == half && (q & 1))) ++q;
+        }
+    }
+    char digits[32];
+    int n = 0;
+    do digits[n++] = static_cast<char>('0' + q % 10), q /= 10;
+    while (q);
+    while (n <= d) digits[n++] = '0';
+    int o = 0;
+    if (neg) out[o++] = '-';
+    for (int i = n - 1; i >= 0; --i) {
+        out[o++] = digits[i];
+        if (i == d && d) out[o++] = '.';
+    }
+    out[o] = 0;
+    return o;
 }
 
 // Python round(x, 1): the key used for writer lookup / coordinates.
@@ -253,6 +285,36 @@ bool g_hasSlotWriter = false;
 Ev g_slotWriter;
 uint32_t g_warps = 0;
 char g_verdict[96] = "";
+
+// Model.window / predictions (deque maxlen 256) / pred_stats
+bool g_hasWindow = false;
+bsp::Window g_window;
+constexpr int kPred = 256;
+bsp::Window g_pred[kPred];
+int g_predStart = 0, g_predLen = 0;
+uint32_t g_polls = 0, g_warpPolls = 0, g_warpsPredicted = 0;
+
+void SetWindow(const bsp::Window* w, uint32_t tick) {  // Model.set_window
+    g_hasWindow = w != nullptr;
+    if (!w) return;
+    g_window = *w;
+    g_window.tick = tick;
+    if (g_window.hasSweeps || g_window.level == bsp::L_CLEAR) {
+        ++g_polls;
+        g_warpPolls += g_window.level == bsp::L_WARP;
+        if (g_predLen == kPred) g_predStart = (g_predStart + 1) % kPred;
+        else ++g_predLen;
+        g_pred[(g_predStart + g_predLen - 1) % kPred] = g_window;
+    }
+}
+
+const bsp::Window* PredictionBefore(uint32_t tick) {
+    for (int i = g_predLen - 1; i >= 0; --i) {
+        const bsp::Window& w = g_pred[(g_predStart + i) % kPred];
+        if (w.tick <= tick) return &w;
+    }
+    return nullptr;
+}
 
 Row& HistAt(int i) { return g_hist[(g_histStart + i) % kHistory]; }  // 0 = oldest
 
@@ -544,9 +606,14 @@ void Feed(Ev& ev, bool& hasSrc, Ev& src) {
             row.count = 1, row.lastTick = ev.tick;
             Describe(row.detail, sizeof(row.detail));
             ++g_warps;
-            // 11b: no prediction yet (both sides), so describe_window(None) == "none".
+            const bsp::Window* pw = PredictionBefore(ev.tick);
+            if (pw && pw->level == bsp::L_WARP) ++g_warpsPredicted;
+            char pred[512];
+            bsp::Describe(pw, true, ev.tick, pred, sizeof(pred));
             int n = lstrlenA(row.detail);
-            lstrcpynA(row.detail + n, "; predicted: none", static_cast<int>(sizeof(row.detail)) - n);
+            lstrcpynA(row.detail + n, "; predicted: ", static_cast<int>(sizeof(row.detail)) - n);
+            n = lstrlenA(row.detail);
+            lstrcpynA(row.detail + n, pred, static_cast<int>(sizeof(row.detail)) - n);
             LogWarp(row);
         }
     }
@@ -635,8 +702,11 @@ const float* F(const uint32_t* r, int i) { return reinterpret_cast<const float*>
 
 } // namespace
 
-void BeginSession() {
+void BeginSession(const char* mapsDir) {
     WritersReset();
+    g_hasWindow = false;
+    g_predStart = g_predLen = 0;
+    g_polls = g_warpPolls = g_warpsPredicted = 0;
     g_histStart = g_histLen = 0;
     g_seq = 0;
     g_crouchbug = false;
@@ -647,11 +717,43 @@ void BeginSession() {
     g_warps = 0;
     g_verdict[0] = 0;
     Header();
+    bsp::Index(mapsDir, Note);  // GameSource.__init__ -> MapFinder(...)
 }
+
+void EndSession() {
+    Note("hooks removed, original bytes restored");
+    char text[200];
+    wsprintfA(text, "warp window: %lu predictions, %lu said WARP NEXT FRAME; %lu warps, %lu of them predicted",
+              static_cast<unsigned long>(g_polls), static_cast<unsigned long>(g_warpPolls),
+              static_cast<unsigned long>(g_warps), static_cast<unsigned long>(g_warpsPredicted));
+    Note(text);
+}
+
+int PyFixed(char* out, double v, int d) { return Fixed(out, v, d); }
 
 void Poll(const Snapshot& s, const uint32_t* const* records, int n) {
     const uint32_t gdelta = s.genesisBase - GENESIS_PREF;
     TrackCrouchbug(s, s.tick);
+    // GameSource._predict (after track_crouchbug, before the records)
+    bool haveMap = bsp::HaveSigs() && bsp::CurrentName()[0];
+    if (s.mapCheck) haveMap = bsp::Update(s.planes, Note);
+    if (!s.playerPtr) {
+        SetWindow(nullptr, s.tick);
+    } else {
+        static bsp::Window w;
+        w = bsp::Window{};
+        w.level = bsp::L_NONE;
+        if (!haveMap) {
+            lstrcpyA(w.text, bsp::HaveSigs() ? "map not recognised" : "Data\\Maps not found (use --maps)");
+        } else if (s.spectator) {
+            w.hasMap = true;
+            lstrcpynA(w.map, bsp::CurrentName(), sizeof(w.map));
+            lstrcpyA(w.text, "spectator - no collision");
+        } else {
+            bsp::Predict(s.pos, s.mins, s.maxs, s.disp, s.slotPlane[1], w);
+        }
+        SetWindow(&w, s.tick);
+    }
     for (int i = 0; i < n; ++i) {
         const uint32_t* r = records[i];
         Ev ev{};

@@ -18,12 +18,22 @@ struct Snapshot {
     float pos[3], mins[3], maxs[3], disp[3];
     float slotImpact[3], slotPlane[4];
     uint32_t genesisBase;
+    // 11c: MapFinder.update ran this poll (its 1 s throttle is the caller's);
+    // planes = the live first bsp::kSigBytes of the plane array, or null.
+    bool mapCheck;
+    const uint8_t* planes;
 };
 
-void BeginSession();  // new Model + TextLog header (a fresh Python session)
+// New Model + TextLog header + MapFinder (a fresh Python session).
+void BeginSession(const char* mapsDir);
 void Poll(const Snapshot& s, const uint32_t* const* records, int n);  // GameSource.poll
+// What the old tool logged when it closed: hooks removed + prediction stats.
+void EndSession();
 
 // For the boxes (11d): the frame verdict text and level.
 const char* VerdictText();
+
+// Python "%.<d>f" (d <= 3) of a double, exactly.
+int PyFixed(char* out, double v, int d);
 
 } // namespace fdcore::glitch::analysis

@@ -24,7 +24,7 @@ cause of RESEARCH.md growing to 465 MB.
 | 8 | speedrun module | **DONE 2026-10-21**: FDNYDeterministic proven live, then exact parity; suite green (18/18), committed. On-screen bot check substituted by memory evidence (see item 8) |
 | 9 | Game state snapshot | **DONE 2026-10-21**: snapshot == direct reads (0 mismatches), suite green (20/20), committed. Also fixed a SafeRead race crash, added fd_skip_intro |
 | 10 | hud_player | **DONE 2026-10-21**: every old-overlay field in-game via geEngine_Printf; drawn == same-frame values (also moving) and == memory at rest; suite green (21/21), committed |
-| 11 | hud_glitch | **in progress**: 11a, 11b done; 11c (Bsp + MapFinder, WARP prediction) next |
+| 11 | hud_glitch | **in progress**: 11a, 11b, 11c done; 11d (in-game boxes + keys) next |
 | 12 | Profiles + watermark | not started |
 | 13 | Teleporter (save location / teleport, map-gated), owner request 2026-10-21 | not started (needs 5, 9) |
 
@@ -512,6 +512,32 @@ Structural map (Haiku, line-referenced) of `fdny_collision_overlay.py` (1748 lin
   - Result: **2075 lines identical** (3 sessions: 1495 capable, 458 WARP, 92 notes, 30 header).
   - Mutation check: a one-character edit to the core log is reported as a mismatch.
 
+**11c (warp window: Bsp + MapFinder): done.**
+
+- **`src/glitch_bsp.{h,cpp}`:** C++ port of `gbsp_chunks` / `Bsp` (expanded hulls, walk, the literal Genesis box clip, sweep, inside, predict) / `MapFinder` / `describe_window`.
+  - Python's double arithmetic is reproduced in the same operation order, with float32 rounding at the same points (`f32`), IEEE sqrt (SSE2 `sqrtsd`), and Python's `min`/`max` argument semantics.
+  - Verified: zig's x86 default target has SSE2 and no FMA, so doubles are SSE2 scalars with no x87 extended precision and no contraction.
+  - `%.Nf` is now exact for any double (integer scaling of the exact binary value, half-even). The 11b version relied on float32-sourced inputs, but gap/window are computed doubles.
+- **Map recognition in-process:** `[genesis.planes_ptr]` first 0x4000 bytes vs each `<exe dir>\Data\Maps\*.bsp` plane chunk prefix (the old tool's default dir), checked every 1 s (MAP_CHECK_SEC).
+  - Each prediction goes into Model.window / predictions / pred_stats, and warp lines now end `; predicted: <describe_window>`.
+  - On `fd_hud_glitch 0` the core logs what the old tool logged on exit ("hooks removed…" and the prediction summary).
+- **Dump / replay:** KIND 0xF2 = a map check ran this frame (+ the 0x4000 plane bytes, or unreadable); 0xF4 = session end.
+  - `glitch_replay.py` drives the original MapFinder by opening its throttle exactly on the core's check frames and handing it those bytes. The original Bsp / describe_window run unmodified.
+  - `_predict` is GameSource's with the two live reads swapped for the stream (documented in the file).
+- **Fuzz:** `glitch_fuzz.py` now uses real maps:
+  - plane prefixes, map switches, unreadable and unknown arrays;
+  - positions in model bounds and in solid leaves, plus "spots" found by nudging inside-solid points up to undersides. The reference `Bsp` is used only to choose inputs.
+  - Per-frame windows covered: WARP NEXT FRAME, both LINED UP variants, blocked above, floor stops it, start moving, move toward open space, too high (many gap values), in bounds, not recognised, spectator.
+  - **Not reached:** "blocked ahead", "almost lined up", "nothing here to line up with".
+- **Results:**
+  - `glitch_parity_fuzz`: 2537 lines identical (463 WARP lines with full predictions, 564 notes incl. map / stats notes).
+  - `glitch_parity_log` live: Training and bank recognised from the live plane array (1160 / 2492 solid leaves), 5242 predictions in one session, identical.
+- **Cost (Debug -O0, game thread):**
+  - 23 µs/frame average.
+  - One ~22 ms frame per level load (the map check that loads the .bsp, plus its INFO line), at a point where the game is loading anyway.
+  - Found and fixed along the way: `log::Raw` called FlushFileBuffers per line, which cost 20-140 ms frames. It now relies on WriteFile (survives a game crash).
+- **Timing visibility:** the pipe `glitch` reports `poll_us_avg` / `poll_us_max`; the uninstall line logs the same, and frames over 10 ms are logged.
+
 ## Assumptions / workarounds
 
 - **"Behaves the same" (item 1c) definition**, chosen by the agent at the owner's request. These are LOOP.md's 7 criteria, with two calibrations:
@@ -589,3 +615,9 @@ Structural map (Haiku, line-referenced) of `fdny_collision_overlay.py` (1748 lin
   - Suite 24/24 PASS (Debug); Release EQUIVALENT (fps 57.2 vs 55.6, laps within 4.1 u).
   - Evidence in `core/evidence/item11b/`.
   - Next: 11c (Bsp + MapFinder → "predicted:" text; replay with `--predict`).
+- 2026-10-21 it14: **11c DONE** (FDNYCore 0.11.2): the warp window (Bsp / MapFinder / describe_window port), with map recognition from Genesis' live plane array.
+  - Fuzz parity: 2537 lines identical, with real-map spots reaching WARP NEXT FRAME and LINED UP. Live: Training and bank recognised; 5242 predictions, identical.
+  - Fixed the per-line log flush (20-140 ms frames) → 23 µs/frame average.
+  - Suite 24/24 PASS (Debug); Release EQUIVALENT (fps 58.8 vs 55.6, laps within 6.2 u).
+  - Evidence in `core/evidence/item11c/`.
+  - Next: 11d (boxes WARP / LAST WARP / HISTORY drawn in-game + F9/F10/F12 equivalents; box text == `build()` on replay).

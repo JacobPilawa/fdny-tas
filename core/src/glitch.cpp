@@ -15,6 +15,7 @@
 #include "cmd.h"
 #include "console.h"
 #include "glitch_analysis.h"
+#include "glitch_bsp.h"
 #include "hooks.h"
 #include "log.h"
 
@@ -52,6 +53,9 @@ bool g_installed = false;
 uint32_t g_lastHead = 0;
 volatile long g_counts[4];  // per record kind, for tests
 uint32_t g_dropped = 0;
+// analysis cost per frame (game thread), for the pipe / tests
+unsigned long g_pollUsMax = 0, g_pollFrames = 0;
+double g_pollUsSum = 0;  // no 64-bit integer division helpers in this no-CRT build
 
 // --- tiny emitter (mirrors the Python Asm class) --------------------------------
 struct Asm {
@@ -268,7 +272,23 @@ bool PatchAll(bool install) {
 
 #ifdef FDCORE_DEBUG
 void DumpSessionStart();
+void DumpMarker(uint32_t kind);
 #endif
+
+// <game>\Data\Maps, as the old tool's _default_maps_dir (exe folder).
+const char* MapsDir() {
+    static char dir[MAX_PATH];
+    if (!dir[0]) {
+        GetModuleFileNameA(nullptr, dir, MAX_PATH);
+        for (int i = lstrlenA(dir) - 1; i >= 0 && dir[i] != '\\'; --i) dir[i] = 0;
+        if (int n = lstrlenA(dir); n && dir[n - 1] == '\\') dir[n - 1] = 0;
+        lstrcatA(dir, "\\Data\\Maps");
+    }
+    return dir;
+}
+
+ULONGLONG g_lastMapCheck = 0;
+bool g_mapCheckDue = true;
 
 bool Install() {
     if (g_installed) return true;
@@ -292,7 +312,8 @@ bool Install() {
         return false;
     }
     g_installed = true;
-    analysis::BeginSession();
+    analysis::BeginSession(MapsDir());
+    g_mapCheckDue = true;
 #ifdef FDCORE_DEBUG
     DumpSessionStart();
 #endif
@@ -305,7 +326,13 @@ void Uninstall() {
     if (!g_installed) return;
     if (PatchAll(false)) {
         g_installed = false;  // the cave stays allocated: nothing may jump into freed memory
-        log::Info("glitch: hooks removed, original bytes restored");
+        log::Info("glitch: hooks removed, original bytes restored; analysis %lu us/frame avg, %lu max, %lu frames",
+                  static_cast<unsigned long>(g_pollFrames ? g_pollUsSum / g_pollFrames : 0.0),
+                  static_cast<unsigned long>(g_pollUsMax), static_cast<unsigned long>(g_pollFrames));
+        analysis::EndSession();
+#ifdef FDCORE_DEBUG
+        DumpMarker(0xF4);
+#endif
     }
 }
 
@@ -334,12 +361,35 @@ void DumpSnapshot(const analysis::Snapshot& s) {
     DumpBlock(b);
 }
 
-void DumpSessionStart() {
+void DumpMarker(uint32_t kind) {
     uint32_t b[32] = {};
-    b[0] = 0xF1;
+    b[0] = kind;
     DumpBlock(b);
 }
+
+void DumpSessionStart() { DumpMarker(0xF1); }
+
+// KIND 0xF2: MapFinder.update ran this frame; b[1] = 1 if the plane array was
+// readable, then the kSigBytes it held follow as raw blocks.
+void DumpMapCheck(const uint8_t* planes) {
+    uint32_t b[32] = {};
+    b[0] = 0xF2;
+    b[1] = planes != nullptr;
+    b[2] = planes ? bsp::kSigBytes : 0;
+    DumpBlock(b);
+    for (uint32_t off = 0; planes && off < bsp::kSigBytes; off += kRecSize)
+        DumpBlock(reinterpret_cast<const uint32_t*>(planes + off));
+}
 #endif
+
+// MapFinder's _read_planes: the first kSigBytes of Genesis' live plane array.
+const uint8_t* ReadPlanes() {
+    static uint8_t buf[bsp::kSigBytes];
+    uintptr_t a;
+    uint32_t ptr = 0;
+    if (!addr::Resolve(Id::genesis_planes_ptr, &a) || !addr::SafeRead(a, &ptr, 4) || !ptr) return nullptr;
+    return addr::SafeRead(ptr, buf, sizeof(buf)) ? buf : nullptr;
+}
 
 // GameSource._read_live: the live player / slot state at this poll.
 void ReadSnapshot(analysis::Snapshot& s) {
@@ -370,8 +420,17 @@ void FrameEnd() {
     if (!g_installed) return;
     static analysis::Snapshot snap;
     ReadSnapshot(snap);  // like Python: live read first, then the new records
+    // MapFinder.update's MAP_CHECK_SEC throttle (only when maps were indexed)
+    const ULONGLONG now = GetTickCount64();
+    snap.mapCheck = bsp::HaveSigs() && (g_mapCheckDue || now - g_lastMapCheck >= 1000);
+    if (snap.mapCheck) {
+        g_mapCheckDue = false;
+        g_lastMapCheck = now;
+        snap.planes = ReadPlanes();
+    }
 #ifdef FDCORE_DEBUG
     DumpSnapshot(snap);
+    if (snap.mapCheck) DumpMapCheck(snap.planes);
 #endif
     const uint32_t head = *reinterpret_cast<volatile uint32_t*>(g_cave + kHead);
     uint32_t n = head - g_lastHead;
@@ -393,7 +452,18 @@ void FrameEnd() {
 #endif
     }
     g_lastHead = head;
+    LARGE_INTEGER t0, t1, fq;
+    QueryPerformanceCounter(&t0);
     analysis::Poll(snap, recs, static_cast<int>(n));
+    QueryPerformanceCounter(&t1);
+    QueryPerformanceFrequency(&fq);
+    const LONGLONG dt = t1.QuadPart - t0.QuadPart;
+    const unsigned long us = static_cast<unsigned long>(MulDiv(dt > 0x7FFFFFFF ? 0x7FFFFFFF : static_cast<int>(dt), 1000000, static_cast<int>(fq.QuadPart)));
+    g_pollUsSum += us, ++g_pollFrames;
+    if (us > g_pollUsMax) g_pollUsMax = us;
+    if (us > 10000)
+        log::Info("glitch: slow analysis frame: %lu us, %lu records, map check %d", us, static_cast<unsigned long>(n),
+                  snap.mapCheck ? 1 : 0);
 }
 void OnToggle(cmd::Cvar& v) {
     if (v.value[0] != '0') {
@@ -445,8 +515,19 @@ int ReplayFile(const char* path, char* out, int cap) {
         if (b[0] == 0xF1) {
             flush();
             haveSnap = false;
-            analysis::BeginSession();
+            analysis::BeginSession(MapsDir());
             ++sessions;
+        } else if (b[0] == 0xF4) {
+            flush();
+            haveSnap = false;
+            analysis::EndSession();
+        } else if (b[0] == 0xF2) {  // belongs to the snapshot just read
+            const uint32_t nb = b[2] / kRecSize;
+            if (haveSnap) {
+                snap.mapCheck = true;
+                snap.planes = b[1] && i + nb < blocks ? reinterpret_cast<const uint8_t*>(b + kRecSize / 4) : nullptr;
+            }
+            i += nb;
         } else if (b[0] == 0xF0) {
             flush();
             snap = analysis::Snapshot{};
@@ -470,9 +551,11 @@ int ReplayFile(const char* path, char* out, int cap) {
 int Stats(char* out, int cap) {
     if (cap < 128) return 0;
     uint32_t tick = g_cave ? *reinterpret_cast<volatile uint32_t*>(g_cave + kTick) : 0;
-    return wsprintfA(out, "installed=%d tick=%lu trace=%ld commit=%ld engine_ray=%ld dropped=%lu",
+    return wsprintfA(out, "installed=%d tick=%lu trace=%ld commit=%ld engine_ray=%ld dropped=%lu poll_us_avg=%lu poll_us_max=%lu",
                      g_installed ? 1 : 0, static_cast<unsigned long>(tick), g_counts[KIND_TRACE],
-                     g_counts[KIND_COMMIT], g_counts[KIND_ENGINE_RAY], static_cast<unsigned long>(g_dropped));
+                     g_counts[KIND_COMMIT], g_counts[KIND_ENGINE_RAY], static_cast<unsigned long>(g_dropped),
+                     static_cast<unsigned long>(g_pollFrames ? g_pollUsSum / g_pollFrames : 0.0),
+                     static_cast<unsigned long>(g_pollUsMax));
 }
 
 } // namespace fdcore::glitch

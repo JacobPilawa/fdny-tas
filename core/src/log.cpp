@@ -61,7 +61,9 @@ void Raw(const char* tag, const char* text) {
     WriteFile(g_file, head, static_cast<DWORD>(n), &wrote, nullptr);
     WriteFile(g_file, text, static_cast<DWORD>(lstrlenA(text)), &wrote, nullptr);
     WriteFile(g_file, "\r\n", 2, &wrote, nullptr);
-    FlushFileBuffers(g_file);
+    // No FlushFileBuffers: Raw lines (the collision log) come in bursts on the
+    // game thread and a disk flush per line cost tens of ms; WriteFile data
+    // already survives a game crash (only an OS crash could lose it).
     LeaveCriticalSection(&g_lock);
 }
 

@@ -245,7 +245,7 @@ class Run:
             import glitch_fuzz
             self.glitch_rec = os.path.join(self.out, "fuzz.glitchrec")
             glitch_fuzz.generate(self.glitch_rec, int(arg.get("seed", 1)), int(arg.get("frames", 600)),
-                                 int(arg.get("sessions", 2)))
+                                 int(arg.get("sessions", 2)), os.path.join(self.game_dir, "Data", "Maps"))
             reply = pipe.call(f"glitch_replay {self.glitch_rec}")
             self.samples["glitch_replay"] = reply
             self.record("glitch_replay", reply.startswith("ok"), reply)
@@ -586,9 +586,9 @@ class Run:
                 self.record("glitch_parity", False, "no FDNYCore.glitchrec (Debug core with fd_hud_glitch 1?)")
                 return
             shutil.copy2(rec, os.path.join(self.out, "FDNYCore.glitchrec"))
-        maps = expect.get("glitch_maps")
-        r = glitch_parity.compare(rec, os.path.join(self.out, "FDNYCore.log"),
-                                  os.path.join(self.game_dir, maps) if maps else None)
+        # 11c: the core always predicts from <game>\Data\Maps (the old tool's default)
+        maps = os.path.join(self.game_dir, expect.get("glitch_maps", "Data\\Maps"))
+        r = glitch_parity.compare(rec, os.path.join(self.out, "FDNYCore.log"), maps)
         self.samples["glitch_parity"] = {k: r[k] for k in ("sessions_ref", "sessions_core", "lines", "kinds")}
         enough = r["lines"] >= int(expect.get("glitch_min_lines", 1))
         self.record("glitch_parity", not r["mismatches"] and enough,

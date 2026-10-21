@@ -14,12 +14,13 @@ overlay classes replay it via glitch_replay.py; glitch_parity.py compares.
 
   python -I glitch_fuzz.py <out.glitchrec> [--seed N] [--frames N] [--sessions N]
 """
+import os
 import random
 import struct
 import sys
 
 REC_FMT = "<11I3f3ff3fI3f7I"
-SNAP, SESSION = 0xF0, 0xF1
+SNAP, SESSION, MAPCHECK, SESSION_END = 0xF0, 0xF1, 0xF2, 0xF4
 KIND_TRACE, KIND_COMMIT, KIND_ENGINE_RAY = 1, 2, 3
 PLAYER = 0x0A01F000
 
@@ -154,34 +155,138 @@ class Gen:
                                              pre=r.choice(self.pool)))
         return out
 
-    def snapshot(self, tick, player, state, maxs_y, gbase):
+    def snapshot(self, tick, player, state, maxs_y, gbase, pos=None, box=None, disp=None, slot_ny=None):
         r = self.r
         d = [SNAP, tick, player, state & 0xFFFFFFFF, r.choice((0, 1, 0x100)), 1 if r.random() < 0.03 else 0]
-        mins = (self.f(20), self.f(20), self.f(20))
-        maxs = (self.f(20), maxs_y, self.f(20))
-        blk = struct.pack("<6I", *d) + struct.pack("<3f3f3f3f3f4f", *self.vec(3000), *mins, *maxs,
-                                                   *self.vec(30), *self.vec(2000), *self.normal(), self.f(500))
+        mins, maxs = box or ((self.f(20), self.f(20), self.f(20)), (self.f(20), maxs_y, self.f(20)))
+        nrm = self.normal() if slot_ny is None else (0.0, slot_ny, 0.0)
+        blk = struct.pack("<6I", *d) + struct.pack("<3f3f3f3f3f4f", *(pos or self.vec(3000)), *mins, *maxs,
+                                                   *(disp or self.vec(30)), *self.vec(2000), *nrm,
+                                                   self.f(500))
         blk += struct.pack("<I", gbase)
         return blk + b"\0" * (128 - len(blk))
 
 
-def generate(path, seed=1, frames=600, sessions=2):
+class Maps:
+    """Real map data for the warp-window paths: each .bsp's plane-array prefix
+    (what MapFinder matches) and boxes to place the player in (the world
+    model's bounds, and solid leaves' bounds = inside-solid positions)."""
+
+    def __init__(self, maps_dir, r, limit=4):
+        sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "tools",
+                                        "collision_overlay"))
+        import fdny_collision_overlay as ov
+        self.r, self.maps = r, []
+        names = sorted(n for n in os.listdir(maps_dir) if n.lower().endswith(".bsp"))
+        for name in r.sample(names, min(limit, len(names))):
+            with open(os.path.join(maps_dir, name), "rb") as f:
+                ch = ov.gbsp_chunks(f)
+                planes = ov.read_chunk(f, ch, ov.GBSP_PLANES, ov.MAP_SIG_BYTES)[0]
+                d, sz, n = ov.read_chunk(f, ch, ov.GBSP_MODELS)
+                m0 = struct.unpack_from("<2i3f3f", d, 0)
+                d, sz, n = ov.read_chunk(f, ch, ov.GBSP_LEAFS)
+                solid = []
+                for li in range(n):
+                    leaf = struct.unpack_from("<i3f3f8i", d, li * sz)
+                    if leaf[0] & ov.PLAYER_MASK and leaf[14]:
+                        solid.append((leaf[1:4], leaf[4:7]))
+            planes += bytes(r.getrandbits(8) for _ in range(ov.MAP_SIG_BYTES - len(planes)))
+            self.maps.append({"name": name, "planes": planes, "bounds": (m0[2:5], m0[5:8]), "solid": solid,
+                              "path": os.path.join(maps_dir, name), "spots": None})
+        self.ov = ov
+
+    def spots(self, m, budget=4000):
+        """Inputs (pos, box, disp, slot_ny) whose window is one of the rare
+        texts: inside-solid points nudged up under an underside until lined
+        up. The reference Bsp is used only to CHOOSE inputs here."""
+        if m["spots"] is not None:
+            return m["spots"]
+        r, bsp, found = self.r, self.ov.Bsp(m["path"]), {}
+        for _ in range(budget):
+            if not m["solid"] or len(found) >= 40:
+                break
+            box = r.choice(BOXES)
+            lo, hi = r.choice(m["solid"])
+            p = [r.uniform(min(a, b), max(a, b)) for a, b in zip(lo, hi)]
+            disp = r.choice(((0.0, 0.0, 0.0), (r.uniform(-8, 8), r.uniform(-3, 0), r.uniform(-8, 8)),
+                             (r.uniform(-1e-3, 1e-3), 0.0, 0.0)))
+            ny = r.choice((1.0, 0.5, 0.0))
+            disp = tuple(self.ov.f32(v) for v in disp)       # as the stream will carry them
+            for _ in range(3):
+                p = [self.ov.f32(v) for v in p]
+                w = bsp.predict(p, box[0], box[1], disp, ny)
+                key = w["text"].split(" u ")[0] if "too high" not in w["text"] else "too high"
+                if key != "too high" and key not in found:
+                    found[key] = (tuple(p), box, disp, ny)
+                if w.get("gap") is None or w["gap"] <= w["win"]:
+                    break
+                # down toward the underside (gap shrinks by -ny per unit; ~1 for a ceiling)
+                p[1] -= w["gap"] - max(w["win"], 0.0) * r.random() + r.choice((0.0, 0.01, -0.01))
+        m["spots"] = list(found.values())
+        return m["spots"]
+
+    def position(self, m, prev):
+        r = self.r
+        c = r.random()
+        if prev is not None and c < 0.3:
+            lo, hi = [v - 24 for v in prev], [v + 24 for v in prev]
+        elif c < 0.7 and m["solid"]:
+            lo, hi = r.choice(m["solid"])
+        else:
+            lo, hi = m["bounds"]
+        return tuple(r.uniform(min(a, b), max(a, b)) for a, b in zip(lo, hi))
+
+
+BOXES = (((-16.0, 0.0, -16.0), (16.0, 85.0, 16.0)), ((-16.0, 0.0, -16.0), (16.0, 25.0, 16.0)),
+         ((-30.0, -30.0, -30.0), (30.0, 85.0, 30.0)))
+
+
+def generate(path, seed=1, frames=600, sessions=2, maps_dir=None):
     g = Gen(seed)
     r = g.r
+    maps = Maps(maps_dir, r) if maps_dir and os.path.isdir(maps_dir) else None
     with open(path, "wb") as f:
         tick = 1000
         for s in range(sessions):
             f.write(struct.pack("<I", SESSION) + b"\0" * 124)
             gbase = 0x10000000 if s % 2 == 0 else 0x02390000
             state, maxs_y = 3, 85.0
-            for _ in range(frames):
+            cur = r.choice(maps.maps) if maps else None
+            pos, box = None, r.choice(BOXES)
+            for fi in range(frames):
                 tick += 1 if r.random() < 0.9 else r.randint(2, 30)
                 if r.random() < 0.05:
                     state = r.choice((3, 4, 5, 6, 7, 2, -1))
                 if r.random() < 0.05:
                     maxs_y = r.choice((85.0, 25.0, 54.9, 55.0, 60.0))
                 player = 0 if r.random() < 0.02 else PLAYER
-                f.write(g.snapshot(tick, player, state, maxs_y, gbase))
+                if cur is None:
+                    f.write(g.snapshot(tick, player, state, maxs_y, gbase))
+                else:
+                    if r.random() < 0.02:
+                        box = r.choice(BOXES)
+                    spots = maps.spots(cur)
+                    if spots and r.random() < 0.3:              # a lined-up / rare-window spot
+                        pos, sbox, disp, ny = r.choice(spots)
+                        f.write(g.snapshot(tick, player, state, maxs_y, gbase, pos, sbox, disp, ny))
+                    else:
+                        pos = maps.position(cur, pos)
+                        disp = (0.0, 0.0, 0.0) if r.random() < 0.15 else tuple(r.uniform(-12, 12) for _ in range(3))
+                        f.write(g.snapshot(tick, player, state, maxs_y, gbase, pos, box, disp))
+                    if fi == 0 or r.random() < 1 / 60:          # MapFinder.update ran this frame
+                        c = r.random()
+                        if c < 0.1:
+                            planes = None                         # plane array unreadable
+                        elif c < 0.2:
+                            planes = bytes(r.getrandbits(8) for _ in range(len(cur["planes"])))  # unknown map
+                        else:
+                            if c > 0.9:
+                                cur = r.choice(maps.maps)          # level change
+                            planes = cur["planes"]
+                        f.write(struct.pack("<3I", MAPCHECK, planes is not None,
+                                            len(planes) if planes else 0) + b"\0" * 116)
+                        if planes:
+                            f.write(planes)
                 recs = g.noise(tick, gbase)
                 if player and r.random() < 0.9:
                     recs += g.player_frame(tick, player)
@@ -189,9 +294,12 @@ def generate(path, seed=1, frames=600, sessions=2):
                     recs.append(g.writer(tick + 1, r.choice(g.pool), g.normal()))
                 for x in recs:
                     f.write(x)
+            if s % 2 == 0:                                         # hooks removed (fd_hud_glitch 0)
+                f.write(struct.pack("<I", SESSION_END) + b"\0" * 124)
 
 
 if __name__ == "__main__":
     a = sys.argv
     opt = lambda k, d: int(a[a.index(k) + 1]) if k in a else d  # noqa: E731
-    generate(a[1], opt("--seed", 1), opt("--frames", 600), opt("--sessions", 2))
+    generate(a[1], opt("--seed", 1), opt("--frames", 600), opt("--sessions", 2),
+             a[a.index("--maps") + 1] if "--maps" in a else None)
