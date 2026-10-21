@@ -31,6 +31,9 @@ void OnAlpha(cmd::Cvar&);
 cmd::Cvar g_fdTextAlpha = {"fd_text_alpha", "160",
                            "panel background opacity 0-255 (translucent panels; 255 = solid)", false, true, OnAlpha,
                            {0}};
+cmd::Cvar g_fdTextFgAlpha = {"fd_text_fg_alpha", "255",
+                             "text opacity 0-255 on translucent panels (255 = solid text; same cost either way)",
+                             false, true, OnAlpha, {0}};
 
 struct Panel {
     char name[24];
@@ -65,11 +68,12 @@ void DirtyAll() {
 }
 void OnAlpha(cmd::Cvar&) { DirtyAll(); }
 
-int Alpha() {
+int Byte(const cmd::Cvar& c) {
     int v = 0;
-    for (const char* s = g_fdTextAlpha.value; *s >= '0' && *s <= '9'; ++s) v = v * 10 + (*s - '0');
+    for (const char* s = c.value; *s >= '0' && *s <= '9'; ++s) v = v * 10 + (*s - '0');
     return v > 255 ? 255 : v;
 }
+int Alpha() { return Byte(g_fdTextAlpha); }
 
 // Runs of equal tag, opaque cells on the exact column grid.
 bool Render(Panel& p) {
@@ -122,7 +126,8 @@ void Draw() {
             p.rendered = true, p.dirty = false, p.lastRender = g_frame;
             const uint32_t* px = p.canvas.Pixels();
             const int stride = p.canvas.Stride(), w = p.canvas.Width(), h = p.canvas.Height();
-            p.alphaReady = p.style == STYLE_TRANSLUCENT && p.surf.Upload(px, stride, w, h, keys, 3);
+            p.alphaReady = p.style == STYLE_TRANSLUCENT &&
+                           p.surf.Upload(px, stride, w, h, keys, 3, static_cast<uint8_t>(Byte(g_fdTextFgAlpha)));
             p.decalStale = true;
             if (!p.alphaReady && !p.decal.Upload(px, stride, w, h)) Fail(p, "could not create / upload its bitmap");
             else if (!p.alphaReady) p.decalStale = false;
@@ -154,7 +159,8 @@ void CmdInfo(int, const char* const*) {
     int vw, vh, cw, ch;
     gfx::ViewSize(&vw, &vh);
     gfx::CellSize(&cw, &ch);
-    console::Print("textdraw: view %dx%d, cell %dx%d, fd_text_alpha %d", vw, vh, cw, ch, Alpha());
+    console::Print("textdraw: view %dx%d, cell %dx%d, fd_text_alpha %d, fd_text_fg_alpha %d", vw, vh, cw, ch, Alpha(),
+                   Byte(g_fdTextFgAlpha));
     for (int i = 0; i < g_nPanels; ++i) {
         const Panel& p = g_panels[i];
         console::Print("  %s: %s, %d line(s), %dx%d at %d,%d, %s", p.name, p.visible ? "shown" : "hidden", p.n,
@@ -208,6 +214,7 @@ void Show(int panel, bool visible) {
 bool Init() {
     if (!gfx::Init()) return false;
     cmd::RegisterCvar(&g_fdTextAlpha);
+    cmd::RegisterCvar(&g_fdTextFgAlpha);
     cmd::RegisterCommand("fd_textdraw", "list the on-screen text panels: shown, size, position, translucent/opaque",
                          CmdInfo);
     hooks::OnFrameEnd(Draw);

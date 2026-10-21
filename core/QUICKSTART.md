@@ -119,6 +119,7 @@ Put anything you want applied on a switch (binds, settings) in
 | `fd_log_commands 0/1` | log every console command (default 1) |
 | `fd_text_size <px>` | on-screen text height, 7–16 (default 9) |
 | `fd_text_alpha <0-255>` | background opacity of the player HUD and collision boxes (default 160; 255 = solid). The watermark is always opaque |
+| `fd_text_fg_alpha <0-255>` | text opacity on the same panels (default 255 = solid text). No extra cost: those panels are blended either way |
 | `fd_textdraw` | list the on-screen text panels: shown/hidden, size, position, translucent/opaque (troubleshooting) |
 | `fd_version` | read-only core version |
 

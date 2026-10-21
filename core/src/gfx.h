@@ -70,7 +70,9 @@ private:
 };
 
 // --- AlphaSurface --------------------------------------------------------------------
-// Alpha by background colour: pixels equal to a key's rgb get its alpha, all others 255.
+// Alpha by background colour: pixels equal to a key's rgb get its alpha, all others
+// (the text) `otherAlpha`. Same per-pixel cost whatever the values: the tile is
+// blended either way; strictly opaque drawing is the Decal.
 struct AlphaKey {
     uint32_t rgb;
     uint8_t alpha;
@@ -80,7 +82,8 @@ public:
     static constexpr int kTile = 256;  // D3DDrv's 3D texture limit (512 crashes it)
     static constexpr int kMaxTiles = 9;  // up to 768 x 768
 
-    bool Upload(const uint32_t* px, int stride, int w, int h, const AlphaKey* keys, int nKeys);
+    bool Upload(const uint32_t* px, int stride, int w, int h, const AlphaKey* keys, int nKeys,
+                uint8_t otherAlpha = 255);
     // False when it can't draw this frame (no world, or tiles still settling); the
     // caller may fall back to a Decal.
     bool Draw(int x, int y);

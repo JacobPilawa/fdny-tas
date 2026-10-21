@@ -269,7 +269,8 @@ namespace {
 uint16_t g_tileBuf[AlphaSurface::kTile * AlphaSurface::kTile];  // game thread only
 }
 
-bool AlphaSurface::Upload(const uint32_t* px, int stride, int w, int h, const AlphaKey* keys, int nKeys) {
+bool AlphaSurface::Upload(const uint32_t* px, int stride, int w, int h, const AlphaKey* keys, int nKeys,
+                          uint8_t otherAlpha) {
     if (!g_alphaOk || !px) return false;
     constexpr int kSide = 3;  // kMaxTiles = 3 x 3
     if (w > kSide * kTile) w = kSide * kTile;
@@ -289,7 +290,7 @@ bool AlphaSurface::Upload(const uint32_t* px, int stride, int w, int h, const Al
                         continue;
                     }
                     const uint32_t c = px[sy * stride + sx] & 0xFFFFFF;
-                    uint32_t a = 255;
+                    uint32_t a = otherAlpha;
                     for (int k = 0; k < nKeys; ++k)
                         if (keys[k].rgb == c) a = keys[k].alpha;
                     d[x] = static_cast<uint16_t>(((a >> 4) << 12) | (((c >> 20) & 0xF) << 8) | (((c >> 12) & 0xF) << 4) |
