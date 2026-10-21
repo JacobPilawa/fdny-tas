@@ -4,6 +4,7 @@
 #include <stdarg.h>
 
 #include "addr.h"
+#include "binds.h"
 #include "cmd.h"
 #include "hooks.h"
 #include "log.h"
@@ -80,9 +81,43 @@ void CheckConsole(bool final) {
     else if (mw != global) log::Warn("console: MainWindow+0x70 %08lx != g_console %08lx",
                                      static_cast<unsigned long>(mw), static_cast<unsigned long>(global));
     else log::Info("console: game console present at %08lx", static_cast<unsigned long>(mw));
+    // FDNYCore.cfg + autoexec.cfg, once, on the game thread, with the console up.
+    cmd::ExecStartup();
 }
 
-void FrameBegin() { CheckConsole(false); }
+using FindTextureFn = int(__thiscall*)(void* render, int id, int logMiss);
+
+// Is the console font registered with the renderer? Same lookup Console::Render
+// does (0x00427F47) before it raises "Console font texture not loaded".
+bool FontLoaded() {
+    uintptr_t field;
+    uint32_t render = 0;
+    int32_t id = 0;
+    if (!addr::Resolve(Id::everGame_render, &field) || !addr::SafeRead(field, &render, 4) || !render) return false;
+    if (!addr::ReadI32(Id::console_font_id, &id)) return false;
+    return reinterpret_cast<FindTextureFn>(addr::ExportAddress(Id::gfx_find_texture))(
+               reinterpret_cast<void*>(render), id, 0) != 0;
+}
+
+// Game bug: its console font is only registered while a level loads
+// (ROCRender::LoadWorldGeometry -> Console::LoadFont), and Console::Render
+// raises a FATAL ERROR if the console is open without it -- e.g. opened at the
+// main menu (reproduced on the unmodified game in developer mode). Render runs
+// after geEngine_BeginFrame in RenderFrame, so close it again here first, and
+// release the game input the console's open path blocked.
+void GuardFont() {
+    int32_t state = 0;
+    if (!addr::ReadI32(Id::console_state, &state) || state == 0) return;
+    if (FontLoaded()) return;
+    addr::WriteI32(Id::console_state, 0);
+    addr::WriteU8(Id::controls_block_input, 0);
+    Print("console: not available until a level has loaded (the game loads the console font with the level)");
+}
+
+void FrameBegin() {
+    CheckConsole(false);
+    GuardFont();
+}
 void LevelLoad(const char*) { CheckConsole(true); }
 
 void FrameEnd() {
@@ -98,7 +133,8 @@ void FrameEnd() {
 }
 
 const Id kNeeds[] = {Id::con_exec_line, Id::con_add_line, Id::str_from_cstr, Id::str_free_rep,
-                     Id::str_empty_rep, Id::script_engine, Id::mainwindow_console,
+                     Id::str_empty_rep, Id::script_engine, Id::mainwindow_console, Id::gfx_find_texture,
+                     Id::everGame_render, Id::console_font_id, Id::controls_block_input, Id::console_state,
                      Id::console_instance};
 
 } // namespace
@@ -112,6 +148,7 @@ bool Init(const char* gameDir, const char* coreVersion) {
             return false;
         }
     cmd::RegisterBuiltins();
+    binds::Init();
     if (!hooks::Create("console", Id::con_exec_line, reinterpret_cast<void*>(&ExecLineDetour),
                        reinterpret_cast<void**>(&g_origExecLine)) ||
         !hooks::SetEnabled("console", true))

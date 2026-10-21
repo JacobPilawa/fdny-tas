@@ -162,6 +162,47 @@ class Run:
                     self.samples[key] = val
                 return
             self.assert_value(arg, val)
+        elif kind == "restart":
+            # Kill and relaunch inside one test (persistence checks); setup is not re-run.
+            self.g.kill()
+            time.sleep(1.0)
+            self.g.launch()
+            crash = self.g.wait_window()
+            if not crash:
+                time.sleep(1.0)
+                inputs.focus(self.g.hwnd)
+                crash = self.g.wait_ready() if self.core_config else None
+            self.record("restart", crash is None, crash or "relaunched; core ready")
+            if not crash:
+                self.resolver.pm = None
+                bases = self.g.attach()
+                self.resolver = addrtable.Resolver(self.g.pm, self.resolver_version, bases)
+                if arg.get("wait_s"):
+                    time.sleep(float(arg["wait_s"]))
+        elif kind == "run_setup":
+            with open(os.path.join(SETUPS_DIR, f"{arg}.yaml"), encoding="utf-8") as fh:
+                for sub in yaml.safe_load(fh)["steps"]:
+                    if self.g.check_crash():
+                        return
+                    self.step(sub)
+        elif kind == "assert_file":
+            path = os.path.join(self.game_dir, arg["path"])
+            try:
+                with open(path, encoding="utf-8", errors="replace") as fh:
+                    text = fh.read()
+            except OSError:
+                text = None
+            if "contains" in arg:
+                self.record("assert_file", text is not None and arg["contains"] in text,
+                            f"{arg['path']} contains {arg['contains']!r}" + ("" if text is not None else " (missing)"))
+            if "absent" in arg:
+                self.record("assert_file", text is None or arg["absent"] not in text,
+                            f"{arg['path']} does not contain {arg['absent']!r}")
+        elif kind == "assert_log_count":
+            with open(self.g.core_log, encoding="utf-8", errors="replace") as fh:
+                n = fh.read().count(arg["contains"])
+            self.record("assert_log_count", n == int(arg["equals"]),
+                        f"{arg['contains']!r} occurs {n} time(s), expected {arg['equals']}")
         elif kind == "assert_log":
             with open(self.g.core_log, encoding="utf-8", errors="replace") as f:
                 text = f.read()
@@ -231,7 +272,10 @@ class Run:
             backup = dst + ".fdh-backup"
             if os.path.exists(dst):  # a real game file: restore it afterwards
                 shutil.copy2(dst, backup)
-            shutil.copy2(os.path.join(CORE_DIR, f["src"]), dst)
+            if f.get("src"):
+                shutil.copy2(os.path.join(CORE_DIR, f["src"]), dst)
+            elif os.path.exists(dst):  # src: null -> the file must be absent for the test
+                os.remove(dst)
             placed.append((dst, backup))
         return placed
 
@@ -276,6 +320,7 @@ class Run:
                 self.record("address_table_version", version is not None, vname or "no matching exe+Genesis hash")
                 if version:
                     self.resolver = addrtable.Resolver(self.g.pm, version, bases)
+                    self.resolver_version = version
                 if self.test.get("record", True):
                     rec = capture.Recorder(os.path.join(self.out, "run.mp4"), self.g.client_rect())
                     err = rec.start()

@@ -42,8 +42,10 @@ SCAN = {
     "up": (0x48, True), "down": (0x50, True), "left": (0x4B, True), "right": (0x4D, True),
     "minus": (0x0C, False), "equals": (0x0D, False), "period": (0x34, False),
     "slash": (0x35, False), "semicolon": (0x27, False), "quote": (0x28, False),
-    "comma": (0x33, False), "f12": (0x58, False),
+    "comma": (0x33, False), "f11": (0x57, False), "f12": (0x58, False),
 }
+for i in range(10):
+    SCAN[f"f{i + 1}"] = (0x3B + i, False)
 for i, c in enumerate("1234567890"):
     SCAN[c] = (0x02 + i, False)
 for row, start in (("qwertyuiop", 0x10), ("asdfghjkl", 0x1E), ("zxcvbnm", 0x2C)):

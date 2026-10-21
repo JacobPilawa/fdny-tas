@@ -83,6 +83,7 @@ class Game:
         self.pm = None
 
     def launch(self):
+        self.hwnd = 0  # a stale handle from a previous launch would read as "hung"
         self.proc = subprocess.Popen([self.exe], cwd=self.dir)
         self.started = time.time()
         return self.proc.pid

@@ -18,8 +18,9 @@ cause of RESEARCH.md growing to 465 MB.
 | 2 | Address table + version check | **DONE 2026-10-21**: live-tested, suite green, committed |
 | 3 | Hook manager + events | **DONE 2026-10-21**: live-tested, suite green, committed |
 | 4 | Console (on the game's console) | **DONE 2026-10-21**: live-tested in player config, suite green, committed |
-| 5 | Variables, config, binds | next |
-| 6-12 | — | not started |
+| 5 | Variables, config, binds | **DONE 2026-10-21**: live-tested, suite green (11/11), committed |
+| 6 | fov module | next |
+| 7-12 | — | not started |
 | 13 | Teleporter (save location / teleport, map-gated), owner request 2026-10-21 | not started (needs 5, 9) |
 
 **Mid-item:** no.
@@ -258,6 +259,35 @@ Live 2026-10-21: in Training, gameState = 1 and mapName = `training`. All 12 cha
 - **Game cfg restored** to the owner's original (`ImADeveloper = false`). The whole suite now runs in the player configuration. `console_basic` stages that cfg itself through `pre_files`, which now backs up and restores a replaced game file.
 - **Red first:** `console_basic` against the item-3 core failed for the right reasons (no console, no output, W moved the player 344 u).
 
+## Item 5: variables, config, binds (done)
+
+- **Built (0.5.0):**
+  - Archived cvars (`archive` flag) and binds are persisted to `FDNYCore.cfg` in the game folder, rewritten on every change (the game can be killed at any time); `fd_writeconfig` forces a write.
+  - At startup, on the game thread once the console exists: `FDNYCore.cfg` runs first (no rewrite while loading), then `autoexec.cfg`. First archived var: `fd_log_commands` (default 1).
+  - `bind`/`unbind`/`unbindall`/`bindlist` (`src/binds.cpp`), per the feasibility notes:
+    - own key-name table (VK codes);
+    - edge-triggered polling with `GetAsyncKeyState` on frame_begin, only while the game window is foreground and the console is closed;
+    - backtick reserved; binding a game key warns but doesn't swallow;
+    - bound lines go through `cmd::Dispatch`, or to the game one per frame.
+- **Live so far:**
+  - `autoexec` PASS (autoexec ran at startup; its F6 bind fired once).
+  - `vars_binds_persist`: everything up to the restart passed. After the restart, `fd_log_commands 0` was in effect (no `cmd:` lines), F5 still fired from the persisted bind, and `FDNYCore.cfg` loaded. Then the test opened the console **at the main menu**, and the game raised FATAL ERROR "Console font texture not loaded".
+- **Native game bug, confirmed:** the unmodified game (no core, `ImADeveloper = true`) raises the same fatal error when the console is opened at the main menu (`runs/...-explore_menu_console_native`). The developers evidently only used the console in a level. FDNYCore exposes the console to every player, so it must make the menu safe.
+- **Fix (font guard, `console.cpp` GuardFont).**
+  - **Why it happens** (Haiku Ghidra pass): the font is registered only during world load (`ROCRender::LoadWorldGeometry` 0x00495210 → `Console::LoadFont` 0x004275A0, its only caller). `Console::Render` checks it via the texture lookup 0x00493D00 (ECX = `[g_everGame]+4`, id = `[console+0x108]`) **only while the console is open**.
+  - **The guard:** Render runs after `geEngine_BeginFrame` inside `RenderFrame`, so the core's frame-begin hook, if the console is open and the same lookup says the font isn't registered:
+    - closes it again (`[con+0x49C] = 0`);
+    - clears the game's input-block byte `[[g_everGame]+0]+0x330`, which the open path set (GameControls object, ctor 0x004395C0);
+    - prints "console: not available until a level has loaded".
+  - **Rejected alternative:** calling LoadFont at the menu, because the device may be null there (placeholder texture → later crash risk), and registrations look per-level.
+  - **Cost:** no console at the menu, only in a level.
+- New address-table entries: `gfx.find_texture`, `everGame.render`, `console.font_id`, `controls.block_input` (39 total).
+- **Tests:**
+  - `console_menu_safe` (new): backtick and Tab at the menu → state stays 0, input not blocked, refusal printed, menu still works; then in a level the console opens and echoes.
+  - `vars_binds_persist`: now checks the refusal at the menu after the restart, then enters Training through the new `run_setup` step to verify the restored values in the console. This adds coverage; no check was dropped.
+  - Both PASS.
+- **Harness fixes:** `restart` step added (kill + relaunch inside one test); `Game.launch` now clears the stale HWND, which otherwise read as "hung". Also added `assert_file`, `assert_log_count`, `pre_files` with `src: null` (file must be absent, restored after), and F1-F12 scancodes.
+
 ## Assumptions / workarounds
 
 - **"Behaves the same" (item 1c) definition**, chosen by the agent at the owner's request. These are LOOP.md's 7 criteria, with two calibrations:
@@ -295,3 +325,8 @@ Live 2026-10-21: in Training, gameState = 1 and mapName = `training`. All 12 cha
   - The first approach (calling the ctor at the first frame) crashed; it's diagnosed and documented.
   - Red then green; suite 8/8 PASS in player config; Release EQUIVALENT (fps 55.6 vs 55.6). Game cfg restored to `ImADeveloper = false`.
   - Evidence in `core/evidence/item04/`.
+- 2026-10-21 it6: **item 5 DONE**. FDNYCore 0.5.0:
+  - Archived vars and binds persist to `FDNYCore.cfg`; `autoexec.cfg` runs at startup; `bind`/`unbind`/`unbindall`/`bindlist`.
+  - Fixed a native game crash: console opened before a level → FATAL "Console font texture not loaded". The core now refuses to open it until the font exists.
+  - Red runs first; suite 11/11 PASS; Release EQUIVALENT (fps 55.6 vs 55.6).
+  - Evidence in `core/evidence/item05/`.

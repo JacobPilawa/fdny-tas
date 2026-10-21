@@ -1,0 +1,8 @@
+# Main menu (splash already dismissed) -> Training via career slot "Hotrod Stein".
+steps:
+  - gclick: [97, 457]       # main: "game"
+  - wait_s: 3
+  - gclick: [195, 165]      # career: Hotrod Stein (Training)
+  - wait_s: 3
+  - gclick: [568, 450]      # briefing: GO!
+  - wait_s: 20              # level load

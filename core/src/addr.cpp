@@ -175,6 +175,20 @@ uintptr_t ExportAddress(Id id) {
     return g_bases[e.module] + e.rva;
 }
 
+bool WriteU8(Id id, uint8_t v) {
+    uintptr_t a;
+    if (!Resolve(id, &a) || !Readable(a, 1)) return false;
+    *reinterpret_cast<volatile uint8_t*>(a) = v;
+    return true;
+}
+
+bool WriteI32(Id id, int32_t v) {
+    uintptr_t a;
+    if (!Resolve(id, &a) || !Readable(a, 4)) return false;
+    *reinterpret_cast<volatile int32_t*>(a) = v;
+    return true;
+}
+
 bool ReadI32(Id id, int32_t* out) {
     uintptr_t a;
     return Resolve(id, &a) && SafeRead(a, out, 4);

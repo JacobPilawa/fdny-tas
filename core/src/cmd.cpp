@@ -2,6 +2,7 @@
 
 #include <windows.h>
 
+#include "binds.h"
 #include "console.h"
 #include "hooks.h"
 #include "log.h"
@@ -120,14 +121,22 @@ bool ExecFile(const char* name) {
     return true;
 }
 
-Cvar g_fdVersion = {"fd_version", "", "FDNYCore version", true, nullptr, {0}};
+bool g_loading = false;  // while FDNYCore.cfg itself is being executed: don't rewrite it
+
+Cvar g_fdVersion = {"fd_version", "", "FDNYCore version", true, false, nullptr, {0}};
+Cvar g_fdLogCommands = {"fd_log_commands", "1", "log every FDNYCore console command to FDNYCore.log (0/1)",
+                        false, true, nullptr, {0}};
+
+void CmdWriteConfig(int, const char* const*) {
+    if (SaveConfig()) console::Print("wrote %s%s", console::GameDir(), kConfigName);
+}
 
 void OnHooksFrame(Cvar& v) {
     bool on = v.value[0] != '0';
     if (!hooks::SetEnabled("frame", on)) console::Print("fd_hooks_frame: frame hooks unavailable");
 }
 Cvar g_fdHooksFrame = {"fd_hooks_frame", "1", "frame hooks on/off (debugging; disables per-frame features)",
-                       false, OnHooksFrame, {0}};
+                       false, false, OnHooksFrame, {0}};
 
 } // namespace
 
@@ -151,7 +160,45 @@ bool SetCvar(Cvar* v, const char* value) {
     if (v->readOnly) return false;
     lstrcpynA(v->value, value, sizeof(v->value));
     if (v->onChange) v->onChange(*v);
+    if (v->archive) SaveConfig();
     return true;
+}
+
+// FDNYCore.cfg: archived variables that differ from their defaults, then
+// binds. Rewritten whole on every change (the game can be killed at any
+// time, so there's no reliable exit to save on).
+bool SaveConfig() {
+    if (g_loading) return false;
+    static char buf[32 * 1024];
+    int o = wsprintfA(buf, "// FDNYCore settings -- written by FDNYCore, overwritten on change.\r\n"
+                           "// Put your own commands in autoexec.cfg instead.\r\n");
+    for (int i = 0; i < g_nCvars; ++i) {
+        const Cvar* v = g_cvars[i];
+        if (!v->archive || lstrcmpA(v->value, v->defaultValue) == 0) continue;
+        if (o + 300 > static_cast<int>(sizeof(buf))) break;
+        o += wsprintfA(buf + o, "%s \"%s\"\r\n", v->name, v->value);
+    }
+    o += binds::AppendConfig(buf + o, static_cast<int>(sizeof(buf)) - o);
+    char path[MAX_PATH];
+    wsprintfA(path, "%s%s", console::GameDir(), kConfigName);
+    HANDLE f = CreateFileA(path, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (f == INVALID_HANDLE_VALUE) {
+        log::Error("config: cannot write %s (%lu)", path, GetLastError());
+        return false;
+    }
+    DWORD wrote = 0;
+    WriteFile(f, buf, static_cast<DWORD>(o), &wrote, nullptr);
+    CloseHandle(f);
+    return true;
+}
+
+void ExecStartup() {
+    g_loading = true;
+    bool haveCfg = ExecFile(kConfigName);
+    g_loading = false;
+    bool haveAuto = ExecFile("autoexec.cfg");
+    log::Info("config: startup (%s: %s, autoexec.cfg: %s)", kConfigName, haveCfg ? "loaded" : "none",
+              haveAuto ? "ran" : "none");
 }
 
 bool Dispatch(const char* line) {
@@ -166,13 +213,14 @@ bool Dispatch(const char* line) {
         }
         return ExecFile(argv[1]);  // false -> the game's own exec verb
     }
+    const bool logIt = g_fdLogCommands.value[0] != '0';
     if (Command* c = FindCommand(argv[0])) {
-        log::Info("cmd: %s", line);
+        if (logIt) log::Info("cmd: %s", line);
         c->fn(argc, argv);
         return true;
     }
     if (Cvar* v = FindCvar(argv[0])) {
-        log::Info("cmd: %s", line);
+        if (logIt) log::Info("cmd: %s", line);
         if (argc == 1) {
             console::Print("%s is \"%s\" (default \"%s\") - %s", v->name, v->value, v->defaultValue, v->help);
         } else if (!SetCvar(v, argv[1])) {
@@ -199,6 +247,8 @@ void RegisterBuiltins() {
     RegisterCvar(&g_fdVersion);
     lstrcpynA(g_fdVersion.value, console::CoreVersion(), sizeof(g_fdVersion.value));
     RegisterCvar(&g_fdHooksFrame);
+    RegisterCvar(&g_fdLogCommands);
+    RegisterCommand("fd_writeconfig", "write FDNYCore.cfg now (it is also written on every change)", CmdWriteConfig);
 }
 
 void QueueGameLine(const char* line) {

@@ -13,6 +13,7 @@ struct Cvar {
     const char* defaultValue;
     const char* help;
     bool readOnly;
+    bool archive;               // persisted in FDNYCore.cfg when not at default
     void (*onChange)(Cvar& v);  // may be null
     char value[128];
 };
@@ -30,6 +31,12 @@ bool Dispatch(const char* line);
 
 // Registers echo / cvarlist / cmdlist / exec and the core's own variables.
 void RegisterBuiltins();
+
+constexpr const char* kConfigName = "FDNYCore.cfg";
+// Writes FDNYCore.cfg (archived non-default vars + binds). False while loading it.
+bool SaveConfig();
+// Runs FDNYCore.cfg, then autoexec.cfg (game thread, once the console exists).
+void ExecStartup();
 
 // Lines from `exec` that belong to the game are queued and handed to the
 // game one per frame (its script engine stores one pending line at a time).
