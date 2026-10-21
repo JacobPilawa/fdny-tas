@@ -9,5 +9,7 @@ void Close();
 void Info(const char* fmt, ...);
 void Warn(const char* fmt, ...);
 void Error(const char* fmt, ...);
+// One INFO line of any length, unformatted: "<tag><text>".
+void Raw(const char* tag, const char* text);
 
 } // namespace fdcore::log

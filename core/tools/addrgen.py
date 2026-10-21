@@ -216,7 +216,27 @@ def cmd_header(out):
                 f'{sig.get("rva", "0")}, {len(sb)}, {{{", ".join(hex(b) for b in sb) or "0"}}}, '
                 f'{chr(34) + e["export"] + chr(34) if e.get("export") else "nullptr"}}},')
         L.append("    }},")
-    L += ["};", "", "} // namespace fdcore::addr", ""]
+    L += ["};", ""]
+    # hud_glitch caller classification (first version's tables; exe-specific
+    # return addresses, kept here so module code holds no raw addresses).
+    c = next(iter(t["versions"].values())).get("classify")
+    if c:
+        q = lambda s: '"' + s.replace("\\", "\\\\").replace('"', '\\"') + '"'
+        sp = c["special"]
+        L += ["namespace classify {"]
+        L += [f"constexpr uint32_t kRet_{k} = {v};" for k, v in sp.items()]
+        L += ["struct Role { uint32_t ret; const char* role; };",
+              f"inline const Role kRoles[] = {{{', '.join('{%s, %s}' % (a, q(r)) for a, r in c['roles'].items())}}};",
+              "struct Outer { uint32_t ret; const char* source; const char* name; };",
+              "inline const Outer kOuterRets[] = {"]
+        L += [f"    {{{a}, {q(s)}, {q(n)}}}," for a, (s, n) in c["outer_rets"].items()]
+        L += ["};", "struct FuncStart { uint32_t start; const char* source; const char* name; };",
+              "inline const FuncStart kFuncStarts[] = {  // sorted by start"]
+        L += [f"    {{{a}, {q(s)}, {q(n)}}}," for a, s, n in sorted(c["func_starts"], key=lambda r: int(r[0], 16))]
+        L += ["};", "struct GenesisRet { uint32_t rel; const char* name; };",
+              f"inline const GenesisRet kGenesisRets[] = {{{', '.join('{%s, %s}' % (a, q(n)) for a, n in c['genesis_rets'].items())}}};",
+              "}  // namespace classify", ""]
+    L += ["} // namespace fdcore::addr", ""]
     os.makedirs(os.path.dirname(out), exist_ok=True)
     with open(out, "w", encoding="utf-8", newline="\n") as f:
         f.write("\n".join(L))

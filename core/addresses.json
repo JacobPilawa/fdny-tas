@@ -1279,6 +1279,207 @@
           "ghidra": "spectator flag: nonzero = DepenetrateFromWorld skipped (overlay OFF_SPECTATOR)",
           "note": "u8"
         }
+      },
+      "classify": {
+        "_comment": "Caller classification for hud_glitch, copied from tools/collision_overlay (HOOK_SITES.md section 6) by tools/addrgen.py-era script; the replay parity test compares against the overlay module itself",
+        "special": {
+          "tracetofloor": "0x492da6",
+          "groundheight": "0x48ffc6",
+          "segmentlos": "0x48ff27",
+          "los_activeworld": "0x49014d",
+          "sweepbox": "0x4900de",
+          "floorme": "0x4486f3",
+          "hosegfx": "0x46cbd8",
+          "commit_site": "0x43f9c7"
+        },
+        "roles": {
+          "0x43f732": "first",
+          "0x43f7e0": "resweep",
+          "0x43f8bf": "stepup",
+          "0x43f920": "forward",
+          "0x43f9b1": "stepdown"
+        },
+        "outer_rets": {
+          "0x43f732": [
+            "Player",
+            "DepenetrateFromWorld"
+          ],
+          "0x43f7e0": [
+            "Player",
+            "DepenetrateFromWorld (2)"
+          ],
+          "0x43f8bf": [
+            "Player",
+            "Think step-up"
+          ],
+          "0x43f920": [
+            "Player",
+            "Think step-forward"
+          ],
+          "0x43f9b1": [
+            "Player",
+            "Think step-down"
+          ],
+          "0x447ccf": [
+            "Fire",
+            "TrySpawnSpreadFire"
+          ],
+          "0x45aca0": [
+            "Victim",
+            "CanReachOffset"
+          ],
+          "0x460dd6": [
+            "Axe",
+            "AxeSwing::ResolveHit"
+          ],
+          "0x49daa7": [
+            "Other",
+            "ModelEntity::SnapToFloor"
+          ],
+          "0x49e44c": [
+            "Other",
+            "ROCWorldEntity vfunc 0x0049e3e0"
+          ],
+          "0x45ade3": [
+            "Victim",
+            "CanReachOffset (ground)"
+          ],
+          "0x45ae11": [
+            "Victim",
+            "CanReachOffset (ground 2)"
+          ],
+          "0x46781c": [
+            "Hose",
+            "PlayerHose::Think_Advance"
+          ],
+          "0x43fd9c": [
+            "Other",
+            "BlinkLight LOS"
+          ],
+          "0x4484cd": [
+            "Fire",
+            "Fire heat LOS ray (player -> fire)"
+          ],
+          "0x482779": [
+            "HoseRope",
+            "hose rope node sweep (HoseRope::Step)"
+          ],
+          "0x449a29": [
+            "Fire",
+            "FloorMe <- FireRescueEnt::AdvanceSpread"
+          ],
+          "0x4492ab": [
+            "Fire",
+            "FloorMe <- GotoPathPoint"
+          ]
+        },
+        "func_starts": [
+          [
+            "0x43dc60",
+            "Other",
+            "BModelEnt_Liftable::Think"
+          ],
+          [
+            "0x43f6d0",
+            "Player",
+            "BModelEnt::DepenetrateFromWorld"
+          ],
+          [
+            "0x43f810",
+            "Player",
+            "BModelEnt::Think"
+          ],
+          [
+            "0x447a90",
+            "Fire",
+            "FireRescueEnt::TrySpawnSpreadFire"
+          ],
+          [
+            "0x448630",
+            "Fire",
+            "FireRescueEnt::FloorMe"
+          ],
+          [
+            "0x448a90",
+            "Fire",
+            "FireRescueEnt::GotoPathPoint"
+          ],
+          [
+            "0x449340",
+            "Fire",
+            "FireRescueEnt::Spawn"
+          ],
+          [
+            "0x452570",
+            "Player",
+            "PlayerRescueEnt::Think"
+          ],
+          [
+            "0x455230",
+            "Other",
+            "RescueBot::TryStartRescue"
+          ],
+          [
+            "0x45ab40",
+            "Victim",
+            "VictimRescueEnt::CanReachOffset"
+          ],
+          [
+            "0x45ae50",
+            "Victim",
+            "VictimRescueEnt::AdvanceRoamTarget"
+          ],
+          [
+            "0x45c7f0",
+            "Victim",
+            "VictimRescueEnt::ValidateSpawn"
+          ],
+          [
+            "0x460b90",
+            "Axe",
+            "AxeSwing::ResolveHit"
+          ],
+          [
+            "0x4677d0",
+            "Hose",
+            "PlayerHose::Think_Advance"
+          ],
+          [
+            "0x46c5a0",
+            "Hose",
+            "HoseGfx::RebuildGeometry"
+          ],
+          [
+            "0x48fea0",
+            "Other",
+            "roc_SegmentClearLOS"
+          ],
+          [
+            "0x48ff30",
+            "Other",
+            "World::TraceGroundHeight"
+          ],
+          [
+            "0x490000",
+            "Other",
+            "roc_SweepWorldBox"
+          ],
+          [
+            "0x492ce0",
+            "Other",
+            "ROCRender::TraceToFloor"
+          ],
+          [
+            "0x49da00",
+            "Other",
+            "ModelEntity::SnapToFloor"
+          ]
+        ],
+        "genesis_rets": {
+          "0x10012253": "engine actor shadow",
+          "0x10002fd5": "engine sound occlusion",
+          "0x10039167": "engine TestModelMove"
+        }
       }
     }
   }

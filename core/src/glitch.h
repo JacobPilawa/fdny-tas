@@ -10,4 +10,9 @@ bool Installed();
 // Debug pipe / tests: "installed=.. tick=.. trace=.. commit=.. engine_ray=.. dropped=..".
 int Stats(char* out, int cap);
 
+#ifdef FDCORE_DEBUG
+// Test-only: run a .glitchrec stream through the analysis offline (parity tests).
+int ReplayFile(const char* path, char* out, int cap);
+#endif
+
 } // namespace fdcore::glitch

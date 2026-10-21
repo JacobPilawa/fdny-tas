@@ -238,6 +238,17 @@ class Run:
             # {cmd, as}: store a "k=v k=v" pipe reply as a dict
             reply = pipe.call(arg["cmd"])
             self.samples[arg["as"]] = dict(kv.split("=", 1) for kv in reply.split() if "=" in kv)
+        elif kind == "glitch_replay_fuzz":
+            # {seed, frames, sessions}: synthetic .glitchrec through the core's analysis offline
+            import sys as _sys
+            _sys.path.insert(0, os.path.join(CORE_DIR, "harness"))
+            import glitch_fuzz
+            self.glitch_rec = os.path.join(self.out, "fuzz.glitchrec")
+            glitch_fuzz.generate(self.glitch_rec, int(arg.get("seed", 1)), int(arg.get("frames", 600)),
+                                 int(arg.get("sessions", 2)))
+            reply = pipe.call(f"glitch_replay {self.glitch_rec}")
+            self.samples["glitch_replay"] = reply
+            self.record("glitch_replay", reply.startswith("ok"), reply)
         elif kind == "assert_pipe_stat":
             # {cmd, key, min|equals, since: <sample label>} numeric field of a pipe reply
             reply = dict(kv.split("=", 1) for kv in pipe.call(arg["cmd"]).split() if "=" in kv)
@@ -551,6 +562,8 @@ class Run:
             errors = self.collect_log()
             limit = expect.get("log_errors", 0)
             self.record("log_errors", len(errors) <= limit, f"{len(errors)} ERROR line(s), limit {limit}")
+        if expect.get("glitch_parity"):
+            self.check_glitch_parity(expect)
         passed = all(r["pass"] for r in self.results)
         result = {"test": self.test["name"], "core": self.core_config, "pass": passed,
                   "crash": crash, "assertions": self.results, "samples": self.samples,
@@ -559,6 +572,28 @@ class Run:
             json.dump(result, f, indent=2)
         print(f"== {'PASS' if passed else 'FAIL'} {self.test['name']}")
         return result
+
+    def check_glitch_parity(self, expect):
+        """Item 11: the core's live collision log vs the original overlay's
+        classes replaying the same raw stream (after the game has exited)."""
+        import sys as _sys
+        _sys.path.insert(0, os.path.join(CORE_DIR, "harness"))
+        import glitch_parity
+        rec = getattr(self, "glitch_rec", None)
+        if rec is None:
+            rec = os.path.join(self.game_dir, "FDNYCore.glitchrec")
+            if not os.path.exists(rec):
+                self.record("glitch_parity", False, "no FDNYCore.glitchrec (Debug core with fd_hud_glitch 1?)")
+                return
+            shutil.copy2(rec, os.path.join(self.out, "FDNYCore.glitchrec"))
+        maps = expect.get("glitch_maps")
+        r = glitch_parity.compare(rec, os.path.join(self.out, "FDNYCore.log"),
+                                  os.path.join(self.game_dir, maps) if maps else None)
+        self.samples["glitch_parity"] = {k: r[k] for k in ("sessions_ref", "sessions_core", "lines", "kinds")}
+        enough = r["lines"] >= int(expect.get("glitch_min_lines", 1))
+        self.record("glitch_parity", not r["mismatches"] and enough,
+                    f"sessions ref {r['sessions_ref']} / core {r['sessions_core']}, {r['lines']} reference "
+                    f"lines {r['kinds']}; mismatches: {r['mismatches'][:3] or 'none'}")
 
     def collect_log(self):
         try:

@@ -27,6 +27,7 @@ $sources = Get-ChildItem (Join-Path $here 'src') -Filter *.cpp | ForEach-Object 
 $common = @(
     'c++', '-target', 'x86-windows-gnu', '-shared', '-std=c++17',
     '-fno-rtti', '-fno-exceptions', '-fno-stack-protector', '-fno-builtin',
+    '-fno-threadsafe-statics',   # no CRT guard functions; function-local statics are game-thread only
     '-nostdlib', '-Wall', '-Wextra', '-Werror', '-Wno-nullability-completeness',
     '-Wno-unused-command-line-argument',   # zig injects -fno-rtlib-defaultlib itself
     '-isystem', $winInc,

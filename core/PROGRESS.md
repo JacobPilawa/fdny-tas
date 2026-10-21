@@ -24,7 +24,7 @@ cause of RESEARCH.md growing to 465 MB.
 | 8 | speedrun module | **DONE 2026-10-21**: FDNYDeterministic proven live, then exact parity; suite green (18/18), committed. On-screen bot check substituted by memory evidence (see item 8) |
 | 9 | Game state snapshot | **DONE 2026-10-21**: snapshot == direct reads (0 mismatches), suite green (20/20), committed. Also fixed a SafeRead race crash, added fd_skip_intro |
 | 10 | hud_player | **DONE 2026-10-21**: every old-overlay field in-game via geEngine_Printf; drawn == same-frame values (also moving) and == memory at rest; suite green (21/21), committed |
-| 11 | hud_glitch | next |
+| 11 | hud_glitch | **in progress**: 11a, 11b done; 11c (Bsp + MapFinder, WARP prediction) next |
 | 12 | Profiles + watermark | not started |
 | 13 | Teleporter (save location / teleport, map-gated), owner request 2026-10-21 | not started (needs 5, 9) |
 
@@ -494,6 +494,24 @@ Structural map (Haiku, line-referenced) of `fdny_collision_overlay.py` (1748 lin
 - **Stream check** with the overlay's own `REC_FMT` (`harness/glitchrec_check.py`): kinds trace / engine-ray / commit / snapshot.
   - Per frame, traces carry tick N and engine rays N+1. That matches the game loop: TickSubsystems → tick hook at 0x0042AF0F → RenderFrame, the same as the Python poll order.
 
+**11b (analysis port): done.**
+
+- **`src/glitch_analysis.{h,cpp}`:** C++ port of Ev / Model (writers = insertion-ordered map, 50000 FIFO; history 500) / FrameAnalyzer / `iteration_outcome` / TextLog / `GameSource._classify` / `poll` record decoding / `track_crouchbug`.
+  - Python `%.Nf` (half-even on the double of the float32) and `round(x, 1)` writer keys reproduced exactly.
+  - `glitch.cpp` starts a session (TextLog header) on every hook install and runs `Poll` per frame. The log goes to `FDNYCore.log` as `glitch| ` lines (new `log::Raw`); there's no separate file (owner rule).
+  - 11b has no prediction on either side: the warp line ends `; predicted: none` until 11c.
+- **Parity tools:** `harness/glitch_replay.py` subclasses the overlay's `GameSource` and swaps only the data source; everything else runs unmodified, with timestamps stubbed. It's session-aware (Debug dump marker 0xF1 on each install). `harness/glitch_parity.py` diffs session by session.
+- **Live test `glitch_parity_log`** (Training → bank, two sessions): identical, but a live run only yields header lines and crouchbug notes. Warp-capable hits and warps are rare in normal play.
+- **Synthetic test `glitch_parity_fuzz`:** `harness/glitch_fuzz.py` writes a seeded stream in the exact dump layout, covering:
+  - capable hits, including repeats;
+  - warps with known and unknown writers;
+  - every iteration outcome and re-sweeps;
+  - engine rays, Genesis callers (relocated and not) and foreign commits;
+  - crouchbug edges, player-less frames, tick gaps, and floats on the .x5 rounding edges.
+  - The core replays it offline through the Debug pipe (`glitch_replay <path>`, refused while the live hooks run); the reference replays it through the original classes.
+  - Result: **2075 lines identical** (3 sessions: 1495 capable, 458 WARP, 92 notes, 30 header).
+  - Mutation check: a one-character edit to the core log is reported as a mismatch.
+
 ## Assumptions / workarounds
 
 - **"Behaves the same" (item 1c) definition**, chosen by the agent at the owner's request. These are LOOP.md's 7 criteria, with two calibrations:
@@ -565,3 +583,9 @@ Structural map (Haiku, line-referenced) of `fdny_collision_overlay.py` (1748 lin
   - Test redesigned after a suite-found measurement race: same-frame source check, also mid-motion.
   - Suite 21/21 PASS; Release EQUIVALENT.
   - Evidence in `core/evidence/item10/`.
+- 2026-10-21 it12: **11a DONE** (FDNYCore 0.11.0): collision-overlay hooks in-process, Debug `.glitchrec` dump; suite green; evidence in `core/evidence/item11a/`.
+- 2026-10-21 it13: **11b DONE** (FDNYCore 0.11.1): analysis port; the core's `glitch|` log is identical to the original overlay classes on the same stream.
+  - Live parity (`glitch_parity_log`) only covered header and notes, so I added the seeded synthetic stream (`glitch_parity_fuzz`): 2075 lines identical, including 1495 capable and 458 WARP. The mutation check is caught.
+  - Suite 24/24 PASS (Debug); Release EQUIVALENT (fps 57.2 vs 55.6, laps within 4.1 u).
+  - Evidence in `core/evidence/item11b/`.
+  - Next: 11c (Bsp + MapFinder → "predicted:" text; replay with `--predict`).

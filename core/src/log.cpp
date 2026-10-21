@@ -49,6 +49,22 @@ void Close() {
     g_file = INVALID_HANDLE_VALUE;
 }
 
+void Raw(const char* tag, const char* text) {
+    if (g_file == INVALID_HANDLE_VALUE) return;
+    char head[96];
+    SYSTEMTIME t;
+    GetLocalTime(&t);
+    int n = wsprintfA(head, "[%04d-%02d-%02d %02d:%02d:%02d.%03d] [INFO] %s", t.wYear, t.wMonth, t.wDay, t.wHour,
+                      t.wMinute, t.wSecond, t.wMilliseconds, tag);
+    EnterCriticalSection(&g_lock);
+    DWORD wrote = 0;
+    WriteFile(g_file, head, static_cast<DWORD>(n), &wrote, nullptr);
+    WriteFile(g_file, text, static_cast<DWORD>(lstrlenA(text)), &wrote, nullptr);
+    WriteFile(g_file, "\r\n", 2, &wrote, nullptr);
+    FlushFileBuffers(g_file);
+    LeaveCriticalSection(&g_lock);
+}
+
 void Info(const char* fmt, ...) {
     va_list ap;
     va_start(ap, fmt);

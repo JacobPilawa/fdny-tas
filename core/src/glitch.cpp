@@ -14,6 +14,7 @@
 #include "addr.h"
 #include "cmd.h"
 #include "console.h"
+#include "glitch_analysis.h"
 #include "hooks.h"
 #include "log.h"
 
@@ -265,6 +266,10 @@ bool PatchAll(bool install) {
     return false;
 }
 
+#ifdef FDCORE_DEBUG
+void DumpSessionStart();
+#endif
+
 bool Install() {
     if (g_installed) return true;
     for (Site& s : g_sites) {
@@ -287,6 +292,10 @@ bool Install() {
         return false;
     }
     g_installed = true;
+    analysis::BeginSession();
+#ifdef FDCORE_DEBUG
+    DumpSessionStart();
+#endif
     log::Info("glitch: hooks installed: cave 0x%08lX, Genesis base 0x%08lX",
               reinterpret_cast<unsigned long>(g_cave), static_cast<unsigned long>(addr::ModuleBase(1)));
     return true;
@@ -314,38 +323,55 @@ void DumpBlock(const uint32_t* rec) {
     if (g_dump != INVALID_HANDLE_VALUE) WriteFile(g_dump, rec, kRecSize, &w, nullptr);
 }
 
-void DumpSnapshot() {
+void DumpSnapshot(const analysis::Snapshot& s) {
     uint32_t b[32] = {};
     b[0] = 0xF0;
-    b[1] = *reinterpret_cast<volatile uint32_t*>(g_cave + kTick);
-    uintptr_t slot;
-    uint32_t player = 0;
-    if (addr::Resolve(Id::player_object, &slot)) addr::SafeRead(slot, &player, 4);
-    b[2] = player;
-    if (player) {
-        int32_t state = 0;
-        uint8_t ground = 0, spec = 0;
-        addr::SafeRead(player + addr::Field(Id::player_f_state), &state, 4);
-        addr::SafeRead(player + addr::Field(Id::player_f_ground), &ground, 1);
-        addr::SafeRead(player + addr::Field(Id::player_f_spectator), &spec, 1);
-        b[3] = static_cast<uint32_t>(state), b[4] = ground, b[5] = spec;
-        addr::SafeRead(player + addr::Field(Id::player_f_pos), &b[6], 12);
-        addr::SafeRead(player + addr::Field(Id::player_f_mins), &b[9], 12);
-        addr::SafeRead(player + addr::Field(Id::player_f_maxs), &b[12], 12);
-        addr::SafeRead(player + addr::Field(Id::player_f_disp), &b[15], 12);
-    }
-    uintptr_t a;
-    if (addr::Resolve(Id::genesis_impact, &a)) addr::SafeRead(a, &b[18], 12);  // slot impact
-    if (addr::Resolve(Id::genesis_plane, &a)) addr::SafeRead(a, &b[21], 16);   // slot plane n + dist
-    b[25] = static_cast<uint32_t>(addr::ModuleBase(1));  // Genesis base (replay rebases return addresses)
+    b[1] = s.tick, b[2] = s.playerPtr, b[3] = static_cast<uint32_t>(s.state), b[4] = s.ground, b[5] = s.spectator;
+    __builtin_memcpy(&b[6], s.pos, 12), __builtin_memcpy(&b[9], s.mins, 12), __builtin_memcpy(&b[12], s.maxs, 12);
+    __builtin_memcpy(&b[15], s.disp, 12), __builtin_memcpy(&b[18], s.slotImpact, 12);
+    __builtin_memcpy(&b[21], s.slotPlane, 16);
+    b[25] = s.genesisBase;
+    DumpBlock(b);
+}
+
+void DumpSessionStart() {
+    uint32_t b[32] = {};
+    b[0] = 0xF1;
     DumpBlock(b);
 }
 #endif
 
+// GameSource._read_live: the live player / slot state at this poll.
+void ReadSnapshot(analysis::Snapshot& s) {
+    s = analysis::Snapshot{};
+    s.tick = *reinterpret_cast<volatile uint32_t*>(g_cave + kTick);
+    uintptr_t slot;
+    uint32_t player = 0;
+    if (addr::Resolve(Id::player_object, &slot)) addr::SafeRead(slot, &player, 4);
+    s.playerPtr = player;
+    if (player) {
+        uint8_t ground = 0, spec = 0;
+        addr::SafeRead(player + addr::Field(Id::player_f_state), &s.state, 4);
+        addr::SafeRead(player + addr::Field(Id::player_f_ground), &ground, 1);
+        addr::SafeRead(player + addr::Field(Id::player_f_spectator), &spec, 1);
+        s.ground = ground != 0, s.spectator = spec != 0;
+        addr::SafeRead(player + addr::Field(Id::player_f_pos), s.pos, 12);
+        addr::SafeRead(player + addr::Field(Id::player_f_mins), s.mins, 12);
+        addr::SafeRead(player + addr::Field(Id::player_f_maxs), s.maxs, 12);
+        addr::SafeRead(player + addr::Field(Id::player_f_disp), s.disp, 12);
+    }
+    uintptr_t a;
+    if (addr::Resolve(Id::genesis_impact, &a)) addr::SafeRead(a, s.slotImpact, 12);
+    if (addr::Resolve(Id::genesis_plane, &a)) addr::SafeRead(a, s.slotPlane, 16);
+    s.genesisBase = static_cast<uint32_t>(addr::ModuleBase(1));
+}
+
 void FrameEnd() {
     if (!g_installed) return;
+    static analysis::Snapshot snap;
+    ReadSnapshot(snap);  // like Python: live read first, then the new records
 #ifdef FDCORE_DEBUG
-    DumpSnapshot();  // like Python: live read first, then the new records
+    DumpSnapshot(snap);
 #endif
     const uint32_t head = *reinterpret_cast<volatile uint32_t*>(g_cave + kHead);
     uint32_t n = head - g_lastHead;
@@ -355,9 +381,11 @@ void FrameEnd() {
         g_lastHead = head - kRingN;
         n = kRingN;
     }
+    static const uint32_t* recs[kRingN];
     for (uint32_t i = 0; i < n; ++i) {
         const uint32_t* rec =
             reinterpret_cast<const uint32_t*>(g_cave + kRing + ((g_lastHead + i) & (kRingN - 1)) * kRecSize);
+        recs[i] = rec;
         uint32_t kind = rec[R_KIND];
         if (kind < 4) InterlockedIncrement(&g_counts[kind]);
 #ifdef FDCORE_DEBUG
@@ -365,8 +393,8 @@ void FrameEnd() {
 #endif
     }
     g_lastHead = head;
+    analysis::Poll(snap, recs, static_cast<int>(n));
 }
-
 void OnToggle(cmd::Cvar& v) {
     if (v.value[0] != '0') {
         if (!Install()) console::Print("fd_hud_glitch: hooks could not be installed (see FDNYCore.log)");
@@ -388,6 +416,56 @@ bool Init() {
 }
 
 bool Installed() { return g_installed; }
+
+#ifdef FDCORE_DEBUG
+// Test-only: feed a recorded / synthetic .glitchrec stream through the core's
+// analysis offline (same blocks the live path produces), for parity against
+// the Python replay of the same file. Refused while the live hooks run.
+int ReplayFile(const char* path, char* out, int cap) {
+    (void)cap;  // replies are short fixed formats, well under the pipe buffer
+    if (g_installed) return wsprintfA(out, "err fd_hud_glitch is on");
+    HANDLE f = CreateFileA(path, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
+    if (f == INVALID_HANDLE_VALUE) return wsprintfA(out, "err cannot open %s", path);
+    DWORD size = GetFileSize(f, nullptr);
+    auto* data = static_cast<uint32_t*>(VirtualAlloc(nullptr, size + kRecSize, MEM_COMMIT, PAGE_READWRITE));
+    DWORD got = 0;
+    ReadFile(f, data, size, &got, nullptr);
+    CloseHandle(f);
+    static const uint32_t* recs[kRingN * 8];
+    const uint32_t blocks = got / kRecSize;
+    analysis::Snapshot snap{};
+    bool haveSnap = false;
+    int n = 0, sessions = 0, frames = 0;
+    auto flush = [&]() {
+        if (haveSnap) analysis::Poll(snap, recs, n), ++frames;
+        n = 0;
+    };
+    for (uint32_t i = 0; i < blocks; ++i) {
+        const uint32_t* b = data + i * (kRecSize / 4);
+        if (b[0] == 0xF1) {
+            flush();
+            haveSnap = false;
+            analysis::BeginSession();
+            ++sessions;
+        } else if (b[0] == 0xF0) {
+            flush();
+            snap = analysis::Snapshot{};
+            snap.tick = b[1], snap.playerPtr = b[2], snap.state = static_cast<int32_t>(b[3]);
+            snap.ground = (b[4] & 0xFF) != 0, snap.spectator = (b[5] & 0xFF) != 0;
+            __builtin_memcpy(snap.pos, &b[6], 12), __builtin_memcpy(snap.mins, &b[9], 12);
+            __builtin_memcpy(snap.maxs, &b[12], 12), __builtin_memcpy(snap.disp, &b[15], 12);
+            __builtin_memcpy(snap.slotImpact, &b[18], 12), __builtin_memcpy(snap.slotPlane, &b[21], 16);
+            snap.genesisBase = b[25];
+            haveSnap = true;
+        } else if (haveSnap && n < static_cast<int>(sizeof(recs) / sizeof(recs[0]))) {
+            recs[n++] = b;
+        }
+    }
+    flush();
+    VirtualFree(data, 0, MEM_RELEASE);
+    return wsprintfA(out, "ok sessions=%d frames=%d", sessions, frames);
+}
+#endif
 
 int Stats(char* out, int cap) {
     if (cap < 128) return 0;

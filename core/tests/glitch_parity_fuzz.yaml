@@ -1,0 +1,17 @@
+name: glitch_parity_fuzz
+# Item 11b: the live parity test rarely sees warp-capable hits or warps, so
+# this one feeds seeded synthetic .glitchrec streams (glitch_fuzz.py: capable
+# hits, warps, every iteration outcome, Genesis callers relocated or not,
+# crouchbug edges, .x5 rounding edges) through the core's analysis offline
+# (Debug pipe) and through the original overlay classes; logs must be identical.
+pre_files:
+  - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
+  - {src: null, dst: FDNYCore.cfg}
+setup: load_training
+steps:
+  - glitch_replay_fuzz: {seed: 1, frames: 800, sessions: 3}
+expect:
+  no_crash: true
+  log_errors: 0
+  glitch_parity: true
+  glitch_min_lines: 1000

@@ -1,0 +1,45 @@
+{
+  "pass": true,
+  "checks": [
+    {
+      "check": "1 no_crash",
+      "pass": true,
+      "detail": "crash: base_a=None base_b=None core=None"
+    },
+    {
+      "check": "2 same_level_and_state",
+      "pass": true,
+      "detail": "base=('training', 1, (1, 1, 1, 1, 1, 1, 1, 1, 1, 1)) core=('training', 1, (1, 1, 1, 1, 1, 1, 1, 1, 1, 1))"
+    },
+    {
+      "check": "3 module_bases",
+      "pass": true,
+      "detail": "exe {'0x400000'}; Genesis.dll ['0x10000000', '0x10000000', '0x10000000']"
+    },
+    {
+      "check": "4 autosplitter_chains",
+      "pass": true,
+      "detail": "12 chains; unresolved=[]; moved_vs_stable_baseline=[]; baseline-noisy (heap differs run to run, not compared)=['addr.game.map_name', 'addr.game.state', 'addr.split.bank_end_sound', 'addr.split.bar_end_sound', 'addr.split.boat_end_sound', 'addr.split.gas_end_sound', 'addr.split.mbase_end_sound', 'addr.split.oilrig_end_sound', 'addr.split.subway_end_sound', 'addr.split.training_end_sound', 'addr.victims.rescued', 'addr.victims.total']"
+    },
+    {
+      "check": "5 frame_rate",
+      "pass": true,
+      "detail": "median fps base=55.55555725097656 core=57.18954086303711"
+    },
+    {
+      "check": "6 lap_positions",
+      "pass": true,
+      "detail": "10 laps (core dist, tolerance): [(3.3, 32.0), (3.8, 32.0), (1.0, 32.0), (4.1, 32.0), (3.7, 32.0), (3.7, 32.0), (1.7, 32.0), (1.0, 32.0), (2.2, 32.0), (1.3, 32.0)]"
+    },
+    {
+      "check": "7 core_log_errors",
+      "pass": true,
+      "detail": "0 ERROR line(s), limit 0"
+    }
+  ],
+  "runs": [
+    "..\\runs\\2026-10-21-022020-baseline_route-base_a",
+    "..\\runs\\2026-10-21-022253-baseline_route-base_b",
+    "C:\\fdny-decomp\\core\\runs\\2026-10-21-103250-baseline_route-core11b"
+  ]
+}
