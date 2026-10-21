@@ -16,8 +16,9 @@ cause of RESEARCH.md growing to 465 MB.
 | 1 | Core skeleton + harness + foundation research | **DONE 2026-10-21**: live-tested, regression suite green, committed |
 | — | Bind feasibility check (`bind <key> <command>`), owner request 2026-10-21 | **DONE (research)**: feasible with constraints, see "Bind feasibility" |
 | 2 | Address table + version check | **DONE 2026-10-21**: live-tested, suite green, committed |
-| 3 | Hook manager + events | next |
-| 4-12 | — | not started |
+| 3 | Hook manager + events | **DONE 2026-10-21**: live-tested, suite green, committed |
+| 4 | Console (on the game's console) | next |
+| 5-12 | — | not started |
 | 13 | Teleporter (save location / teleport, map-gated), owner request 2026-10-21 | not started (needs 5, 9) |
 
 **Mid-item:** no.
@@ -203,6 +204,28 @@ Live 2026-10-21: in Training, gameState = 1 and mapName = `training`. All 12 cha
 - **Tests:** `addr_verified`, `addr_unknown_exe`, `addr_bad_signature` (all live, in Training). `core_loads` now expects `FDNYCore 0.2.0`; this is a version bump, not a weakened check.
 - **Deviation:** I didn't run the new tests red before implementing; the item-1 binary had already been rebuilt. Each one asserts log lines 0.1.0 never emitted, so all would have failed on their first assertion.
 
+## Item 3: hook manager + events (done)
+
+- **Hook manager (`src/hooks.cpp`).** MinHook 1.3.3 is compiled with `zig cc` (third-party, no `-Werror`) and statically linked. Both builds still import only KERNEL32/USER32/bcrypt.
+- **Frame hooks.** `geEngine_BeginFrame` / `geEngine_EndFrame` are resolved **by export name**. They're in the address table as Genesis entries `genesis.begin_frame` (RVA 0x25B70) and `genesis.end_frame` (0x260E0).
+  - The signature is the first 16 prologue bytes, plus a cross-check that GetProcAddress == base+rva.
+  - Both are **cdecl**: undecorated exports, and the exe cleans the stack after both call sites (`add esp,4` after EndFrame at 0x004949A6).
+  - The two hooks toggle together via `MH_QueueEnable/Disable` + `MH_ApplyQueued`, so a frame never sees one hooked and not the other.
+- **Events.**
+  - `frame_end` is dispatched inside the EndFrame detour **before** the original runs, so later in-frame drawing lands before the flip.
+  - `level_load(map)` is raised by `levelwatch` (now a frame_end subscriber, no thread) when state reaches 1 with a map name. Live: `event: level_load 'training'`.
+  - `victim_spawn` arrives with item 8.
+- **Debug-only test pipe `\\.\pipe\FDNYCore`** (`src/testpipe.cpp`, wholly `#ifdef FDCORE_DEBUG`; verified absent from Release). Commands: `ping`, `stats` (begin/end/events/levels/toggles counters + frame on/off), `hook frame on|off`. Harness client: `fdh/pipe.py`.
+- **Independent frame count.** The game has no frame counter, but `g_gameClock`'s published elapsed-ms (+0x44) changes once per `GameSession::RunFrame`. In a level each RunFrame renders exactly one Begin/End pair. The harness step `assert_frame_hooks` polls it in a tight loop and compares against the core's counters.
+- **Results:**
+  - `hooks_frame`: clock ticks = BeginFrame = EndFrame = frame_end events = **287/287/287/287** in 5 s (and 286 again while moving).
+  - `hooks_toggle`: 50× off/on with 0 failures and no crash. Afterwards hooks fire once per frame again (286, 172). While off, all deltas stay 0 for 2 s.
+  - Tolerance ±2 is for window-edge races only; actual differences were 0.
+- **Red run first:** `hooks_frame` against the item-2 core (`git stash` of the new sources) failed for the right reasons: no hook log lines, and no test pipe.
+- **Version single-sourced:** `core/VERSION` → `build.ps1` generates `src/gen/version_gen.h`, and the harness substitutes `{core_version}` in `assert_log`. Without the generated header, `core.cpp` refuses to compile.
+  - This fixed `core_loads`, which first failed in the suite after the 0.3.0 bump. Its check is unchanged: it still matches the exact running version.
+- **Release 0.3.0, hooking every frame**, is still EQUIVALENT to the item-1 baselines (fps 58.8 vs 55.6, laps within 3.5 u).
+
 ## Assumptions / workarounds
 
 - **"Behaves the same" (item 1c) definition**, chosen by the agent at the owner's request. These are LOOP.md's 7 criteria, with two calibrations:
@@ -228,3 +251,7 @@ Live 2026-10-21: in Training, gameState = 1 and mapName = `training`. All 12 cha
   - Suite 5/5 PASS.
   - The Release 0.2.0 core is still EQUIVALENT to the item-1 baselines (fps 58.8 vs 55.6, laps within 5 u).
   - Evidence in `core/evidence/item02/`.
+- 2026-10-21 it4: **item 3 DONE**. FDNYCore 0.3.0 adds the MinHook hook manager, by-name Genesis frame hooks (exactly once per frame vs an independent clock), frame_end + level_load events, and the Debug test pipe.
+  - Red run first, then green; suite 7/7 PASS; Release EQUIVALENT.
+  - Evidence in `core/evidence/item03/`.
+  - Next: item 4 (console on the game's console; hook `ScriptEngine::ExecLine` 0x00470F10).

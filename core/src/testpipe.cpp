@@ -1,0 +1,73 @@
+// Debug-only harness channel: \\.\pipe\FDNYCore, one request line -> one
+// response line. Compiled out of Release (the whole file is #ifdef'd).
+#ifdef FDCORE_DEBUG
+
+#include "testpipe.h"
+
+#include <windows.h>
+
+#include "hooks.h"
+#include "log.h"
+
+namespace fdcore::testpipe {
+namespace {
+
+bool StartsWith(const char* s, const char* p) {
+    while (*p)
+        if (*s++ != *p++) return false;
+    return true;
+}
+
+void Handle(const char* req, char* resp) {
+    const hooks::Counters& c = hooks::Stats();
+    if (StartsWith(req, "ping")) {
+        lstrcpyA(resp, "pong");
+    } else if (StartsWith(req, "stats")) {
+        wsprintfA(resp, "begin=%ld end=%ld events=%ld levels=%ld toggles=%ld frame=%s", c.beginFrame,
+                  c.endFrame, c.frameEndEvents, c.levelLoads, c.toggles,
+                  hooks::IsEnabled("frame") ? "on" : "off");
+    } else if (StartsWith(req, "hook frame on")) {
+        lstrcpyA(resp, hooks::SetEnabled("frame", true) ? "ok" : "err");
+    } else if (StartsWith(req, "hook frame off")) {
+        lstrcpyA(resp, hooks::SetEnabled("frame", false) ? "ok" : "err");
+    } else {
+        wsprintfA(resp, "err unknown command");
+    }
+}
+
+DWORD WINAPI Server(LPVOID) {
+    for (;;) {
+        HANDLE p = CreateNamedPipeA("\\\\.\\pipe\\FDNYCore", PIPE_ACCESS_DUPLEX,
+                                    PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT, 1, 4096,
+                                    4096, 0, nullptr);
+        if (p == INVALID_HANDLE_VALUE) {
+            log::Error("testpipe: CreateNamedPipe failed (%lu)", GetLastError());
+            return 0;
+        }
+        if (ConnectNamedPipe(p, nullptr) || GetLastError() == ERROR_PIPE_CONNECTED) {
+            char req[512], resp[512];
+            DWORD got = 0;
+            while (ReadFile(p, req, sizeof(req) - 1, &got, nullptr) && got) {
+                while (got && (req[got - 1] == '\n' || req[got - 1] == '\r')) --got;
+                req[got] = 0;
+                Handle(req, resp);
+                DWORD wrote = 0;
+                WriteFile(p, resp, lstrlenA(resp), &wrote, nullptr);
+            }
+        }
+        DisconnectNamedPipe(p);
+        CloseHandle(p);
+    }
+}
+
+} // namespace
+
+void Start() {
+    HANDLE t = CreateThread(nullptr, 0, Server, nullptr, 0, nullptr);
+    if (t) CloseHandle(t);
+    log::Info("testpipe: listening on \\\\.\\pipe\\FDNYCore (Debug build)");
+}
+
+} // namespace fdcore::testpipe
+
+#endif // FDCORE_DEBUG

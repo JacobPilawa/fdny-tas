@@ -49,6 +49,11 @@ bool StrEq(const char* a, const char* b) {
 
 bool VerifySig(const Entry& e) {
     if (!e.sigRva || !e.sigLen) return false;
+    if (e.exportName) {
+        // Hooked exports are resolved by name; the table's rva must agree.
+        FARPROC p = GetProcAddress(reinterpret_cast<HMODULE>(g_bases[e.module]), e.exportName);
+        if (reinterpret_cast<uintptr_t>(p) != g_bases[e.module] + e.rva) return false;
+    }
     uint8_t live[kMaxSig];
     if (!SafeRead(g_bases[e.module] + e.sigRva, live, e.sigLen)) return false;
     for (int i = 0; i < e.sigLen; ++i)
@@ -143,6 +148,12 @@ bool Resolve(Id id, uintptr_t* out) {
         if (!SafeRead(p + e.chain[i], &p, 4) || !p) return false;
     *out = p + e.chain[e.nchain - 1];
     return true;
+}
+
+uintptr_t ExportAddress(Id id) {
+    if (!Usable(id)) return 0;
+    const Entry& e = g_version->entries[static_cast<int>(id)];
+    return g_bases[e.module] + e.rva;
 }
 
 bool ReadI32(Id id, int32_t* out) {
@@ -266,9 +277,9 @@ bool LoadOverride(const char* path) {
             if (idx < 0) continue;  // unknown name: ignore
             Entry& e = g_override.entries[idx];
             e.name = kVersions[0].entries[idx].name;
-            const char* f[6];
-            int fn[6];
-            for (int i = 0; i < 6; ++i)
+            const char* f[7];
+            int fn[7];
+            for (int i = 0; i < 7; ++i)
                 if (!c.Token(&f[i], &fn[i])) return false;
             e.module = static_cast<uint8_t>(ParseNum(f[0], fn[0]));
             e.type = static_cast<uint8_t>(ParseNum(f[1], fn[1]));
@@ -279,6 +290,7 @@ bool LoadOverride(const char* path) {
             if (!(fn[5] == 1 && f[5][0] == '-'))
                 for (int i = 0; i + 1 < fn[5] && e.sigLen < kMaxSig; i += 2)
                     e.sig[e.sigLen++] = static_cast<uint8_t>(HexNib(f[5][i]) << 4 | HexNib(f[5][i + 1]));
+            e.exportName = (fn[6] == 1 && f[6][0] == '-') ? nullptr : keep(f[6], fn[6]);
             e.nchain = 0;
             const char* ch;
             int cn;

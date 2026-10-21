@@ -22,6 +22,8 @@ const char* Name(Id id);
 
 // Final address of an entry (null pointer anywhere in the chain -> false).
 bool Resolve(Id id, uintptr_t* out);
+// Address of a verified code entry (a hooked export); 0 if unusable.
+uintptr_t ExportAddress(Id id);
 bool ReadI32(Id id, int32_t* out);
 bool ReadF32(Id id, float* out);
 // Reads up to cap-1 bytes of a NUL-terminated string.

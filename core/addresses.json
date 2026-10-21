@@ -404,6 +404,34 @@
           },
           "ghidra": "cfg table 0x004FF524; read in Console::Print 0x00428930",
           "note": "FDNYFireFighter.cfg [DEBUG] ImADeveloper"
+        },
+        "genesis.begin_frame": {
+          "module": "genesis",
+          "rva": "0x25B70",
+          "export": "geEngine_BeginFrame",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x25B70",
+            "bytes": "83 EC 20 56 8B 74 24 28 8B 86 68 36 03 00 85 C0",
+            "ref": "first 16 bytes of Genesis.dll export geEngine_BeginFrame"
+          },
+          "ghidra": "Genesis.dll export table (core/notes/genesis_exports.txt, ordinal 440); called from ROCRender::RenderFrame 0x0049490F",
+          "note": "cdecl geBoolean geEngine_BeginFrame(geEngine*, geCamera*, geBoolean ClearScreen); frame start"
+        },
+        "genesis.end_frame": {
+          "module": "genesis",
+          "rva": "0x260E0",
+          "export": "geEngine_EndFrame",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x260E0",
+            "bytes": "83 EC 18 55 8B 6C 24 20 8B 85 68 36 03 00 85 C0",
+            "ref": "first 16 bytes of Genesis.dll export geEngine_EndFrame"
+          },
+          "ghidra": "Genesis.dll export table (ordinal 444); called from ROCRender::RenderFrame 0x004949A6",
+          "note": "cdecl geBoolean geEngine_EndFrame(geEngine*); frame end (flip)"
         }
       }
     }

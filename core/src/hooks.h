@@ -1,0 +1,38 @@
+// Hook manager: owns every hook (MinHook inline hooks on exe code and on
+// Genesis.dll exports resolved by name), toggles them at runtime, and
+// dispatches core events to subscribers. Only the core installs hooks.
+#pragma once
+
+#include <stdint.h>
+
+#include "addr.h"
+
+namespace fdcore::hooks {
+
+// Event subscribers run on the game thread.
+using FrameFn = void (*)();
+using LevelFn = void (*)(const char* map);
+
+bool Init();  // MH_Initialize + install the core's own hooks (frame events)
+void Shutdown();
+
+// Named hooks ("frame" = geEngine_BeginFrame + geEngine_EndFrame).
+bool SetEnabled(const char* group, bool on);
+bool IsEnabled(const char* group);
+
+void OnFrameEnd(FrameFn fn);   // after the world is drawn, before the flip
+void OnLevelLoad(LevelFn fn);  // map entered (game state reaches 1 with a map name)
+
+// Raised by the core itself (levelwatch) when it detects a level entry.
+void RaiseLevelLoad(const char* map);
+
+struct Counters {
+    volatile long beginFrame;
+    volatile long endFrame;
+    volatile long frameEndEvents;
+    volatile long levelLoads;
+    volatile long toggles;
+};
+const Counters& Stats();
+
+} // namespace fdcore::hooks

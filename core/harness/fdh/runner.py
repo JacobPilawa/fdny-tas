@@ -21,12 +21,18 @@ import time
 
 import yaml
 
-from . import addrtable, capture, game, inputs
+from . import addrtable, capture, game, inputs, pipe
 
 CORE_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", ".."))
 RUNS_DIR = os.path.join(CORE_DIR, "runs")
 SETUPS_DIR = os.path.join(CORE_DIR, "harness", "setups")
 CORE_ASI = "FDNYCore.asi"
+
+
+def core_version():
+    """core/VERSION: the single source build.ps1 compiles into the core."""
+    with open(os.path.join(CORE_DIR, "VERSION"), encoding="ascii") as f:
+        return f.read().strip()
 
 
 def deploy_core(game_dir, config):
@@ -105,6 +111,30 @@ class Run:
                     if self.g.check_crash():
                         return
                     self.step(sub)
+        elif kind == "pipe":
+            self.samples.setdefault("pipe", []).append([arg, pipe.call(arg)])
+        elif kind == "assert_frame_hooks":
+            self.assert_frame_hooks(float(arg.get("seconds", 5)), int(arg.get("tolerance", 2)))
+        elif kind == "assert_hooks_idle":
+            # Hook group switched off: its counters must not move while the game renders.
+            group = arg.get("group", "frame")
+            self.record("hook_off", pipe.call(f"hook {group} off") == "ok", f"{group} disabled")
+            s0 = pipe.stats()
+            time.sleep(float(arg.get("seconds", 2)))
+            s1 = pipe.stats()
+            d = {k: s1[k] - s0[k] for k in ("begin", "end", "events")}
+            self.record("hooks_idle_while_off", all(v == 0 for v in d.values()),
+                        f"{group} off for {arg.get('seconds', 2)}s: deltas {d}")
+            self.record("hook_on", pipe.call(f"hook {group} on") == "ok", f"{group} re-enabled")
+        elif kind == "toggle_hooks":
+            fails = 0
+            for _ in range(int(arg.get("times", 50))):
+                fails += pipe.call(f"hook {arg['group']} off") != "ok"
+                time.sleep(float(arg.get("gap_s", 0.05)))
+                fails += pipe.call(f"hook {arg['group']} on") != "ok"
+                time.sleep(float(arg.get("gap_s", 0.05)))
+            self.record("toggle_hooks", fails == 0,
+                        f"{arg.get('times', 50)}x off/on '{arg['group']}', {fails} failed command(s)")
         elif kind == "sample_addr":
             # Resolved address of each named entry (autosplitter-safety check).
             for name in arg:
@@ -126,7 +156,8 @@ class Run:
         elif kind == "assert_log":
             with open(self.g.core_log, encoding="utf-8", errors="replace") as f:
                 text = f.read()
-            self.record("assert_log", arg["contains"] in text, f"contains {arg['contains']!r}")
+            needle = arg["contains"].replace("{core_version}", core_version())
+            self.record("assert_log", needle in text, f"contains {needle!r}")
         elif kind == "console":
             inputs.type_text("`")  # backtick opens the game console in typing mode (R3b)
             time.sleep(0.2)
@@ -136,6 +167,29 @@ class Run:
             inputs.type_text("`")
         else:
             raise ValueError(f"unknown step {kind}")
+
+    def assert_frame_hooks(self, seconds, tolerance):
+        """Independent frame count: g_gameClock's published elapsed-ms changes
+        once per GameSession::RunFrame, and in a level each RunFrame renders
+        one BeginFrame/EndFrame pair. Poll it fast and count changes, then
+        compare with the core's hook counters over the same window."""
+        s0 = pipe.stats()
+        last, ticks = self.resolver.read("clock.elapsed_ms"), 0
+        t_end = time.perf_counter() + seconds
+        while time.perf_counter() < t_end:
+            v = self.resolver.read("clock.elapsed_ms")
+            if v != last:
+                ticks += 1
+                last = v
+        s1 = pipe.stats()
+        db, de, dv = (s1[k] - s0[k] for k in ("begin", "end", "events"))
+        self.samples.setdefault("frame_windows", []).append(
+            {"seconds": seconds, "clock_ticks": ticks, "begin": db, "end": de, "events": dv})
+        self.record("frame_hooks_once_per_frame",
+                    ticks > 0 and abs(db - ticks) <= tolerance and abs(de - ticks) <= tolerance
+                    and abs(db - de) <= 1 and abs(dv - de) <= 1,
+                    f"{seconds}s: clock ticks={ticks} BeginFrame={db} EndFrame={de} frame_end events={dv} "
+                    f"(tolerance {tolerance} for window-edge races)")
 
     def assert_value(self, a, val):
         name, tol = a["name"], float(a.get("tolerance", 0))

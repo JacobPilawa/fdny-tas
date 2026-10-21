@@ -2,45 +2,36 @@
 
 #include <windows.h>
 
+#include "hooks.h"
 #include "log.h"
 
 namespace fdcore::modules {
 namespace {
 
 // --- levelwatch ------------------------------------------------------------
-// Logs every change of map name / game state. Polls 4x a second from its own
-// thread until the hook manager (item 3) provides frame and level-load events.
+// On every frame end, logs changes of map name / game state and raises the
+// core's level_load event when the game enters a map (state reaches 1).
 using addr::Id;
 
-const Id kLevelwatchNeeds[] = {Id::game_state, Id::game_map_name};
+const Id kLevelwatchNeeds[] = {Id::game_state, Id::game_map_name, Id::genesis_end_frame};
 
-DWORD WINAPI LevelwatchThread(LPVOID) {
-    char last[16] = "\x01";
-    int32_t lastState = -12345;
-    for (;;) {
-        char map[16];
-        int32_t state = -1;
-        if (!addr::ReadStr(Id::game_map_name, map, sizeof(map))) map[0] = 0;
-        addr::ReadI32(Id::game_state, &state);
-        bool changed = state != lastState;
-        for (int i = 0; !changed && i < 16; ++i) {
-            if (map[i] != last[i]) changed = true;
-            if (!map[i]) break;
-        }
-        if (changed) {
-            log::Info("levelwatch: map '%s' state %d", map, static_cast<int>(state));
-            lstrcpynA(last, map, sizeof(last));
-            lastState = state;
-        }
-        Sleep(250);
-    }
+char g_lastMap[16] = "\x01";
+int32_t g_lastState = -12345;
+
+void LevelwatchFrame() {
+    char map[16];
+    int32_t state = -1;
+    if (!addr::ReadStr(Id::game_map_name, map, sizeof(map))) map[0] = 0;
+    addr::ReadI32(Id::game_state, &state);
+    bool mapChanged = lstrcmpA(map, g_lastMap) != 0;
+    if (state == g_lastState && !mapChanged) return;
+    log::Info("levelwatch: map '%s' state %d", map, static_cast<int>(state));
+    if (state == 1 && map[0] && (g_lastState != 1 || mapChanged)) hooks::RaiseLevelLoad(map);
+    lstrcpynA(g_lastMap, map, sizeof(g_lastMap));
+    g_lastState = state;
 }
 
-void LevelwatchStart() {
-    HANDLE t = CreateThread(nullptr, 0, LevelwatchThread, nullptr, 0, nullptr);
-    if (t) CloseHandle(t);
-    else log::Error("levelwatch: CreateThread failed (%lu)", GetLastError());
-}
+void LevelwatchStart() { hooks::OnFrameEnd(LevelwatchFrame); }
 
 Module g_modules[] = {
     {"levelwatch", kLevelwatchNeeds, sizeof(kLevelwatchNeeds) / sizeof(kLevelwatchNeeds[0]),

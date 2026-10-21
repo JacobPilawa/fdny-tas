@@ -5,11 +5,14 @@
 #include <bcrypt.h>
 
 #include "addr.h"
+#include "gen/version_gen.h"
+#include "hooks.h"
 #include "log.h"
 #include "modules.h"
+#include "testpipe.h"
 
 #ifndef FDCORE_VERSION
-#define FDCORE_VERSION "0.2.0"
+#error FDCORE_VERSION must come from core/VERSION (build.ps1)
 #endif
 #ifdef FDCORE_DEBUG
 #define FDCORE_CONFIG "Debug"
@@ -84,7 +87,11 @@ DWORD WINAPI InitThread(LPVOID) {
                       reinterpret_cast<unsigned long>(genesis));
     fdcore::addr::Init(exeHash, genesisHash, reinterpret_cast<uintptr_t>(GetModuleHandleA(nullptr)),
                        reinterpret_cast<uintptr_t>(genesis));
+    if (fdcore::addr::VersionKnown()) fdcore::hooks::Init();
     fdcore::modules::StartAll();
+#ifdef FDCORE_DEBUG
+    fdcore::testpipe::Start();
+#endif
     fdcore::log::Info("FDNYCore ready");
     return 0;
 }
