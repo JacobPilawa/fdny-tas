@@ -117,6 +117,7 @@ Put anything you want applied on a switch (binds, settings) in
 | `fd_window_cursor 1` | cursor kept in the window only while focused (hold **O** to free it); `0` = game default |
 | `fd_skip_intro 1` | skip the intro movies (next launch) |
 | `fd_log_commands 0/1` | log every console command (default 1) |
+| `fd_textdraw` | list the on-screen text panels: shown/hidden, size, position, view size (troubleshooting) |
 | `fd_version` | read-only core version |
 
 ## 6. Suggested first session

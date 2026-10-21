@@ -140,6 +140,12 @@ void CmdFovInfo(int, const char* const*) {
 
 } // namespace
 
+bool ViewSize(int* w, int* h) {
+    if (!g_lastCamera || g_lastRect[1] <= 0 || g_lastRect[3] <= 0) return false;
+    *w = g_lastRect[1] + 1, *h = g_lastRect[3] + 1;
+    return true;
+}
+
 bool Init() {
     if (!addr::Usable(Id::genesis_camera_set_attributes)) {
         log::Warn("fov: disabled (needs genesis.camera_set_attributes)");

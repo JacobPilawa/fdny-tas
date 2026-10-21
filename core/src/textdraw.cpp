@@ -3,6 +3,9 @@
 #include <windows.h>
 
 #include "addr.h"
+#include "cmd.h"
+#include "console.h"
+#include "fov.h"
 #include "hooks.h"
 #include "log.h"
 
@@ -77,6 +80,8 @@ struct Panel {
     void* engine;
     int settle;
     bool uploaded;
+    int x, y;            // last draw position (fd_textdraw)
+    bool reported;       // first draw / first failure logged
 };
 constexpr int kMaxPanels = 8;
 Panel g_panels[kMaxPanels];
@@ -173,12 +178,36 @@ bool Upload(Panel& p) {  // DIB -> engine bitmap (565)
     return dst != nullptr;
 }
 
-void ViewSize(int* w, int* h) {  // the game's client area (= render size, windowed)
-    static int cw = 640, chh = 480;
+// The render size: the camera's rect. The window's client area is only a
+// fallback (before the first camera): it is the render size windowed through
+// dgVoodoo, but larger when the image is scaled up (driver / wrapper resolution
+// override), which put right / bottom anchored panels outside the frame.
+int g_vw = 640, g_vh = 480;
+bool g_vCamera = false;
+void ViewSize(int* w, int* h) {
+    int vw = 0, vh = 0;
     RECT rc;
-    if (HWND wnd = GetActiveWindow(); wnd && GetClientRect(wnd, &rc) && rc.right > 0 && rc.bottom > 0)
-        cw = rc.right, chh = rc.bottom;
-    *w = cw, *h = chh;
+    const bool camera = fov::ViewSize(&vw, &vh);
+    if (!camera) {
+        if (HWND wnd = GetActiveWindow(); wnd && GetClientRect(wnd, &rc) && rc.right > 0 && rc.bottom > 0)
+            vw = rc.right, vh = rc.bottom;
+        else
+            vw = g_vw, vh = g_vh;
+    }
+    if (vw != g_vw || vh != g_vh || camera != g_vCamera) {
+        RECT cr = {};
+        if (HWND wnd = GetActiveWindow()) GetClientRect(wnd, &cr);
+        log::Info("textdraw: view %dx%d (%s; window client %ldx%ld)", vw, vh, camera ? "camera" : "window", cr.right,
+                  cr.bottom);
+        g_vw = vw, g_vh = vh, g_vCamera = camera;
+    }
+    *w = vw, *h = vh;
+}
+
+void Fail(Panel& p, const char* what) {  // once per panel, not every frame
+    if (p.reported) return;
+    p.reported = true;
+    log::Warn("textdraw: %s: %s (%dx%d)", p.name, what, p.dibW, p.dibH);
 }
 
 void Draw() {
@@ -193,13 +222,19 @@ void Draw() {
         if (p.dirty && (!p.uploaded || g_frame - p.lastRender >= static_cast<unsigned long>(p.minFrames))) {
             if (!Gdi()) return;
             Render(p);
-            if (!p.dib) continue;
+            if (!p.dib) {
+                Fail(p, "GDI could not create its image");
+                continue;
+            }
             if (p.bmp && p.engine != engine) DropBitmap(p);
             if (!p.bmp) {
                 p.bmp = g_create(p.dibW, p.dibH, 1, kFormat565);
-                if (!p.bmp) continue;
+                if (!p.bmp) {
+                    Fail(p, "geBitmap_Create failed");
+                    continue;
+                }
                 if (!Upload(p) || !g_add(engine, p.bmp)) {
-                    log::Warn("textdraw: %s: could not create its bitmap (%dx%d)", p.name, p.dibW, p.dibH);
+                    Fail(p, "could not upload / add its bitmap");
                     g_destroy(&p.bmp);
                     p.bmp = nullptr;
                     continue;
@@ -229,7 +264,25 @@ void Draw() {
         if (x < 0) x = 0;
         if (y < 0) y = 0;
         const GeRect src = {0, p.w - 1, 0, p.h - 1};
-        g_draw(engine, p.bmp, &src, static_cast<uint32_t>(x), static_cast<uint32_t>(y));
+        const int ok = g_draw(engine, p.bmp, &src, static_cast<uint32_t>(x), static_cast<uint32_t>(y));
+        p.x = x, p.y = y;
+        if (!ok) {
+            Fail(p, "geEngine_DrawBitmap failed");
+        } else if (!p.reported) {
+            p.reported = true;
+            log::Info("textdraw: %s: %dx%d at %d,%d (view %dx%d)", p.name, p.w, p.h, x, y, vw, vh);
+        }
+    }
+}
+
+void CmdInfo(int, const char* const*) {
+    int vw, vh;
+    ViewSize(&vw, &vh);
+    console::Print("textdraw: view %dx%d (%s)", vw, vh, g_vCamera ? "camera" : "window");
+    for (int i = 0; i < g_nPanels; ++i) {
+        const Panel& p = g_panels[i];
+        console::Print("  %s: %s, %d line(s), %dx%d at %d,%d, bitmap %s", p.name, p.visible ? "shown" : "hidden", p.n,
+                       p.w, p.h, p.x, p.y, p.bmp ? (p.settle ? "settling" : "ok") : "none");
     }
 }
 
@@ -295,6 +348,7 @@ bool Init() {
     g_remove = reinterpret_cast<EngineBmpFn>(addr::ExportAddress(Id::genesis_remove_bitmap));
     g_flush = reinterpret_cast<FlushFn>(addr::ExportAddress(Id::genesis_flush_pipeline));
     g_ok = true;
+    cmd::RegisterCommand("fd_textdraw", "list the on-screen text panels: shown, size, position, view size", CmdInfo);
     hooks::OnFrameEnd(Draw);
     log::Info("textdraw: ready (%d panel(s))", g_nPanels);
     return true;
