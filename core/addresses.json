@@ -1,4 +1,4 @@
-﻿{
+{
   "_comment": "FDNYCore address table: the ONLY place addresses live. Shared by the core (via a generated header, item 2) and core/harness. Keyed by exe+Genesis SHA-256. 'rva' is relative to 'module'; 'chain' = pointer offsets applied after reading the root (CE/LiveSplit style: read [base+rva], then for each offset but the last, read [p+off]; the last offset is added). 'deref_root': false = the root is a static struct, so the offsets are added without dereferencing. 'sig' = byte signature verified at startup (item 2); 'ghidra' = where it was confirmed.",
   "versions": {
     "retail-1.1": {
@@ -6,86 +6,406 @@
       "genesis_sha256": "5014bb879706bfb5ae6cf9ce1de63dc3deebdcc5b8e1b41f247b284a336c4643",
       "entries": {
         "game.state": {
-          "module": "exe", "rva": "0x102AAC", "chain": ["0x6F0"], "type": "i32",
-          "sig": null, "ghidra": "autosplitter .asl (unverified in Ghidra)",
+          "module": "exe",
+          "rva": "0x102AAC",
+          "chain": [
+            "0x6F0"
+          ],
+          "type": "i32",
+          "sig": {
+            "rva": "0x2465a",
+            "bytes": "8B 0D AC 2A 50 00 57 50 81 C1 AC 06",
+            "ref": "instruction at 0x0042465a embeds 0x00502aac",
+            "ghidra": "xref confirmed 2026-10-21: MOV ECX,[0x00502aac] in TPlayerInfo::RecordLevelComplete @0x00424650"
+          },
+          "ghidra": "autosplitter .asl (unverified in Ghidra)",
           "note": "LiveSplit gameState: 1 = in level (timer runs), 2/3 = loading, 0 = menu/reset"
         },
         "game.map_name": {
-          "module": "exe", "rva": "0x102AAC", "chain": ["0x688", "0x0", "0xC"], "type": "str10",
-          "sig": null, "ghidra": "autosplitter .asl (unverified in Ghidra)",
+          "module": "exe",
+          "rva": "0x102AAC",
+          "chain": [
+            "0x688",
+            "0x0",
+            "0xC"
+          ],
+          "type": "str10",
+          "sig": {
+            "rva": "0x2465a",
+            "bytes": "8B 0D AC 2A 50 00 57 50 81 C1 AC 06",
+            "ref": "instruction at 0x0042465a embeds 0x00502aac",
+            "ghidra": "xref confirmed 2026-10-21: MOV ECX,[0x00502aac] in TPlayerInfo::RecordLevelComplete @0x00424650"
+          },
+          "ghidra": "autosplitter .asl (unverified in Ghidra)",
           "note": "LiveSplit mapName, current .bsp base name"
         },
         "victims.total": {
-          "module": "exe", "rva": "0x103A78", "chain": ["0x30", "0x3528"], "type": "i32",
-          "sig": null, "ghidra": "autosplitter .asl; KB: RescueBot +0x3528/+0x352C",
+          "module": "exe",
+          "rva": "0x103A78",
+          "chain": [
+            "0x30",
+            "0x3528"
+          ],
+          "type": "i32",
+          "sig": {
+            "rva": "0x274c2",
+            "bytes": "8B 15 78 3A 50 00 8B 12 83 F8 02 0F",
+            "ref": "instruction at 0x004274c2 embeds 0x00503a78",
+            "ghidra": "xref confirmed 2026-10-21: MOV EDX,[0x00503a78] in FUN_00427420 (Console::SetState region)"
+          },
+          "ghidra": "autosplitter .asl; KB: RescueBot +0x3528/+0x352C",
           "note": "victims in level"
         },
         "victims.rescued": {
-          "module": "exe", "rva": "0x103A78", "chain": ["0x30", "0x352C"], "type": "i32",
-          "sig": null, "ghidra": "autosplitter .asl",
+          "module": "exe",
+          "rva": "0x103A78",
+          "chain": [
+            "0x30",
+            "0x352C"
+          ],
+          "type": "i32",
+          "sig": {
+            "rva": "0x274c2",
+            "bytes": "8B 15 78 3A 50 00 8B 12 83 F8 02 0F",
+            "ref": "instruction at 0x004274c2 embeds 0x00503a78",
+            "ghidra": "xref confirmed 2026-10-21: MOV EDX,[0x00503a78] in FUN_00427420 (Console::SetState region)"
+          },
+          "ghidra": "autosplitter .asl",
           "note": "victims rescued"
         },
-        "split.bank_end_sound":     {"module": "exe", "rva": "0x103A78", "chain": ["0x8", "0x0", "0x158", "0x0"], "type": "i32", "sig": null, "ghidra": "autosplitter .asl", "note": "level-end sound played (Bank)"},
-        "split.bar_end_sound":      {"module": "exe", "rva": "0x103A78", "chain": ["0x8", "0x0", "0xFC", "0x0"],  "type": "i32", "sig": null, "ghidra": "autosplitter .asl", "note": "level-end sound played (Bar)"},
-        "split.gas_end_sound":      {"module": "exe", "rva": "0x103A78", "chain": ["0x8", "0x0", "0xF0", "0x0"],  "type": "i32", "sig": null, "ghidra": "autosplitter .asl", "note": "level-end sound played (Gas station)"},
-        "split.mbase_end_sound":    {"module": "exe", "rva": "0x103A78", "chain": ["0x8", "0x0", "0xC8", "0x0"],  "type": "i32", "sig": null, "ghidra": "autosplitter .asl", "note": "level-end sound played (Military base)"},
-        "split.training_end_sound": {"module": "exe", "rva": "0x103A78", "chain": ["0x8", "0x0", "0x104", "0x0"], "type": "i32", "sig": null, "ghidra": "autosplitter .asl", "note": "level-end sound played (Training)"},
-        "split.boat_end_sound":     {"module": "exe", "rva": "0x103A78", "chain": ["0x8", "0x0", "0xBC", "0x0"],  "type": "i32", "sig": null, "ghidra": "autosplitter .asl", "note": "level-end sound played (Boat B)"},
-        "split.oilrig_end_sound":   {"module": "exe", "rva": "0x103A78", "chain": ["0x8", "0x0", "0xC4", "0x0"],  "type": "i32", "sig": null, "ghidra": "autosplitter .asl", "note": "level-end sound played (Oil rig D)"},
-        "split.subway_end_sound":   {"module": "exe", "rva": "0x103A78", "chain": ["0x8", "0x0", "0x144", "0x0"], "type": "i32", "sig": null, "ghidra": "autosplitter .asl", "note": "level-end sound played (Subway B)"},
+        "split.bank_end_sound": {
+          "module": "exe",
+          "rva": "0x103A78",
+          "chain": [
+            "0x8",
+            "0x0",
+            "0x158",
+            "0x0"
+          ],
+          "type": "i32",
+          "sig": {
+            "rva": "0x274c2",
+            "bytes": "8B 15 78 3A 50 00 8B 12 83 F8 02 0F",
+            "ref": "instruction at 0x004274c2 embeds 0x00503a78",
+            "ghidra": "xref confirmed 2026-10-21: MOV EDX,[0x00503a78] in FUN_00427420 (Console::SetState region)"
+          },
+          "ghidra": "autosplitter .asl",
+          "note": "level-end sound played (Bank)"
+        },
+        "split.bar_end_sound": {
+          "module": "exe",
+          "rva": "0x103A78",
+          "chain": [
+            "0x8",
+            "0x0",
+            "0xFC",
+            "0x0"
+          ],
+          "type": "i32",
+          "sig": {
+            "rva": "0x274c2",
+            "bytes": "8B 15 78 3A 50 00 8B 12 83 F8 02 0F",
+            "ref": "instruction at 0x004274c2 embeds 0x00503a78",
+            "ghidra": "xref confirmed 2026-10-21: MOV EDX,[0x00503a78] in FUN_00427420 (Console::SetState region)"
+          },
+          "ghidra": "autosplitter .asl",
+          "note": "level-end sound played (Bar)"
+        },
+        "split.gas_end_sound": {
+          "module": "exe",
+          "rva": "0x103A78",
+          "chain": [
+            "0x8",
+            "0x0",
+            "0xF0",
+            "0x0"
+          ],
+          "type": "i32",
+          "sig": {
+            "rva": "0x274c2",
+            "bytes": "8B 15 78 3A 50 00 8B 12 83 F8 02 0F",
+            "ref": "instruction at 0x004274c2 embeds 0x00503a78",
+            "ghidra": "xref confirmed 2026-10-21: MOV EDX,[0x00503a78] in FUN_00427420 (Console::SetState region)"
+          },
+          "ghidra": "autosplitter .asl",
+          "note": "level-end sound played (Gas station)"
+        },
+        "split.mbase_end_sound": {
+          "module": "exe",
+          "rva": "0x103A78",
+          "chain": [
+            "0x8",
+            "0x0",
+            "0xC8",
+            "0x0"
+          ],
+          "type": "i32",
+          "sig": {
+            "rva": "0x274c2",
+            "bytes": "8B 15 78 3A 50 00 8B 12 83 F8 02 0F",
+            "ref": "instruction at 0x004274c2 embeds 0x00503a78",
+            "ghidra": "xref confirmed 2026-10-21: MOV EDX,[0x00503a78] in FUN_00427420 (Console::SetState region)"
+          },
+          "ghidra": "autosplitter .asl",
+          "note": "level-end sound played (Military base)"
+        },
+        "split.training_end_sound": {
+          "module": "exe",
+          "rva": "0x103A78",
+          "chain": [
+            "0x8",
+            "0x0",
+            "0x104",
+            "0x0"
+          ],
+          "type": "i32",
+          "sig": {
+            "rva": "0x274c2",
+            "bytes": "8B 15 78 3A 50 00 8B 12 83 F8 02 0F",
+            "ref": "instruction at 0x004274c2 embeds 0x00503a78",
+            "ghidra": "xref confirmed 2026-10-21: MOV EDX,[0x00503a78] in FUN_00427420 (Console::SetState region)"
+          },
+          "ghidra": "autosplitter .asl",
+          "note": "level-end sound played (Training)"
+        },
+        "split.boat_end_sound": {
+          "module": "exe",
+          "rva": "0x103A78",
+          "chain": [
+            "0x8",
+            "0x0",
+            "0xBC",
+            "0x0"
+          ],
+          "type": "i32",
+          "sig": {
+            "rva": "0x274c2",
+            "bytes": "8B 15 78 3A 50 00 8B 12 83 F8 02 0F",
+            "ref": "instruction at 0x004274c2 embeds 0x00503a78",
+            "ghidra": "xref confirmed 2026-10-21: MOV EDX,[0x00503a78] in FUN_00427420 (Console::SetState region)"
+          },
+          "ghidra": "autosplitter .asl",
+          "note": "level-end sound played (Boat B)"
+        },
+        "split.oilrig_end_sound": {
+          "module": "exe",
+          "rva": "0x103A78",
+          "chain": [
+            "0x8",
+            "0x0",
+            "0xC4",
+            "0x0"
+          ],
+          "type": "i32",
+          "sig": {
+            "rva": "0x274c2",
+            "bytes": "8B 15 78 3A 50 00 8B 12 83 F8 02 0F",
+            "ref": "instruction at 0x004274c2 embeds 0x00503a78",
+            "ghidra": "xref confirmed 2026-10-21: MOV EDX,[0x00503a78] in FUN_00427420 (Console::SetState region)"
+          },
+          "ghidra": "autosplitter .asl",
+          "note": "level-end sound played (Oil rig D)"
+        },
+        "split.subway_end_sound": {
+          "module": "exe",
+          "rva": "0x103A78",
+          "chain": [
+            "0x8",
+            "0x0",
+            "0x144",
+            "0x0"
+          ],
+          "type": "i32",
+          "sig": {
+            "rva": "0x274c2",
+            "bytes": "8B 15 78 3A 50 00 8B 12 83 F8 02 0F",
+            "ref": "instruction at 0x004274c2 embeds 0x00503a78",
+            "ghidra": "xref confirmed 2026-10-21: MOV EDX,[0x00503a78] in FUN_00427420 (Console::SetState region)"
+          },
+          "ghidra": "autosplitter .asl",
+          "note": "level-end sound played (Subway B)"
+        },
         "console.instance": {
-          "module": "exe", "rva": "0x102A90", "chain": [], "type": "ptr",
-          "sig": null, "ghidra": "write 0x00427920 in Console ctor 0x00427910",
+          "module": "exe",
+          "rva": "0x102A90",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x27920",
+            "bytes": "89 35 90 2A 50 00 89 46 08 89 46 0C",
+            "ref": "instruction at 0x00427920 embeds 0x00502a90",
+            "ghidra": "xref confirmed 2026-10-21: MOV [0x00502a90],ESI (Ghidra places it in PlayerRescueEnt::Init @0x004277d0; earlier pass: console ctor 0x00427910 -- boundary labelling to resolve)"
+          },
+          "ghidra": "write 0x00427920 in Console ctor 0x00427910",
           "note": "game's dev console object (null until created)"
         },
         "console.state": {
-          "module": "exe", "rva": "0x102A90", "chain": ["0x49C"], "type": "i32",
-          "sig": null, "ghidra": "Console::OnChar 0x004274F0 / OnKeyDown 0x00428C50",
+          "module": "exe",
+          "rva": "0x102A90",
+          "chain": [
+            "0x49C"
+          ],
+          "type": "i32",
+          "sig": {
+            "rva": "0x27920",
+            "bytes": "89 35 90 2A 50 00 89 46 08 89 46 0C",
+            "ref": "instruction at 0x00427920 embeds 0x00502a90",
+            "ghidra": "xref confirmed 2026-10-21: MOV [0x00502a90],ESI (Ghidra places it in PlayerRescueEnt::Init @0x004277d0; earlier pass: console ctor 0x00427910 -- boundary labelling to resolve)"
+          },
+          "ghidra": "Console::OnChar 0x004274F0 / OnKeyDown 0x00428C50",
           "note": "0 closed, 1 view-only (Tab), 2 typing (backtick)"
         },
         "player.pos_x": {
-          "module": "exe", "rva": "0x103A78", "chain": ["0x30", "0x4C"], "type": "f32",
-          "sig": null, "ghidra": "g_everGame 0x00503A78 -> +0x30 player (tools/collision_overlay EG_PLAYER/OFF_POS)",
+          "module": "exe",
+          "rva": "0x103A78",
+          "chain": [
+            "0x30",
+            "0x4C"
+          ],
+          "type": "f32",
+          "sig": {
+            "rva": "0x274c2",
+            "bytes": "8B 15 78 3A 50 00 8B 12 83 F8 02 0F",
+            "ref": "instruction at 0x004274c2 embeds 0x00503a78",
+            "ghidra": "xref confirmed 2026-10-21: MOV EDX,[0x00503a78] in FUN_00427420 (Console::SetState region)"
+          },
+          "ghidra": "g_everGame 0x00503A78 -> +0x30 player (tools/collision_overlay EG_PLAYER/OFF_POS)",
           "note": "player world position X"
         },
         "player.pos_y": {
-          "module": "exe", "rva": "0x103A78", "chain": ["0x30", "0x50"], "type": "f32",
-          "sig": null, "ghidra": "as player.pos_x (+4)", "note": "player world position Y (up)"
+          "module": "exe",
+          "rva": "0x103A78",
+          "chain": [
+            "0x30",
+            "0x50"
+          ],
+          "type": "f32",
+          "sig": {
+            "rva": "0x274c2",
+            "bytes": "8B 15 78 3A 50 00 8B 12 83 F8 02 0F",
+            "ref": "instruction at 0x004274c2 embeds 0x00503a78",
+            "ghidra": "xref confirmed 2026-10-21: MOV EDX,[0x00503a78] in FUN_00427420 (Console::SetState region)"
+          },
+          "ghidra": "as player.pos_x (+4)",
+          "note": "player world position Y (up)"
         },
         "player.pos_z": {
-          "module": "exe", "rva": "0x103A78", "chain": ["0x30", "0x54"], "type": "f32",
-          "sig": null, "ghidra": "as player.pos_x (+8)", "note": "player world position Z"
+          "module": "exe",
+          "rva": "0x103A78",
+          "chain": [
+            "0x30",
+            "0x54"
+          ],
+          "type": "f32",
+          "sig": {
+            "rva": "0x274c2",
+            "bytes": "8B 15 78 3A 50 00 8B 12 83 F8 02 0F",
+            "ref": "instruction at 0x004274c2 embeds 0x00503a78",
+            "ghidra": "xref confirmed 2026-10-21: MOV EDX,[0x00503a78] in FUN_00427420 (Console::SetState region)"
+          },
+          "ghidra": "as player.pos_x (+8)",
+          "note": "player world position Z"
         },
         "player.ground": {
-          "module": "exe", "rva": "0x103A78", "chain": ["0x30", "0x12C"], "type": "i32",
-          "sig": null, "ghidra": "collision overlay OFF_GROUND", "note": "on-ground flag"
+          "module": "exe",
+          "rva": "0x103A78",
+          "chain": [
+            "0x30",
+            "0x12C"
+          ],
+          "type": "i32",
+          "sig": {
+            "rva": "0x274c2",
+            "bytes": "8B 15 78 3A 50 00 8B 12 83 F8 02 0F",
+            "ref": "instruction at 0x004274c2 embeds 0x00503a78",
+            "ghidra": "xref confirmed 2026-10-21: MOV EDX,[0x00503a78] in FUN_00427420 (Console::SetState region)"
+          },
+          "ghidra": "collision overlay OFF_GROUND",
+          "note": "on-ground flag"
         },
         "player.state": {
-          "module": "exe", "rva": "0x103A78", "chain": ["0x30", "0x18C"], "type": "i32",
-          "sig": null, "ghidra": "collision overlay OFF_STATE (4 = standing, 3 = crouched)", "note": "player movement state"
+          "module": "exe",
+          "rva": "0x103A78",
+          "chain": [
+            "0x30",
+            "0x18C"
+          ],
+          "type": "i32",
+          "sig": {
+            "rva": "0x274c2",
+            "bytes": "8B 15 78 3A 50 00 8B 12 83 F8 02 0F",
+            "ref": "instruction at 0x004274c2 embeds 0x00503a78",
+            "ghidra": "xref confirmed 2026-10-21: MOV EDX,[0x00503a78] in FUN_00427420 (Console::SetState region)"
+          },
+          "ghidra": "collision overlay OFF_STATE (4 = standing, 3 = crouched)",
+          "note": "player movement state"
         },
         "clock.elapsed_ms": {
-          "module": "exe", "rva": "0x102AB8", "chain": ["0x44"], "type": "u32", "deref_root": false,
-          "sig": null, "ghidra": "g_gameClock 0x00502AB8; GameClock::Tick 0x0042C080 publishes +0x44",
+          "module": "exe",
+          "rva": "0x102AB8",
+          "chain": [
+            "0x44"
+          ],
+          "type": "u32",
+          "deref_root": false,
+          "sig": {
+            "rva": "0x2aec0",
+            "bytes": "B9 B8 2A 50 00 E8 B6 11 00 00 8B",
+            "ref": "instruction at 0x0042aec0 embeds 0x00502ab8",
+            "ghidra": "xref confirmed 2026-10-21: MOV ECX,0x00502ab8 in GameSession::RunFrame @0x0042aea0"
+          },
+          "ghidra": "g_gameClock 0x00502AB8; GameClock::Tick 0x0042C080 publishes +0x44",
           "note": "published elapsed ms (timeGetTime based); advances once per GameSession::RunFrame"
         },
         "clock.dt": {
-          "module": "exe", "rva": "0x102AB8", "chain": ["0x4C"], "type": "f32", "deref_root": false,
-          "sig": null, "ghidra": "GameClock::ComputeFrameDelta 0x0042BF70 (60 FPS busy-wait cap, dt clamped <= 0.1)",
+          "module": "exe",
+          "rva": "0x102AB8",
+          "chain": [
+            "0x4C"
+          ],
+          "type": "f32",
+          "deref_root": false,
+          "sig": {
+            "rva": "0x2aec0",
+            "bytes": "B9 B8 2A 50 00 E8 B6 11 00 00 8B",
+            "ref": "instruction at 0x0042aec0 embeds 0x00502ab8",
+            "ghidra": "xref confirmed 2026-10-21: MOV ECX,0x00502ab8 in GameSession::RunFrame @0x0042aea0"
+          },
+          "ghidra": "GameClock::ComputeFrameDelta 0x0042BF70 (60 FPS busy-wait cap, dt clamped <= 0.1)",
           "note": "published frame delta, seconds"
         },
         "clock.fps": {
-          "module": "exe", "rva": "0x102AB8", "chain": ["0x50"], "type": "f32", "deref_root": false,
-          "sig": null, "ghidra": "GameClock::Tick 0x0042C080 (+0x50 = 1/dt)",
+          "module": "exe",
+          "rva": "0x102AB8",
+          "chain": [
+            "0x50"
+          ],
+          "type": "f32",
+          "deref_root": false,
+          "sig": {
+            "rva": "0x2aec0",
+            "bytes": "B9 B8 2A 50 00 E8 B6 11 00 00 8B",
+            "ref": "instruction at 0x0042aec0 embeds 0x00502ab8",
+            "ghidra": "xref confirmed 2026-10-21: MOV ECX,0x00502ab8 in GameSession::RunFrame @0x0042aea0"
+          },
+          "ghidra": "GameClock::Tick 0x0042C080 (+0x50 = 1/dt)",
           "note": "published fps (float; verified live 2026-10-21: reads 60.0 under the 60 FPS cap)"
         },
         "cfg.im_a_developer": {
-          "module": "exe", "rva": "0x102A78", "chain": [], "type": "u8",
-          "sig": null, "ghidra": "cfg table 0x004FF524; read in Console::Print 0x00428930",
+          "module": "exe",
+          "rva": "0x102A78",
+          "chain": [],
+          "type": "u8",
+          "sig": {
+            "rva": "0x220be",
+            "bytes": "A0 78 2A 50 00 84 C0 74 24 8A 46",
+            "ref": "instruction at 0x004220be embeds 0x00502a78",
+            "ghidra": "xref confirmed 2026-10-21: MOV AL,[0x00502a78] in SArray::OobFail @0x00422060 (debug-message dispatcher)"
+          },
+          "ghidra": "cfg table 0x004FF524; read in Console::Print 0x00428930",
           "note": "FDNYFireFighter.cfg [DEBUG] ImADeveloper"
         }
       }
     }
   }
 }
-

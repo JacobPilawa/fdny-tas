@@ -1,0 +1,15 @@
+name: addr_verified
+# Item 2: on the known exe every address-table signature verifies at startup,
+# the version is selected by hash, and modules that depend on the table run
+# (levelwatch logs the map once a level is loaded).
+setup: load_training
+record: true
+steps:
+  - assert_log: {contains: "address table: version retail-1.1 selected"}
+  - assert_log: {contains: "signatures: all OK"}
+  - assert_log: {contains: "module levelwatch: enabled"}
+  - assert_log: {contains: "levelwatch: map 'training' state 1"}
+  - assert_mem: {name: game.map_name, equals: training}
+expect:
+  no_crash: true
+  log_errors: 0

@@ -14,9 +14,10 @@ cause of RESEARCH.md growing to 465 MB.
 | # | Item | State |
 |---|---|---|
 | 1 | Core skeleton + harness + foundation research | **DONE 2026-10-21**: live-tested, regression suite green, committed |
-| — | Bind feasibility check (`bind <key> <command>`), owner request 2026-10-21 | not started (research before item 5) |
-| 2 | Address table + version check | next |
-| 3-12 | — | not started |
+| — | Bind feasibility check (`bind <key> <command>`), owner request 2026-10-21 | **DONE (research)**: feasible with constraints, see "Bind feasibility" |
+| 2 | Address table + version check | **DONE 2026-10-21**: live-tested, suite green, committed |
+| 3 | Hook manager + events | next |
+| 4-12 | — | not started |
 | 13 | Teleporter (save location / teleport, map-gated), owner request 2026-10-21 | not started (needs 5, 9) |
 
 **Mid-item:** no.
@@ -122,6 +123,32 @@ Both `.asl` files share one `state("FDNYFirefighter")` block: 12 vars, all main-
 
 Live 2026-10-21: in Training, gameState = 1 and mapName = `training`. All 12 chains resolve; their final (heap) addresses differ run to run even without the core.
 
+## Bind feasibility (owner request; Haiku Ghidra pass 2026-10-21; not yet live-verified)
+
+**Verdict: feasible, with constraints.** `bind <key> <command>` can't piggyback as-is, because the game has no bind verb, no key-name table, and no "key runs a line" mechanism. The plumbing it needs does exist and is reusable. Item 5 builds the binding store and the verb.
+
+- **Every console line is a script line.** `Console::OnKeyDown` (Enter, 0x00428FD3) calls `ScriptEngine::ExecLine(g_scriptEngine, line)` 0x00470F10, and that is ExecLine's **only** caller.
+  - So the single interception point for **all** our console commands (item 4) is a pre-hook on ExecLine: handle `fd_*` / `bind` / `unbind` / `echo` / `cvarlist` / `exec`-of-our-cfg ourselves, pass everything else through.
+  - A bound key can run a line by calling the same ExecLine with the bound text, so game verbs and `fd_` commands both work from binds.
+- **Verbs in the game:**
+  - `ScriptTrigger::HandleVerb` 0x0047A1F0: if/ifnot/set/inc/dec/print/once/ignore/exec/execsetsonly/sendmsg/fog*/*snd*/hint/quake/if-comparisons/listmaps/loadmap/loadhosemap/setlighttable/difficulty/quit/debugvictims/runrescuebot/listvars.
+  - `ScriptActor::HandleBaseVerb` 0x0046F9D0: que/flush/wait/idle/cmd/loopinque/onmsg/onmsgappend/printmsgs.
+  - There's no bind/unbind/alias. Names to avoid colliding with: `exec` is a game verb (it loads Data\Scripts / Data\Maps), so our config exec should be `fd_exec`, or `exec` should fall back to the game verb when the file isn't ours. **Decide in item 4/5.**
+- **Default controls are hardcoded:** 26 `ActionMap::BindKey` 0x00437410 calls inside `GameControls::Construct` 0x004395C0, with keys as raw **DIK** codes. Mouse uses custom codes 0x101-0x105 (ANY_KEY, ANY_MOUSE_BUTTON, MOUSE_LB/MB/RB).
+  - Movement: W/S/A/D + arrows.
+  - CROUCH = C / LCtrl / RCtrl.
+  - **USE = LShift / RShift / Space**, ACTION = mouse LB, **JUMP = mouse RB**.
+  - SELECT_* = 1-4.
+  - Dev keys: F2 / F3 / F4 / F6 (SKIP_HOTSPOT and ACTIVATE_RESCUEBOT share code 0x40 in the decompile) / F7 spectator / F8 WIN_LEVEL / F11 CRASH_TEST.
+  - `ActionMap::BindAction` 0x00438BF0 asserts "Invalid binding" for an unregistered name; new actions need `RegisterAction` 0x00438D70 first.
+- **Constraints for item 5:**
+  1. We ship our own key-name → DIK table (incl. mouse4/5 and wheel).
+  2. Bound-key detection reads DIK state from the DirectInput keyboard buffer (`DrainKeyboardBuffer` 0x00437C80 state) or our own WM_KEYDOWN filter. Binds must not fire while the console is open (state != 0).
+  3. A bind on a key the game already uses (W, Space, ...) runs **both** our line and the game action, unless we swallow it. Default: don't swallow, and warn in the console when binding a game-used key.
+  4. Backtick/tilde stays reserved for the console.
+  5. Binds persist in the core's own cfg (written by `fd_writeconfig` / on exit), not the game's `FDNYFireFighter.cfg`, which the game rewrites at startup and exit.
+- **Harness note:** my `baseline_route` presses Space, which is USE, not jump. Jump is mouse RB. Not a problem for equivalence, since both runs do the same; noted for future routes.
+
 ## Build / harness notes
 
 - **`core/build.ps1`:** zig 0.16 freestanding x86 (no CRT; kernel32/user32/bcrypt), `-Wall -Wextra -Werror`.
@@ -146,6 +173,36 @@ Live 2026-10-21: in Training, gameState = 1 and mapName = `training`. All 12 cha
   - `sig` fields are filled in item 2.
 - **`harness/compare_runs.py`:** item 1(c) baseline equivalence. Two no-core runs define the noise envelope, and the core run must sit inside it.
 
+## Item 2: address table + version check (done)
+
+- **Signatures.** `core/tools/addrgen.py sigs <exe>` finds, for each exe entry's static root, the first code instruction that embeds that root as an absolute operand. It stores the instruction plus 6 context bytes as the entry's `sig`: `{rva, bytes, ref, ghidra}`.
+  - This works because the exe has no relocations and is always at 0x400000. Matching bytes in memory prove the global is where the table says.
+  - Five distinct sites cover all 23 entries; each is confirmed in Ghidra as an xref to its global (Haiku pass):
+
+    | site | instruction | function |
+    |---|---|---|
+    | 0x0042465A | `MOV ECX,[0x502AAC]` | TPlayerInfo::RecordLevelComplete |
+    | 0x004274C2 | `MOV EDX,[0x503A78]` | FUN_00427420 |
+    | 0x00427920 | `MOV [0x502A90],ESI` | (see below) |
+    | 0x0042AEC0 | `MOV ECX,0x502AB8` | GameSession::RunFrame |
+    | 0x004220BE | `MOV AL,[0x502A78]` | SArray::OobFail = the debug-message dispatcher |
+
+  - **Decomp follow-up (not ours to fix here):** Ghidra places 0x00427920 in `PlayerRescueEnt::Init @0x004277D0`, but the R3 pass called it the console ctor at 0x00427910. That's a function-boundary labelling question for the decomp loop.
+- **Compiled-in table.** `build.ps1` runs `addrgen.py header` to produce `src/gen/addresses_gen.h` (gitignored, regenerated every build): an `Id` enum plus `kVersions[]`. Python is a build-time tool on the VM only; players get the table inside the .asi.
+- **Startup (`src/addr.cpp`):**
+  1. Select the version by exe + Genesis SHA-256.
+  2. Compare each entry's signature bytes in memory via `SafeRead`, which uses VirtualQuery and never faults.
+  3. Mark each entry usable or not.
+  4. Unknown version → one WARN, and every module disabled.
+- **Modules (`src/modules.cpp`):** each module declares required `Id`s. `StartAll` enables a module only if the version is known and all its entries verified, and logs `module X: enabled` / `disabled (unknown version)` / `disabled (needs <entry>)`.
+  - The first module is `levelwatch`: it logs map/state changes, polling at 4 Hz from its own thread until item 3's frame events exist. Live, it shows state −1 → 0 (menu) → 3 (loading) → 1 (in level), the seed of the level-load event.
+- **Debug-only override:** `FDNYCore.addroverride.txt` next to the .asi, in the `addrgen.py text` flat format. Tests feed patched tables through it without touching the exe.
+  - Fixtures come from `tools/make_override_fixtures.py`: `tests/data/addr_override_unknown.txt` (hashes zeroed) and `addr_override_badsig.txt` (first sig byte of `game.map_name` flipped).
+  - The harness places them via the new `pre_files` test key and removes them after the run.
+  - Verified absent from Release: no `addroverride` string in the Release .asi.
+- **Tests:** `addr_verified`, `addr_unknown_exe`, `addr_bad_signature` (all live, in Training). `core_loads` now expects `FDNYCore 0.2.0`; this is a version bump, not a weakened check.
+- **Deviation:** I didn't run the new tests red before implementing; the item-1 binary had already been rebuilt. Each one asserts log lines 0.1.0 never emitted, so all would have failed on their first assertion.
+
 ## Assumptions / workarounds
 
 - **"Behaves the same" (item 1c) definition**, chosen by the agent at the owner's request. These are LOOP.md's 7 criteria, with two calibrations:
@@ -165,3 +222,9 @@ Live 2026-10-21: in Training, gameState = 1 and mapName = `training`. All 12 cha
   - Wrote `baseline_route` (10 laps ≈ 2.5 min in-game) and `compare_runs.py`.
   - Baseline equivalence: **EQUIVALENT** (runs `2026-10-21-022020-base_a`, `022253-base_b`, `022526-core`; fps 55.6 vs 57.2; laps within 5.8 u). The first attempt read fps as int; fixed to f32 and re-ran.
   - Regression suite (`baseline_route`, `core_loads`) PASS, Debug. **Item 1 DONE**, committed with evidence in `core/evidence/item01/`.
+- 2026-10-21 bind feasibility (Haiku): feasible with constraints; recorded above.
+- 2026-10-21 it3: **item 2 DONE**. FDNYCore 0.2.0 has the signature-verified address table (23/23 OK live), version selection by hash, the module registry plus `levelwatch`, and a Debug override for failure-path tests.
+  - Tests `addr_verified` / `addr_unknown_exe` / `addr_bad_signature` PASS.
+  - Suite 5/5 PASS.
+  - The Release 0.2.0 core is still EQUIVALENT to the item-1 baselines (fps 58.8 vs 55.6, laps within 5 u).
+  - Evidence in `core/evidence/item02/`.

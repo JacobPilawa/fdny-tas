@@ -159,8 +159,29 @@ class Run:
                 steps += yaml.safe_load(f)["steps"]
         return steps + self.test.get("steps", [])
 
+    def place_pre_files(self):
+        """pre_files: [{src: <path rel. to core/>, dst: <name in game dir>}] copied
+        before launch and removed after the run (e.g. Debug address-table overrides)."""
+        placed = []
+        for f in self.test.get("pre_files", []):
+            dst = os.path.join(self.game_dir, f["dst"])
+            shutil.copy2(os.path.join(CORE_DIR, f["src"]), dst)
+            placed.append(dst)
+        return placed
+
     def execute(self):
         deploy_core(self.game_dir, self.core_config)
+        placed = self.place_pre_files()
+        try:
+            return self._execute()
+        finally:
+            for p in placed:
+                try:
+                    os.remove(p)
+                except OSError:
+                    pass
+
+    def _execute(self):
         expect = self.test.get("expect", {})
         crash = None
         rec = None

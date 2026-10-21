@@ -16,6 +16,10 @@ if (-not (Test-Path $zig)) {
 if (-not $zig) { throw "zig.exe not found -- run environment\scripts\get_zig.ps1 + install_zig.ps1" }
 $winInc = Join-Path (Split-Path -Parent $zig) 'lib\libc\include\any-windows-any'
 
+# The address table is compiled in: regenerate the header from addresses.json.
+& $PythonExe -I (Join-Path $here 'tools\addrgen.py') header (Join-Path $here 'src\gen\addresses_gen.h')
+if ($LASTEXITCODE -ne 0) { throw "addrgen header failed ($LASTEXITCODE)" }
+
 $sources = Get-ChildItem (Join-Path $here 'src') -Filter *.cpp | ForEach-Object FullName
 
 # Distinct preferred base: Genesis.dll and the other .asi files sit at

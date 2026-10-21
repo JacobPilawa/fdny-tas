@@ -18,3 +18,4 @@ __pycache__/
 # FDNYCore harness run output (evidence is committed explicitly per item).
 core/runs/
 core/build/
+core/src/gen/

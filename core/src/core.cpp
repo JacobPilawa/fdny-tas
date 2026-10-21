@@ -4,10 +4,12 @@
 #include <windows.h>
 #include <bcrypt.h>
 
+#include "addr.h"
 #include "log.h"
+#include "modules.h"
 
 #ifndef FDCORE_VERSION
-#define FDCORE_VERSION "0.1.0"
+#define FDCORE_VERSION "0.2.0"
 #endif
 #ifdef FDCORE_DEBUG
 #define FDCORE_CONFIG "Debug"
@@ -80,6 +82,9 @@ DWORD WINAPI InitThread(LPVOID) {
                       reinterpret_cast<unsigned long>(GetModuleHandleA(nullptr)));
     fdcore::log::Info("Genesis.dll sha256=%s base=%08lx", genesisHash,
                       reinterpret_cast<unsigned long>(genesis));
+    fdcore::addr::Init(exeHash, genesisHash, reinterpret_cast<uintptr_t>(GetModuleHandleA(nullptr)),
+                       reinterpret_cast<uintptr_t>(genesis));
+    fdcore::modules::StartAll();
     fdcore::log::Info("FDNYCore ready");
     return 0;
 }
