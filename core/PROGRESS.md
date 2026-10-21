@@ -1,4 +1,4 @@
-﻿# FDNYCore progress
+# FDNYCore progress
 
 Spec: `core/LOOP.md`. One line per iteration in the log; findings,
 assumptions and workarounds in their sections. Newest log entry last.
@@ -25,7 +25,7 @@ cause of RESEARCH.md growing to 465 MB.
 | 9 | Game state snapshot | **DONE 2026-10-21**: snapshot == direct reads (0 mismatches), suite green (20/20), committed. Also fixed a SafeRead race crash, added fd_skip_intro |
 | 10 | hud_player | **DONE 2026-10-21**: every old-overlay field in-game via geEngine_Printf; drawn == same-frame values (also moving) and == memory at rest; suite green (21/21), committed |
 | 11 | hud_glitch | **DONE 2026-10-21**: record layer, analysis, warp window, boxes + keys; log and per-frame box text identical to the original overlay (live + synthetic), suite green, committed |
-| 12 | Profiles + watermark | not started |
+| 12 | Profiles + watermark | **DONE 2026-10-21**: run/practice sets, refusals, in-frame watermark, persistence; suite green, committed. Practice-only list = agent default, owner to confirm |
 | 13 | Teleporter (save location / teleport, map-gated), owner request 2026-10-21 | not started (needs 5, 9) |
 
 **Mid-item:** no.
@@ -568,6 +568,34 @@ Structural map (Haiku, line-referenced) of `fdny_collision_overlay.py` (1748 lin
   - D3DDrv.dll was imported as a new program (raw block, not PE-loaded).
   - No renames, comments or patches.
 
+## Item 12: profiles + watermark
+
+- **`src/profile.{h,cpp}`:** `fd_profile practice` (default) / `run`.
+  - `cmd` gained gates: `SetGates(CvarGate, CommandGate)`; `SetCvarUngated` for profile switches.
+  - In `run`, practice-only variables can't leave their default and practice-only commands are refused, each with the console message "<name> is practice-only (fd_profile is run)" and a log line.
+- **Switching sets:**
+  - → `run`: practice-only vars not at default are remembered and reset.
+  - → `practice`: they come back.
+  - The remembered set (`fd_profile_saved <var> "<value>"`) and `fd_profile "run"` are written last in FDNYCore.cfg, so a restart restores both.
+  - A switch also runs `profile_<name>.cfg` if present (the player's own per-profile set, through the existing exec).
+- **Classification (agent default, OWNER TO CONFIRM):**
+  - Practice-only vars: `fd_hud_glitch`, `fd_hud_player`, `fd_watermark` (the watermark can't be hidden in run).
+  - Practice-only commands: `fd_glitch_*`, and `fd_tp_save` / `fd_tp_load` reserved for item 13.
+  - Allowed in run and listed on the watermark: fov, window cursor, skip intro, static spawns / spawn pins / RescueBot (FDNYDeterministic's speedrun features), binds.
+  - The list is one table in profile.cpp.
+- **Watermark:** one in-frame line (geEngine_Printf, engine font, so recordings and OBS game capture show it) at the bottom-left above the tool icons.
+  - Example: `FDNYCore 0.12.0 RUN | fov 95 | asi: alttabfix FDNYFirefighterAmericanHeroFOVFix`.
+  - It shows the version, the profile (RUN in capitals), every FDNYCore variable not at its default (`fd_` stripped), and every other .asi module loaded (toolhelp snapshot at init).
+  - On by default in practice too (`fd_watermark 0` hides it there).
+- **Test `profile_run`:**
+  - practice shows hud_player; → run resets it;
+  - refusals: fd_hud_player / fd_hud_glitch (hooks stay off) / fd_watermark / fd_glitch_clear;
+  - fov allowed and listed;
+  - restart keeps RUN and the fov, without hud_player;
+  - → practice restores hud_player 1;
+  - screenshots of both profiles.
+  - New harness step `assert_pipe_contains`; Debug pipe `watermark`.
+
 ## Assumptions / workarounds
 
 - **"Behaves the same" (item 1c) definition**, chosen by the agent at the owner's request. These are LOOP.md's 7 criteria, with two calibrations:
@@ -658,3 +686,4 @@ Structural map (Haiku, line-referenced) of `fdny_collision_overlay.py` (1748 lin
   - Suite 25/25 PASS (Debug); Release EQUIVALENT (fps 58.8 vs 55.6, laps within 4.3 u).
   - Evidence in `core/evidence/item11d/`.
   - Next: item 12 (profiles + watermark).
+- 2026-10-21 it16: **item 12 DONE** (FDNYCore 0.12.0): fd_profile run/practice (gated vars/commands, remembered practice set, persisted, profile_<name>.cfg), in-frame watermark (version, profile, non-default vars, other .asi). Test `profile_run`. Suite 26/26 PASS (Debug); Release EQUIVALENT with the watermark on (fps 57.2 vs 55.6). Practice-only list is the agent's default, owner to confirm. Evidence `core/evidence/item12/`. Next: item 13 (teleporter).

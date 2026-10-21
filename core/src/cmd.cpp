@@ -164,7 +164,20 @@ Cvar* FindCvar(const char* name) {
     return nullptr;
 }
 
+CvarGate g_cvarGate = nullptr;
+CommandGate g_commandGate = nullptr;
+
+void SetGates(CvarGate cvarGate, CommandGate commandGate) { g_cvarGate = cvarGate, g_commandGate = commandGate; }
+int CvarCount() { return g_nCvars; }
+Cvar* CvarAt(int i) { return i >= 0 && i < g_nCvars ? g_cvars[i] : nullptr; }
+
 bool SetCvar(Cvar* v, const char* value) {
+    if (v->readOnly) return false;
+    if (g_cvarGate && !g_cvarGate(*v, value)) return false;
+    return SetCvarUngated(v, value);
+}
+
+bool SetCvarUngated(Cvar* v, const char* value) {
     if (v->readOnly) return false;
     lstrcpynA(v->value, value, sizeof(v->value));
     if (v->onChange) v->onChange(*v);
@@ -225,6 +238,7 @@ bool Dispatch(const char* line) {
     const bool logIt = g_fdLogCommands.value[0] != '0';
     if (Command* c = FindCommand(argv[0])) {
         if (logIt) log::Info("cmd: %s", line);
+        if (g_commandGate && !g_commandGate(c->name)) return true;
         c->fn(argc, argv);
         return true;
     }
@@ -232,7 +246,7 @@ bool Dispatch(const char* line) {
         if (logIt) log::Info("cmd: %s", line);
         if (argc == 1) {
             console::Print("%s is \"%s\" (default \"%s\") - %s", v->name, v->value, v->defaultValue, v->help);
-        } else if (!SetCvar(v, argv[1])) {
+        } else if (!SetCvar(v, argv[1]) && v->readOnly) {  // a gate refusal prints its own reason
             console::Print("%s is read-only", v->name);
         }
         return true;

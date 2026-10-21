@@ -22,7 +22,18 @@ void RegisterCommand(const char* name, const char* help, CommandFn fn);
 // The Cvar must outlive the core (static storage). Value starts at its default.
 void RegisterCvar(Cvar* v);
 Cvar* FindCvar(const char* name);
-bool SetCvar(Cvar* v, const char* value);  // false if read-only
+bool SetCvar(Cvar* v, const char* value);  // false if read-only or refused by the gate
+
+// Profiles (item 12): gates that may refuse a variable value or a command;
+// they print their own reason. Null = everything allowed.
+using CvarGate = bool (*)(const Cvar& v, const char* value);
+using CommandGate = bool (*)(const char* name);
+void SetGates(CvarGate cvarGate, CommandGate commandGate);
+// Profile switches put practice-only vars back without the gate.
+bool SetCvarUngated(Cvar* v, const char* value);
+// Every registered variable (watermark: what is not at its default).
+int CvarCount();
+Cvar* CvarAt(int i);
 
 // Executes one line if it's ours. Returns false (untouched) if the first
 // token isn't a registered command or variable, so the caller can hand the

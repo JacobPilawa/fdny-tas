@@ -249,6 +249,13 @@ class Run:
             reply = pipe.call(f"glitch_replay {self.glitch_rec}")
             self.samples["glitch_replay"] = reply
             self.record("glitch_replay", reply.startswith("ok"), reply)
+        elif kind == "assert_pipe_contains":
+            # {cmd, contains | absent}: text of a pipe reply
+            reply = pipe.call(arg["cmd"])
+            if "contains" in arg:
+                self.record(kind, arg["contains"] in reply, f"{arg['cmd']} contains {arg['contains']!r}: {reply[:200]!r}")
+            else:
+                self.record(kind, arg["absent"] not in reply, f"{arg['cmd']} lacks {arg['absent']!r}: {reply[:200]!r}")
         elif kind == "assert_pipe_stat":
             # {cmd, key, min|equals, since: <sample label>} numeric field of a pipe reply
             reply = dict(kv.split("=", 1) for kv in pipe.call(arg["cmd"]).split() if "=" in kv)

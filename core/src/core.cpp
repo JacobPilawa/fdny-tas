@@ -15,6 +15,7 @@
 #include "log.h"
 #include "modules.h"
 #include "patches.h"
+#include "profile.h"
 #include "speedrun.h"
 #include "state.h"
 #include "testpipe.h"
@@ -105,6 +106,7 @@ DWORD WINAPI InitThread(LPVOID) {
         fdcore::hud::Init();
         fdcore::glitch::Init();
         fdcore::patches::Init();
+        fdcore::profile::Init();  // last: gates + watermark see every module's variables
     }
     fdcore::modules::StartAll();
 #ifdef FDCORE_DEBUG
