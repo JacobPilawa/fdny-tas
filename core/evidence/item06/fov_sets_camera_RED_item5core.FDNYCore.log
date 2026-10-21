@@ -1,0 +1,20 @@
+[2026-10-21 04:21:39.170] [INFO] FDNYCore loaded from C:\fdny-decomp\FDNY SP 1.1\FDNYCore.asi
+[2026-10-21 04:21:39.214] [INFO] patches: console creation ungated at 00499370
+[2026-10-21 04:21:39.245] [INFO] FDNYCore 0.5.0 (Debug) exe=C:\fdny-decomp\FDNY SP 1.1\FDNYFirefighter.exe sha256=4b3b4dc1cc0b05bcb42c8e27ac6f6ca72fe5f7064ca8122fda7d41e7f6d2fc3e base=00400000
+[2026-10-21 04:21:39.377] [INFO] Genesis.dll sha256=5014bb879706bfb5ae6cf9ce1de63dc3deebdcc5b8e1b41f247b284a336c4643 base=10000000
+[2026-10-21 04:21:39.442] [INFO] address table: version retail-1.1 selected
+[2026-10-21 04:21:39.501] [INFO] signatures: all OK (42/42)
+[2026-10-21 04:21:39.547] [INFO] hooks: created genesis.begin_frame at 10025b70 (group frame)
+[2026-10-21 04:21:39.617] [INFO] hooks: created genesis.end_frame at 100260e0 (group frame)
+[2026-10-21 04:21:39.675] [INFO] hooks: created con.exec_line at 00470f10 (group console)
+[2026-10-21 04:21:39.746] [INFO] console: ready (game console; FDNYCore commands intercepted at ScriptEngine::ExecLine)
+[2026-10-21 04:21:39.814] [INFO] module levelwatch: enabled
+[2026-10-21 04:21:39.875] [INFO] testpipe: listening on \\.\pipe\FDNYCore (Debug build)
+[2026-10-21 04:21:39.942] [INFO] FDNYCore ready
+[2026-10-21 04:21:40.595] [INFO] levelwatch: map '' state -1
+[2026-10-21 04:21:43.018] [INFO] console: game console present at 032e7800
+[2026-10-21 04:21:43.063] [INFO] config: startup (FDNYCore.cfg: none, autoexec.cfg: none)
+[2026-10-21 04:21:43.122] [INFO] levelwatch: map '' state 0
+[2026-10-21 04:21:58.867] [INFO] levelwatch: map 'training' state 3
+[2026-10-21 04:21:59.443] [INFO] levelwatch: map 'training' state 1
+[2026-10-21 04:21:59.478] [INFO] event: level_load 'training'

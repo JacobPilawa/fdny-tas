@@ -1,0 +1,11 @@
+name: explore_fov_probe_fix_off
+# Exploration: same, with the old FOV fix removed (restored after the run).
+pre_files:
+  - {src: null, dst: FDNYFirefighterAmericanHeroFOVFix.asi}
+setup: load_training
+record: false
+steps:
+  - wait_s: 2
+  - screenshot: in_level
+expect:
+  no_crash: true

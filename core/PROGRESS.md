@@ -19,8 +19,9 @@ cause of RESEARCH.md growing to 465 MB.
 | 3 | Hook manager + events | **DONE 2026-10-21**: live-tested, suite green, committed |
 | 4 | Console (on the game's console) | **DONE 2026-10-21**: live-tested in player config, suite green, committed |
 | 5 | Variables, config, binds | **DONE 2026-10-21**: live-tested, suite green (11/11), committed |
-| 6 | fov module | next |
-| 7-12 | — | not started |
+| 6 | fov module | **DONE 2026-10-21**: parity with the original fix measured, suite green (13/13), committed |
+| 7 | window module | next |
+| 8-12 | — | not started |
 | 13 | Teleporter (save location / teleport, map-gated), owner request 2026-10-21 | not started (needs 5, 9) |
 
 **Mid-item:** no.
@@ -288,6 +289,41 @@ Live 2026-10-21: in Training, gameState = 1 and mapName = `training`. All 12 cha
   - Both PASS.
 - **Harness fixes:** `restart` step added (kill + relaunch inside one test); `Game.launch` now clears the stale HWND, which otherwise read as "hung". Also added `assert_file`, `assert_log_count`, `pre_files` with `src: null` (file must be absent, restored after), and F1-F12 scancodes.
 
+## Item 6: fov module (done)
+
+- **Original FOV fix provenance** (Haiku web pass plus my own clone):
+  - It's by **AlphaYellow**, not Lyall: PCGamingWiki community file 3287, v1.0. Same toolchain as AlphaYellow's other fixes (inipp, spdlog, safetyhook, Ultimate ASI Loader).
+  - AlphaYellow's MIT repo `github.com/alphayellow1/AlphaYellowWidescreenFixes` (shallow clone, 1,952 files) has **no FDNY / Line of Duty fix**, so the source isn't public there. Parity comes from the binary: disassembly of `geCamera_SetAttributes` and of the fix's hook (Haiku, capstone).
+  - PCGamingWiki describes the game as Vert- and the fix as uncropped Hor+, with FOV-factor controls.
+- **Engine facts** (capstone disassembly of Genesis.dll; Haiku plus my own read):
+  - `@geCamera_SetAttributes@12` is fastcall: ECX = geCamera*, EDX = geRect*, Fov on the stack; `ret 4`.
+  - It stores Fov raw at `[cam+0]`, Width/Height at +4/+8, and the screen scales `[cam+0x1C] = W/Fov`, `[cam+0x20] = H/Fov`. So **horizontal FOV = 2·atan(Fov/2)**.
+  - The exe passes Fov = tan(deg·π/360) from its camera controller (`Camera::SetFov` 0x00491D20).
+  - The old fix mid-hooks Genesis+0x1383 (`mov eax,[esp+0x10]`, the Fov load; its pattern is `8B 44 24 10 D8 05 ?? ?? ?? ?? 89 01`).
+- **Old fix behaviour, measured live** with an fov-module hook logging Fov in vs stored:
+  - Without the fix, stored = the game's value. It changes over loading (2.0 → 1.732 → 2.0), and in Training it is **1.428148 = 71.1° horizontal** (Vert-).
+  - With the fix, stored is a **constant**, whatever the game passed: **1.43 × (W/H)/(4/3) × FOVFactor**, with W/H from *its ini*. Data points: 1920×1080 ini, factor 1.4 → 2.669333; 640×480, factor 1.0 → 1.43; owner's 640×480, factor 1.4 → **2.002 = 90.0°**.
+  - The installed ini is the stale 1920×1080 one, so the owner's game currently runs at 2.669 = 106°. The owner's reference ini (640×480) is the parity target.
+- **fov module (`src/fov.cpp`).** MinHook on `@geCamera_SetAttributes@12` (function entry; no overlap with the old fix's +0x33 mid-hook), group `fov`.
+  - **`fd_fov`** (archived, default `0`):
+    - `0` = classic, exactly the old fix: 1.43 × aspect/(4/3) × `fd_fov_factor`, with the aspect from the **real** render rect instead of an ini.
+    - `N` = N° horizontal at 4:3, Hor+ for wider screens: 2·tan(N·π/360) × aspect/(4/3).
+    - `-1` = leave the game's FOV untouched.
+  - **`fd_fov_factor`** (archived, default 1.4).
+  - **`fd_fovinfo`** shows the game and camera values.
+  - Changes apply at once: re-call SetAttributes on the live camera with the game's last rect/FOV.
+  - No-CRT math: `fptan` inline asm, plus a small float parser/formatter.
+- **Camera address:**
+  - `camera.fov` = `[[[[g_everGame 0x00503A78]+0x288]+0x8]+0x5C]+0` (f32). The chain to the camera controller came from a live **pointer scan** (`harness/pointer_scan.py`, from the static roots to the geCamera* the hook logged). Controller+0x5C = geCamera* is Ghidra-confirmed (0x00491BE0).
+  - Dead end, documented: Haiku's static chain via `GameSession+0x64` is actually the **entity list** (dozens of elements, `+0x18` = 4/8); the player chain `[[g_everGame]+0x30]+0x7C` is not it either.
+  - Bug found and fixed: Reapply first used a camera pointer cached in the detour and cleared on level_load, but level_load fires *after* the camera is configured, so changes never applied. Reapply now resolves the live camera through `camera.fov`.
+- **Tests (live):**
+  - `fov_parity_reference`: the **original fix** with the owner's ini, core told to leave the FOV alone (`fd_fov -1` via FDNYCore.cfg), gives camera.fov **2.001999855**.
+  - `fov_sets_camera`: original fix removed. Default **2.001999855** (parity); `fd_fov -1` → 1.428148 (game stock); `fd_fov 90` → 2.0; `fd_fov 120` → 3.464102; `fd_fov 0` → 2.002, and FDNYCore.cfg holds no fd_fov line again (default).
+  - Screenshots: 71° stock vs 120° shows a clearly wider view.
+  - Red run against the item-5 core: no fov module, so the assertions fail.
+- **Both fixes active at once:** the old fix's mid-hook runs inside the original, so its value wins and the owner's current behaviour is unchanged. The old .asi stays installed until the owner retires it; the profiles item (12) should decide what ships.
+
 ## Assumptions / workarounds
 
 - **"Behaves the same" (item 1c) definition**, chosen by the agent at the owner's request. These are LOOP.md's 7 criteria, with two calibrations:
@@ -330,3 +366,9 @@ Live 2026-10-21: in Training, gameState = 1 and mapName = `training`. All 12 cha
   - Fixed a native game crash: console opened before a level → FATAL "Console font texture not loaded". The core now refuses to open it until the font exists.
   - Red runs first; suite 11/11 PASS; Release EQUIVALENT (fps 55.6 vs 55.6).
   - Evidence in `core/evidence/item05/`.
+- 2026-10-21 it7: **item 6 DONE**. FDNYCore 0.6.0 adds the fov module.
+  - The old fix's behaviour was measured live: a constant 1.43·aspect/(4/3)·factor, which is 2.002 = 90° with the owner's ini.
+  - FDNYCore's default reproduces it to the float (2.001999855). `fd_fov N` sets 2·tan(N/2) Hor+; `-1` gives the game default.
+  - `camera.fov` chain found by pointer scan.
+  - Red then green; suite 13/13 PASS; Release EQUIVALENT.
+  - Evidence in `core/evidence/item06/`.

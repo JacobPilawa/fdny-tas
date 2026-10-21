@@ -7,6 +7,7 @@
 #include "addr.h"
 #include "console.h"
 #include "crashlog.h"
+#include "fov.h"
 #include "gen/version_gen.h"
 #include "hooks.h"
 #include "log.h"
@@ -90,7 +91,10 @@ DWORD WINAPI InitThread(LPVOID) {
                       reinterpret_cast<unsigned long>(genesis));
     fdcore::addr::Init(exeHash, genesisHash, reinterpret_cast<uintptr_t>(GetModuleHandleA(nullptr)),
                        reinterpret_cast<uintptr_t>(genesis));
-    if (fdcore::addr::VersionKnown() && fdcore::hooks::Init()) fdcore::console::Init(g_dir, FDCORE_VERSION);
+    if (fdcore::addr::VersionKnown() && fdcore::hooks::Init()) {
+        fdcore::console::Init(g_dir, FDCORE_VERSION);
+        fdcore::fov::Init();
+    }
     fdcore::modules::StartAll();
 #ifdef FDCORE_DEBUG
     fdcore::testpipe::Start();

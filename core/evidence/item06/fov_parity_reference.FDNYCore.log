@@ -1,0 +1,26 @@
+[2026-10-21 04:37:50.423] [INFO] FDNYCore loaded from C:\fdny-decomp\FDNY SP 1.1\FDNYCore.asi
+[2026-10-21 04:37:50.494] [INFO] patches: console creation ungated at 00499370
+[2026-10-21 04:37:50.537] [INFO] FDNYCore 0.6.0 (Debug) exe=C:\fdny-decomp\FDNY SP 1.1\FDNYFirefighter.exe sha256=4b3b4dc1cc0b05bcb42c8e27ac6f6ca72fe5f7064ca8122fda7d41e7f6d2fc3e base=00400000
+[2026-10-21 04:37:50.585] [INFO] Genesis.dll sha256=5014bb879706bfb5ae6cf9ce1de63dc3deebdcc5b8e1b41f247b284a336c4643 base=10000000
+[2026-10-21 04:37:50.621] [INFO] address table: version retail-1.1 selected
+[2026-10-21 04:37:50.668] [INFO] signatures: all OK (41/41)
+[2026-10-21 04:37:50.704] [INFO] hooks: created genesis.begin_frame at 10025b70 (group frame)
+[2026-10-21 04:37:50.815] [INFO] hooks: created genesis.end_frame at 100260e0 (group frame)
+[2026-10-21 04:37:50.849] [INFO] hooks: created con.exec_line at 00470f10 (group console)
+[2026-10-21 04:37:50.888] [INFO] console: ready (game console; FDNYCore commands intercepted at ScriptEngine::ExecLine)
+[2026-10-21 04:37:50.926] [INFO] hooks: created genesis.camera_set_attributes at 10001350 (group fov)
+[2026-10-21 04:37:50.971] [INFO] fov: ready (geCamera_SetAttributes hooked)
+[2026-10-21 04:37:51.003] [INFO] module levelwatch: enabled
+[2026-10-21 04:37:51.051] [INFO] testpipe: listening on \\.\pipe\FDNYCore (Debug build)
+[2026-10-21 04:37:51.087] [INFO] FDNYCore ready
+[2026-10-21 04:37:51.889] [INFO] levelwatch: map '' state -1
+[2026-10-21 04:37:54.297] [INFO] fov: camera 078166b8 game_fov=2.000000 stored=2.002000
+[2026-10-21 04:37:54.336] [INFO] console: game console present at 033877d8
+[2026-10-21 04:37:54.364] [INFO] console> exec C:\fdny-decomp\FDNY SP 1.1\FDNYCore.cfg
+[2026-10-21 04:37:54.391] [INFO] cmd: fd_fov "-1"
+[2026-10-21 04:37:54.422] [INFO] exec: C:\fdny-decomp\FDNY SP 1.1\FDNYCore.cfg (1 line(s))
+[2026-10-21 04:37:54.441] [INFO] config: startup (FDNYCore.cfg: loaded, autoexec.cfg: none)
+[2026-10-21 04:37:54.500] [INFO] levelwatch: map '' state 0
+[2026-10-21 04:38:10.118] [INFO] levelwatch: map 'training' state 3
+[2026-10-21 04:38:10.168] [INFO] levelwatch: map 'training' state 1
+[2026-10-21 04:38:10.198] [INFO] event: level_load 'training'

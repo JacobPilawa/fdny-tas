@@ -632,6 +632,38 @@
           },
           "ghidra": "[[g_everGame]+0]+0x330 = GameControls (0x368 bytes, ctor 0x004395C0) byte set 1/0 by Console::OnChar 0x0042756B/0x00427550 and SetState 0x004274B0",
           "note": "game input blocked while the console is in typing mode"
+        },
+        "genesis.camera_set_attributes": {
+          "module": "genesis",
+          "rva": "0x1350",
+          "export": "@geCamera_SetAttributes@12",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x1350",
+            "bytes": "83 EC 0C 8B 42 04 56 2B 02 8B 72 08 89 44 24 0C",
+            "ref": "first 16 bytes of Genesis.dll export @geCamera_SetAttributes@12"
+          },
+          "ghidra": "Genesis.dll export (ordinal 158); disassembled (capstone): fastcall ECX=geCamera*, EDX=const geRect*, [esp+4]=Fov float, ret 4; stores Fov raw at [cam+0] (|Fov|<1e-4 -> 1e-4); old FOV fix mid-hooks +0x1383 (mov eax,[esp+0x10] = Fov load). Exe callers 0x00491CC4 / 0x00491D64 pass tan(FOV_deg*pi/360)",
+          "note": "camera FOV entry point; FDNYCore fov module hooks it"
+        },
+        "camera.fov": {
+          "module": "exe",
+          "rva": "0x103A78",
+          "chain": [
+            "0x288",
+            "0x8",
+            "0x5C",
+            "0x0"
+          ],
+          "type": "f32",
+          "sig": {
+            "rva": "0x274c2",
+            "bytes": "8B 15 78 3A 50 00 8B 12 83 F8 02 0F",
+            "ref": "instruction at 0x004274c2 embeds 0x00503a78"
+          },
+          "ghidra": "root g_everGame 0x00503A78 (Ghidra); [EG+0x288]+0x8 = camera controller found by live pointer scan (harness/pointer_scan.py, 2026-10-21; same object also reachable as g_mainWindow+0x3A0->+0x8). Controller+0x5C = geCamera* (geCamera_Create result stored at 0x00491BE0, Ghidra); Genesis stores Fov at geCamera+0 (geCamera_SetAttributes 0x1000138D)",
+          "note": "in-level player camera FOV as stored by Genesis = 2*tan(hfov/2). (A static GameSession+0x64 list walk was a dead end: that list is the entity list.)"
         }
       }
     }

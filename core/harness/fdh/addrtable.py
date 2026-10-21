@@ -3,6 +3,8 @@ import json
 import os
 import struct
 
+import pymem.exception
+
 TABLE_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "addresses.json")
 
 _TYPES = {"i32": ("<i", 4), "u32": ("<I", 4), "ptr": ("<I", 4), "u8": ("<B", 1),
@@ -30,7 +32,14 @@ class Resolver:
         self.bases = module_bases  # {"exe": int, "genesis": int}
 
     def address(self, name):
-        """Final address of an entry, or None if a pointer in the chain is null."""
+        """Final address of an entry, or None if a pointer in the chain is null
+        or unreadable (a bad chain must fail the assertion, not the harness)."""
+        try:
+            return self._address(name)
+        except pymem.exception.MemoryReadError:
+            return None
+
+    def _address(self, name):
         e = self.entries[name]
         addr = self.bases[e["module"]] + int(e["rva"], 16)
         chain = [int(o, 16) for o in e.get("chain", [])]
@@ -52,6 +61,12 @@ class Resolver:
         if addr is None:
             return None
         t = e["type"]
+        try:
+            return self._read_at(addr, t)
+        except pymem.exception.MemoryReadError:
+            return None
+
+    def _read_at(self, addr, t):
         if t.startswith("str"):
             raw = self.pm.read_bytes(addr, int(t[3:]))
             return raw.split(b"\0", 1)[0].decode("latin-1")
