@@ -104,6 +104,15 @@ Rules carried over from this project's decomp loop (memory: loop-owns-ghidra-wri
 | 10 | hud_player | 9 | In-game HUD shows X/Y/Z position, player state, screen state, X/Y/Z velocity, XY speed; each equals memory within one frame. |
 | 11 | hud_glitch | 9 | Port of the Python collision overlay. Parity = same outputs (WARP status line, stance incl. "Bugged" crouchbug, target row, LAST WARP, HISTORY, log lines) as the Python overlay on the same scripted route. Run the two **separately, never both hooked at once** (same hook sites), and diff their logs. **Do not attempt to trigger/validate an actual OOB warp** — out of scope for now. |
 | 12 | Profiles + watermark | 8, 10 | `fd_profile run` / `practice` switch var sets; watermark lists active mods; practice-only vars refused in `run`. |
+| 13 | Teleporter (owner request 2026-10-21) | 5, 9 | Two console commands: one saves the player's current location (position + facing/view angles), the other teleports the player back to it (default names `fd_tp_save` / `fd_tp_load`; take the game's own naming if a native equivalent exists). **A saved location is tagged with the map it was saved on; teleporting is refused (console message, no state change) on any other map**, including after a level reload of a different map. Done when: save → move away → teleport restores position within tolerance (memory) + screenshot; teleport on a different map is refused and position unchanged; works bound to keys via `bind`. Practice-only once item 12 exists. Research first: how the game moves the player safely (reuse a native warp such as the checkpoint/`Verb_Reset` path rather than raw position writes, so collision/physics state stays consistent). |
+
+### Bind feasibility check (owner request 2026-10-21; do as research before item 5, report in PROGRESS.md)
+
+Can a player type `bind <key> <command>` in the console to bind any console command (including `fd_` commands and multi-word commands like `bind f5 fd_tp_save`) to a key? Answer before building item 5:
+- Does the game already have a bind command or key-binding system to piggyback on (e.g. `ActionMap::BindKey` 0x00437410, a `bind` script verb, binds in a cfg)? If yes, can it run arbitrary console lines, or only game actions?
+- Where key presses can be observed for binds (WndProc WM_KEYDOWN path vs. DirectInput keyboard buffer, R2), and whether a bound key must be swallowed from the game.
+- Key-name table (`bind f5`, `bind mouse2`, ...), persistence of binds to the core cfg, and conflict with the console toggle key (backtick).
+- Verdict: feasible as-is / feasible with constraints (list them) / not feasible — with evidence.
 
 Lua scripting is out of scope until requested.
 

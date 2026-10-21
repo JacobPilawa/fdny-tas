@@ -1,0 +1,44 @@
+name: baseline_route
+# Item 1(c) "behaves the same": a scripted ~2-minute route in Training, run
+# once with the core removed (--core none) and once with it (--core Release),
+# then compared by harness/compare_runs.py. On its own it asserts only that
+# the run completes in-level without a crash.
+setup: load_training
+record: true
+steps:
+  - sample_mem: {name: game.state, as: state_start}
+  - sample_mem: {name: game.map_name, as: map_start}
+  - sample_addr: [game.state, game.map_name, victims.total, victims.rescued,
+                  split.bank_end_sound, split.bar_end_sound, split.gas_end_sound,
+                  split.mbase_end_sound, split.training_end_sound, split.boat_end_sound,
+                  split.oilrig_end_sound, split.subway_end_sound]
+  - sample_pos: s00
+  - repeat:
+      times: 10          # 10 x ~11.5 s of input + the setup's ~33 s = well over 2 minutes in game
+      steps:
+        - key: {key: w, hold: 2.0}
+        - key: space
+        - wait_s: 1.0
+        - mouse_rel: [300, 0]
+        - key: {key: w, hold: 1.5}
+        - key: {key: c, hold: 1.0}
+        - mouse_rel: [-300, 0]
+        - key: {key: s, hold: 2.0}
+        - key: {key: a, hold: 1.0}
+        - key: {key: d, hold: 1.0}
+        - wait_s: 1.0
+        - sample_mem: {name: player.pos_x, as: lap_x, append: true}
+        - sample_mem: {name: player.pos_y, as: lap_y, append: true}
+        - sample_mem: {name: player.pos_z, as: lap_z, append: true}
+        - sample_mem: {name: clock.fps, as: fps, append: true}
+        - sample_mem: {name: clock.dt, as: dt, append: true}
+        - sample_mem: {name: game.state, as: lap_state, append: true}
+  - sample_pos: s10
+  - screenshot: route_end
+  - assert_mem: {name: game.state, equals: 1}
+  - assert_mem: {name: game.map_name, equals: training}
+  - sample_mem: {name: victims.total, as: victims_total}
+  - sample_mem: {name: victims.rescued, as: victims_rescued}
+expect:
+  no_crash: true
+  log_errors: 0

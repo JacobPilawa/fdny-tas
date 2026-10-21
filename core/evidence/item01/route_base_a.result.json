@@ -1,0 +1,139 @@
+{
+  "test": "baseline_route",
+  "core": null,
+  "pass": true,
+  "crash": null,
+  "assertions": [
+    {
+      "step": "focus",
+      "pass": true,
+      "detail": "game window foreground at launch"
+    },
+    {
+      "step": "address_table_version",
+      "pass": true,
+      "detail": "retail-1.1"
+    },
+    {
+      "step": "assert_mem",
+      "pass": true,
+      "detail": "game.state=1 expected 1 +/-0.0"
+    },
+    {
+      "step": "assert_mem",
+      "pass": true,
+      "detail": "game.map_name='training' expected 'training' +/-0.0"
+    },
+    {
+      "step": "no_crash",
+      "pass": true,
+      "detail": "no crash, hang or dialog"
+    }
+  ],
+  "samples": {
+    "module.exe": "0x400000",
+    "module.genesis": "0x10000000",
+    "state_start": 1,
+    "map_start": "training",
+    "addr.game.state": "0x31d8a68",
+    "addr.game.map_name": "0x885546c",
+    "addr.victims.total": "0x887dad0",
+    "addr.victims.rescued": "0x887dad4",
+    "addr.split.bank_end_sound": "0x889a8f8",
+    "addr.split.bar_end_sound": "0x888ce68",
+    "addr.split.gas_end_sound": "0x888cc00",
+    "addr.split.mbase_end_sound": "0x887aa8c",
+    "addr.split.training_end_sound": "0x888ca48",
+    "addr.split.boat_end_sound": "0x887a9fc",
+    "addr.split.oilrig_end_sound": "0x887aa68",
+    "addr.split.subway_end_sound": "0x88989f0",
+    "pos.s00": [
+      -1268.0,
+      -225.82,
+      4692.0
+    ],
+    "t.s00": 39.39,
+    "lap_x": [
+      -993.0315551757812,
+      -1275.084716796875,
+      -992.1080932617188,
+      -1278.0086669921875,
+      -992.9708862304688,
+      -1274.3482666015625,
+      -993.1163940429688,
+      -1278.2708740234375,
+      -997.7626953125,
+      -1276.0216064453125
+    ],
+    "lap_y": [
+      -213.89999389648438,
+      -213.89999389648438,
+      -213.89999389648438,
+      -213.89999389648438,
+      -213.89999389648438,
+      -213.89999389648438,
+      -213.89999389648438,
+      -213.89999389648438,
+      -213.89999389648438,
+      -213.89999389648438
+    ],
+    "lap_z": [
+      4751.66748046875,
+      4752.57275390625,
+      4752.10400390625,
+      4753.9443359375,
+      4753.8466796875,
+      4752.1484375,
+      4753.0322265625,
+      4752.68212890625,
+      4751.34326171875,
+      4752.0634765625
+    ],
+    "fps": [
+      58.823524475097656,
+      55.55555725097656,
+      58.823524475097656,
+      55.55555725097656,
+      58.823524475097656,
+      55.55555725097656,
+      55.55555725097656,
+      55.55555725097656,
+      58.823524475097656,
+      55.55555725097656
+    ],
+    "dt": [
+      0.017000000923871994,
+      0.017999999225139618,
+      0.017000000923871994,
+      0.017999999225139618,
+      0.017000000923871994,
+      0.017000000923871994,
+      0.017000000923871994,
+      0.017000000923871994,
+      0.017000000923871994,
+      0.017000000923871994
+    ],
+    "lap_state": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "pos.s10": [
+      -1276.02,
+      -213.9,
+      4752.06
+    ],
+    "t.s10": 151.67,
+    "screenshot.route_end.luma": 102.8,
+    "victims_total": 2,
+    "victims_rescued": 0
+  },
+  "video": "C:\\fdny-decomp\\core\\runs\\2026-10-21-022020-baseline_route-base_a\\run.mp4"
+}

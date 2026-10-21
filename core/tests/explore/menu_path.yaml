@@ -1,0 +1,15 @@
+name: explore_menu_path
+# Exploration (not part of the suite): walk the front end toward a level.
+record: true
+steps:
+  - wait_s: 4
+  - click: [320, 240]
+  - wait_s: 3
+  - gclick: [97, 457]
+  - wait_s: 3
+  - gclick: [195, 165]
+  - wait_s: 3
+  - screenshot: 02_after_slot
+expect:
+  no_crash: true
+  log_errors: 0

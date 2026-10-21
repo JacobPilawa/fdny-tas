@@ -1,0 +1,25 @@
+name: explore_console_verbs
+# Exploration (not part of the suite): in a level, does backtick open the game
+# console, and does it accept script verbs (listmaps)?
+setup: load_training
+record: true
+steps:
+  - screenshot: 01_in_level
+  - sample_mem: {name: game.state, as: state_in_level}
+  - sample_mem: {name: game.map_name, as: map_in_level}
+  - sample_mem: {name: console.instance, as: con_ptr}
+  - type: "`"
+  - wait_s: 1
+  - screenshot: 02_console
+  - sample_mem: {name: console.state, as: con_state_open}
+  - type: "listmaps"
+  - key: enter
+  - wait_s: 1.5
+  - screenshot: 03_listmaps
+  - type: "`"
+  - wait_s: 1
+  - sample_mem: {name: console.state, as: con_state_closed}
+  - screenshot: 04_closed
+expect:
+  no_crash: true
+  log_errors: 0
