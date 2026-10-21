@@ -1,0 +1,87 @@
+{
+  "test": "glitch_box_cost",
+  "core": "Debug",
+  "pass": true,
+  "crash": null,
+  "assertions": [
+    {
+      "step": "focus",
+      "pass": true,
+      "detail": "game window foreground at launch"
+    },
+    {
+      "step": "core_ready",
+      "pass": true,
+      "detail": "ready line seen"
+    },
+    {
+      "step": "address_table_version",
+      "pass": true,
+      "detail": "retail-1.1"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "glitch.tick = 1641 (+345 since shown0), want >= 250"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "glitch_box.hidden = 0, want == 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "glitch.tick = 2005 (+345 since hidden0), want >= 250"
+    },
+    {
+      "step": "no_crash",
+      "pass": true,
+      "detail": "no crash, hang or dialog"
+    },
+    {
+      "step": "log_errors",
+      "pass": true,
+      "detail": "0 ERROR line(s), limit 0"
+    }
+  ],
+  "samples": {
+    "module.exe": "0x400000",
+    "module.genesis": "0x10000000",
+    "shown0": {
+      "installed": "1",
+      "tick": "1296",
+      "trace": "2596",
+      "commit": "0",
+      "engine_ray": "1292",
+      "dropped": "0",
+      "poll_us_avg": "19",
+      "poll_us_max": "20414",
+      "draw_us_avg": "62"
+    },
+    "screenshot.box_shown.luma": 68.0,
+    "hidden0": {
+      "installed": "1",
+      "tick": "1660",
+      "trace": "3324",
+      "commit": "0",
+      "engine_ray": "1656",
+      "dropped": "0",
+      "poll_us_avg": "19",
+      "poll_us_max": "20414",
+      "draw_us_avg": "62"
+    },
+    "cost": {
+      "installed": "1",
+      "tick": "2018",
+      "trace": "4040",
+      "commit": "0",
+      "engine_ray": "2014",
+      "dropped": "0",
+      "poll_us_avg": "18",
+      "poll_us_max": "20414",
+      "draw_us_avg": "55"
+    }
+  },
+  "video": "C:\\fdny-decomp\\core\\runs\\2026-10-21-122452-glitch_box_cost-core11d\\run.mp4"
+}

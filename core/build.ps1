@@ -2,7 +2,8 @@
 #   .\build.ps1                    # Debug and Release
 #   .\build.ps1 -Config Release
 # Output: core\build\<Config>\FDNYCore.asi
-# Freestanding like asi\build.ps1: no CRT, imports kernel32/user32/bcrypt only.
+# Freestanding like asi\build.ps1: no CRT, imports kernel32/user32/gdi32/bcrypt only
+# (gdi32: the hud_glitch box is rendered with GDI, item 11d).
 
 param([ValidateSet('Debug', 'Release', 'Both')] [string]$Config = 'Both')
 
@@ -67,7 +68,7 @@ foreach ($c in $configs) {
         $objs += $o
     }
 
-    $args = $common + $perConfig[$c] + @('-o', $out) + $sources + $objs + @('-lkernel32', '-luser32', '-lbcrypt')
+    $args = $common + $perConfig[$c] + @('-o', $out) + $sources + $objs + @('-lkernel32', '-luser32', '-lgdi32', '-lbcrypt')
     & $zig @args
     if ($LASTEXITCODE -ne 0) { throw "$c build failed ($LASTEXITCODE)" }
 

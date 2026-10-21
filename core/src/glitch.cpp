@@ -16,6 +16,8 @@
 #include "console.h"
 #include "glitch_analysis.h"
 #include "glitch_bsp.h"
+#include "glitch_draw.h"
+#include "binds.h"
 #include "hooks.h"
 #include "log.h"
 
@@ -56,6 +58,8 @@ uint32_t g_dropped = 0;
 // analysis cost per frame (game thread), for the pipe / tests
 unsigned long g_pollUsMax = 0, g_pollFrames = 0;
 double g_pollUsSum = 0;  // no 64-bit integer division helpers in this no-CRT build
+double g_drawUsSum = 0;  // box drawing cost (geEngine_Printf calls)
+unsigned long g_drawFrames = 0;
 
 // --- tiny emitter (mirrors the Python Asm class) --------------------------------
 struct Asm {
@@ -270,9 +274,13 @@ bool PatchAll(bool install) {
     return false;
 }
 
+bool g_boxDump = false;  // Debug: FDNYCORE_TEST_GLITCHBOX=1 -> FDNYCore.glitchbox
+int g_nShown = 0;        // box lines currently drawn
+bool g_drawOk = false;   // the box window (glitch_draw) is available
 #ifdef FDCORE_DEBUG
 void DumpSessionStart();
 void DumpMarker(uint32_t kind);
+void BoxWrite(const char* s);
 #endif
 
 // <game>\Data\Maps, as the old tool's _default_maps_dir (exe folder).
@@ -314,7 +322,9 @@ bool Install() {
     g_installed = true;
     analysis::BeginSession(MapsDir());
     g_mapCheckDue = true;
+    g_nShown = 0;
 #ifdef FDCORE_DEBUG
+    if (g_boxDump) BoxWrite("## session\n");
     DumpSessionStart();
 #endif
     log::Info("glitch: hooks installed: cave 0x%08lX, Genesis base 0x%08lX",
@@ -330,6 +340,8 @@ void Uninstall() {
                   static_cast<unsigned long>(g_pollFrames ? g_pollUsSum / g_pollFrames : 0.0),
                   static_cast<unsigned long>(g_pollUsMax), static_cast<unsigned long>(g_pollFrames));
         analysis::EndSession();
+        if (g_drawOk) draw::Hide();
+        g_nShown = 0;
 #ifdef FDCORE_DEBUG
         DumpMarker(0xF4);
 #endif
@@ -416,6 +428,64 @@ void ReadSnapshot(analysis::Snapshot& s) {
     s.genesisBase = static_cast<uint32_t>(addr::ModuleBase(1));
 }
 
+// --- the boxes (Overlay: build / render / hotkeys) ----------------------------------
+bool g_hidden = false, g_frozen = false;  // F9 / F10
+char g_build[analysis::kBoxLines][analysis::kBoxLineLen];
+uint8_t g_buildA[analysis::kBoxLines][analysis::kBoxLineLen];  // colour tags
+char g_shown[analysis::kBoxLines][analysis::kBoxLineLen];  // what is drawn (kept while frozen)
+uint32_t g_shownTick = 0;
+CRITICAL_SECTION g_boxLock;  // the pipe thread reads what the game thread draws
+
+#ifdef FDCORE_DEBUG
+HANDLE g_boxFile = INVALID_HANDLE_VALUE;
+void BoxWrite(const char* s) {
+    if (g_boxFile == INVALID_HANDLE_VALUE) {
+        char path[MAX_PATH];
+        wsprintfA(path, "%sFDNYCore.glitchbox", console::GameDir());
+        g_boxFile = CreateFileA(path, GENERIC_WRITE, FILE_SHARE_READ, nullptr, CREATE_ALWAYS, 0, nullptr);
+    }
+    DWORD w;
+    if (g_boxFile != INVALID_HANDLE_VALUE) WriteFile(g_boxFile, s, lstrlenA(s), &w, nullptr);
+}
+// One build() per frame: "== <tick>" then the lines; "## session" per hook install.
+void DumpBox(const char (*lines)[analysis::kBoxLineLen], int n) {
+    char h[32];
+    wsprintfA(h, "== %lu\n", static_cast<unsigned long>(analysis::Tick()));
+    BoxWrite(h);
+    for (int i = 0; i < n; ++i) BoxWrite(lines[i]), BoxWrite("\n");
+}
+#endif
+
+void ClearBoxHistory() {  // F12
+    analysis::ClearHistory();
+#ifdef FDCORE_DEBUG
+    DumpMarker(0xF5);
+#endif
+}
+
+void CmdHide(int, const char* const*) { g_hidden = !g_hidden; }
+void CmdFreeze(int, const char* const*) { g_frozen = !g_frozen; }
+void CmdClear(int, const char* const*) {
+    if (g_installed) ClearBoxHistory();
+}
+
+// Overlay._hotkeys: F9 show/hide, F10 freeze, F12 clear -- edge-triggered,
+// only while the game has the keyboard (binds' rule); the game still gets them.
+void Hotkeys() {
+    static const int kVk[3] = {VK_F9, VK_F10, VK_F12};
+    static bool was[3];
+    const bool live = binds::KeysLive();
+    for (int i = 0; i < 3; ++i) {
+        const bool down = (GetAsyncKeyState(kVk[i]) & 0x8000) != 0;
+        if (down && !was[i] && live) {
+            if (i == 0) CmdHide(0, nullptr);
+            else if (i == 1) CmdFreeze(0, nullptr);
+            else ClearBoxHistory();
+        }
+        was[i] = down;
+    }
+}
+
 void FrameEnd() {
     if (!g_installed) return;
     static analysis::Snapshot snap;
@@ -464,6 +534,27 @@ void FrameEnd() {
     if (us > 10000)
         log::Info("glitch: slow analysis frame: %lu us, %lu records, map check %d", us, static_cast<unsigned long>(n),
                   snap.mapCheck ? 1 : 0);
+    // Overlay.tick: poll, then hotkeys, then render
+    Hotkeys();
+    QueryPerformanceCounter(&t0);  // box cost on the game thread: build + hand-over (rendering is on the UI thread)
+    if (g_boxDump || (!g_frozen && !g_hidden)) {
+        const int nb = analysis::BuildBox(g_build, g_buildA);
+#ifdef FDCORE_DEBUG
+        if (g_boxDump) DumpBox(g_build, nb);
+#endif
+        if (!g_frozen && !g_hidden) {
+            EnterCriticalSection(&g_boxLock);
+            for (int i = 0; i < nb; ++i) lstrcpynA(g_shown[i], g_build[i], analysis::kBoxLineLen);
+            g_nShown = nb;
+            g_shownTick = snap.tick;
+            LeaveCriticalSection(&g_boxLock);
+            if (g_drawOk) draw::Update(g_build, g_buildA, nb, true, GetActiveWindow());
+        }
+    }
+    if (g_drawOk && (g_frozen || g_hidden)) draw::Update(nullptr, nullptr, -1, !g_hidden, GetActiveWindow());
+    QueryPerformanceCounter(&t1);
+    g_drawUsSum += static_cast<double>(t1.QuadPart - t0.QuadPart) * 1e6 / static_cast<double>(fq.QuadPart);
+    ++g_drawFrames;
 }
 void OnToggle(cmd::Cvar& v) {
     if (v.value[0] != '0') {
@@ -479,6 +570,15 @@ cmd::Cvar g_fdHudGlitch = {"fd_hud_glitch", "0",
 } // namespace
 
 bool Init() {
+    InitializeCriticalSection(&g_boxLock);
+    g_drawOk = draw::Init();
+#ifdef FDCORE_DEBUG
+    char env[8];
+    g_boxDump = GetEnvironmentVariableA("FDNYCORE_TEST_GLITCHBOX", env, sizeof(env)) && env[0] == '1';
+#endif
+    cmd::RegisterCommand("fd_glitch_hide", "show / hide the hud_glitch boxes (default key F9)", CmdHide);
+    cmd::RegisterCommand("fd_glitch_freeze", "freeze / unfreeze the hud_glitch boxes; logging continues (F10)", CmdFreeze);
+    cmd::RegisterCommand("fd_glitch_clear", "clear the hud_glitch history and last warp (F12)", CmdClear);
     cmd::RegisterCvar(&g_fdHudGlitch);
     hooks::OnFrameEnd(FrameEnd);
     log::Info("glitch: ready (fd_hud_glitch)");
@@ -506,19 +606,29 @@ int ReplayFile(const char* path, char* out, int cap) {
     analysis::Snapshot snap{};
     bool haveSnap = false;
     int n = 0, sessions = 0, frames = 0;
+    bool pendingBox = false;  // build() runs after the frame's hotkeys (an F12 marker may follow)
+    auto box = [&]() {
+        if (pendingBox && g_boxDump) DumpBox(g_build, analysis::BuildBox(g_build));
+        pendingBox = false;
+    };
     auto flush = [&]() {
-        if (haveSnap) analysis::Poll(snap, recs, n), ++frames;
+        if (haveSnap) analysis::Poll(snap, recs, n), ++frames, pendingBox = true;
         n = 0;
     };
     for (uint32_t i = 0; i < blocks; ++i) {
         const uint32_t* b = data + i * (kRecSize / 4);
         if (b[0] == 0xF1) {
-            flush();
+            flush(), box();
             haveSnap = false;
+            if (g_boxDump) BoxWrite("## session\n");
             analysis::BeginSession(MapsDir());
             ++sessions;
-        } else if (b[0] == 0xF4) {
+        } else if (b[0] == 0xF5) {  // F12 after that frame's poll
             flush();
+            haveSnap = false;
+            analysis::ClearHistory();
+        } else if (b[0] == 0xF4) {
+            flush(), box();
             haveSnap = false;
             analysis::EndSession();
         } else if (b[0] == 0xF2) {  // belongs to the snapshot just read
@@ -529,7 +639,7 @@ int ReplayFile(const char* path, char* out, int cap) {
             }
             i += nb;
         } else if (b[0] == 0xF0) {
-            flush();
+            flush(), box();
             snap = analysis::Snapshot{};
             snap.tick = b[1], snap.playerPtr = b[2], snap.state = static_cast<int32_t>(b[3]);
             snap.ground = (b[4] & 0xFF) != 0, snap.spectator = (b[5] & 0xFF) != 0;
@@ -542,20 +652,31 @@ int ReplayFile(const char* path, char* out, int cap) {
             recs[n++] = b;
         }
     }
-    flush();
+    flush(), box();
     VirtualFree(data, 0, MEM_RELEASE);
+    if (g_boxFile != INVALID_HANDLE_VALUE) FlushFileBuffers(g_boxFile);
     return wsprintfA(out, "ok sessions=%d frames=%d", sessions, frames);
 }
 #endif
 
+int BoxState(char* out, int cap) {
+    EnterCriticalSection(&g_boxLock);
+    int o = wsprintfA(out, "hidden=%d frozen=%d shown_tick=%lu lines=%d", g_hidden ? 1 : 0, g_frozen ? 1 : 0,
+                      static_cast<unsigned long>(g_shownTick), g_nShown);
+    for (int i = 0; i < g_nShown && o + analysis::kBoxLineLen + 2 < cap; ++i) o += wsprintfA(out + o, "|%s", g_shown[i]);
+    LeaveCriticalSection(&g_boxLock);
+    return o;
+}
+
 int Stats(char* out, int cap) {
     if (cap < 128) return 0;
     uint32_t tick = g_cave ? *reinterpret_cast<volatile uint32_t*>(g_cave + kTick) : 0;
-    return wsprintfA(out, "installed=%d tick=%lu trace=%ld commit=%ld engine_ray=%ld dropped=%lu poll_us_avg=%lu poll_us_max=%lu",
+    return wsprintfA(out, "installed=%d tick=%lu trace=%ld commit=%ld engine_ray=%ld dropped=%lu poll_us_avg=%lu poll_us_max=%lu draw_us_avg=%lu",
                      g_installed ? 1 : 0, static_cast<unsigned long>(tick), g_counts[KIND_TRACE],
                      g_counts[KIND_COMMIT], g_counts[KIND_ENGINE_RAY], static_cast<unsigned long>(g_dropped),
                      static_cast<unsigned long>(g_pollFrames ? g_pollUsSum / g_pollFrames : 0.0),
-                     static_cast<unsigned long>(g_pollUsMax));
+                     static_cast<unsigned long>(g_pollUsMax),
+                     static_cast<unsigned long>(g_drawFrames ? g_drawUsSum / g_drawFrames : 0.0));
 }
 
 } // namespace fdcore::glitch

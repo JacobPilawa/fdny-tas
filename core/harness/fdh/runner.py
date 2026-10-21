@@ -589,6 +589,17 @@ class Run:
         # 11c: the core always predicts from <game>\Data\Maps (the old tool's default)
         maps = os.path.join(self.game_dir, expect.get("glitch_maps", "Data\\Maps"))
         r = glitch_parity.compare(rec, os.path.join(self.out, "FDNYCore.log"), maps)
+        if expect.get("glitch_box"):
+            box = os.path.join(self.game_dir, "FDNYCore.glitchbox")
+            if not os.path.exists(box):
+                self.record("glitch_box_parity", False, "no FDNYCore.glitchbox (env FDNYCORE_TEST_GLITCHBOX=1?)")
+            else:
+                shutil.copy2(box, os.path.join(self.out, "FDNYCore.glitchbox"))
+                b = glitch_parity.compare_boxes(rec, box, maps)
+                self.samples["glitch_box_parity"] = {k: b[k] for k in ("frames", "lines")}
+                self.record("glitch_box_parity", not b["mismatches"] and b["frames"] >= int(expect.get("glitch_box_min_frames", 1)),
+                            f"{b['frames']} frames / {b['lines']} lines of build() text; mismatches: "
+                            f"{b['mismatches'][:3] or 'none'}")
         self.samples["glitch_parity"] = {k: r[k] for k in ("sessions_ref", "sessions_core", "lines", "kinds")}
         enough = r["lines"] >= int(expect.get("glitch_min_lines", 1))
         self.record("glitch_parity", not r["mismatches"] and enough,

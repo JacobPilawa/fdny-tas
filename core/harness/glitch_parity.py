@@ -66,6 +66,25 @@ def compare(rec_path, log_path, maps=None):
     return report
 
 
+def compare_boxes(rec_path, box_path, maps=None):
+    """11d: the core's per-frame box text (FDNYCore.glitchbox, Debug with
+    FDNYCORE_TEST_GLITCHBOX=1) vs the original Overlay.build() on the same
+    stream. Returns {frames, lines, mismatches}."""
+    ref = []
+    glitch_replay.replay(rec_path, maps, ref)
+    with open(box_path, encoding="utf-8", errors="replace") as f:
+        core = [l.rstrip("\r\n") for l in f]
+    r = {"frames": sum(1 for l in ref if l.startswith("== ")), "lines": len(ref), "mismatches": []}
+    if len(ref) != len(core):
+        r["mismatches"].append(f"line count: reference {len(ref)} vs core {len(core)}")
+    for i, (a, b) in enumerate(zip(ref, core)):
+        if a != b:
+            r["mismatches"].append(f"line {i}:\n  ref : {a}\n  core: {b}")
+            if len(r["mismatches"]) > 8:
+                break
+    return r
+
+
 if __name__ == "__main__":
     maps = sys.argv[sys.argv.index("--predict") + 1] if "--predict" in sys.argv else None
     r = compare(sys.argv[1], sys.argv[2], maps)

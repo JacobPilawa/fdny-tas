@@ -31,6 +31,8 @@ void Handle(const char* req, char* resp) {
         wsprintfA(resp, "begin=%ld end=%ld events=%ld levels=%ld toggles=%ld frame=%s", c.beginFrame,
                   c.endFrame, c.frameEndEvents, c.levelLoads, c.toggles,
                   hooks::IsEnabled("frame") ? "on" : "off");
+    } else if (StartsWith(req, "glitch_box")) {
+        glitch::BoxState(resp, kResp);
     } else if (StartsWith(req, "glitch_replay ")) {
         glitch::ReplayFile(req + 14, resp, kResp);
     } else if (StartsWith(req, "glitch")) {

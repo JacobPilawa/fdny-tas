@@ -24,7 +24,7 @@ cause of RESEARCH.md growing to 465 MB.
 | 8 | speedrun module | **DONE 2026-10-21**: FDNYDeterministic proven live, then exact parity; suite green (18/18), committed. On-screen bot check substituted by memory evidence (see item 8) |
 | 9 | Game state snapshot | **DONE 2026-10-21**: snapshot == direct reads (0 mismatches), suite green (20/20), committed. Also fixed a SafeRead race crash, added fd_skip_intro |
 | 10 | hud_player | **DONE 2026-10-21**: every old-overlay field in-game via geEngine_Printf; drawn == same-frame values (also moving) and == memory at rest; suite green (21/21), committed |
-| 11 | hud_glitch | **in progress**: 11a, 11b, 11c done; 11d (in-game boxes + keys) next |
+| 11 | hud_glitch | **DONE 2026-10-21**: record layer, analysis, warp window, boxes + keys; log and per-frame box text identical to the original overlay (live + synthetic), suite green, committed |
 | 12 | Profiles + watermark | not started |
 | 13 | Teleporter (save location / teleport, map-gated), owner request 2026-10-21 | not started (needs 5, 9) |
 
@@ -538,6 +538,36 @@ Structural map (Haiku, line-referenced) of `fdny_collision_overlay.py` (1748 lin
   - Found and fixed along the way: `log::Raw` called FlushFileBuffers per line, which cost 20-140 ms frames. It now relies on WriteFile (survives a game crash).
 - **Timing visibility:** the pipe `glitch` reports `poll_us_avg` / `poll_us_max`; the uninstall line logs the same, and frames over 10 ms are logged.
 
+**11d (boxes + keys): done. Item 11 complete.**
+
+- **Box text:** `analysis::BuildBox` ports `Overlay.build()` (WARP / LAST WARP / HISTORY), with the original Text widget's tags per character.
+  - It reproduces tk's tag priority: source and player colours outrank the warp/flash background; plain tags turn white on it.
+  - The model gained what build() reads: the snapshot slot fallback (`last_player_trace_tick`), `last_warp` kept apart from history eviction, and Model.player / tick.
+- **Display:** like the original, a click-through, never-activating layered window, 0.88 alpha, the original's colours, Consolas 11 px with an exact cell grid. It's owned by the game window (stays above it, minimises with it) and placed at its client top-right with the 12 px margin.
+  - GDI rendering runs on the core's own UI thread, only when the lines change. The game thread builds the text and hands it over (~57 µs/frame, Debug).
+  - Needs windowed or dgVoodoo fake-fullscreen, the same requirement as the original.
+- **Two in-frame attempts, rejected with measurements:**
+  - `geEngine_Printf` (proportional engine font with cell artefacts) cut simulated ticks from ~346 to 84 per 6 s.
+  - Genesis bitmap decals (`geBitmap_Create` / `LockForWriteFormat` / `geEngine_AddBitmap` / `geEngine_DrawBitmap`, ABI read by Haiku in Ghidra) attached and returned TRUE but never showed:
+    - tried 398×346, 256 and 64 tiles; XRGB and 565; with a colour key; opaque alpha;
+    - `AddBitmap` only flags the engine, and blitting in the same frame crashed in D3DDrv (null driver handle at D3DDrv+0x7E09);
+    - D3DDrv's decal function (RVA 0x7DE0, table +0x88) is an immediate DDraw `Blt` with DDBLT_KEYSRC that ignores errors;
+    - diagnostic dumps showed our THandles match the game's visible timer digits except the bitmap's source format (8-bit palettized).
+    - Left as a lead if in-frame drawing is ever wanted (e.g. for OBS game capture): test a palettized bitmap.
+- **Keys:** F9 hide/show, F10 freeze (logging continues), F12 clear history + last warp (logged "history cleared (F12)").
+  - Edge-triggered via GetAsyncKeyState, only while the game has the keyboard (`binds::KeysLive`: focused, console closed); the game still receives them.
+  - Also console commands for binds: `fd_glitch_hide` / `fd_glitch_freeze` / `fd_glitch_clear`.
+  - Discrepancy kept as in the code: the title's "FROZEN" never shows in the original (build() only runs unfrozen).
+- **Parity:** the Debug `FDNYCore.glitchbox` (env `FDNYCORE_TEST_GLITCHBOX=1`) holds every frame's build() text; `glitch_replay.py` runs the ORIGINAL `Overlay.build` on a stand-in with `m` / `frozen`. F12 is dump marker 0xF5 (replayed as `m.clear()` + note).
+  - `glitch_parity_fuzz`: 2400 frames / 59953 box lines identical, covering LAST WARP + from, HISTORY warp rows, repeat counts, Target rows, Bugged, LINED UP / WARP NEXT FRAME and 9 F12 clears.
+  - `glitch_parity_log` live: 6870 frames / 164882 lines identical, plus F9 / F10 / F12 asserted through the pipe (`glitch_box`: hidden / frozen / shown_tick).
+  - Colours are not parity-checked (text only); screenshots in evidence.
+- **`glitch_box_cost`:** ≥ 250 ticks / 6 s with the boxes shown (guards against the printf regression).
+- **Ghidra project side effects (Haiku lookups, read-only intent):**
+  - instruction units were created in the Genesis.dll listing at the bitmap exports;
+  - D3DDrv.dll was imported as a new program (raw block, not PE-loaded).
+  - No renames, comments or patches.
+
 ## Assumptions / workarounds
 
 - **"Behaves the same" (item 1c) definition**, chosen by the agent at the owner's request. These are LOOP.md's 7 criteria, with two calibrations:
@@ -621,3 +651,10 @@ Structural map (Haiku, line-referenced) of `fdny_collision_overlay.py` (1748 lin
   - Suite 24/24 PASS (Debug); Release EQUIVALENT (fps 58.8 vs 55.6, laps within 6.2 u).
   - Evidence in `core/evidence/item11c/`.
   - Next: 11d (boxes WARP / LAST WARP / HISTORY drawn in-game + F9/F10/F12 equivalents; box text == `build()` on replay).
+- 2026-10-21 it15: **11d DONE → item 11 DONE** (FDNYCore 0.11.3): WARP / LAST WARP / HISTORY boxes as the original's overlay window (GDI, own UI thread), F9/F10/F12 + console commands.
+  - Per-frame box text identical to `Overlay.build()`: 2400 synthetic + 6870 live frames.
+  - Two in-frame attempts measured and rejected (printf: 84 vs 346 ticks / 6 s; Genesis decals: never visible). Findings recorded above.
+  - New test `glitch_box_cost` (345 ticks / 6 s shown and hidden).
+  - Suite 25/25 PASS (Debug); Release EQUIVALENT (fps 58.8 vs 55.6, laps within 4.3 u).
+  - Evidence in `core/evidence/item11d/`.
+  - Next: item 12 (profiles + watermark).

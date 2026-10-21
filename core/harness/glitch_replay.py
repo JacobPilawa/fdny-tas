@@ -35,12 +35,14 @@ ov.datetime = types.SimpleNamespace(datetime=types.SimpleNamespace(now=lambda: _
 SESSION = 0xF1
 MAPCHECK = 0xF2      # MapFinder.update ran this frame; b[1] = readable, b[2] bytes of planes follow
 SESSION_END = 0xF4   # hooks removed (the old tool's exit notes)
+CLEAR = 0xF5         # F12 after that frame's poll (Model.clear + note)
 
 
 class Frame:
     def __init__(self, snap):
         self.snap, self.records = snap, []
         self.map_check, self.planes = False, None
+        self.clear = False
 
 
 def sessions(path):
@@ -58,6 +60,9 @@ def sessions(path):
                 out.append([[], False])
         elif kind == SESSION_END:
             cur[1] = True
+        elif kind == CLEAR:
+            if cur[0]:
+                cur[0][-1].clear = True
         elif kind == MAPCHECK:
             ok, n = struct.unpack_from("<II", blk, 4)
             if cur[0]:
@@ -133,14 +138,27 @@ class ReplaySource(ov.GameSource):
         return self.frame.records
 
 
-def replay_session(frames_, ended=False, predict_maps=None):
+def box_text(m):
+    """Overlay.build() (the original method, on a stand-in with just the
+    attributes it reads) as plain text lines: tags/colours dropped."""
+    stub = types.SimpleNamespace(m=m, frozen=False)
+    return ["".join(s for s, _ in segs) for segs in ov.Overlay.build(stub)]
+
+
+def replay_session(frames_, ended=False, predict_maps=None, boxes=None):
     out = io.StringIO()
     m = ov.Model()
     log = ov.TextLog(out)
     src = ReplaySource(m, log, predict_maps)
     for fr in frames_:
         src.frame, src.cur = fr, fr.snap
-        src.poll()
+        src.poll()                      # Overlay.tick: poll, hotkeys, render
+        if fr.clear:
+            m.clear()
+            log.note("history cleared (F12)")
+        if boxes is not None:
+            boxes.append("== %d" % m.tick)
+            boxes.extend(box_text(m))
     if ended:   # main()'s finally: source.close() + the prediction summary
         log.note("hooks removed, original bytes restored")
         s = m.pred_stats
@@ -149,9 +167,15 @@ def replay_session(frames_, ended=False, predict_maps=None):
     return out.getvalue(), m
 
 
-def replay(path, predict_maps=None):
-    """One TextLog text per hook-install session."""
-    return [replay_session(fr, ended, predict_maps) for fr, ended in sessions(path)]
+def replay(path, predict_maps=None, boxes=None):
+    """One TextLog text per hook-install session (boxes: list to receive the
+    per-frame build() text, "## session" between sessions)."""
+    out = []
+    for fr, ended in sessions(path):
+        if boxes is not None:
+            boxes.append("## session")
+        out.append(replay_session(fr, ended, predict_maps, boxes))
+    return out
 
 
 if __name__ == "__main__":

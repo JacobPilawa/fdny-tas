@@ -1,0 +1,398 @@
+﻿== addr_bad_signature (core=Debug) -> C:\fdny-decomp\core\runs\2026-10-21-121641-addr_bad_signature-core11d
+  [PASS] focus: game window foreground at launch
+  [PASS] core_ready: ready line seen
+  [PASS] address_table_version: retail-1.1
+  [PASS] assert_log: contains 'address table: Debug override loaded'
+  [PASS] assert_log: contains '[WARN] signature mismatch: game.map_name'
+  [PASS] assert_log: contains 'module levelwatch: disabled (needs game.map_name)'
+  [PASS] assert_mem: game.state=1 expected 1 +/-0.0
+  [PASS] assert_screen_nonblack: in_level mean luma 101.9
+  [PASS] no_crash: no crash, hang or dialog
+  [PASS] log_errors: 0 ERROR line(s), limit 0
+== PASS addr_bad_signature
+== addr_unknown_exe (core=Debug) -> C:\fdny-decomp\core\runs\2026-10-21-121722-addr_unknown_exe-core11d
+  [PASS] focus: game window foreground at launch
+  [PASS] core_ready: ready line seen
+  [PASS] address_table_version: retail-1.1
+  [PASS] assert_log: contains 'address table: Debug override loaded'
+  [PASS] assert_log: contains '[WARN] unknown exe/Genesis'
+  [PASS] assert_log: contains 'module levelwatch: disabled (unknown version)'
+  [PASS] assert_mem: game.state=1 expected 1 +/-0.0
+  [PASS] assert_screen_nonblack: in_level mean luma 101.9
+  [PASS] no_crash: no crash, hang or dialog
+  [PASS] log_errors: 0 ERROR line(s), limit 0
+== PASS addr_unknown_exe
+== addr_verified (core=Debug) -> C:\fdny-decomp\core\runs\2026-10-21-121803-addr_verified-core11d
+  [PASS] focus: game window foreground at launch
+  [PASS] core_ready: ready line seen
+  [PASS] address_table_version: retail-1.1
+  [PASS] assert_log: contains 'address table: version retail-1.1 selected'
+  [PASS] assert_log: contains 'signatures: all OK'
+  [PASS] assert_log: contains 'module levelwatch: enabled'
+  [PASS] assert_log: contains "levelwatch: map 'training' state 1"
+  [PASS] assert_mem: game.map_name='training' expected 'training' +/-0.0
+  [PASS] no_crash: no crash, hang or dialog
+  [PASS] log_errors: 0 ERROR line(s), limit 0
+== PASS addr_verified
+== autoexec (core=Debug) -> C:\fdny-decomp\core\runs\2026-10-21-121844-autoexec-core11d
+  [PASS] focus: game window foreground at launch
+  [PASS] core_ready: ready line seen
+  [PASS] address_table_version: retail-1.1
+  [PASS] assert_log: contains 'config: startup (FDNYCore.cfg: none, autoexec.cfg: ran)'
+  [PASS] assert_log: contains 'console> autoexec-ran-777'
+  [PASS] assert_log_count: 'console> autoexec-bind-ok' occurs 1 time(s), expected 1
+  [PASS] assert_screen_nonblack: menu mean luma 162.0
+  [PASS] no_crash: no crash, hang or dialog
+  [PASS] log_errors: 0 ERROR line(s), limit 0
+== PASS autoexec
+== baseline_route (core=Debug) -> C:\fdny-decomp\core\runs\2026-10-21-121857-baseline_route-core11d
+  [PASS] focus: game window foreground at launch
+  [PASS] core_ready: ready line seen
+  [PASS] address_table_version: retail-1.1
+  [PASS] assert_mem: game.state=1 expected 1 +/-0.0
+  [PASS] assert_mem: game.map_name='training' expected 'training' +/-0.0
+  [PASS] no_crash: no crash, hang or dialog
+  [PASS] log_errors: 0 ERROR line(s), limit 0
+== PASS baseline_route
+== console_basic (core=Debug) -> C:\fdny-decomp\core\runs\2026-10-21-122131-console_basic-core11d
+  [PASS] focus: game window foreground at launch
+  [PASS] core_ready: ready line seen
+  [PASS] address_table_version: retail-1.1
+  [PASS] assert_mem: cfg.im_a_developer=0 expected 0 +/-0.0
+  [PASS] assert_mem: console.instance=54229064 != 0
+  [PASS] assert_log: contains 'patches: console creation ungated'
+  [PASS] assert_log: contains 'signatures: all OK'
+  [PASS] assert_log: contains 'console: game console present at'
+  [PASS] assert_mem: console.state=2 expected 2 +/-0.0
+  [PASS] assert_log: contains 'console> hello from fdnycore'
+  [PASS] assert_log: contains 'console> fd_version "0.11.3" (read-only)'
+  [PASS] assert_log: contains 'variable(s)'
+  [PASS] assert_log: contains 'console> exec-ok-4242'
+  [PASS] assert_same_pos: player moved 0.0 u (must be <= 1.0)
+  [PASS] assert_mem: console.state=0 expected 0 +/-0.0
+  [PASS] assert_moved: player moved 260.0 u (must be >= 20)
+  [PASS] no_crash: no crash, hang or dialog
+  [PASS] log_errors: 0 ERROR line(s), limit 0
+== PASS console_basic
+== console_menu_safe (core=Debug) -> C:\fdny-decomp\core\runs\2026-10-21-122224-console_menu_safe-core11d
+  [PASS] focus: game window foreground at launch
+  [PASS] core_ready: ready line seen
+  [PASS] address_table_version: retail-1.1
+  [PASS] assert_mem: console.state=0 expected 0 +/-0.0
+  [PASS] assert_mem: controls.block_input=0 expected 0 +/-0.0
+  [PASS] assert_log: contains 'console> console: not available until a level has loaded'
+  [PASS] assert_mem: console.state=0 expected 0 +/-0.0
+  [PASS] assert_screen_nonblack: menu_after mean luma 47.8
+  [PASS] assert_mem: console.state=2 expected 2 +/-0.0
+  [PASS] assert_log: contains 'console> in-level-console-ok'
+  [PASS] no_crash: no crash, hang or dialog
+  [PASS] log_errors: 0 ERROR line(s), limit 0
+== PASS console_menu_safe
+== core_loads (core=Debug) -> C:\fdny-decomp\core\runs\2026-10-21-122313-core_loads-core11d
+  [PASS] focus: game window foreground at launch
+  [PASS] core_ready: ready line seen
+  [PASS] address_table_version: retail-1.1
+  [PASS] assert_screen_nonblack: splash mean luma 162.0
+  [PASS] assert_log: contains 'FDNYCore 0.11.3 ('
+  [PASS] assert_log: contains 'sha256=4b3b4dc1cc0b05bcb42c8e27ac6f6ca72fe5f7064ca8122fda7d41e7f6d2fc3e'
+  [PASS] assert_log: contains 'Genesis.dll sha256=5014bb879706bfb5ae6cf9ce1de63dc3deebdcc5b8e1b41f247b284a336c4643'
+  [PASS] assert_log: contains 'FDNYCore ready'
+  [PASS] no_crash: no crash, hang or dialog
+  [PASS] log_errors: 0 ERROR line(s), limit 0
+== PASS core_loads
+== fov_parity_reference (core=Debug) -> C:\fdny-decomp\core\runs\2026-10-21-122323-fov_parity_reference-core11d
+  [PASS] focus: game window foreground at launch
+  [PASS] core_ready: ready line seen
+  [PASS] address_table_version: retail-1.1
+  [PASS] assert_log: contains 'fd_fov'
+  [PASS] assert_mem: camera.fov=2.001999855041504 expected 2.002 +/-0.0005
+  [PASS] no_crash: no crash, hang or dialog
+  [PASS] log_errors: 0 ERROR line(s), limit 0
+== PASS fov_parity_reference
+== fov_sets_camera (core=Debug) -> C:\fdny-decomp\core\runs\2026-10-21-122404-fov_sets_camera-core11d
+  [PASS] focus: game window foreground at launch
+  [PASS] core_ready: ready line seen
+  [PASS] address_table_version: retail-1.1
+  [PASS] assert_log: contains 'fov: ready'
+  [PASS] assert_mem: camera.fov=2.001999855041504 expected 2.002 +/-0.0005
+  [PASS] assert_mem: camera.fov=1.4281480312347412 expected 1.428148 +/-0.0005
+  [PASS] assert_mem: camera.fov=2.0 expected 2.0 +/-0.0005
+  [PASS] assert_mem: camera.fov=3.464101791381836 expected 3.4641 +/-0.0005
+  [PASS] assert_mem: camera.fov=2.001999855041504 expected 2.002 +/-0.0005
+  [PASS] assert_file: FDNYCore.cfg does not contain 'fd_fov'
+  [PASS] no_crash: no crash, hang or dialog
+  [PASS] log_errors: 0 ERROR line(s), limit 0
+== PASS fov_sets_camera
+== glitch_box_cost (core=Debug) -> C:\fdny-decomp\core\runs\2026-10-21-122452-glitch_box_cost-core11d
+  [PASS] focus: game window foreground at launch
+  [PASS] core_ready: ready line seen
+  [PASS] address_table_version: retail-1.1
+  [PASS] assert_pipe_stat: glitch.tick = 1641 (+345 since shown0), want >= 250
+  [PASS] assert_pipe_stat: glitch_box.hidden = 0, want == 0
+  [PASS] assert_pipe_stat: glitch.tick = 2005 (+345 since hidden0), want >= 250
+  [PASS] no_crash: no crash, hang or dialog
+  [PASS] log_errors: 0 ERROR line(s), limit 0
+== PASS glitch_box_cost
+== glitch_parity_fuzz (core=Debug) -> C:\fdny-decomp\core\runs\2026-10-21-122548-glitch_parity_fuzz-core11d
+  [PASS] focus: game window foreground at launch
+  [PASS] core_ready: ready line seen
+  [PASS] address_table_version: retail-1.1
+  [PASS] glitch_replay: ok sessions=3 frames=2400
+  [PASS] no_crash: no crash, hang or dialog
+  [PASS] log_errors: 0 ERROR line(s), limit 0
+  [PASS] glitch_box_parity: 2400 frames / 59953 lines of build() text; mismatches: none
+  [PASS] glitch_parity: sessions ref 3 / core 3, 2301 reference lines {'header': 30, 'note': 302, 'capable': 1526, 'WARP': 443}; mismatches: none
+== PASS glitch_parity_fuzz
+== glitch_parity_log (core=Debug) -> C:\fdny-decomp\core\runs\2026-10-21-122648-glitch_parity_log-core11d
+  [PASS] focus: game window foreground at launch
+  [PASS] core_ready: ready line seen
+  [PASS] address_table_version: retail-1.1
+  [PASS] assert_log: contains 'glitch: hooks installed'
+  [PASS] assert_pipe_stat: glitch_box.hidden = 1, want == 1
+  [PASS] assert_pipe_stat: glitch_box.hidden = 0, want == 0
+  [PASS] assert_pipe_stat: glitch_box.shown_tick = 426 (+0 since frozen_at), want == 0
+  [PASS] assert_pipe_stat: glitch_box.frozen = 1, want == 1
+  [PASS] assert_pipe_stat: glitch_box.shown_tick = 537 (+111 since frozen_at), want >= 10
+  [PASS] assert_log: contains 'history cleared (F12)'
+  [PASS] no_crash: no crash, hang or dialog
+  [PASS] log_errors: 0 ERROR line(s), limit 0
+  [PASS] glitch_box_parity: 7135 frames / 171242 lines of build() text; mismatches: none
+  [PASS] glitch_parity: sessions ref 2 / core 2, 30 reference lines {'header': 20, 'note': 10}; mismatches: none
+== PASS glitch_parity_log
+== glitch_records (core=Debug) -> C:\fdny-decomp\core\runs\2026-10-21-122910-glitch_records-core11d
+  [PASS] focus: game window foreground at launch
+  [PASS] core_ready: ready line seen
+  [PASS] address_table_version: retail-1.1
+  [PASS] assert_log: contains 'glitch: hooks installed: cave 0x'
+  [PASS] assert_pipe_stat: glitch.tick = 1299 (+173 since g0), want >= 100
+  [PASS] assert_pipe_stat: glitch.trace = 2609 (+353 since g0), want >= 100
+  [PASS] assert_pipe_stat: glitch.dropped = 0, want == 0
+  [PASS] assert_log: contains 'glitch: hooks removed, original bytes restored'
+  [PASS] assert_pipe_stat: glitch.trace = 2767 (+0 since g_off), want == 0
+  [PASS] assert_pipe_stat: glitch.trace = 2966 (+199 since g_off), want >= 50
+  [PASS] assert_screen_nonblack: in_level mean luma 71.5
+  [PASS] no_crash: no crash, hang or dialog
+  [PASS] log_errors: 0 ERROR line(s), limit 0
+== PASS glitch_records
+== hooks_frame (core=Debug) -> C:\fdny-decomp\core\runs\2026-10-21-123000-hooks_frame-core11d
+  [PASS] focus: game window foreground at launch
+  [PASS] core_ready: ready line seen
+  [PASS] address_table_version: retail-1.1
+  [PASS] assert_log: contains 'hooks: created genesis.begin_frame'
+  [PASS] assert_log: contains 'hooks: created genesis.end_frame'
+  [PASS] assert_log: contains "event: level_load 'training'"
+  [PASS] frame_hooks_once_per_frame: 5.0s: clock ticks=287 BeginFrame=287 EndFrame=287 frame_end events=287 (tolerance 2 for window-edge races)
+  [PASS] frame_hooks_once_per_frame: 5.0s: clock ticks=286 BeginFrame=286 EndFrame=286 frame_end events=286 (tolerance 2 for window-edge races)
+  [PASS] assert_screen_nonblack: in_level mean luma 92.2
+  [PASS] no_crash: no crash, hang or dialog
+  [PASS] log_errors: 0 ERROR line(s), limit 0
+== PASS hooks_frame
+== hooks_toggle (core=Debug) -> C:\fdny-decomp\core\runs\2026-10-21-123052-hooks_toggle-core11d
+  [PASS] focus: game window foreground at launch
+  [PASS] core_ready: ready line seen
+  [PASS] address_table_version: retail-1.1
+  [PASS] toggle_hooks: 50x off/on 'frame', 0 failed command(s)
+  [PASS] frame_hooks_once_per_frame: 5.0s: clock ticks=287 BeginFrame=287 EndFrame=287 frame_end events=287 (tolerance 2 for window-edge races)
+  [PASS] hook_off: frame disabled
+  [PASS] hooks_idle_while_off: frame off for 2s: deltas {'begin': 0, 'end': 0, 'events': 0}
+  [PASS] hook_on: frame re-enabled
+  [PASS] frame_hooks_once_per_frame: 3.0s: clock ticks=173 BeginFrame=173 EndFrame=173 frame_end events=173 (tolerance 2 for window-edge races)
+  [PASS] assert_screen_nonblack: after_toggles mean luma 101.9
+  [PASS] no_crash: no crash, hang or dialog
+  [PASS] log_errors: 0 ERROR line(s), limit 0
+== PASS hooks_toggle
+== hud_player (core=Debug) -> C:\fdny-decomp\core\runs\2026-10-21-123149-hud_player-core11d
+  [PASS] focus: game window foreground at launch
+  [PASS] core_ready: ready line seen
+  [PASS] address_table_version: retail-1.1
+  [PASS] assert_log: contains 'hud: ready'
+  [PASS] assert_hud_matches: HUD frame 2193: {'pos': '-1268.0 -225.9 4692.0', 'vel': '0.0 0.0 0.0', 'speed': '0.0', 'state': 'crouched (3) ground', 'screen': 'in level', 'src': '-1268.000 -225.872 4692.000 0.000 0.000 0.000 0.000 3 1 2'}; mismatches: none
+  [PASS] assert_hud_matches: [moving] HUD frame 2236: {'pos': '-1043.5 -225.9 4692.0', 'vel': '367.1 0.0 0.0', 'speed': '367.1', 'state': 'crouched (3) ground', 'screen': 'in level', 'src': '-1043.483 -225.872 4692.000 367.059 0.000 0.000 367.059 3 1 2'}; mismatches: none
+  [PASS] assert_hud_matches: [moving] HUD frame 2242: {'pos': '-1004.6 -225.9 4692.0', 'vel': '367.2 0.0 0.0', 'speed': '367.2', 'state': 'crouched (3) ground', 'screen': 'in level', 'src': '-1004.580 -225.872 4692.000 367.187 0.000 0.000 367.187 3 1 2'}; mismatches: none
+  [PASS] assert_hud_matches: HUD frame 2371: {'pos': '-543.6 -225.9 4692.0', 'vel': '0.0 0.0 0.0', 'speed': '0.0', 'state': 'crouched (3) ground', 'screen': 'in level', 'src': '-543.623 -225.872 4692.000 0.000 0.000 0.000 0.000 3 1 2'}; mismatches: none
+  [PASS] assert_hud_matches: HUD frame 2423: {'pos': '-543.6 -225.9 4692.0', 'vel': '0.0 0.0 0.0', 'speed': '0.0', 'state': 'standing (4) ground', 'screen': 'in level', 'src': '-543.623 -225.872 4692.000 0.000 0.000 0.000 0.000 4 1 2'}; mismatches: none
+  [PASS] no_crash: no crash, hang or dialog
+  [PASS] log_errors: 0 ERROR line(s), limit 0
+== PASS hud_player
+== skip_intro (core=Debug) -> C:\fdny-decomp\core\runs\2026-10-21-123237-skip_intro-core11d
+  [PASS] focus: game window foreground at launch
+  [PASS] core_ready: ready line seen
+  [PASS] address_table_version: retail-1.1
+  [PASS] assert_log: contains 'patches: intro movies skipped (fd_skip_intro)'
+  [PASS] assert_mem: game.map_name='training' expected 'training' +/-0.0
+  [PASS] assert_log: contains 'console> fd_skip_intro "1"'
+  [PASS] no_crash: no crash, hang or dialog
+  [PASS] log_errors: 0 ERROR line(s), limit 0
+== PASS skip_intro
+== speedrun_reference_deterministic (core=Debug) -> C:\fdny-decomp\core\runs\2026-10-21-123320-speedrun_reference_deterministic-core11d
+  [PASS] focus: game window foreground at launch
+  [PASS] core_ready: ready line seen
+  [PASS] address_table_version: retail-1.1
+  [PASS] assert_log: contains 'speedrun: FDNYDeterministic.asi is installed; static spawns and RescueBot left to it'
+  [PASS] sample_victims: run1: 2 victim(s)
+  [PASS] sample_victims: run2: 2 victim(s)
+  [PASS] sample_victims: run3: 2 victim(s)
+  [PASS] assert_victims_equal: ['run1', 'run2', 'run3']: positions identical (+/-0.5 u): [[['victim1', 1104.0, -230.9, -4976.0, 1104.0, -4976.0], ['victim2', 1656.0, -230.9, -4968.0, 1656.0, -4968.0]], [['victim1', 1104.0, -230.9, -4976.0, 1104.0, -4976.0], ['victim2', 1656.0, -230.9, -4968.0, 1656.0, -4968.0]], [['victim1', 1104.0, -230.9, -4976.0, 1104.0, -4976.0], ['victim2', 1656.0, -230.9, -4968.0, 1656.0, -4968.0]]]
+  [PASS] assert_victims_at_spot0: run1: every victim at its spot 0 (x,z; y is floor-snapped): [['victim1', 1104.0, -230.9, -4976.0, 1104.0, -4976.0], ['victim2', 1656.0, -230.9, -4968.0, 1656.0, -4968.0]]
+  [PASS] assert_victims_at_spot0: run3: every victim at its spot 0 (x,z; y is floor-snapped): [['victim1', 1104.0, -230.9, -4976.0, 1104.0, -4976.0], ['victim2', 1656.0, -230.9, -4968.0, 1656.0, -4968.0]]
+  [PASS] no_crash: no crash, hang or dialog
+  [PASS] log_errors: 0 ERROR line(s), limit 0
+== PASS speedrun_reference_deterministic
+== speedrun_rescuebot (core=Debug) -> C:\fdny-decomp\core\runs\2026-10-21-123454-speedrun_rescuebot-core11d
+  [PASS] focus: game window foreground at launch
+  [PASS] core_ready: ready line seen
+  [PASS] address_table_version: retail-1.1
+  [PASS] assert_mem: game.map_name='bank' expected 'bank' +/-0.0
+  [PASS] assert_mem: rescuebot.enabled=0 expected 0 +/-0.0
+  [PASS] assert_mem: rescuebot.claimed=0 expected 0 +/-0.0
+  [PASS] assert_mem: rescuebot.enabled=1 expected 1 +/-0.0
+  [PASS] assert_mem: rescuebot.enabled=0 expected 0 +/-0.0
+  [PASS] assert_mem: rescuebot.claimed=0 expected 0 +/-0.0
+  [PASS] no_crash: no crash, hang or dialog
+  [PASS] log_errors: 0 ERROR line(s), limit 0
+== PASS speedrun_rescuebot
+== speedrun_static_spawns (core=Debug) -> C:\fdny-decomp\core\runs\2026-10-21-123702-speedrun_static_spawns-core11d
+  [PASS] focus: game window foreground at launch
+  [PASS] core_ready: ready line seen
+  [PASS] address_table_version: retail-1.1
+  [PASS] assert_log: contains 'speedrun: victim-spawn hook at'
+  [PASS] assert_log: contains 'pinned to spot 0'
+  [PASS] sample_victims: run1: 2 victim(s)
+  [PASS] sample_victims: run2: 2 victim(s)
+  [PASS] sample_victims: run3: 2 victim(s)
+  [PASS] assert_victims_equal: ['run1', 'run2', 'run3']: positions identical (+/-0.5 u): [[['victim1', 1104.0, -230.9, -4976.0, 1104.0, -4976.0], ['victim2', 1656.0, -230.9, -4968.0, 1656.0, -4968.0]], [['victim1', 1104.0, -230.9, -4976.0, 1104.0, -4976.0], ['victim2', 1656.0, -230.9, -4968.0, 1656.0, -4968.0]], [['victim1', 1104.0, -230.9, -4976.0, 1104.0, -4976.0], ['victim2', 1656.0, -230.9, -4968.0, 1656.0, -4968.0]]]
+  [PASS] assert_victims_at_spot0: run1: every victim at its spot 0 (x,z; y is floor-snapped): [['victim1', 1104.0, -230.9, -4976.0, 1104.0, -4976.0], ['victim2', 1656.0, -230.9, -4968.0, 1656.0, -4968.0]]
+  [PASS] assert_victims_at_spot0: run3: every victim at its spot 0 (x,z; y is floor-snapped): [['victim1', 1104.0, -230.9, -4976.0, 1104.0, -4976.0], ['victim2', 1656.0, -230.9, -4968.0, 1656.0, -4968.0]]
+  [PASS] no_crash: no crash, hang or dialog
+  [PASS] log_errors: 0 ERROR line(s), limit 0
+== PASS speedrun_static_spawns
+== state_snapshot (core=Debug) -> C:\fdny-decomp\core\runs\2026-10-21-123836-state_snapshot-core11d
+  [PASS] focus: game window foreground at launch
+  [PASS] core_ready: ready line seen
+  [PASS] address_table_version: retail-1.1
+  [PASS] assert_log: contains 'state: snapshot ready'
+  [PASS] assert_snapshot_matches: 24 fields compared at frame 2219; mismatches: none
+  [PASS] assert_snapshot_matches: 24 fields compared at frame 2393; mismatches: none
+  [PASS] assert_mem: game.map_name='bank' expected 'bank' +/-0.0
+  [PASS] assert_snapshot_matches: 28 fields compared at frame 4722; mismatches: none
+  [PASS] assert_snapshot_matches: 28 fields compared at frame 4838; mismatches: none
+  [PASS] no_crash: no crash, hang or dialog
+  [PASS] log_errors: 0 ERROR line(s), limit 0
+== PASS state_snapshot
+== vars_binds_persist (core=Debug) -> C:\fdny-decomp\core\runs\2026-10-21-124004-vars_binds_persist-core11d
+  [PASS] focus: game window foreground at launch
+  [PASS] core_ready: ready line seen
+  [PASS] address_table_version: retail-1.1
+  [PASS] assert_log: contains 'config: startup (FDNYCore.cfg: none, autoexec.cfg: none)'
+  [PASS] assert_log_count: 'console> bound-f5-ok' occurs 0 time(s), expected 0
+  [PASS] assert_log_count: 'console> bound-f5-ok' occurs 1 time(s), expected 1
+  [PASS] assert_log_count: 'console> bound-f5-ok' occurs 2 time(s), expected 2
+  [PASS] assert_file: FDNYCore.cfg contains 'fd_log_commands "0"'
+  [PASS] assert_file: FDNYCore.cfg contains 'bind f5 "echo bound-f5-ok"'
+  [PASS] restart: relaunched; core ready
+  [PASS] assert_log: contains 'config: startup (FDNYCore.cfg: loaded, autoexec.cfg: none)'
+  [PASS] assert_log_count: 'console> bound-f5-ok' occurs 1 time(s), expected 1
+  [PASS] assert_log_count: 'cmd: echo bound-f5-ok' occurs 0 time(s), expected 0
+  [PASS] assert_mem: console.state=0 expected 0 +/-0.0
+  [PASS] assert_log: contains 'console> fd_log_commands is "0"'
+  [PASS] assert_log: contains 'console> f5 "echo bound-f5-ok"'
+  [PASS] no_crash: no crash, hang or dialog
+  [PASS] log_errors: 0 ERROR line(s), limit 0
+== PASS vars_binds_persist
+== window_alttab (core=Debug) -> C:\fdny-decomp\core\runs\2026-10-21-124139-window_alttab-core11d
+  [PASS] focus: game window foreground at launch
+  [PASS] core_ready: ready line seen
+  [PASS] address_table_version: retail-1.1
+  [PASS] assert_log: contains 'window: cursor warp at'
+  [PASS] assert_cursor: cursor (330,261) expected (330,261) +/-1 [game window centre]
+  [PASS] assert_foreground: game is not the foreground window (expected other)
+  [PASS] assert_cursor: cursor (900,700) expected (900,700) +/-1
+  [PASS] assert_foreground: game is the foreground window (expected game)
+  [PASS] assert_cursor: cursor (330,261) expected (330,261) +/-1 [game window centre]
+  [PASS] assert_screen_nonblack: back_in_game mean luma 101.6
+  [PASS] assert_foreground: game is not the foreground window (expected other)
+  [PASS] assert_cursor: cursor (900,700) expected (900,700) +/-1
+  [PASS] assert_foreground: game is the foreground window (expected game)
+  [PASS] assert_cursor: cursor (330,261) expected (330,261) +/-1 [game window centre]
+  [PASS] assert_screen_nonblack: back_in_game mean luma 101.9
+  [PASS] assert_foreground: game is not the foreground window (expected other)
+  [PASS] assert_cursor: cursor (900,700) expected (900,700) +/-1
+  [PASS] assert_foreground: game is the foreground window (expected game)
+  [PASS] assert_cursor: cursor (330,261) expected (330,261) +/-1 [game window centre]
+  [PASS] assert_screen_nonblack: back_in_game mean luma 101.5
+  [PASS] assert_foreground: game is not the foreground window (expected other)
+  [PASS] assert_cursor: cursor (900,700) expected (900,700) +/-1
+  [PASS] assert_foreground: game is the foreground window (expected game)
+  [PASS] assert_cursor: cursor (330,261) expected (330,261) +/-1 [game window centre]
+  [PASS] assert_screen_nonblack: back_in_game mean luma 101.9
+  [PASS] assert_foreground: game is not the foreground window (expected other)
+  [PASS] assert_cursor: cursor (900,700) expected (900,700) +/-1
+  [PASS] assert_foreground: game is the foreground window (expected game)
+  [PASS] assert_cursor: cursor (330,261) expected (330,261) +/-1 [game window centre]
+  [PASS] assert_screen_nonblack: back_in_game mean luma 101.5
+  [PASS] assert_moved: player moved 549.9 u (must be >= 20)
+  [PASS] no_crash: no crash, hang or dialog
+  [PASS] log_errors: 0 ERROR line(s), limit 0
+== PASS window_alttab
+== window_parity_reference (core=Debug) -> C:\fdny-decomp\core\runs\2026-10-21-124246-window_parity_reference-core11d
+  [PASS] focus: game window foreground at launch
+  [PASS] core_ready: ready line seen
+  [PASS] address_table_version: retail-1.1
+  [PASS] assert_log: contains "window: cursor-warp site doesn't match"
+  [PASS] assert_cursor: cursor (330,261) expected (330,261) +/-1 [game window centre]
+  [PASS] assert_foreground: game is not the foreground window (expected other)
+  [PASS] assert_cursor: cursor (900,700) expected (900,700) +/-1
+  [PASS] assert_foreground: game is the foreground window (expected game)
+  [PASS] assert_cursor: cursor (330,261) expected (330,261) +/-1 [game window centre]
+  [PASS] assert_screen_nonblack: back_in_game mean luma 101.5
+  [PASS] assert_foreground: game is not the foreground window (expected other)
+  [PASS] assert_cursor: cursor (900,700) expected (900,700) +/-1
+  [PASS] assert_foreground: game is the foreground window (expected game)
+  [PASS] assert_cursor: cursor (330,261) expected (330,261) +/-1 [game window centre]
+  [PASS] assert_screen_nonblack: back_in_game mean luma 101.9
+  [PASS] assert_foreground: game is not the foreground window (expected other)
+  [PASS] assert_cursor: cursor (900,700) expected (900,700) +/-1
+  [PASS] assert_foreground: game is the foreground window (expected game)
+  [PASS] assert_cursor: cursor (330,261) expected (330,261) +/-1 [game window centre]
+  [PASS] assert_screen_nonblack: back_in_game mean luma 101.6
+  [PASS] assert_foreground: game is not the foreground window (expected other)
+  [PASS] assert_cursor: cursor (900,700) expected (900,700) +/-1
+  [PASS] assert_foreground: game is the foreground window (expected game)
+  [PASS] assert_cursor: cursor (330,261) expected (330,261) +/-1 [game window centre]
+  [PASS] assert_screen_nonblack: back_in_game mean luma 101.8
+  [PASS] assert_foreground: game is not the foreground window (expected other)
+  [PASS] assert_cursor: cursor (900,700) expected (900,700) +/-1
+  [PASS] assert_foreground: game is the foreground window (expected game)
+  [PASS] assert_cursor: cursor (330,261) expected (330,261) +/-1 [game window centre]
+  [PASS] assert_screen_nonblack: back_in_game mean luma 101.7
+  [PASS] assert_moved: player moved 546.5 u (must be >= 20)
+  [PASS] no_crash: no crash, hang or dialog
+  [PASS] log_errors: 0 ERROR line(s), limit 0
+== PASS window_parity_reference
+{
+  "addr_bad_signature": true,
+  "addr_unknown_exe": true,
+  "addr_verified": true,
+  "autoexec": true,
+  "baseline_route": true,
+  "console_basic": true,
+  "console_menu_safe": true,
+  "core_loads": true,
+  "fov_parity_reference": true,
+  "fov_sets_camera": true,
+  "glitch_box_cost": true,
+  "glitch_parity_fuzz": true,
+  "glitch_parity_log": true,
+  "glitch_records": true,
+  "hooks_frame": true,
+  "hooks_toggle": true,
+  "hud_player": true,
+  "skip_intro": true,
+  "speedrun_reference_deterministic": true,
+  "speedrun_rescuebot": true,
+  "speedrun_static_spawns": true,
+  "state_snapshot": true,
+  "vars_binds_persist": true,
+  "window_alttab": true,
+  "window_parity_reference": true
+}

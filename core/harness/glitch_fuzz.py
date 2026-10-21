@@ -20,7 +20,7 @@ import struct
 import sys
 
 REC_FMT = "<11I3f3ff3fI3f7I"
-SNAP, SESSION, MAPCHECK, SESSION_END = 0xF0, 0xF1, 0xF2, 0xF4
+SNAP, SESSION, MAPCHECK, SESSION_END, CLEAR = 0xF0, 0xF1, 0xF2, 0xF4, 0xF5
 KIND_TRACE, KIND_COMMIT, KIND_ENGINE_RAY = 1, 2, 3
 PLAYER = 0x0A01F000
 
@@ -294,6 +294,8 @@ def generate(path, seed=1, frames=600, sessions=2, maps_dir=None):
                     recs.append(g.writer(tick + 1, r.choice(g.pool), g.normal()))
                 for x in recs:
                     f.write(x)
+                if r.random() < 1 / 250:                         # F12 after this frame's poll
+                    f.write(struct.pack("<I", CLEAR) + b"\0" * 124)
             if s % 2 == 0:                                         # hooks removed (fd_hud_glitch 0)
                 f.write(struct.pack("<I", SESSION_END) + b"\0" * 124)
 

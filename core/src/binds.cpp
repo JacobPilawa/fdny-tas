@@ -150,11 +150,13 @@ bool ConsoleOpen() {
     return addr::ReadI32(addr::Id::console_state, &state) && state != 0;
 }
 
+bool KeysLive_() { return OurWindowFocused() && !ConsoleOpen(); }
+
 // Edge-triggered on key press. Ignored while the console is open (keys are
 // typing there) or another window has focus; key state is still tracked so
 // closing the console doesn't fire keys that were held.
 void Poll() {
-    const bool live = OurWindowFocused() && !ConsoleOpen();
+    const bool live = KeysLive_();
     for (int vk = 1; vk < kVkCount; ++vk) {
         if (!g_binds[vk][0]) continue;
         bool down = (GetAsyncKeyState(vk) & 0x8000) != 0;
@@ -169,6 +171,8 @@ void Poll() {
 }
 
 } // namespace
+
+bool KeysLive() { return KeysLive_(); }
 
 void Init() {
     cmd::RegisterCommand("bind", "bind <key> \"<command>\": run a console line when the key is pressed", CmdBind);

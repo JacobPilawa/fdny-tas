@@ -280,9 +280,18 @@ Row g_hist[kHistory];
 int g_histStart = 0, g_histLen = 0;
 uint32_t g_seq = 0;
 bool g_crouchbug = false;
-Key g_slot;
+Key g_slot;  // Model.slot = (pos, normal or None); valid=false: slot is None
+float g_slotNormal[3];
+bool g_slotHasNormal = false;
 bool g_hasSlotWriter = false;
 Ev g_slotWriter;
+long long g_lastPlayerTraceTick = -1000000000LL;  // GameSource.last_player_trace_tick
+uint32_t g_tick = 0;                               // Model.tick
+bool g_hasLastWarp = false;                        // Model.last_warp (survives history eviction)
+Row g_lastWarp;
+ULONGLONG g_lastWarpWall = 0;                      // its Ev.wall (LAST WARP flash)
+bool g_hasPlayer = false;                          // Model.player
+Snapshot g_player;
 uint32_t g_warps = 0;
 char g_verdict[96] = "";
 
@@ -571,6 +580,7 @@ void Feed(Ev& ev, bool& hasSrc, Ev& src) {
     if (ev.role == R_FIRST) {
         const Ev* w = ev.pre.valid ? FindWriter(ev.pre) : nullptr;
         g_slot = ev.pre;
+        g_slotHasNormal = false;
         g_hasSlotWriter = w != nullptr;
         if (w) g_slotWriter = *w;
         if (w && lstrcmpA(w->source, "Player") != 0 && WarpAllowed(*w)) AddCapable(*w, ev.tick);
@@ -614,6 +624,8 @@ void Feed(Ev& ev, bool& hasSrc, Ev& src) {
             lstrcpynA(row.detail + n, "; predicted: ", static_cast<int>(sizeof(row.detail)) - n);
             n = lstrlenA(row.detail);
             lstrcpynA(row.detail + n, pred, static_cast<int>(sizeof(row.detail)) - n);
+            g_lastWarp = row, g_hasLastWarp = true;  // Model.add_warp
+            g_lastWarpWall = GetTickCount64();
             LogWarp(row);
         }
     }
@@ -711,7 +723,12 @@ void BeginSession(const char* mapsDir) {
     g_seq = 0;
     g_crouchbug = false;
     g_slot.valid = false;
+    g_slotHasNormal = false;
     g_hasSlotWriter = false;
+    g_lastPlayerTraceTick = -1000000000LL;
+    g_tick = 0;
+    g_hasLastWarp = false;
+    g_hasPlayer = false;
     g_nIters = 0;
     g_anHasTick = false;
     g_warps = 0;
@@ -733,6 +750,9 @@ int PyFixed(char* out, double v, int d) { return Fixed(out, v, d); }
 
 void Poll(const Snapshot& s, const uint32_t* const* records, int n) {
     const uint32_t gdelta = s.genesisBase - GENESIS_PREF;
+    g_tick = s.tick;
+    g_hasPlayer = s.playerPtr != 0;
+    g_player = s;
     TrackCrouchbug(s, s.tick);
     // GameSource._predict (after track_crouchbug, before the records)
     bool haveMap = bsp::HaveSigs() && bsp::CurrentName()[0];
@@ -754,6 +774,14 @@ void Poll(const Snapshot& s, const uint32_t* const* records, int n) {
         }
         SetWindow(&w, s.tick);
     }
+    // WARP box Target: the slot as the player's own first trace saw it; a live
+    // read when the player has not traced recently.
+    if (static_cast<long long>(s.tick) - g_lastPlayerTraceTick > 10) {
+        g_slot = MakeKey(s.slotImpact);
+        for (int k = 0; k < 3; ++k) g_slotNormal[k] = s.slotPlane[k];
+        g_slotHasNormal = true;
+        g_hasSlotWriter = false;
+    }
     for (int i = 0; i < n; ++i) {
         const uint32_t* r = records[i];
         Ev ev{};
@@ -770,6 +798,7 @@ void Poll(const Snapshot& s, const uint32_t* const* records, int n) {
             ev.hasNormal = true;
             ev.dist = *F(r, R_DIST), ev.hasDist = true;
             ev.pre = MakeKey(F(r, R_PRE));
+            if (lstrcmpA(ev.source, "Player") == 0) g_lastPlayerTraceTick = ev.tick;
             Feed(ev, hasSrc, src);
         } else if (r[R_KIND] == KIND_ENGINE_RAY) {
             ev.seq = NextSeq();
@@ -799,5 +828,253 @@ void Poll(const Snapshot& s, const uint32_t* const* records, int n) {
 }
 
 const char* VerdictText() { return g_verdict; }
+
+uint32_t Tick() { return g_tick; }
+
+void ClearHistory() {
+    g_histStart = g_histLen = 0;
+    g_hasLastWarp = false;
+    Note("history cleared (F12)");
+}
+
+// --- Overlay.build() --------------------------------------------------------------
+// Text plus the original's Text-widget tags, per character (attrs). The tags
+// map to colours in the renderer; the text alone is what parity compares.
+namespace {
+
+constexpr int W_INNER = 61, COORD_COL = 19, SRC_W = COORD_COL - 8, HISTORY_ROWS = 10, AGE_DIM_TICKS = 180;
+constexpr ULONGLONG WARP_FLASH_MS = 1000;
+const char* const kStateNames[] = {"Standing", "Crouched", "Climbing", "Out cold", "Scripted"};  // 3..7
+
+uint8_t SrcTag(const char* s) {
+    static const char* const kSrc[] = {"Victim", "Fire", "Hose", "HoseRope", "Axe", "Player", "Engine"};
+    for (int i = 0; i < 7; ++i)
+        if (lstrcmpA(s, kSrc[i]) == 0) return static_cast<uint8_t>(T_SRC_VICTIM + i);
+    return T_SRC_OTHER;
+}
+
+uint8_t PlayerTag(const char* s) {  // pl_tag(): PLAYER_COLORS or dim
+    static const char* const kPl[] = {"Standing", "Crouched", "Climbing", "Out cold", "Scripted", "Bugged", "Ground", "In air"};
+    for (int i = 0; i < 8; ++i)
+        if (lstrcmpA(s, kPl[i]) == 0) return static_cast<uint8_t>(T_PL_STANDING + i);
+    return T_DIM;
+}
+
+struct Box {
+    char (*L)[kBoxLineLen];
+    uint8_t (*A)[kBoxLineLen];
+    int n = 0;
+    char row[kBoxLineLen * 2];
+    uint8_t rowA[kBoxLineLen * 2];
+    int rn = 0;
+    uint8_t bg = 0;  // body(..., bg): the background bit for every segment and the pad
+    void put(const char* s, uint8_t tag) {
+        // with a background, plain tags render white (the bg tag outranks them);
+        // source / player colours keep their foreground (they outrank the bg tag)
+        if (bg && tag < T_SRC_VICTIM) tag = T_WHITE;
+        for (; *s && rn < kBoxLineLen * 2 - 1; ++s) row[rn] = *s, rowA[rn++] = static_cast<uint8_t>(tag | bg);
+        row[rn] = 0;
+    }
+    void pad(const char* s, int width, bool left, uint8_t tag) {  // "%-Ns" / "%Ns" in one segment
+        int len = lstrlenA(s);
+        if (!left)
+            for (int i = len; i < width; ++i) put(" ", tag);
+        put(s, tag);
+        if (left)
+            for (int i = len; i < width; ++i) put(" ", tag);
+    }
+    void emit(const char* s, const uint8_t* a, int len) {
+        if (n >= kBoxLines) return;
+        if (len > kBoxLineLen - 1) len = kBoxLineLen - 1;
+        for (int i = 0; i < len; ++i) {
+            L[n][i] = s[i];
+            if (A) A[n][i] = a[i];
+        }
+        L[n][len] = 0;
+        ++n;
+    }
+    void top(const char* title, const char* extra, bool flash) {
+        rn = 0, bg = 0;
+        const uint8_t frame = flash ? static_cast<uint8_t>(T_WHITE | BG_FLASH) : T_FRAME;
+        put("+-- ", frame), put(title, T_TITLE);
+        if (extra[0]) put(extra, flash ? T_ALERT : T_HEADER);
+        put(" ", frame);
+        for (int i = W_INNER + 4 - 6 - lstrlenA(title) - lstrlenA(extra); i > 0; --i) put("-", frame);
+        put("+", frame);
+        emit(row, rowA, rn);
+    }
+    void begin(uint8_t background = 0) {  // body(): "| " in frame colour, then the segments
+        rn = 0, bg = 0;
+        put("| ", T_FRAME);
+        bg = background;
+    }
+    void seg(const char* s, uint8_t tag) { put(s, tag); }
+    void end() {
+        for (int i = rn - 2; i < W_INNER; ++i) put(" ", T_TEXT);  // pad: (bg or "text")
+        bg = 0;
+        put(" |", T_FRAME);
+        emit(row, rowA, rn);
+    }
+    void body(const char* s, uint8_t tag) { begin(), seg(s, tag), end(); }
+    void bottom() {
+        rn = 0, bg = 0;
+        put("+", T_FRAME);
+        for (int i = 0; i < W_INNER + 2; ++i) put("-", T_FRAME);
+        put("+", T_FRAME);
+        emit(row, rowA, rn);
+    }
+};
+
+void Coords(Box& x, const Key& k, uint8_t tag) {  // fmt_coords of a round(.., 1) tuple
+    char t[32];
+    for (int i = 0; i < 3; ++i) {
+        if (k.valid) KeyComp(t, k, i);
+        else lstrcpyA(t, "nan");
+        x.pad(t, 10, false, tag);
+    }
+}
+
+void CoordsF(Box& x, const float* v, uint8_t tag) {  // fmt_coords of raw floats
+    char t[32];
+    for (int i = 0; i < 3; ++i) Fixed(t, v[i], 1), x.pad(t, 10, false, tag);
+}
+
+// ev_row(ev, dim); tickCol replaces the tick column (the Target row)
+void EvRow(Box& x, const Ev& ev, bool dim, const char* tickCol) {
+    char t[32];
+    if (tickCol) {
+        x.seg(tickCol, T_HEADER);
+    } else {
+        wsprintfA(t, "%6ld  ", static_cast<long>(ev.tick));
+        x.seg(t, dim ? T_DIM : T_TEXT);
+    }
+    x.pad(ev.source, SRC_W, true, dim ? T_DIM : SrcTag(ev.source));
+    Coords(x, ev.pos, dim ? T_DIM : T_TEXT);
+    const char* surf = SurfaceName(ev);
+    x.seg("  ", dim ? T_DIM : (lstrcmpA(surf, "Floor") == 0 ? T_OK : T_ALERT));
+    x.seg(surf, dim ? T_DIM : (lstrcmpA(surf, "Floor") == 0 ? T_OK : T_ALERT));
+}
+
+void TableHeader(Box& x) {
+    x.begin();
+    x.pad("Tick", 6, false, T_HEADER), x.seg("  ", T_HEADER), x.pad("Source", SRC_W, true, T_HEADER);
+    x.pad("X", 10, false, T_HEADER), x.pad("Y", 10, false, T_HEADER), x.pad("Z", 10, false, T_HEADER);
+    x.seg("  Surface", T_HEADER);
+    x.end();
+}
+
+} // namespace
+
+int BuildBox(char (*lines)[kBoxLineLen], uint8_t (*attrs)[kBoxLineLen]) {
+    static Box x;  // static: its row buffers would need stack probes (no CRT)
+    x.L = lines, x.A = attrs, x.n = 0;
+    char t[200];
+    // WARP: who you are, what the next frame will do, where it would send you
+    // ("  FROZEN" is never visible in the original: build() only runs unfrozen.)
+    const bsp::Window* w = g_hasWindow ? &g_window : nullptr;
+    char extra[160] = "";
+    if (w && w->hasMap && w->map[0]) wsprintfA(extra, "  (map %s)", w->map);
+    wsprintfA(t, "  tick %lu", static_cast<unsigned long>(g_tick));
+    lstrcatA(extra, t);
+    x.top("WARP", extra, false);
+    x.begin();
+    for (int i = 0; i < COORD_COL; ++i) x.seg(" ", T_HEADER);
+    x.pad("X", 10, false, T_HEADER), x.pad("Y", 10, false, T_HEADER), x.pad("Z", 10, false, T_HEADER);
+    x.end();
+    if (g_hasPlayer) {
+        const Snapshot& p = g_player;
+        char stance[16];
+        if (p.state >= 3 && p.state <= 7) lstrcpyA(stance, kStateNames[p.state - 3]);
+        else wsprintfA(stance, "State %ld", static_cast<long>(p.state));
+        stance[8] = 0;  // [:8]
+        uint8_t stanceTag = PlayerTag(stance);
+        if (p.state != 4 && static_cast<double>(p.maxs[1]) < CROUCH_BOX_MAX_Y) {  // crouchbug
+            if (p.state == 3) lstrcpyA(stance, "Bugged");
+            stanceTag = T_PL_BUGGED;
+        }
+        const char* ground = p.ground ? "Ground" : "In air";
+        x.begin();
+        x.pad(stance, 8, true, stanceTag);
+        x.seg("  -  ", T_FRAME);
+        x.pad(ground, 6, true, PlayerTag(ground));
+        CoordsF(x, p.pos, T_TEXT);
+        x.end();
+    } else {
+        x.body("(no player -- menu or loading)", T_DIM);
+    }
+    if (!w || w->level == bsp::L_NONE) {
+        x.body(w ? w->text : "", T_DIM);
+    } else {
+        static const uint8_t kLevelTag[] = {T_OK, T_ALERT, static_cast<uint8_t>(T_WHITE | BG_FLASH), T_WARN};
+        x.body(w->text, kLevelTag[w->level]);  // clear / armed / warp / solid
+    }
+    if (w && w->inside && g_slot.valid) {
+        const Ev* wr = (g_hasSlotWriter && KeyEq(g_slotWriter.pos, g_slot)) ? &g_slotWriter : FindWriter(g_slot);
+        static Ev unk;
+        if (!wr) {  // no logged writer has these coords
+            unk = Ev{};
+            unk.source = "Unknown";
+            unk.pos = g_slot;
+            unk.hasNormal = g_slotHasNormal;
+            for (int k = 0; k < 3; ++k) unk.normal[k] = g_slotNormal[k];
+            wr = &unk;
+        }
+        x.begin();
+        EvRow(x, *wr, false, "Target  ");
+        x.end();
+    } else {
+        x.body("Target  -", T_DIM);
+    }
+    x.bottom();
+
+    // LAST WARP
+    if (!g_hasLastWarp) {
+        x.top("LAST WARP", "", false);
+        TableHeader(x);
+        x.body("(none yet)", T_DIM);
+    } else {
+        const Row& lw = g_lastWarp;
+        const bool flash = GetTickCount64() - g_lastWarpWall < WARP_FLASH_MS;
+        wsprintfA(t, "  -  %ld ticks ago", static_cast<long>(g_tick) - static_cast<long>(lw.ev.tick));
+        x.top("LAST WARP", t, flash);
+        TableHeader(x);
+        x.begin(flash ? BG_FLASH : BG_WARP);
+        EvRow(x, lw.ev, false, nullptr);
+        x.end();
+        if (lw.ev.frm.valid) {
+            x.begin();
+            x.pad("from", 6, false, T_TEXT);
+            for (int i = 6; i < COORD_COL; ++i) x.seg(" ", T_TEXT);
+            Coords(x, lw.ev.frm, T_TEXT);
+            x.end();
+        }
+    }
+    x.bottom();
+
+    // HISTORY
+    x.top("HISTORY", "  (warp-capable hits, newest first)", false);
+    TableHeader(x);
+    int shown = 0;
+    for (int i = g_histLen - 1; i >= 0 && i >= g_histLen - HISTORY_ROWS; --i) {
+        const Row& r = HistAt(i);
+        ++shown;
+        const bool dim = static_cast<long>(g_tick) - static_cast<long>(r.lastTick) > AGE_DIM_TICKS;
+        if (r.ev.kind == K_WARP) {
+            x.begin(BG_WARP);
+            wsprintfA(t, "%6ld  ", static_cast<long>(r.ev.tick));
+            x.seg(t, T_TEXT);
+            wsprintfA(t, ">>>>> WARP: player moved to %s hit <<<<<", r.hasSrc ? r.src.source : "unknown");
+            x.seg(t, T_WHITE);
+        } else {
+            x.begin();
+            EvRow(x, r.ev, dim, nullptr);
+            if (r.count > 1) wsprintfA(t, " x%lu", static_cast<unsigned long>(r.count)), x.seg(t, dim ? T_DIM : T_HEADER);
+        }
+        x.end();
+    }
+    for (; shown < HISTORY_ROWS; ++shown) x.body("", T_TEXT);
+    x.bottom();
+    return x.n;
+}
 
 } // namespace fdcore::glitch::analysis
