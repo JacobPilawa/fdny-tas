@@ -129,6 +129,14 @@ def cmd_sigs(exe):
                             "ref": f"first {len(ins)} bytes of Genesis.dll export {e['export']}"}
                 print(f"{vname}:{name}: Genesis+{rva:#x}  {ins.hex(' ').upper()}")
                 continue
+            if e.get("kind") == "code":
+                # A game function we call or hook: signature = its first bytes.
+                rva = int(e["rva"], 16)
+                ins = export_sig(exe if e["module"] == "exe" else genesis, rva)
+                e["sig"] = {"rva": e["rva"], "bytes": ins.hex(" ").upper(),
+                            "ref": f"first {len(ins)} bytes of the function at {image_base + rva:#010x}"}
+                print(f"{vname}:{name}: code {image_base + rva:#010x}  {ins.hex(' ').upper()}")
+                continue
             if e["module"] != "exe":
                 continue
             root = image_base + int(e["rva"], 16)

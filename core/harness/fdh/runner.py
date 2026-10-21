@@ -115,6 +115,15 @@ class Run:
             self.samples.setdefault("pipe", []).append([arg, pipe.call(arg)])
         elif kind == "assert_frame_hooks":
             self.assert_frame_hooks(float(arg.get("seconds", 5)), int(arg.get("tolerance", 2)))
+        elif kind in ("assert_same_pos", "assert_moved"):
+            x, z = self.resolver.read("player.pos_x"), self.resolver.read("player.pos_z")
+            x0, z0 = self.samples[arg["x"]], self.samples[arg["z"]]
+            d = ((x - x0) ** 2 + (z - z0) ** 2) ** 0.5
+            if kind == "assert_same_pos":
+                self.record(kind, d <= float(arg["tolerance"]),
+                            f"player moved {d:.1f} u (must be <= {arg['tolerance']})")
+            else:
+                self.record(kind, d >= float(arg["min"]), f"player moved {d:.1f} u (must be >= {arg['min']})")
         elif kind == "assert_hooks_idle":
             # Hook group switched off: its counters must not move while the game renders.
             group = arg.get("group", "frame")
@@ -219,8 +228,11 @@ class Run:
         placed = []
         for f in self.test.get("pre_files", []):
             dst = os.path.join(self.game_dir, f["dst"])
+            backup = dst + ".fdh-backup"
+            if os.path.exists(dst):  # a real game file: restore it afterwards
+                shutil.copy2(dst, backup)
             shutil.copy2(os.path.join(CORE_DIR, f["src"]), dst)
-            placed.append(dst)
+            placed.append((dst, backup))
         return placed
 
     def execute(self):
@@ -229,9 +241,12 @@ class Run:
         try:
             return self._execute()
         finally:
-            for p in placed:
+            for dst, backup in placed:
                 try:
-                    os.remove(p)
+                    if os.path.exists(backup):
+                        os.replace(backup, dst)
+                    else:
+                        os.remove(dst)
                 except OSError:
                     pass
 

@@ -16,10 +16,14 @@ using LevelFn = void (*)(const char* map);
 bool Init();  // MH_Initialize + install the core's own hooks (frame events)
 void Shutdown();
 
-// Named hooks ("frame" = geEngine_BeginFrame + geEngine_EndFrame).
+// Creates (disabled) a hook on a verified address-table code entry, in a
+// named group. Groups toggle atomically. "frame" = geEngine_BeginFrame +
+// geEngine_EndFrame (created and enabled by Init).
+bool Create(const char* group, addr::Id id, void* detour, void** original);
 bool SetEnabled(const char* group, bool on);
 bool IsEnabled(const char* group);
 
+void OnFrameBegin(FrameFn fn); // before geEngine_BeginFrame runs (outside the engine's frame)
 void OnFrameEnd(FrameFn fn);   // after the world is drawn, before the flip
 void OnLevelLoad(LevelFn fn);  // map entered (game state reaches 1 with a map name)
 

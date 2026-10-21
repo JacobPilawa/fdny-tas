@@ -26,10 +26,16 @@ void Handle(const char* req, char* resp) {
         wsprintfA(resp, "begin=%ld end=%ld events=%ld levels=%ld toggles=%ld frame=%s", c.beginFrame,
                   c.endFrame, c.frameEndEvents, c.levelLoads, c.toggles,
                   hooks::IsEnabled("frame") ? "on" : "off");
-    } else if (StartsWith(req, "hook frame on")) {
-        lstrcpyA(resp, hooks::SetEnabled("frame", true) ? "ok" : "err");
-    } else if (StartsWith(req, "hook frame off")) {
-        lstrcpyA(resp, hooks::SetEnabled("frame", false) ? "ok" : "err");
+    } else if (StartsWith(req, "hook ")) {
+        // hook <group> on|off
+        char group[32];
+        int i = 0;
+        const char* s = req + 5;
+        while (*s && *s != ' ' && i < 31) group[i++] = *s++;
+        group[i] = 0;
+        bool on = StartsWith(s, " on");
+        bool off = StartsWith(s, " off");
+        lstrcpyA(resp, (on || off) && hooks::SetEnabled(group, on) ? "ok" : "err");
     } else {
         wsprintfA(resp, "err unknown command");
     }

@@ -22,6 +22,11 @@ const char* Name(Id id);
 
 // Final address of an entry (null pointer anywhere in the chain -> false).
 bool Resolve(Id id, uintptr_t* out);
+// For work that must happen in DllMain, before Init (hashing) has run: the
+// address of an exe code entry if its signature matches the running exe in
+// any table version, else 0. The signature check alone guards the patch.
+uintptr_t EarlyCodeAddress(Id id);
+
 // Address of a verified code entry (a hooked export); 0 if unusable.
 uintptr_t ExportAddress(Id id);
 bool ReadI32(Id id, int32_t* out);

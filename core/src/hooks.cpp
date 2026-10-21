@@ -17,21 +17,34 @@ using EndFrameFn = int(__cdecl*)(void* engine);
 
 BeginFrameFn g_origBegin = nullptr;
 EndFrameFn g_origEnd = nullptr;
-void* g_targetBegin = nullptr;
-void* g_targetEnd = nullptr;
-bool g_frameEnabled = false;
 bool g_mhInit = false;
+
+struct HookRec {
+    const char* group;
+    void* target;
+};
+constexpr int kMaxHooks = 64;
+HookRec g_hooks[kMaxHooks];
+int g_nHooks = 0;
+
+constexpr int kMaxGroups = 16;
+const char* g_groupNames[kMaxGroups];
+bool g_groupOn[kMaxGroups];
+int g_nGroups = 0;
 
 Counters g_stats;
 
 constexpr int kMaxSubs = 32;
 FrameFn g_frameSubs[kMaxSubs];
 int g_nFrameSubs = 0;
+FrameFn g_beginSubs[kMaxSubs];
+int g_nBeginSubs = 0;
 LevelFn g_levelSubs[kMaxSubs];
 int g_nLevelSubs = 0;
 
 int __cdecl BeginFrameDetour(void* engine, void* camera, int clear) {
     InterlockedIncrement(&g_stats.beginFrame);
+    for (int i = 0; i < g_nBeginSubs; ++i) g_beginSubs[i]();
     return g_origBegin(engine, camera, clear);
 }
 
@@ -47,23 +60,34 @@ bool StrEq(const char* a, const char* b) {
     return *a == *b;
 }
 
-bool CreateHook(Id id, void* detour, void** orig, void** target) {
+int GroupIndex(const char* group, bool create) {
+    for (int i = 0; i < g_nGroups; ++i)
+        if (StrEq(g_groupNames[i], group)) return i;
+    if (!create || g_nGroups >= kMaxGroups) return -1;
+    g_groupNames[g_nGroups] = group;
+    g_groupOn[g_nGroups] = false;
+    return g_nGroups++;
+}
+
+} // namespace
+
+bool Create(const char* group, Id id, void* detour, void** original) {
+    if (!g_mhInit) return false;
     uintptr_t t = addr::ExportAddress(id);
     if (!t) {
         log::Warn("hooks: %s unavailable (address table); not hooked", addr::Name(id));
         return false;
     }
-    MH_STATUS s = MH_CreateHook(reinterpret_cast<void*>(t), detour, orig);
+    if (g_nHooks >= kMaxHooks || GroupIndex(group, true) < 0) return false;
+    MH_STATUS s = MH_CreateHook(reinterpret_cast<void*>(t), detour, original);
     if (s != MH_OK) {
         log::Error("hooks: MH_CreateHook(%s) failed: %s", addr::Name(id), MH_StatusToString(s));
         return false;
     }
-    *target = reinterpret_cast<void*>(t);
-    log::Info("hooks: created %s at %08lx", addr::Name(id), static_cast<unsigned long>(t));
+    g_hooks[g_nHooks++] = {group, reinterpret_cast<void*>(t)};
+    log::Info("hooks: created %s at %08lx (group %s)", addr::Name(id), static_cast<unsigned long>(t), group);
     return true;
 }
-
-} // namespace
 
 bool Init() {
     MH_STATUS s = MH_Initialize();
@@ -72,10 +96,10 @@ bool Init() {
         return false;
     }
     g_mhInit = true;
-    bool ok = CreateHook(Id::genesis_begin_frame, reinterpret_cast<void*>(&BeginFrameDetour),
-                         reinterpret_cast<void**>(&g_origBegin), &g_targetBegin) &&
-              CreateHook(Id::genesis_end_frame, reinterpret_cast<void*>(&EndFrameDetour),
-                         reinterpret_cast<void**>(&g_origEnd), &g_targetEnd);
+    bool ok = Create("frame", Id::genesis_begin_frame, reinterpret_cast<void*>(&BeginFrameDetour),
+                     reinterpret_cast<void**>(&g_origBegin)) &&
+              Create("frame", Id::genesis_end_frame, reinterpret_cast<void*>(&EndFrameDetour),
+                     reinterpret_cast<void**>(&g_origEnd));
     if (ok) ok = SetEnabled("frame", true);
     return ok;
 }
@@ -88,24 +112,36 @@ void Shutdown() {
 }
 
 bool SetEnabled(const char* group, bool on) {
-    if (!StrEq(group, "frame") || !g_targetBegin || !g_targetEnd) return false;
-    if (on == g_frameEnabled) return true;
-    // Queue both, apply atomically: MinHook suspends the game's threads while
-    // it patches, so a frame never sees Begin hooked and End not.
-    MH_STATUS a = on ? MH_QueueEnableHook(g_targetBegin) : MH_QueueDisableHook(g_targetBegin);
-    MH_STATUS b = on ? MH_QueueEnableHook(g_targetEnd) : MH_QueueDisableHook(g_targetEnd);
-    MH_STATUS c = MH_ApplyQueued();
-    if (a != MH_OK || b != MH_OK || c != MH_OK) {
-        log::Error("hooks: %s frame hooks failed: %s / %s / %s", on ? "enable" : "disable",
-                   MH_StatusToString(a), MH_StatusToString(b), MH_StatusToString(c));
+    int g = GroupIndex(group, false);
+    if (g < 0) return false;
+    if (on == g_groupOn[g]) return true;
+    // Queue every hook of the group, apply atomically: MinHook suspends the
+    // game's threads while it patches, so no frame sees half a group.
+    MH_STATUS bad = MH_OK;
+    for (int i = 0; i < g_nHooks; ++i) {
+        if (!StrEq(g_hooks[i].group, group)) continue;
+        MH_STATUS s = on ? MH_QueueEnableHook(g_hooks[i].target) : MH_QueueDisableHook(g_hooks[i].target);
+        if (s != MH_OK) bad = s;
+    }
+    MH_STATUS a = MH_ApplyQueued();
+    if (bad != MH_OK || a != MH_OK) {
+        log::Error("hooks: %s group %s failed: %s / %s", on ? "enable" : "disable", group,
+                   MH_StatusToString(bad), MH_StatusToString(a));
         return false;
     }
-    g_frameEnabled = on;
+    g_groupOn[g] = on;
     InterlockedIncrement(&g_stats.toggles);
     return true;
 }
 
-bool IsEnabled(const char* group) { return StrEq(group, "frame") && g_frameEnabled; }
+bool IsEnabled(const char* group) {
+    int g = GroupIndex(group, false);
+    return g >= 0 && g_groupOn[g];
+}
+
+void OnFrameBegin(FrameFn fn) {
+    if (g_nBeginSubs < kMaxSubs) g_beginSubs[g_nBeginSubs++] = fn;
+}
 
 void OnFrameEnd(FrameFn fn) {
     if (g_nFrameSubs < kMaxSubs) g_frameSubs[g_nFrameSubs++] = fn;

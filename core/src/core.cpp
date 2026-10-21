@@ -5,10 +5,13 @@
 #include <bcrypt.h>
 
 #include "addr.h"
+#include "console.h"
+#include "crashlog.h"
 #include "gen/version_gen.h"
 #include "hooks.h"
 #include "log.h"
 #include "modules.h"
+#include "patches.h"
 #include "testpipe.h"
 
 #ifndef FDCORE_VERSION
@@ -87,7 +90,7 @@ DWORD WINAPI InitThread(LPVOID) {
                       reinterpret_cast<unsigned long>(genesis));
     fdcore::addr::Init(exeHash, genesisHash, reinterpret_cast<uintptr_t>(GetModuleHandleA(nullptr)),
                        reinterpret_cast<uintptr_t>(genesis));
-    if (fdcore::addr::VersionKnown()) fdcore::hooks::Init();
+    if (fdcore::addr::VersionKnown() && fdcore::hooks::Init()) fdcore::console::Init(g_dir, FDCORE_VERSION);
     fdcore::modules::StartAll();
 #ifdef FDCORE_DEBUG
     fdcore::testpipe::Start();
@@ -115,6 +118,10 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID) {
         wsprintfA(logPath, "%sFDNYCore.log", g_dir);
         fdcore::log::Open(logPath);
         fdcore::log::Info("FDNYCore loaded from %s", path);
+        fdcore::crashlog::Install();
+        // DllMain runs before WinMain (verified 2026-10-21: g_mainWindow and
+        // g_console are still null here), so startup patches go in now.
+        fdcore::patches::ApplyEarly();
 
         HANDLE t = CreateThread(nullptr, 0, InitThread, nullptr, 0, nullptr);
         if (t) CloseHandle(t);

@@ -17,8 +17,9 @@ cause of RESEARCH.md growing to 465 MB.
 | — | Bind feasibility check (`bind <key> <command>`), owner request 2026-10-21 | **DONE (research)**: feasible with constraints, see "Bind feasibility" |
 | 2 | Address table + version check | **DONE 2026-10-21**: live-tested, suite green, committed |
 | 3 | Hook manager + events | **DONE 2026-10-21**: live-tested, suite green, committed |
-| 4 | Console (on the game's console) | next |
-| 5-12 | — | not started |
+| 4 | Console (on the game's console) | **DONE 2026-10-21**: live-tested in player config, suite green, committed |
+| 5 | Variables, config, binds | next |
+| 6-12 | — | not started |
 | 13 | Teleporter (save location / teleport, map-gated), owner request 2026-10-21 | not started (needs 5, 9) |
 
 **Mid-item:** no.
@@ -226,13 +227,47 @@ Live 2026-10-21: in Training, gameState = 1 and mapName = `training`. All 12 cha
   - This fixed `core_loads`, which first failed in the suite after the 0.3.0 bump. Its check is unchanged: it still matches the exact running version.
 - **Release 0.3.0, hooking every frame**, is still EQUIVALENT to the item-1 baselines (fps 58.8 vs 55.6, laps within 3.5 u).
 
+## Item 4: console (done)
+
+- **It's the game's console.** FDNYCore doesn't draw its own: it makes sure the game's developer console exists for every player, intercepts typed lines, and prints into it. The console is drawn by the game's own `Console::Render`, inside RenderFrame, so it shows on any driver (screenshot `evidence/item04/02_console_exec.png`).
+- **Console without ImADeveloper (decision, reversible).** The game creates the console only when `ImADeveloper` is set: in `roc_CreateEngineSubsystems` 0x004992D0, `JZ` at 0x00499370 skips operator new(0x4A0) + ctor 0x004277D0(640, 460) + `MOV [MainWindow+0x70],EAX`.
+  - Forcing the flag would turn on about 16 debug paths: diagnostic spam into the console, dev keys, F12, a 0xDEADBEEF sentinel write per frame, extra debug HUD objects, and RescueBot/hose debug text.
+  - So the core NOPs **only that JZ**, in memory, from DllMain, which runs before WinMain (verified live: `g_mainWindow` and `g_console` are still null there). The game then creates its console itself at the normal moment.
+  - `addr::EarlyCodeAddress` verifies the patch site's signature before writing (no version selection yet at DllMain). `addr::Init` later counts the pre-patch verification, so it doesn't report the patched bytes as a mismatch.
+- **Rejected approach (documented failure).** Calling the ctor ourselves at the first frame crashed: AV at 0x0047EAC8 reading `[g_everGame 0x00503A78]+4`.
+  - Some frames render **before** WinMain reaches `roc_CreateEngineSubsystems`, which is also where `g_everGame` (the root) is allocated, at 0x0042CD65.
+  - The ctor depends on that root, and also on root+4 (the 0x17C-byte subsystem, 0x00495190).
+  - Evidence: `evidence/item04/attempt2_lazy_ctor_crash.FDNYCore.log`. The new crashlog (below) located it without a debugger.
+- **Interception (`src/console.cpp`).** MinHook on `ScriptEngine::ExecLine` 0x00470F10, group `console`. It's thiscall, takes the game `String` by value, and the callee releases it; its only caller is the console's Enter handler, after the game has already echoed `--> line` and before it adds history.
+  - Our lines (`cmd::Dispatch`) are handled and the handle released the way ExecLine does: decrement, then `String::FreeRep` 0x004011C0 at <= 0. The game never sees them.
+  - Everything else is passed to the original untouched, so game verbs (`listmaps`, `loadmap`, ...) keep working.
+  - A mistyped `fd_*` is answered "unknown command" and never reaches the game.
+- **Output.** `console::Print` builds a game String with 0x00402790 and calls `Console::AddLine` 0x004286E0 on `[MainWindow+0x70]`. This is `Console::Print` 0x00428930 minus its ImADeveloper gate. Every line is mirrored to FDNYCore.log as `console> ...` for tests.
+- **Commands / vars (`src/cmd.cpp`).**
+  - `echo`, `cvarlist`, `cmdlist`, `exec`.
+  - `fd_version` (read-only) and `fd_hooks_frame` (toggles the frame hook group).
+- **`exec` vs the game's `exec` verb.** `exec <name>` runs `<name>` / `<name>.cfg` from the game folder if that file exists. Otherwise the line goes to the game's own `exec` (Data\Scripts / Data\Maps).
+  - Lines in our cfg that aren't ours are queued and handed to the game **one per frame**, because its script engine keeps a single pending line (`+0x78`).
+- **Keystrokes don't reach the game while the console is open.** Live: W held 1.5 s with the console open → player moved **0.0 u**; console closed → 258 u. That covers both input paths:
+  - The WM key path is blocked natively by `[con+0x49C] != 0`.
+  - The DirectInput path is also blocked natively. This is presumably `Console::SetState`'s `[[0x503A78]+0x330]` flag; the live result shows the effect.
+- **Crash reporter (`src/crashlog.cpp`).** A vectored exception handler logs AV/illegal/div0/stack-overflow first-chance exceptions with module+offset, registers, and the code addresses on the stack (≤ 8 reports per run). It is log-only and never changes the game's handling.
+- **Address table:** +11 entries, 35 total.
+  - Code entries (signature = first 16 bytes): `con.exec_line`, `con.add_line`, `str.from_cstr`, `str.free_rep`, `con.ctor`, `crt.operator_new`, `patch.console_gate`.
+  - Data entries: `str.empty_rep`, `script.engine`, `mainwindow.console` (`[g_mainWindow 0x00503A70]+0x70`).
+- **Game cfg restored** to the owner's original (`ImADeveloper = false`). The whole suite now runs in the player configuration. `console_basic` stages that cfg itself through `pre_files`, which now backs up and restores a replaced game file.
+- **Red first:** `console_basic` against the item-3 core failed for the right reasons (no console, no output, W moved the player 344 u).
+
 ## Assumptions / workarounds
 
 - **"Behaves the same" (item 1c) definition**, chosen by the agent at the owner's request. These are LOOP.md's 7 criteria, with two calibrations:
   - **(4)** Autosplitter final addresses are heap pointers that move run to run even without the core. So the check requires all 12 chains to resolve in every run, plus an exact match only where the two baselines agree with each other.
   - **(6)** Lap-position tolerance = max(32 u, 2× the baseline-pair spread). Scripted wall-clock input isn't frame-exact; the observed core-vs-baseline distance was 0.6-5.8 u.
 - **Saves:** backed up to `core/backup/Saves` after several harness runs had already started the game, and the game rewrites `player*.rb`. The pristine originals are in the repo-root `FDNYSP1.1_0e4c1e9f.zip`. Harness runs only enter Training on the "Hotrod Stein" slot.
-- **Tests run with `ImADeveloper = true`** in the game cfg (console availability), in both baseline and core runs.
+- **Game cfg history:**
+  - Items 1-3 ran with `ImADeveloper = true` (the console needed it then). That covers the baseline_route base_a/base_b no-core runs used as the equivalence envelope.
+  - From item 4 on, the cfg is the owner's original (`ImADeveloper = false`) and the core provides the console.
+  - The item-4 Release core with the flag off is still inside the envelope (fps 55.6 vs 55.6). A future re-baseline in player config is cheap if a check ever becomes ambiguous.
 
 ## Log
 
@@ -255,3 +290,8 @@ Live 2026-10-21: in Training, gameState = 1 and mapName = `training`. All 12 cha
   - Red run first, then green; suite 7/7 PASS; Release EQUIVALENT.
   - Evidence in `core/evidence/item03/`.
   - Next: item 4 (console on the game's console; hook `ScriptEngine::ExecLine` 0x00470F10).
+- 2026-10-21 it5: **item 4 DONE**. FDNYCore 0.4.0 gives players the game's own console without ImADeveloper (1 JZ NOPped at DllMain).
+  - `fd_`/`echo`/`cvarlist`/`cmdlist`/`exec` are intercepted at ExecLine; output goes through `Console::AddLine`. Input is blocked while the console is open (0.0 u vs 258 u). Crashlog VEH added.
+  - The first approach (calling the ctor at the first frame) crashed; it's diagnosed and documented.
+  - Red then green; suite 8/8 PASS in player config; Release EQUIVALENT (fps 55.6 vs 55.6). Game cfg restored to `ImADeveloper = false`.
+  - Evidence in `core/evidence/item04/`.

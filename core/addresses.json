@@ -432,6 +432,145 @@
           },
           "ghidra": "Genesis.dll export table (ordinal 444); called from ROCRender::RenderFrame 0x004949A6",
           "note": "cdecl geBoolean geEngine_EndFrame(geEngine*); frame end (flip)"
+        },
+        "con.exec_line": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x70F10",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x70F10",
+            "bytes": "6A FF 68 08 26 4D 00 64 A1 00 00 00 00 50 64 89",
+            "ref": "first 16 bytes of the function at 0x00470f10"
+          },
+          "ghidra": "ScriptEngine::ExecLine 0x00470F10; sole caller Console::OnKeyDown 0x00428FD3",
+          "note": "thiscall(ECX=g_scriptEngine) void(String byValue); callee releases the handle; RET 4"
+        },
+        "con.add_line": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x286E0",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x286E0",
+            "bytes": "6A FF 68 78 D5 4C 00 64 A1 00 00 00 00 50 64 89",
+            "ref": "first 16 bytes of the function at 0x004286e0"
+          },
+          "ghidra": "Console::AddLine 0x004286E0",
+          "note": "thiscall(ECX=console) void(String byValue); appends a line; RET 4"
+        },
+        "str.from_cstr": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x2790",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x2790",
+            "bytes": "A0 18 19 50 00 56 8B F1 33 C9 3A C1 75 25 B8 01",
+            "ref": "first 16 bytes of the function at 0x00402790"
+          },
+          "ghidra": "String ctor from char* 0x00402790 (used by Console::Print 0x00428930)",
+          "note": "thiscall(ECX=&slot) void(const char*); builds a String handle in the slot; RET 4"
+        },
+        "str.free_rep": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x11C0",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x11C0",
+            "bytes": "83 EC 18 56 8B 31 C7 01 08 19 50 00 83 3E 00 7D",
+            "ref": "first 16 bytes of the function at 0x004011c0"
+          },
+          "ghidra": "String::FreeRep 0x004011C0 (ExecLine release path 0x00470FA4)",
+          "note": "thiscall(ECX=&slot); frees the rep after the caller dropped refcount to <= 0"
+        },
+        "con.ctor": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x277D0",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x277D0",
+            "bytes": "6A FF 68 60 D4 4C 00 64 A1 00 00 00 00 50 64 89",
+            "ref": "first 16 bytes of the function at 0x004277d0"
+          },
+          "ghidra": "console ctor 0x004277D0 (Ghidra label PlayerRescueEnt::Init is wrong); called from roc_CreateEngineSubsystems 0x00499394",
+          "note": "thiscall(ECX=new 0x4A0-byte object) void(int w=640, int h=460); writes g_console 0x00502A90; RET 8"
+        },
+        "crt.operator_new": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0xA5A84",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0xA5A84",
+            "bytes": "56 8B 74 24 08 EB 10 56 E8 E1 56 01 00 85 C0 59",
+            "ref": "first 16 bytes of the function at 0x004a5a84"
+          },
+          "ghidra": "operator new 0x004A5A84 (roc_CreateEngineSubsystems 0x00499372)",
+          "note": "cdecl void*(size_t)"
+        },
+        "str.empty_rep": {
+          "module": "exe",
+          "rva": "0x101908",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x119d",
+            "bytes": "C7 05 08 19 50 00 02 00 00 00 A3 0C 19 50 00 89",
+            "ref": "instruction at 0x0040119d embeds 0x00501908"
+          },
+          "ghidra": "shared empty String rep (refs/len/cap/NUL at +0/+4/+8/+C); compared in ExecLine 0x00470F72",
+          "note": "String handle of the empty string; addref before passing by value"
+        },
+        "script.engine": {
+          "module": "exe",
+          "rva": "0x102FB0",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x28fce",
+            "bytes": "B9 B0 2F 50 00 E8 38 7F 04 00 51",
+            "ref": "instruction at 0x00428fce embeds 0x00502fb0"
+          },
+          "ghidra": "g_scriptEngine (static object) 0x00502FB0; ECX for ExecLine at 0x00428FCE",
+          "note": "ScriptEngine object (static, not a pointer)"
+        },
+        "mainwindow.console": {
+          "module": "exe",
+          "rva": "0x103A70",
+          "chain": [
+            "0x70"
+          ],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x2233b",
+            "bytes": "8B 0D 70 3A 50 00 85 C9 C7 45 FC 05",
+            "ref": "instruction at 0x0042233b embeds 0x00503a70"
+          },
+          "ghidra": "g_mainWindow 0x00503A70; console slot written at 0x004993A0 (roc_CreateEngineSubsystems), read by WM_KEYDOWN 0x00498FF3 / WM_CHAR 0x004990A3 / RenderFrame 0x0049497B",
+          "note": "MainWindow+0x70 = console pointer used for input routing and Console::Render"
+        },
+        "patch.console_gate": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x99370",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x99370",
+            "bytes": "74 46 68 A0 04 00 00 E8 08 C7 00 00 83 C4 04 89",
+            "ref": "first 16 bytes of the function at 0x00499370"
+          },
+          "ghidra": "roc_CreateEngineSubsystems 0x004992D0: 0x00499361 MOV AL,[0x502A78] (ImADeveloper); 0x00499370 JZ 0x004993B8 skips console creation (operator new 0x4A0 + ctor 0x004277D0 + MOV [EDI+0x70],EAX)",
+          "note": "2-byte JZ rel8; NOPped in memory at DllMain (before WinMain) so the game creates its console without ImADeveloper"
         }
       }
     }

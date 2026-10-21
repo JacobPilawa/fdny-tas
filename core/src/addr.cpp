@@ -16,6 +16,8 @@ constexpr int kCount = static_cast<int>(Id::Count);
 
 const Version* g_version = nullptr;
 bool g_usable[kCount];
+// Entries verified by EarlyCodeAddress before a startup patch changed their bytes.
+bool g_earlyVerified[kCount];
 uintptr_t g_bases[2];
 
 #ifdef FDCORE_DEBUG
@@ -111,7 +113,7 @@ void Init(const char* exeSha256, const char* genesisSha256, uintptr_t exeBase,
         const Entry& e = g_version->entries[i];
         if (!e.rva) continue;  // absent in this version
         ++total;
-        g_usable[i] = VerifySig(e);
+        g_usable[i] = g_earlyVerified[i] || VerifySig(e);
         if (g_usable[i]) ++ok;
         else log::Warn("signature mismatch: %s (expected at %s+%08lx); entry disabled", e.name,
                        e.module ? "Genesis.dll" : "exe", static_cast<unsigned long>(e.sigRva));
@@ -148,6 +150,23 @@ bool Resolve(Id id, uintptr_t* out) {
         if (!SafeRead(p + e.chain[i], &p, 4) || !p) return false;
     *out = p + e.chain[e.nchain - 1];
     return true;
+}
+
+uintptr_t EarlyCodeAddress(Id id) {
+    uintptr_t exe = reinterpret_cast<uintptr_t>(GetModuleHandleA(nullptr));
+    for (int v = 0; v < kVersionCount; ++v) {
+        const Entry& e = kVersions[v].entries[static_cast<int>(id)];
+        if (e.module != 0 || !e.sigLen) continue;
+        uint8_t live[kMaxSig];
+        if (!SafeRead(exe + e.sigRva, live, e.sigLen)) continue;
+        bool match = true;
+        for (int i = 0; i < e.sigLen && match; ++i) match = live[i] == e.sig[i];
+        if (match) {
+            g_earlyVerified[static_cast<int>(id)] = true;
+            return exe + e.rva;
+        }
+    }
+    return 0;
 }
 
 uintptr_t ExportAddress(Id id) {

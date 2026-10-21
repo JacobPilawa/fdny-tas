@@ -1,0 +1,52 @@
+name: console_basic
+# Item 4: in a normal player setup (ImADeveloper = false) the core provides
+# the game's console: backtick opens it, it is drawn in-game, echo / cvarlist
+# / exec work, and keystrokes don't reach the game while it is open.
+pre_files:
+  - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
+  - {src: tests/data/fdtest_exec.cfg, dst: fdtest_exec.cfg}
+setup: load_training
+record: true
+steps:
+  - assert_mem: {name: cfg.im_a_developer, equals: 0}
+  - assert_mem: {name: console.instance, not_equals: 0}
+  - assert_log: {contains: "patches: console creation ungated"}
+  - assert_log: {contains: "signatures: all OK"}
+  - assert_log: {contains: "console: game console present at"}
+  - screenshot: 00_before
+  - type: "`"
+  - wait_s: 0.5
+  - assert_mem: {name: console.state, equals: 2}
+  - type: "echo hello from fdnycore"
+  - key: enter
+  - wait_s: 0.5
+  - screenshot: 01_console_echo
+  - assert_log: {contains: "console> hello from fdnycore"}
+  - type: "cvarlist"
+  - key: enter
+  - wait_s: 0.5
+  - assert_log: {contains: "console> fd_version \"{core_version}\" (read-only)"}
+  - assert_log: {contains: "variable(s)"}
+  - type: "exec fdtest_exec"
+  - key: enter
+  - wait_s: 0.5
+  - assert_log: {contains: "console> exec-ok-4242"}
+  - screenshot: 02_console_exec
+  # keystrokes must not reach the game while the console is open
+  - sample_mem: {name: player.pos_x, as: x_open_before}
+  - sample_mem: {name: player.pos_z, as: z_open_before}
+  - key: {key: w, hold: 1.5}
+  - assert_same_pos: {x: x_open_before, z: z_open_before, tolerance: 1.0}
+  - type: "`"
+  - wait_s: 0.5
+  - assert_mem: {name: console.state, equals: 0}
+  # control: with the console closed, W moves the player
+  - sample_mem: {name: player.pos_x, as: x_closed_before}
+  - sample_mem: {name: player.pos_z, as: z_closed_before}
+  - mouse_rel: [600, 0]
+  - key: {key: w, hold: 1.5}
+  - assert_moved: {x: x_closed_before, z: z_closed_before, min: 20}
+  - screenshot: 03_closed
+expect:
+  no_crash: true
+  log_errors: 0

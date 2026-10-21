@@ -1,0 +1,30 @@
+[2026-10-21 03:28:12.095] [INFO] FDNYCore loaded from C:\fdny-decomp\FDNY SP 1.1\FDNYCore.asi
+[2026-10-21 03:28:12.152] [INFO] patches: console creation ungated at 00499370
+[2026-10-21 03:28:12.194] [INFO] FDNYCore 0.4.0 (Debug) exe=C:\fdny-decomp\FDNY SP 1.1\FDNYFirefighter.exe sha256=4b3b4dc1cc0b05bcb42c8e27ac6f6ca72fe5f7064ca8122fda7d41e7f6d2fc3e base=00400000
+[2026-10-21 03:28:12.226] [INFO] Genesis.dll sha256=5014bb879706bfb5ae6cf9ce1de63dc3deebdcc5b8e1b41f247b284a336c4643 base=10000000
+[2026-10-21 03:28:12.277] [INFO] address table: version retail-1.1 selected
+[2026-10-21 03:28:12.358] [INFO] signatures: all OK (35/35)
+[2026-10-21 03:28:12.401] [INFO] hooks: created genesis.begin_frame at 10025b70 (group frame)
+[2026-10-21 03:28:12.433] [INFO] hooks: created genesis.end_frame at 100260e0 (group frame)
+[2026-10-21 03:28:12.468] [INFO] hooks: created con.exec_line at 00470f10 (group console)
+[2026-10-21 03:28:12.506] [INFO] console: ready (game console; FDNYCore commands intercepted at ScriptEngine::ExecLine)
+[2026-10-21 03:28:12.543] [INFO] module levelwatch: enabled
+[2026-10-21 03:28:12.575] [INFO] testpipe: listening on \\.\pipe\FDNYCore (Debug build)
+[2026-10-21 03:28:12.602] [INFO] FDNYCore ready
+[2026-10-21 03:28:13.536] [INFO] levelwatch: map '' state -1
+[2026-10-21 03:28:15.929] [INFO] console: game console present at 033377d0
+[2026-10-21 03:28:16.012] [INFO] levelwatch: map '' state 0
+[2026-10-21 03:28:31.782] [INFO] levelwatch: map 'training' state 3
+[2026-10-21 03:28:32.219] [INFO] levelwatch: map 'training' state 1
+[2026-10-21 03:28:32.262] [INFO] event: level_load 'training'
+[2026-10-21 03:28:54.099] [INFO] cmd: echo hello from fdnycore
+[2026-10-21 03:28:54.137] [INFO] console> hello from fdnycore
+[2026-10-21 03:28:55.397] [INFO] cmd: cvarlist
+[2026-10-21 03:28:55.430] [INFO] console> fd_version "0.4.0" (read-only) - FDNYCore version
+[2026-10-21 03:28:55.471] [INFO] console> fd_hooks_frame "1" - frame hooks on/off (debugging; disables per-frame features)
+[2026-10-21 03:28:55.506] [INFO] console> 2 variable(s)
+[2026-10-21 03:28:57.251] [INFO] console> exec C:\fdny-decomp\FDNY SP 1.1\fdtest_exec.cfg
+[2026-10-21 03:28:57.289] [INFO] cmd: echo exec-ok-4242
+[2026-10-21 03:28:57.329] [INFO] console> exec-ok-4242
+[2026-10-21 03:28:57.364] [INFO] cmd: fd_hooks_frame 1
+[2026-10-21 03:28:57.395] [INFO] exec: C:\fdny-decomp\FDNY SP 1.1\fdtest_exec.cfg (2 line(s))
