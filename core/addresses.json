@@ -1382,6 +1382,42 @@
           "ghidra": "PlayerRescueEnt view yaw, degrees (Think STEER_YAW; ResetLocomotionState copies the anchor heading +0x530 here)",
           "note": "f32"
         },
+        "player.f_safe": {
+          "module": "field",
+          "rva": "0x3400",
+          "chain": [],
+          "type": "f32",
+          "sig": null,
+          "ghidra": "PlayerRescueEnt last safe spot x,y,z: PlayerRescueEnt::Think 0x00452570 copies +0x4C here each frame only when the flinch flags are clear, burn +0x3538 < 0.1, on-ground +0x12C, O2 +0x3450 > 0.5 and state != 6. Verb_Reset 0x0044FF10 copies it into the position before DropAtPlayer 0x0045C1A0 (a carried survivor lands there, -30 X, floored); ResetLocomotionState 0x0044CD10 mirrors the respawn checkpoint +0x534 into it. Verified live on bank 2026-10-22 (KB fire-juggling; core/evidence/fire_juggling/round2_frame_order.txt)",
+          "note": "x,y,z; the fire-juggling landing point is (x - 30, y, z)"
+        },
+        "player.f_burn": {
+          "module": "field",
+          "rva": "0x3538",
+          "chain": [],
+          "type": "f32",
+          "sig": null,
+          "ghidra": "PlayerRescueEnt burn meter: TakeFireDamage 0x00451640 adds dt*1.2*severity, > 1.0 -> PassOut(1); Think cools it by 0.1*dt on frames with no flinch flag; ResetLocomotionState zeroes it. Measured live: cools 0.1/s (core/evidence/fire_juggling/run3.log, phase C)",
+          "note": "0..1+; the safe spot is frozen while >= 0.1"
+        },
+        "player.f_flinch": {
+          "module": "field",
+          "rva": "0x353C",
+          "chain": [],
+          "type": "u32",
+          "sig": null,
+          "ghidra": "PlayerRescueEnt four fire-flinch bytes +0x353C..+0x353F (SetFireFlinchDir 0x0044BB00, one per 90-degree quadrant), set by TakeFireDamage after Think and cleared by Think at the end of its frame: nonzero at frame end = fire contact this frame (round2_frame_order.txt)",
+          "note": "read as one u32; nonzero = burnt this frame"
+        },
+        "player.f_o2": {
+          "module": "field",
+          "rva": "0x3450",
+          "chain": [],
+          "type": "f32",
+          "sig": null,
+          "ghidra": "PlayerRescueEnt O2: UpdateO2 0x00451560 drains it (-0.05 per 3000 ms), 0 -> PassOut(0); Think's safe-spot write needs it > 0.5; Verb_Escape's checkpoint snapshot needs it > 0.5 too (KB mission-win-lose, fire-juggling)",
+          "note": "0..1"
+        },
         "genesis.draw_bitmap": {
           "module": "genesis",
           "rva": "0x24230",
