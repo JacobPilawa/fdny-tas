@@ -13,13 +13,10 @@ constexpr int GBSP_MODELS = 1, GBSP_NODES = 2, GBSP_LEAFS = 4, GBSP_LEAFSIDES = 
 constexpr int32_t PLAYER_MASK = 0x43;
 constexpr double STEP_UP = 16.0, STEP_DOWN = 17.0, FLOOR_NY = 0.9;
 
-double OnEpsilon() {  // Genesis 0x10051330: float32 0x3dcccccd
-    const uint32_t bits = 0x3DCCCCCD;
-    float f;
-    __builtin_memcpy(&f, &bits, 4);
-    return f;
-}
-const double ON_EPSILON = OnEpsilon();
+// Genesis 0x10051330: float32 0x3dcccccd. Compile-time constant: a dynamically
+// initialised global is never initialised in this no-CRT DLL (rule R7; this one
+// was, until -Wglobal-constructors caught it in 0.16.1).
+constexpr double ON_EPSILON = static_cast<double>(__builtin_bit_cast(float, 0x3DCCCCCDu));
 
 double F32(double v) { return static_cast<double>(static_cast<float>(v)); }  // FSTP dword
 double Sqrt(double v) { return _mm_cvtsd_f64(_mm_sqrt_sd(_mm_set_sd(v), _mm_set_sd(v))); }

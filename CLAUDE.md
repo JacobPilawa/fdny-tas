@@ -17,10 +17,16 @@ granular Ghidra work; record findings there. `plan.md` is the
 infrastructure plan, `RESEARCH.md` is the domain understanding — keep
 them separate.
 
-**No git on the VM.** This repo reaches it as a plain file copy via the
-Packer file provisioner, not a clone — there's no push/pull. If you're
-running on the VM and edit `plan.md`/`RESEARCH.md`/`CLAUDE.md`, those
-edits stay on the VM until someone copies them back to the dev machine.
+**The repo reaches the VM as a plain file copy** via the Packer file
+provisioner, not a clone. Since 2026-10-21 the VM copy is also a local git
+repo (PortableGit at `environment\local\tools\git`, not on PATH; branches
+`main` + `fdny-bxt`), but it has no remote, so there's no push/pull. Edits
+on the VM stay on the VM until someone copies them back to the dev machine.
+Enable the tracked hooks once per clone: `git config core.hooksPath .githooks`.
+
+**FDNYCore (`core/`) has its own rules:** `core/CLAUDE.md` (loaded when
+working there), `core/DECISIONS.md`, and the `new-feature` skill
+(`.claude/skills/new-feature/`) for adding features.
 
 **You may install additional tools as work demands it** — follow the
 existing `get_<thing>.ps1`/`install_<thing>.ps1` convention in

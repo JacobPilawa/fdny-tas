@@ -1,3 +1,4 @@
+// Tests: tests/window_alttab.yaml tests/window_parity_reference.yaml
 // The game calls SetCursorPos(200, 200) every frame from
 // GameControls::PollFrame (0x00439347: push 200; push 200; call [SetCursorPos]),
 // even when it isn't the foreground window, so after alt-tab the mouse stays

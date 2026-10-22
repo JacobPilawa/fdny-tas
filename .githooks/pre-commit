@@ -1,0 +1,12 @@
+#!/bin/sh
+# Architecture rules (core/CLAUDE.md, core/tools/arch_check.py) on every commit that
+# touches core/. Enable once per clone:  git config core.hooksPath .githooks
+if git diff --cached --name-only | grep -q '^core/'; then
+    PY="environment/local/tools/python/python.exe"
+    [ -x "$PY" ] || PY=python
+    if ! "$PY" -I core/tools/arch_check.py; then
+        echo "pre-commit: arch_check failed -- fix the code (rules + reasons: core/CLAUDE.md, core/DECISIONS.md)"
+        exit 1
+    fi
+fi
+exit 0

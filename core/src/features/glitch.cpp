@@ -1,3 +1,4 @@
+// Tests: tests/glitch_records.yaml tests/glitch_parity_log.yaml tests/glitch_parity_fuzz.yaml tests/glitch_box_cost.yaml tests/text_panels.yaml
 // hud_glitch record layer (backlog item 11a): a port of the code caves in
 // tools/collision_overlay/fdny_collision_overlay.py (GameSource._install).
 // The cave code below is emitted byte for byte like the Python Asm emitter

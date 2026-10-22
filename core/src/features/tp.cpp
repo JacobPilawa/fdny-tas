@@ -1,3 +1,4 @@
+// Tests: tests/tp_teleport.yaml
 #include "tp.h"
 
 #include <windows.h>

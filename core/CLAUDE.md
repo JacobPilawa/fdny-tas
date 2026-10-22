@@ -1,0 +1,71 @@
+# core/ — FDNYCore working rules
+
+FDNYCore.asi is one in-process plugin for FDNY Firefighter: American Hero:
+**core services** (`src/`) plus **self-registering feature modules**
+(`src/features/`). These rules are how every piece so far was built. The
+machine-checkable ones are enforced by `tools/arch_check.py` (run by `build.ps1`) and
+compiler flags; the reasons are in `DECISIONS.md`. Change a rule only with an
+owner-approved entry there.
+
+Read before working: `QUICKSTART.md` (what exists, how to use it, module-author
+sections), `DECISIONS.md` (why), the tail of `PROGRESS.md` (what happened last).
+To add a feature, use the `new-feature` skill (`.claude/skills/new-feature/`).
+
+## Architecture (enforced)
+
+| Rule | What | Enforced by |
+|---|---|---|
+| R1 | Core files (`src/*`) never include a feature header. The core never names a feature. | arch_check |
+| R2 | A feature includes core headers and its own group's headers only (`glitch_*` = group `glitch`). Features talk to each other only through core services. | arch_check |
+| R3 | Each feature group has exactly one `FDCORE_MODULE(...)`, in a file whose `// Tests:` line names existing tests. | arch_check |
+| R4 | No game addresses or module-base+RVA in code: every address/offset is an `addresses.json` entry, used by `addr::Id`. Exceptions need `// arch-allow: R4 <why>` on the line. | arch_check |
+| R5 | Only `gfx` calls the Genesis drawing/bitmap API. Features draw with `textdraw` panels (or `gfx` blocks). | arch_check |
+| R6 | Harness channels are Debug-only (`#ifdef FDCORE_DEBUG` around `testpipe::Register`). | Release build fails otherwise |
+| R7 | No dynamically initialised globals or exit-time destructors: there is no CRT, they never run. Globals must be constant-initialisable (`= {}`, `constexpr`). | `-Wglobal-constructors -Wexit-time-destructors -Werror` |
+
+Not machine-checked, still rules:
+- **Service ownership.** A Genesis/exe function is hooked by exactly one owner. Shared hooks belong to a core service that offers subscriptions/filters (frame events → `hooks`, camera → `camera`, rendered world → `gfx`). A feature that needs a hooked function asks the owning service; if none exists, add the service to the core first.
+- **Practice-only** variables/commands are declared by the feature (`cmd::SetPracticeOnly`). Anything that shows information the game doesn't, or moves the player, is practice-only. Speedrun-category options (static spawns, RescueBot) are not; they show on the watermark.
+- **Drawing order:** state updates in `hooks::OnFrameEnd`, drawing in `hooks::OnFrameEndLate` (textdraw does this for panels).
+- **Freestanding C++17:** no CRT, no STL, no exceptions/RTTI, no `<initializer_list>`; no 64-bit integer division (use doubles or `MulDiv`); large locals are `static` (no stack probes). Windows API via kernel32/user32/gdi32/bcrypt only.
+
+## Drawing: pick the block
+
+| Need | Use |
+|---|---|
+| A text panel | `textdraw::Create(...)`: `STYLE_TRANSLUCENT` (default; opaque fallback without a world) or `STYLE_OPAQUE` (always visible, e.g. the watermark). Own colours: `textdraw::SetPalette`. |
+| Opaque image / rect | `gfx::Decal`, `gfx::SolidRect` |
+| Per-pixel alpha | `gfx::AlphaSurface` (256 px 4444 tiles, world-attached; colours are 4 bits per channel) |
+| Screen size | `gfx::ViewSize` (the camera rect, never the window) |
+
+## Game, VM and safety
+
+- Never edit the exe or Genesis.dll on disk; in-memory patches only, and only through `addr` / `hooks`. Back up any game-folder file before replacing it.
+- **Never rebuild the VM / run packer** (root `CLAUDE.md`).
+- Ghidra lookups go through subagents; the primary session never calls GhidrAssist MCP itself.
+- Python and git are not on PATH: prepend `C:\fdny-decomp\environment\local\tools\python` and `...\tools\git\cmd`.
+- Edit UTF-8 docs with the Edit/Write tools, not a PowerShell `Get-Content`/`Set-Content` round trip (mojibake). Some `.cpp` and `build.ps1` are CRLF.
+
+## Done means
+
+1. `.\build.ps1` builds both configs (arch_check + `-Werror` clean).
+2. **Tests:** a new or changed behaviour gets a test in `tests/` (named in the module's `// Tests:` line). Never weaken or delete a test to make it pass; a flaky or environmental failure is rerun and reported as such, with evidence (e.g. the same failure on the previous version). Run the affected tests, and the full suite (`python -I harness/run_test.py --suite`) before a version bump.
+   - Known environmental: `glitch_box_cost` / `text_panels` frame-rate thresholds fail when the VM runs slow (~35 fps instead of ~57); `state_snapshot` can race when a fire spreads between the two reads.
+3. **Evidence** in `evidence/<topic>/`: logs, screenshots, measurements, plus a README for anything investigative (spikes: what was tried, numbers, verdict).
+4. **Docs:** `QUICKSTART.md` for anything user-visible (commands, variables, keys); `DECISIONS.md` for any non-obvious choice; a `PROGRESS.md` entry (`- <date> it<N>: **<version>** ...`).
+5. **Version:** bump `VERSION` (minor for features/architecture, patch for fixes).
+6. **Commit:** one topic per commit; message via `-F` from a UTF-8 file without BOM, ending with the Co-Authored-By / Claude-Session lines; don't stage `research/research.db-*` side files.
+7. **Report to the owner** (end of every task):
+   - the outcome and version/commit, first sentence;
+   - what changed, in owner terms (commands, behaviour, look);
+   - verification: tests with numbers; failures stated plainly with cause and evidence;
+   - evidence path;
+   - open items and anything needing an owner ruling.
+
+## Owner decisions in force
+
+- Old tools stay installed (FOV fix, alttabfix, FDNYDeterministic, Python overlays): no further development, don't delete. The core defers to them where they own a patch site.
+- The watermark stays opaque (decal path).
+- The practice-only list is the agent's default; the owner still has to confirm it.
+- No extra log files for overlay output: it goes to `FDNYCore.log` (`glitch|` lines).
+- Spikes and probes never modify working code: standalone probes in `probes/`, tests in `tests/probes/` (outside the suite).

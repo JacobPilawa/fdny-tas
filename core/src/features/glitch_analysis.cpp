@@ -15,7 +15,7 @@ constexpr double FLOOR_NY = 0.9, WALL_NY = 0.1, CROUCH_BOX_MAX_Y = 55.0;
 constexpr uint32_t KIND_TRACE = 1, KIND_COMMIT = 2, KIND_ENGINE_RAY = 3;
 constexpr int R_KIND = 0, R_TICK = 1, R_RET0 = 2, R_S30 = 3, R_S34 = 4, R_S44 = 5, R_S90 = 7, R_SC4 = 8,
               R_RESULT = 9, R_FRESH = 10, R_IMP = 11, R_NRM = 14, R_DIST = 17, R_PRE = 18, R_THIS = 21, R_GPL = 22;
-constexpr uint32_t GENESIS_PREF = 0x10000000;
+constexpr uint32_t GENESIS_PREF = 0x10000000;  // arch-allow: R4 Genesis.dll preferred base (PE header), as the Python tool normalises
 
 // ---------------------------------------------------------------------------
 // Number formatting identical to Python's %.Nf: round the exact binary value

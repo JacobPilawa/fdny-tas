@@ -20,6 +20,10 @@ if (-not (Test-Path $zig)) {
 if (-not $zig) { throw "zig.exe not found -- run environment\scripts\get_zig.ps1 + install_zig.ps1" }
 $winInc = Join-Path (Split-Path -Parent $zig) 'lib\libc\include\any-windows-any'
 
+# Architecture rules first (core/CLAUDE.md): a violation stops the build.
+& $PythonExe -I (Join-Path $here 'tools\arch_check.py')
+if ($LASTEXITCODE -ne 0) { throw "arch_check failed: fix the code (rules + reasons: core/CLAUDE.md, core/DECISIONS.md)" }
+
 # The address table is compiled in: regenerate the header from addresses.json.
 & $PythonExe -I (Join-Path $here 'tools\addrgen.py') header (Join-Path $here 'src\gen\addresses_gen.h')
 if ($LASTEXITCODE -ne 0) { throw "addrgen header failed ($LASTEXITCODE)" }
@@ -38,6 +42,7 @@ $common = @(
     '-fno-threadsafe-statics',   # no CRT guard functions; function-local statics are game-thread only
     '-nostdlib', '-Wall', '-Wextra', '-Werror', '-Wno-nullability-completeness',
     '-Wno-unused-command-line-argument',   # zig injects -fno-rtlib-defaultlib itself
+    '-Wglobal-constructors', '-Wexit-time-destructors',  # arch rule R7: no CRT runs them (core/CLAUDE.md)
     '-isystem', $winInc,
     '-I', (Join-Path $here 'src'),
     '-Wl,--image-base,0x3D000000', '-Wl,--dynamicbase'

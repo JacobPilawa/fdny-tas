@@ -1,3 +1,4 @@
+// Tests: tests/hud_player.yaml tests/text_panels.yaml tests/text_alpha.yaml
 #include "hud.h"
 
 #include <windows.h>

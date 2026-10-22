@@ -52,7 +52,7 @@ struct Panel {
     bool reported, failed;
 };
 constexpr int kMaxPanels = 8;
-Panel g_panels[kMaxPanels];
+Panel g_panels[kMaxPanels] = {};  // constant-initialised: no CRT runs constructors (rule R7)
 int g_nPanels = 0;
 unsigned long g_frame = 0;
 unsigned g_fontGen = 0;
