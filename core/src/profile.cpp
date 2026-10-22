@@ -8,6 +8,7 @@
 #include "console.h"
 #include "hooks.h"
 #include "log.h"
+#include "testpipe.h"
 #include "textdraw.h"
 
 namespace fdcore::profile {
@@ -15,22 +16,13 @@ namespace {
 
 using addr::Id;
 
-// Practice-only: anything that shows information the game doesn't, or moves
-// the player. Agent's default classification (item 12), for the owner to
-// confirm; speedrun-category mods (static spawns, RescueBot) are allowed in
-// `run` and listed on the watermark instead.
-const char* const kPracticeVars[] = {"fd_hud_glitch", "fd_hud_player", "fd_watermark"};
-const char* const kPracticeCommands[] = {"fd_glitch_hide", "fd_glitch_freeze", "fd_glitch_clear",
-                                         "fd_tp_save", "fd_tp_load"};
+// Practice-only: anything that shows information the game doesn't, or moves the
+// player. Each feature declares its own (cmd::SetPracticeOnly); the profile only
+// enforces. Agent's default classification (item 12), for the owner to confirm;
+// speedrun-category mods (static spawns, RescueBot) are allowed in `run` and
+// listed on the watermark instead.
 
 bool IEq(const char* a, const char* b) { return lstrcmpiA(a, b) == 0; }
-
-template <int N>
-bool In(const char* const (&list)[N], const char* name) {
-    for (const char* n : list)
-        if (IEq(n, name)) return true;
-    return false;
-}
 
 bool g_run = false;
 
@@ -56,14 +48,14 @@ void Remember(const char* name, const char* value) {
 }
 
 bool CvarGate(const cmd::Cvar& v, const char* value) {
-    if (!g_run || !In(kPracticeVars, v.name) || lstrcmpA(value, v.defaultValue) == 0) return true;
+    if (!g_run || !cmd::IsPracticeOnly(v.name) || lstrcmpA(value, v.defaultValue) == 0) return true;
     console::Print("%s is practice-only (fd_profile is run)", v.name);
     log::Info("profile: refused %s \"%s\" in run", v.name, value);
     return false;
 }
 
 bool CommandGate(const char* name) {
-    if (!g_run || !In(kPracticeCommands, name)) return true;
+    if (!g_run || !cmd::IsPracticeOnly(name)) return true;
     console::Print("%s is practice-only (fd_profile is run)", name);
     log::Info("profile: refused %s in run", name);
     return false;
@@ -86,9 +78,9 @@ void OnProfile(cmd::Cvar& v) {
     }
     if (run == g_run) return;
     g_run = run;
-    for (const char* name : kPracticeVars) {
-        cmd::Cvar* c = cmd::FindCvar(name);
-        if (!c) continue;
+    for (int k = 0; k < cmd::CvarCount(); ++k) {
+        cmd::Cvar* c = cmd::CvarAt(k);
+        if (!c || !cmd::IsPracticeOnly(c->name)) continue;
         if (run) {
             if (lstrcmpA(c->value, c->defaultValue) == 0) continue;
             Remember(c->name, c->value);
@@ -117,7 +109,7 @@ cmd::Cvar g_fdWatermark = {"fd_watermark", "1", "1 = show the FDNYCore watermark
 // fd_profile_saved <var> <value>: a practice value remembered while in run.
 void CmdSaved(int argc, const char* const* argv) {
     if (argc < 3) return;
-    if (In(kPracticeVars, argv[1])) Remember(argv[1], argv[2]);
+    if (cmd::IsPracticeOnly(argv[1])) Remember(argv[1], argv[2]);
 }
 
 int WriteConfig(char* out, int cap) {
@@ -195,14 +187,18 @@ bool Init() {
     InitializeCriticalSection(&g_lock);
     cmd::RegisterCvar(&g_fdProfile);
     cmd::RegisterCvar(&g_fdWatermark);
+    cmd::SetPracticeOnly("fd_watermark");  // turning it off is refused in run
     cmd::RegisterCommand("fd_profile_saved", "internal: a practice setting remembered while fd_profile is run",
                          CmdSaved);
     cmd::RegisterConfigWriter(WriteConfig);
     cmd::SetGates(CvarGate, CommandGate);
     FindMods();
     // Opaque (owner: the watermark stays on the decal path; it must show in menus too).
-    g_panel = textdraw::Create("watermark", textdraw::BOTTOM_LEFT, 8, 60, 1, textdraw::T_WHITE, textdraw::STYLE_OPAQUE);
+    g_panel = textdraw::Create("watermark", textdraw::BOTTOM_LEFT, 8, 60, 1, textdraw::C_WHITE, textdraw::STYLE_OPAQUE);
     hooks::OnFrameEnd(Draw);
+#ifdef FDCORE_DEBUG
+    testpipe::Register("watermark", [](const char*, char* resp, int cap) { LastWatermark(resp, cap); });
+#endif
     log::Info("profile: ready (fd_profile, fd_watermark); other asi: %s", g_mods[0] ? g_mods : "none");
     return true;
 }

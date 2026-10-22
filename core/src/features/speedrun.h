@@ -8,6 +8,6 @@ namespace fdcore::speedrun {
 bool ApplyEarlyPatch(const char* gameDir);
 
 // After the address table and console are up: fd_static_spawns, fd_spawns, fd_rescuebot.
-void Init();
+bool Init();  // false when FDNYDeterministic.asi is installed (it owns the sites)
 
 } // namespace fdcore::speedrun

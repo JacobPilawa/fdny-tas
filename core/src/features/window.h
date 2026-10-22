@@ -9,6 +9,7 @@ namespace fdcore::window {
 bool ApplyEarlyPatch();
 
 // After the address table and console are up: registers fd_window_cursor.
-void Init();
+// False when the early patch didn't apply.
+bool Init();
 
 } // namespace fdcore::window

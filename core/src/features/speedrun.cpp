@@ -18,6 +18,7 @@
 #include "cmd.h"
 #include "console.h"
 #include "log.h"
+#include "modules.h"
 
 namespace fdcore::speedrun {
 namespace {
@@ -261,8 +262,8 @@ bool ApplyEarlyPatch(const char* gameDir) {
     return true;
 }
 
-void Init() {
-    if (g_deferTo) return;
+bool Init() {
+    if (g_deferTo) return false;  // FDNYDeterministic.asi owns these sites (logged in ApplyEarlyPatch)
     bool spawnsOk = g_hooked;
     for (Id id : kSpawnNeeds) spawnsOk = spawnsOk && addr::Usable(id);
     if (spawnsOk) {
@@ -277,6 +278,13 @@ void Init() {
     else log::Warn("speedrun: RescueBot sites unavailable (used by another mod, e.g. FDNYDeterministic.asi?)");
     log::Info("speedrun: ready (static spawns %s, rescuebot %s)", spawnsOk ? "available" : "unavailable",
               addr::Usable(Id::patch_rescuebot_trystart) ? "available" : "unavailable");
+    return true;
 }
 
+namespace {
+void Early(const char* gameDir) { ApplyEarlyPatch(gameDir); }
+} // namespace
+
 } // namespace fdcore::speedrun
+
+FDCORE_MODULE(speedrun, "speedrun", nullptr, 0, &fdcore::speedrun::Early, &fdcore::speedrun::Init, 30)

@@ -4,27 +4,21 @@
 #include <windows.h>
 #include <bcrypt.h>
 
+// The core never names a feature: features (src/features/) register themselves
+// with FDCORE_MODULE and are started by modules::StartAll after the services.
 #include "addr.h"
+#include "camera.h"
 #include "console.h"
 #include "crashlog.h"
-#include "fov.h"
-#include "glitch.h"
 #include "gen/version_gen.h"
 #include "hooks.h"
-#include "hud.h"
 #include "log.h"
 #include "modules.h"
 #include "patches.h"
 #include "profile.h"
-#include "tp.h"
 #include "textdraw.h"
-#ifdef FDCORE_DEBUG
-namespace fdcore::bench { void Init(); }
-#endif
-#include "speedrun.h"
 #include "state.h"
 #include "testpipe.h"
-#include "window.h"
 
 #ifndef FDCORE_VERSION
 #error FDCORE_VERSION must come from core/VERSION (build.ps1)
@@ -102,23 +96,17 @@ DWORD WINAPI InitThread(LPVOID) {
                       reinterpret_cast<unsigned long>(genesis));
     fdcore::addr::Init(exeHash, genesisHash, reinterpret_cast<uintptr_t>(GetModuleHandleA(nullptr)),
                        reinterpret_cast<uintptr_t>(genesis));
-    if (fdcore::addr::VersionKnown() && fdcore::hooks::Init()) {
+    // Core services, then every registered feature module.
+    const bool services = fdcore::addr::VersionKnown() && fdcore::hooks::Init();
+    if (services) {
         fdcore::console::Init(g_dir, FDCORE_VERSION);
-        fdcore::fov::Init();
-        fdcore::window::Init();
-        fdcore::speedrun::Init();
+        fdcore::camera::Init();
         fdcore::state::Init();
-        fdcore::hud::Init();
-        fdcore::glitch::Init();
         fdcore::patches::Init();
-        fdcore::tp::Init();
-#ifdef FDCORE_DEBUG
-        fdcore::bench::Init();  // fd_bench_text (text-drawing cost)
-#endif
-        fdcore::profile::Init();  // gates + watermark see every module's variables
-        fdcore::textdraw::Init();  // last: draws after every module updated its panels
+        fdcore::textdraw::Init();  // draws late in the frame, after every module's update
+        fdcore::profile::Init();   // gates read cmd::IsPracticeOnly at use time
     }
-    fdcore::modules::StartAll();
+    fdcore::modules::StartAll(services);
 #ifdef FDCORE_DEBUG
     fdcore::testpipe::Start();
 #endif
@@ -150,8 +138,7 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID) {
         // g_console are still null here), so startup patches go in now.
         fdcore::patches::ApplyEarly();
         fdcore::patches::ApplyIntroSkip(g_dir);
-        fdcore::window::ApplyEarlyPatch();
-        fdcore::speedrun::ApplyEarlyPatch(g_dir);
+        fdcore::modules::RunEarly(g_dir);  // the features' own startup patches
 
         HANDLE t = CreateThread(nullptr, 0, InitThread, nullptr, 0, nullptr);
         if (t) CloseHandle(t);

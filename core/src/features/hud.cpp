@@ -6,7 +6,9 @@
 #include "cmd.h"
 #include "hooks.h"
 #include "log.h"
+#include "modules.h"
 #include "state.h"
+#include "testpipe.h"
 #include "textdraw.h"
 
 namespace fdcore::hud {
@@ -98,11 +100,15 @@ void Draw() {
 } // namespace
 
 bool Init() {
-    g_panel = textdraw::Create("hud_player", textdraw::TOP_LEFT, 8, 52, 1, textdraw::T_TEXT);
+    g_panel = textdraw::Create("hud_player", textdraw::TOP_LEFT, 8, 52, 1, textdraw::C_TEXT);
     textdraw::Show(g_panel, false);
     InitializeCriticalSection(&g_lock);
     cmd::RegisterCvar(&g_fdHudPlayer);
+    cmd::SetPracticeOnly("fd_hud_player");
     hooks::OnFrameEnd(Draw);
+#ifdef FDCORE_DEBUG
+    testpipe::Register("hud", [](const char*, char* resp, int cap) { LastDrawn(resp, cap); });
+#endif
     log::Info("hud: ready (fd_hud_player)");
     return true;
 }
@@ -127,3 +133,5 @@ int LastDrawn(char* out, int cap) {
 }
 
 } // namespace fdcore::hud
+
+FDCORE_MODULE(hud, "hud", nullptr, 0, nullptr, &fdcore::hud::Init, 40)

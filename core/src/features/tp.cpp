@@ -7,6 +7,7 @@
 #include "console.h"
 #include "hooks.h"
 #include "log.h"
+#include "modules.h"
 #include "state.h"
 
 namespace fdcore::tp {
@@ -121,9 +122,13 @@ bool Init() {
         }
     cmd::RegisterCommand("fd_tp_save", "save the player's position + view (practice; this map only)", CmdSave);
     cmd::RegisterCommand("fd_tp_load", "teleport to the fd_tp_save location (same map only)", CmdLoad);
+    cmd::SetPracticeOnly("fd_tp_save");
+    cmd::SetPracticeOnly("fd_tp_load");
     hooks::OnFrameEnd(Apply);
     log::Info("tp: ready (fd_tp_save, fd_tp_load)");
     return true;
 }
 
 } // namespace fdcore::tp
+
+FDCORE_MODULE(tp, "tp", nullptr, 0, nullptr, &fdcore::tp::Init, 60)

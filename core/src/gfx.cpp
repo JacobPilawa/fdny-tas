@@ -4,7 +4,7 @@
 
 #include "addr.h"
 #include "cmd.h"
-#include "fov.h"
+#include "camera.h"
 #include "hooks.h"
 #include "log.h"
 
@@ -143,19 +143,19 @@ bool BeginDraw() {
 void ViewSize(int* w, int* h) {
     int vw = 0, vh = 0;
     RECT rc;
-    const bool camera = fov::ViewSize(&vw, &vh);
-    if (!camera) {
+    const bool fromCamera = camera::ViewSize(&vw, &vh);
+    if (!fromCamera) {
         if (HWND wnd = GetActiveWindow(); wnd && GetClientRect(wnd, &rc) && rc.right > 0 && rc.bottom > 0)
             vw = rc.right, vh = rc.bottom;
         else
             vw = g_vw, vh = g_vh;
     }
-    if (vw != g_vw || vh != g_vh || camera != g_vCamera) {
+    if (vw != g_vw || vh != g_vh || fromCamera != g_vCamera) {
         RECT cr = {};
         if (HWND wnd = GetActiveWindow()) GetClientRect(wnd, &cr);
-        log::Info("gfx: view %dx%d (%s; window client %ldx%ld)", vw, vh, camera ? "camera" : "window", cr.right,
+        log::Info("gfx: view %dx%d (%s; window client %ldx%ld)", vw, vh, fromCamera ? "camera" : "window", cr.right,
                   cr.bottom);
-        g_vw = vw, g_vh = vh, g_vCamera = camera;
+        g_vw = vw, g_vh = vh, g_vCamera = fromCamera;
     }
     *w = vw, *h = vh;
 }

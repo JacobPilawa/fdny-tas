@@ -1,11 +1,14 @@
 # build.ps1 -- build FDNYCore.asi (32-bit PE DLL) with the bundled zig toolchain.
 #   .\build.ps1                    # Debug and Release
 #   .\build.ps1 -Config Release
-# Output: core\build\<Config>\FDNYCore.asi
+#   .\build.ps1 -Without glitch,tp # leave feature modules out (files src\features\<name>*.cpp)
+#   .\build.ps1 -Without *         # the core services alone
+# Output: core\build\<Config>\FDNYCore.asi (with -Without: core\build\<Config>-without\)
 # Freestanding like asi\build.ps1: no CRT, imports kernel32/user32/gdi32/bcrypt only
 # (gdi32: the hud_glitch box is rendered with GDI, item 11d).
 
-param([ValidateSet('Debug', 'Release', 'Both')] [string]$Config = 'Both')
+param([ValidateSet('Debug', 'Release', 'Both')] [string]$Config = 'Both',
+      [string[]]$Without = @())
 
 $ErrorActionPreference = 'Stop'
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -21,7 +24,11 @@ $winInc = Join-Path (Split-Path -Parent $zig) 'lib\libc\include\any-windows-any'
 & $PythonExe -I (Join-Path $here 'tools\addrgen.py') header (Join-Path $here 'src\gen\addresses_gen.h')
 if ($LASTEXITCODE -ne 0) { throw "addrgen header failed ($LASTEXITCODE)" }
 
-$sources = Get-ChildItem (Join-Path $here 'src') -Filter *.cpp | ForEach-Object FullName
+# Core services in src/, feature modules in src/features/ (self-registered, see modules.h).
+$sources = @('src', 'src\features') | ForEach-Object { Get-ChildItem (Join-Path $here $_) -Filter *.cpp } |
+    Where-Object { $f = $_; $f.Directory.Name -ne 'features' -or -not ($Without | Where-Object { $f.BaseName -like "$_*" }) } |
+    ForEach-Object FullName
+if ($Without) { "without: $($Without -join ', ') -> $(@($sources | Where-Object { $_ -like '*\features\*' }).Count) feature file(s) left" }
 
 # Distinct preferred base: Genesis.dll and the other .asi files sit at
 # 0x10000000 / 0x3C000000. Relocatable regardless (--dynamicbase).
@@ -32,6 +39,7 @@ $common = @(
     '-nostdlib', '-Wall', '-Wextra', '-Werror', '-Wno-nullability-completeness',
     '-Wno-unused-command-line-argument',   # zig injects -fno-rtlib-defaultlib itself
     '-isystem', $winInc,
+    '-I', (Join-Path $here 'src'),
     '-Wl,--image-base,0x3D000000', '-Wl,--dynamicbase'
 )
 # Single source of the core version (also read by the harness for {core_version}).
@@ -52,7 +60,7 @@ $mhDir = Join-Path $here 'third_party\minhook\src'
 $mhSources = @('hook.c', 'buffer.c', 'trampoline.c', 'hde\hde32.c') | ForEach-Object { Join-Path $mhDir $_ }
 
 foreach ($c in $configs) {
-    $outDir = Join-Path $here "build\$c"
+    $outDir = Join-Path $here ("build\$c" + $(if ($Without) { '-without' } else { '' }))
     $objDir = Join-Path $outDir 'obj'
     New-Item -ItemType Directory -Force -Path $objDir | Out-Null
     $out = Join-Path $outDir 'FDNYCore.asi'

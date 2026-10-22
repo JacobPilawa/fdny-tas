@@ -20,15 +20,13 @@ namespace fdcore::textdraw {
 
 constexpr int kMaxLines = 40, kLineLen = 160;
 
-// Colour tags (the original collision overlay's palette); attrs may carry a
-// background bit. Plain panels use kDefaultTag for every character.
-enum Tag : uint8_t {
-    T_FRAME, T_TITLE, T_HEADER, T_TEXT, T_DIM, T_ALERT, T_OK, T_WARN, T_WHITE,
-    T_SRC_VICTIM, T_SRC_FIRE, T_SRC_HOSE, T_SRC_HOSEROPE, T_SRC_AXE, T_SRC_PLAYER, T_SRC_ENGINE, T_SRC_OTHER,
-    T_PL_STANDING, T_PL_CROUCHED, T_PL_CLIMBING, T_PL_OUTCOLD, T_PL_SCRIPTED, T_PL_BUGGED, T_PL_GROUND, T_PL_INAIR,
-    T_COUNT
-};
-constexpr uint8_t BG_WARP = 0x40, BG_FLASH = 0x80, TAG_MASK = 0x3F;
+// Per-character attribute: foreground colour index into the panel's palette
+// (bits 0-4), bold (bit 5), background slot 0-3 (bits 6-7). The default palette
+// has C_TEXT and C_WHITE; a feature with its own colours sets them with SetPalette
+// (the collision overlay: features/glitch_palette.h).
+constexpr uint8_t A_COLOR_MASK = 0x1F, A_BOLD = 0x20, A_BG_SHIFT = 6;
+constexpr uint8_t C_TEXT = 0, C_WHITE = 1;
+constexpr int kMaxColors = 32;
 
 enum Anchor : uint8_t { TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT };
 // STYLE_TRANSLUCENT: gfx::AlphaSurface (background at fd_text_alpha) while the frame has a
@@ -36,16 +34,20 @@ enum Anchor : uint8_t { TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT };
 enum Style : uint8_t { STYLE_TRANSLUCENT, STYLE_OPAQUE };
 
 // A panel: anchor + offset (pixels from that corner of the view), how often its
-// bitmap may be re-rendered, the tag for lines set without attrs, and its style.
-int Create(const char* name, Anchor anchor, int dx, int dy, int minFrames, uint8_t defaultTag,
+// bitmap may be re-rendered, the attribute for lines set without attrs, and its style.
+int Create(const char* name, Anchor anchor, int dx, int dy, int minFrames, uint8_t defaultAttr,
            Style style = STYLE_TRANSLUCENT);
+// The panel's colours: fg[nFg] (0x00RRGGBB, nFg <= kMaxColors) and the four
+// background slots (slot 0 = the panel background, at fd_text_alpha; slots 1-3
+// are highlight backgrounds, kept nearly opaque). bg may be null (default).
+void SetPalette(int panel, const uint32_t* fg, int nFg, const uint32_t* bg4);
 // New content. Re-rendered (at most every minFrames frames) only if it changed.
 void Set(int panel, const char (*lines)[kLineLen], const uint8_t (*attrs)[kLineLen], int n);
 void SetLines(int panel, const char* const* lines, int n);  // plain text, the panel's default tag
 void Show(int panel, bool visible);
 
-// Registers the frame-end draw. Call after every module that creates panels,
-// so their frame-end updates run before it.
+// Core service: registers the draw as a late frame-end subscriber, so it runs
+// after every module's frame-end update of its panels.
 bool Init();
 
 } // namespace fdcore::textdraw

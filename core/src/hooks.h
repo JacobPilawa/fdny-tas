@@ -25,6 +25,7 @@ bool IsEnabled(const char* group);
 
 void OnFrameBegin(FrameFn fn); // before geEngine_BeginFrame runs (outside the engine's frame)
 void OnFrameEnd(FrameFn fn);   // after the world is drawn, before the flip
+void OnFrameEndLate(FrameFn fn);  // after every OnFrameEnd subscriber (drawing what they updated)
 void OnLevelLoad(LevelFn fn);  // map entered (game state reaches 1 with a map name)
 
 // Raised by the core itself (levelwatch) when it detects a level entry.

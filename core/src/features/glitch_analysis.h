@@ -7,6 +7,7 @@
 
 #include <stdint.h>
 
+#include "glitch_palette.h"
 #include "textdraw.h"
 
 namespace fdcore::glitch::analysis {
@@ -38,8 +39,8 @@ const char* VerdictText();
 // Overlay.build() as text (11d): the WARP / LAST WARP / HISTORY boxes, one
 // line per row (tags/colours dropped). Returns the line count.
 constexpr int kBoxLines = textdraw::kMaxLines, kBoxLineLen = textdraw::kLineLen;
-// Per character: the original Text widget's tag (colour) + background bit (textdraw's palette).
-using namespace fdcore::textdraw;  // T_* tags, BG_WARP / BG_FLASH
+// Per character: the original Text widget's tag (colour) + background bit (glitch_palette.h).
+using namespace fdcore::glitch::palette;  // T_* tags, BG_WARP / BG_FLASH
 int BuildBox(char (*lines)[kBoxLineLen], uint8_t (*attrs)[kBoxLineLen] = nullptr);
 // F12: Model.clear() + the "history cleared (F12)" note.
 void ClearHistory();

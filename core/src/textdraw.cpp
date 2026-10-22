@@ -13,19 +13,10 @@ namespace {
 
 constexpr int kPad = 4;  // around the text, like the original Text widget
 
-// The original collision overlay's colours (COLORS / SOURCE_COLORS / PLAYER_COLORS), by tag.
-const uint32_t kFg[T_COUNT] = {
-    0x7c8894, 0xd8e0e8, 0x8a96a2, 0xe8e8e8, 0x5c646c, 0xff3b3b, 0x7fd17f, 0xffcc4d, 0xffffff,
-    0xffa040, 0xff5a5a, 0x5aaaff, 0x3f7fbf, 0xffd84a, 0xd0d0d0, 0x8a8a8a, 0xb48cff,
-    0x7fd17f, 0x5ad1d1, 0x5aaaff, 0xff5a5a, 0xb48cff, 0xff8c1a, 0x7fd17f, 0xffcc4d,
-};
-constexpr uint32_t kBg = 0x101418, kWarpBg = 0x5a1010, kFlashBg = 0xb02020;
-constexpr uint8_t kAlertAlpha = 230;  // warp / flash backgrounds stay nearly opaque
-
-bool Bold(uint8_t a) {  // title / alert / warp / flash / Bugged are bold in the original
-    const uint8_t t = a & TAG_MASK;
-    return t == T_TITLE || t == T_ALERT || t == T_PL_BUGGED || (a & (BG_WARP | BG_FLASH));
-}
+// Default palette (C_TEXT, C_WHITE) and background slots (panel, then highlights).
+const uint32_t kDefaultFg[] = {0xe8e8e8, 0xffffff};
+const uint32_t kDefaultBg[4] = {0x101418, 0x5a1010, 0xb02020, 0xb02020};
+constexpr uint8_t kHighlightAlpha = 230;  // background slots 1-3 stay nearly opaque
 
 void OnAlpha(cmd::Cvar&);
 cmd::Cvar g_fdTextAlpha = {"fd_text_alpha", "160",
@@ -40,7 +31,10 @@ struct Panel {
     Anchor anchor;
     Style style;
     int dx, dy, minFrames;
-    uint8_t defTag;
+    uint8_t defAttr;
+    uint32_t fg[kMaxColors];
+    int nFg;
+    uint32_t bg[4];
     bool visible;
     char text[kMaxLines][kLineLen];
     uint8_t attr[kMaxLines][kLineLen];
@@ -82,16 +76,15 @@ bool Render(Panel& p) {
         const int len = lstrlenA(p.text[i]);
         if (len > cols) cols = len;
     }
-    if (!p.canvas.Begin(cols, p.n, kPad, kBg)) return false;
+    if (!p.canvas.Begin(cols, p.n, kPad, p.bg[0])) return false;
     for (int r = 0; r < p.n; ++r) {
         const int len = lstrlenA(p.text[r]);
         for (int c = 0; c < len;) {
             const uint8_t a = p.attr[r][c];
             int e = c + 1;
             while (e < len && p.attr[r][e] == a) ++e;
-            const uint8_t tag = (a & TAG_MASK) < T_COUNT ? (a & TAG_MASK) : T_TEXT;
-            p.canvas.Text(c, r, p.text[r] + c, e - c, kFg[tag], (a & BG_FLASH) ? kFlashBg : (a & BG_WARP) ? kWarpBg : kBg,
-                          Bold(a));
+            const int color = (a & A_COLOR_MASK) < p.nFg ? (a & A_COLOR_MASK) : 0;
+            p.canvas.Text(c, r, p.text[r] + c, e - c, p.fg[color], p.bg[a >> A_BG_SHIFT], (a & A_BOLD) != 0);
             c = e;
         }
     }
@@ -112,11 +105,10 @@ void Draw() {
     int vw, vh;
     gfx::ViewSize(&vw, &vh);
     const uint8_t alpha = static_cast<uint8_t>(Alpha());
-    const gfx::AlphaKey keys[] = {{kBg, alpha},
-                                  {kWarpBg, alpha > kAlertAlpha ? alpha : kAlertAlpha},
-                                  {kFlashBg, alpha > kAlertAlpha ? alpha : kAlertAlpha}};
+    const uint8_t high = alpha > kHighlightAlpha ? alpha : kHighlightAlpha;
     for (int i = 0; i < g_nPanels; ++i) {
         Panel& p = g_panels[i];
+        const gfx::AlphaKey keys[] = {{p.bg[0], alpha}, {p.bg[1], high}, {p.bg[2], high}, {p.bg[3], high}};
         if (!p.visible || p.n <= 0) continue;
         if (p.dirty && (!p.rendered || g_frame - p.lastRender >= static_cast<unsigned long>(p.minFrames))) {
             if (!Render(p)) {
@@ -127,7 +119,7 @@ void Draw() {
             const uint32_t* px = p.canvas.Pixels();
             const int stride = p.canvas.Stride(), w = p.canvas.Width(), h = p.canvas.Height();
             p.alphaReady = p.style == STYLE_TRANSLUCENT &&
-                           p.surf.Upload(px, stride, w, h, keys, 3, static_cast<uint8_t>(Byte(g_fdTextFgAlpha)));
+                           p.surf.Upload(px, stride, w, h, keys, 4, static_cast<uint8_t>(Byte(g_fdTextFgAlpha)));
             p.decalStale = true;
             if (!p.alphaReady && !p.decal.Upload(px, stride, w, h)) Fail(p, "could not create / upload its bitmap");
             else if (!p.alphaReady) p.decalStale = false;
@@ -171,14 +163,26 @@ void CmdInfo(int, const char* const*) {
 
 } // namespace
 
-int Create(const char* name, Anchor anchor, int dx, int dy, int minFrames, uint8_t defaultTag, Style style) {
+int Create(const char* name, Anchor anchor, int dx, int dy, int minFrames, uint8_t defaultAttr, Style style) {
     if (g_nPanels >= kMaxPanels) return -1;
     Panel& p = g_panels[g_nPanels];
     lstrcpynA(p.name, name, sizeof(p.name));
     p.anchor = anchor, p.style = style, p.dx = dx, p.dy = dy, p.minFrames = minFrames < 1 ? 1 : minFrames;
-    p.defTag = defaultTag;
+    p.defAttr = defaultAttr;
     p.visible = true;
-    return g_nPanels++;
+    const int id = g_nPanels++;
+    SetPalette(id, kDefaultFg, 2, nullptr);
+    return id;
+}
+
+void SetPalette(int panel, const uint32_t* fg, int nFg, const uint32_t* bg4) {
+    if (panel < 0 || panel >= g_nPanels) return;
+    Panel& p = g_panels[panel];
+    if (nFg > kMaxColors) nFg = kMaxColors;
+    for (int i = 0; i < nFg; ++i) p.fg[i] = fg[i];
+    p.nFg = nFg;
+    for (int i = 0; i < 4; ++i) p.bg[i] = bg4 ? bg4[i] : kDefaultBg[i];
+    p.dirty = true;
 }
 
 void Set(int panel, const char (*lines)[kLineLen], const uint8_t (*attrs)[kLineLen], int n) {
@@ -194,7 +198,7 @@ void Set(int panel, const char (*lines)[kLineLen], const uint8_t (*attrs)[kLineL
     for (int i = 0; i < n; ++i) {
         lstrcpynA(p.text[i], lines[i], kLineLen);
         if (attrs) __builtin_memcpy(p.attr[i], attrs[i], kLineLen);
-        else __builtin_memset(p.attr[i], p.defTag, kLineLen);
+        else __builtin_memset(p.attr[i], p.defAttr, kLineLen);
     }
     p.n = n;
     p.dirty = true;
@@ -217,8 +221,8 @@ bool Init() {
     cmd::RegisterCvar(&g_fdTextFgAlpha);
     cmd::RegisterCommand("fd_textdraw", "list the on-screen text panels: shown, size, position, translucent/opaque",
                          CmdInfo);
-    hooks::OnFrameEnd(Draw);
-    log::Info("textdraw: ready (%d panel(s))", g_nPanels);
+    hooks::OnFrameEndLate(Draw);  // after every module updated its panels
+    log::Info("textdraw: ready");
     return true;
 }
 

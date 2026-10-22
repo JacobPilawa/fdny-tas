@@ -6,10 +6,7 @@
 
 #include <windows.h>
 
-#include "glitch.h"
-#include "profile.h"
 #include "hooks.h"
-#include "hud.h"
 #include "log.h"
 #include "state.h"
 
@@ -24,6 +21,27 @@ bool StartsWith(const char* s, const char* p) {
 
 constexpr int kResp = 4096;
 
+struct Reg {
+    const char* name;
+    Handler fn;
+};
+constexpr int kMaxReg = 16;
+Reg g_regs[kMaxReg];
+int g_nRegs = 0;
+
+// Registered handler whose name is the request's first token.
+bool Dispatch(const char* req, char* resp) {
+    for (int i = 0; i < g_nRegs; ++i) {
+        const char* n = g_regs[i].name;
+        const char* s = req;
+        while (*n && *s == *n) ++s, ++n;
+        if (*n || (*s && *s != ' ')) continue;
+        g_regs[i].fn(*s ? s + 1 : s, resp, kResp);
+        return true;
+    }
+    return false;
+}
+
 void Handle(const char* req, char* resp) {
     const hooks::Counters& c = hooks::Stats();
     if (StartsWith(req, "ping")) {
@@ -32,16 +50,7 @@ void Handle(const char* req, char* resp) {
         wsprintfA(resp, "begin=%ld end=%ld events=%ld levels=%ld toggles=%ld frame=%s", c.beginFrame,
                   c.endFrame, c.frameEndEvents, c.levelLoads, c.toggles,
                   hooks::IsEnabled("frame") ? "on" : "off");
-    } else if (StartsWith(req, "watermark")) {
-        profile::LastWatermark(resp, kResp);
-    } else if (StartsWith(req, "glitch_box")) {
-        glitch::BoxState(resp, kResp);
-    } else if (StartsWith(req, "glitch_replay ")) {
-        glitch::ReplayFile(req + 14, resp, kResp);
-    } else if (StartsWith(req, "glitch")) {
-        glitch::Stats(resp, kResp);
-    } else if (StartsWith(req, "hud")) {
-        hud::LastDrawn(resp, kResp);
+    } else if (Dispatch(req, resp)) {
     } else if (StartsWith(req, "snapshot")) {
         state::Format(resp, kResp);
     } else if (StartsWith(req, "hook ")) {
@@ -85,6 +94,10 @@ DWORD WINAPI Server(LPVOID) {
 }
 
 } // namespace
+
+void Register(const char* name, Handler fn) {
+    if (g_nRegs < kMaxReg) g_regs[g_nRegs++] = {name, fn};
+}
 
 void Start() {
     HANDLE t = CreateThread(nullptr, 0, Server, nullptr, 0, nullptr);

@@ -163,6 +163,39 @@ result: 28/28 pass (Debug).
 - Translucent panels need a loaded world; in menus they are drawn opaque. Their
   colours are 4 bits per channel (the driver's only alpha format), so dim greys band.
 
+## For module authors: core and feature modules
+
+The core (`src/`) is services only; every feature is a self-registering module
+in `src/features/`. The core never names a feature, so a feature can be dropped
+from the build (`.\build.ps1 -Without glitch`, or `-Without *` for the core alone)
+and everything else still compiles and runs.
+
+| Core service | What a module gets |
+|---|---|
+| `addr` | address table: verified addresses by Id (never raw addresses) |
+| `hooks` | `Create` (inline hook in a group), `OnFrameBegin` / `OnFrameEnd` / `OnLevelLoad`; `OnFrameEndLate` is for drawing |
+| `cmd`, `console`, `binds` | variables, commands, config persistence (`RegisterConfigWriter`), `SetPracticeOnly` (refused in `fd_profile run`), console output |
+| `camera` | view size; one FOV filter (`fov` uses it) |
+| `state` | the frame's player snapshot |
+| `gfx`, `textdraw` | in-frame drawing (below) |
+| `profile` | run/practice gates + watermark (reads `SetPracticeOnly`) |
+| `testpipe` (Debug) | `Register("<name>", handler)` for harness requests |
+| `log`, `crashlog`, `patches`, `levelwatch` | logging, crash reports, the core's startup patches, level events |
+
+A new feature is one file (or a few) in `src/features/`:
+
+```cpp
+#include "modules.h"
+namespace fdcore::myfeature {
+bool Init() { /* register cvars/commands, hooks::OnFrameEnd(...), ... */ return true; }
+}
+// name, required address Ids (or nullptr, 0), DllMain-phase step (or nullptr), init, order
+FDCORE_MODULE(myfeature, "myfeature", nullptr, 0, nullptr, &fdcore::myfeature::Init, 70)
+```
+
+At startup the log lists `modules: N registered (...)` and one
+`module <name>: enabled | disabled (reason)` line each.
+
 ## For module authors: drawing blocks (`src/gfx.h`)
 
 | Block | Use it for |

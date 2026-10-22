@@ -13,6 +13,7 @@
 #include "console.h"
 #include "hooks.h"
 #include "log.h"
+#include "modules.h"
 
 namespace fdcore::bench {
 namespace {
@@ -236,8 +237,8 @@ void Bmp() {
 
 } // namespace
 
-void Init() {
-    if (!addr::Usable(addr::Id::genesis_printf)) return;
+bool Init() {
+    if (!addr::Usable(addr::Id::genesis_printf)) return false;
     g_printf = reinterpret_cast<PrintfFn>(addr::ExportAddress(addr::Id::genesis_printf));
     cmd::RegisterCommand("fd_bench_text", "Debug: fd_bench_text <calls> <chars> <every> <mode>", Cmd);
     hooks::OnFrameEnd(Draw);
@@ -258,8 +259,11 @@ void Init() {
         cmd::RegisterCommand("fd_bench_bmp", "Debug: fd_bench_bmp <w> <h> <format> <every> <ck>", CmdBmp);
         hooks::OnFrameEnd(Bmp);
     }
+    return true;
 }
 
 } // namespace fdcore::bench
+
+FDCORE_MODULE(bench, "bench", nullptr, 0, nullptr, &fdcore::bench::Init, 90)
 
 #endif

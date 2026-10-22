@@ -29,6 +29,11 @@ bool SetCvar(Cvar* v, const char* value);  // false if read-only or refused by t
 using CvarGate = bool (*)(const Cvar& v, const char* value);
 using CommandGate = bool (*)(const char* name);
 void SetGates(CvarGate cvarGate, CommandGate commandGate);
+// Features declare which of their variables / commands are practice-only
+// (anything that shows information the game doesn't, or moves the player);
+// the profile gate refuses them in `fd_profile run`. Name must be static.
+void SetPracticeOnly(const char* name);
+bool IsPracticeOnly(const char* name);
 // Profile switches put practice-only vars back without the gate.
 bool SetCvarUngated(Cvar* v, const char* value);
 // Every registered variable (watermark: what is not at its default).

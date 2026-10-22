@@ -168,6 +168,19 @@ CvarGate g_cvarGate = nullptr;
 CommandGate g_commandGate = nullptr;
 
 void SetGates(CvarGate cvarGate, CommandGate commandGate) { g_cvarGate = cvarGate, g_commandGate = commandGate; }
+namespace {
+constexpr int kMaxPractice = 32;
+const char* g_practice[kMaxPractice];
+int g_nPractice = 0;
+} // namespace
+void SetPracticeOnly(const char* name) {
+    if (g_nPractice < kMaxPractice && !IsPracticeOnly(name)) g_practice[g_nPractice++] = name;
+}
+bool IsPracticeOnly(const char* name) {
+    for (int i = 0; i < g_nPractice; ++i)
+        if (IEq(g_practice[i], name)) return true;
+    return false;
+}
 int CvarCount() { return g_nCvars; }
 Cvar* CvarAt(int i) { return i >= 0 && i < g_nCvars ? g_cvars[i] : nullptr; }
 

@@ -20,6 +20,8 @@
 #include "binds.h"
 #include "hooks.h"
 #include "log.h"
+#include "modules.h"
+#include "testpipe.h"
 
 namespace fdcore::glitch {
 namespace {
@@ -548,7 +550,10 @@ void FrameEnd() {
             g_nShown = nb;
             g_shownTick = snap.tick;
             LeaveCriticalSection(&g_boxLock);
-            textdraw::Set(g_panel, g_build, g_buildA, nb);
+            static uint8_t drawA[analysis::kBoxLines][analysis::kBoxLineLen];  // + bold, for textdraw
+            for (int i = 0; i < nb; ++i)
+                for (int c = 0; c < analysis::kBoxLineLen; ++c) drawA[i][c] = palette::Attr(g_buildA[i][c]);
+            textdraw::Set(g_panel, g_build, drawA, nb);
         }
     }
     textdraw::Show(g_panel, !g_hidden);  // frozen: the panel keeps its last text
@@ -573,7 +578,8 @@ bool Init() {
     InitializeCriticalSection(&g_boxLock);
     // Top-right, 12 px margin (the original's corner); re-rendered at most every 3 frames,
     // about the original's 50 ms refresh (REFRESH_MS). The text itself is built every frame.
-    g_panel = textdraw::Create("glitch", textdraw::TOP_RIGHT, 12, 12, 3, textdraw::T_TEXT);
+    g_panel = textdraw::Create("glitch", textdraw::TOP_RIGHT, 12, 12, 3, palette::T_TEXT);
+    textdraw::SetPalette(g_panel, palette::kFg, palette::T_COUNT, palette::kBg);
     textdraw::Show(g_panel, false);
 #ifdef FDCORE_DEBUG
     char env[8];
@@ -583,7 +589,14 @@ bool Init() {
     cmd::RegisterCommand("fd_glitch_freeze", "freeze / unfreeze the hud_glitch boxes; logging continues (F10)", CmdFreeze);
     cmd::RegisterCommand("fd_glitch_clear", "clear the hud_glitch history and last warp (F12)", CmdClear);
     cmd::RegisterCvar(&g_fdHudGlitch);
+    static const char* const kPractice[] = {"fd_hud_glitch", "fd_glitch_hide", "fd_glitch_freeze", "fd_glitch_clear"};
+    for (const char* n : kPractice) cmd::SetPracticeOnly(n);
     hooks::OnFrameEnd(FrameEnd);
+#ifdef FDCORE_DEBUG
+    testpipe::Register("glitch", [](const char*, char* resp, int cap) { Stats(resp, cap); });
+    testpipe::Register("glitch_box", [](const char*, char* resp, int cap) { BoxState(resp, cap); });
+    testpipe::Register("glitch_replay", [](const char* path, char* resp, int cap) { ReplayFile(path, resp, cap); });
+#endif
     log::Info("glitch: ready (fd_hud_glitch)");
     return true;
 }
@@ -683,3 +696,5 @@ int Stats(char* out, int cap) {
 }
 
 } // namespace fdcore::glitch
+
+FDCORE_MODULE(glitch, "glitch", nullptr, 0, nullptr, &fdcore::glitch::Init, 50)

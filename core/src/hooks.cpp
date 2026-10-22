@@ -38,6 +38,8 @@ void* g_engine = nullptr;  // geEngine* of the frame in progress (from Begin/End
 constexpr int kMaxSubs = 32;
 FrameFn g_frameSubs[kMaxSubs];
 int g_nFrameSubs = 0;
+FrameFn g_lateSubs[kMaxSubs];
+int g_nLateSubs = 0;
 FrameFn g_beginSubs[kMaxSubs];
 int g_nBeginSubs = 0;
 LevelFn g_levelSubs[kMaxSubs];
@@ -54,6 +56,7 @@ int __cdecl EndFrameDetour(void* engine) {
     InterlockedIncrement(&g_stats.endFrame);
     g_engine = engine;
     for (int i = 0; i < g_nFrameSubs; ++i) g_frameSubs[i]();
+    for (int i = 0; i < g_nLateSubs; ++i) g_lateSubs[i]();
     InterlockedIncrement(&g_stats.frameEndEvents);
     return g_origEnd(engine);
 }
@@ -148,6 +151,10 @@ void OnFrameBegin(FrameFn fn) {
 
 void OnFrameEnd(FrameFn fn) {
     if (g_nFrameSubs < kMaxSubs) g_frameSubs[g_nFrameSubs++] = fn;
+}
+
+void OnFrameEndLate(FrameFn fn) {
+    if (g_nLateSubs < kMaxSubs) g_lateSubs[g_nLateSubs++] = fn;
 }
 
 void OnLevelLoad(LevelFn fn) {

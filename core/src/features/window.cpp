@@ -13,6 +13,7 @@
 #include "addr.h"
 #include "cmd.h"
 #include "log.h"
+#include "modules.h"
 
 namespace fdcore::window {
 namespace {
@@ -82,9 +83,16 @@ bool ApplyEarlyPatch() {
     return true;
 }
 
-void Init() {
-    if (!g_patched) return;
+bool Init() {
+    if (!g_patched) return false;  // ApplyEarlyPatch logged why
     cmd::RegisterCvar(&g_fdWindowCursor);
+    return true;
 }
 
+namespace {
+void Early(const char*) { ApplyEarlyPatch(); }
+} // namespace
+
 } // namespace fdcore::window
+
+FDCORE_MODULE(window, "window", nullptr, 0, &fdcore::window::Early, &fdcore::window::Init, 20)
