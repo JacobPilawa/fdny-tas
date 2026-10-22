@@ -1,0 +1,448 @@
+{
+  "test": "freecam",
+  "core": "Debug",
+  "pass": true,
+  "crash": null,
+  "assertions": [
+    {
+      "step": "focus",
+      "pass": true,
+      "detail": "game window foreground at launch"
+    },
+    {
+      "step": "core_ready",
+      "pass": true,
+      "detail": "ready line seen"
+    },
+    {
+      "step": "address_table_version",
+      "pass": true,
+      "detail": "retail-1.1"
+    },
+    {
+      "step": "assert_log",
+      "pass": true,
+      "detail": "contains 'module freecam: enabled'"
+    },
+    {
+      "step": "assert_log",
+      "pass": true,
+      "detail": "contains 'freecam: ready (fd_pause; key P)'"
+    },
+    {
+      "step": "wait_log",
+      "pass": true,
+      "detail": "'juggle: setpos 144 -47 -1000 (+yaw): ok' after 0.0 s"
+    },
+    {
+      "step": "focus",
+      "pass": true,
+      "detail": "game window foreground"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.paused = 0, want == 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.clock = 75240 (+2027 since run0), want >= 1500"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.time = 449521 (-20 since run0), want <= -15"
+    },
+    {
+      "step": "wait_pipe",
+      "pass": true,
+      "detail": "freecam.paused = 1 after 0.00 s, want 1"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.flying = 1, want == 1"
+    },
+    {
+      "step": "assert_log",
+      "pass": true,
+      "detail": "contains 'freecam: flying from'"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.rebuild = 0, want <= 5"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.gamecam_dist = 0, want <= 10"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.px = 1440 (+0 since p0), want == 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.py = -479 (+0 since p0), want == 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.pz = -10000 (+0 since p0), want == 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.vx = 0 (+0 since p0), want == 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.vy = 0 (+0 since p0), want == 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.vz = 0 (+0 since p0), want == 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.burn = 0 (+0 since p0), want == 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.o2 = 1000 (+0 since p0), want == 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.time = 449519 (+0 since p0), want == 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.clock = 75447 (+0 since p0), want == 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.victims = 28782935 (+0 since p0), want == 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.fires = 96 (+0 since p0), want == 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.fire_c = -576487 (+0 since p0), want == 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.fire_i = 96000 (+0 since p0), want == 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.fire_m = 0 (+0 since p0), want == 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.frames = 272, want >= 100"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.rate = 4000, want >= 3960 and <= 4040"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.along = 999, want >= 999"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.keytime = 990, want >= 700 and <= 1500"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.rate = 16000, want >= 15840 and <= 16160"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.rate = 1000, want >= 990 and <= 1010"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.along = -999, want <= -999"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.rate = 4000, want >= 3960 and <= 4040"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.turn = 300, want >= 295 and <= 305"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.px = 1440 (+0 since p0), want == 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.pz = -10000 (+0 since p0), want == 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.clock = 75447 (+0 since p0), want == 0"
+    },
+    {
+      "step": "wait_pipe",
+      "pass": true,
+      "detail": "freecam.paused = 0 after 0.00 s, want 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.flying = 0, want == 0"
+    },
+    {
+      "step": "assert_log",
+      "pass": true,
+      "detail": "contains 'freecam: camera back to the player'"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.resume_dt = 17, want >= 1 and <= 50"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.gamecam_dist = 25, want <= 50"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.px = 1440 (+0 since p0), want == 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.pz = -10000 (+0 since p0), want == 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.time = 449482 (-30 since r0), want >= -40 and <= -20"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.px = 1440 (+0 since p0), want == 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.pz = -10000 (+0 since p0), want == 0"
+    },
+    {
+      "step": "wait_pipe",
+      "pass": true,
+      "detail": "freecam.paused = 1 after 0.00 s, want 1"
+    },
+    {
+      "step": "wait_log",
+      "pass": true,
+      "detail": "'pause: off (level change)' after 0.0 s"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.paused = 0, want == 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.flying = 0, want == 0"
+    },
+    {
+      "step": "assert_log",
+      "pass": true,
+      "detail": "contains 'fd_pause is \"0\"'"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.paused = 0, want == 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "freecam.paused = 0, want == 0"
+    },
+    {
+      "step": "no_crash",
+      "pass": true,
+      "detail": "no crash, hang or dialog"
+    },
+    {
+      "step": "log_errors",
+      "pass": true,
+      "detail": "0 ERROR line(s), limit 0"
+    }
+  ],
+  "samples": {
+    "module.exe": "0x400000",
+    "module.genesis": "0x10000000",
+    "run0": {
+      "paused": "0",
+      "flying": "0",
+      "frames": "0",
+      "cx": "0",
+      "cy": "0",
+      "cz": "0",
+      "yaw": "0",
+      "pitch": "0",
+      "moved": "0",
+      "keys": "0",
+      "rebuild": "-1000",
+      "keytime": "0",
+      "rate": "0",
+      "along": "0",
+      "turn": "0",
+      "gamecam_dist": "10105",
+      "resume_dt": "-1000",
+      "px": "1440",
+      "py": "-479",
+      "pz": "-10000",
+      "vx": "0",
+      "vy": "0",
+      "vz": "0",
+      "burn": "0",
+      "o2": "1000",
+      "time": "449541",
+      "clock": "73213",
+      "fires": "102",
+      "fire_c": "-637700",
+      "fire_i": "102000",
+      "fire_m": "0",
+      "victims": "28772643"
+    },
+    "screenshot.running.luma": 10.6,
+    "p0": {
+      "paused": "1",
+      "flying": "1",
+      "frames": "25",
+      "cx": "1440",
+      "cy": "236",
+      "cz": "-10000",
+      "yaw": "1800",
+      "pitch": "-1",
+      "moved": "0",
+      "keys": "0",
+      "rebuild": "0",
+      "keytime": "0",
+      "rate": "0",
+      "along": "0",
+      "turn": "0",
+      "gamecam_dist": "0",
+      "resume_dt": "-1000",
+      "px": "1440",
+      "py": "-479",
+      "pz": "-10000",
+      "vx": "0",
+      "vy": "0",
+      "vz": "0",
+      "burn": "0",
+      "o2": "1000",
+      "time": "449519",
+      "clock": "75447",
+      "fires": "96",
+      "fire_c": "-576487",
+      "fire_i": "96000",
+      "fire_m": "0",
+      "victims": "28782935"
+    },
+    "screenshot.paused.luma": 10.6,
+    "pipe": [
+      [
+        "freecam reset",
+        "paused=1 flying=1 frames=273 cx=1440 cy=236 cz=-10000 yaw=1800 pitch=-1 moved=0 keys=0 rebuild=0 keytime=0 rate=0 along=0 turn=0 gamecam_dist=0 resume_dt=-1000 px=1440 py=-479 pz=-10000 vx=0 vy=0 vz=0 burn=0 o2=1000 time=449519 clock=75447 fires=96 fire_c=-576487 fire_i=96000 fire_m=0 victims=28782935"
+      ],
+      [
+        "freecam reset",
+        "paused=1 flying=1 frames=356 cx=1440 cy=230 cz=-13963 yaw=1800 pitch=-1 moved=3963 keys=0 rebuild=0 keytime=0 rate=0 along=0 turn=0 gamecam_dist=0 resume_dt=-1000 px=1440 py=-479 pz=-10000 vx=0 vy=0 vz=0 burn=0 o2=1000 time=449519 clock=75447 fires=96 fire_c=-576487 fire_i=96000 fire_m=0 victims=28782935"
+      ],
+      [
+        "freecam reset",
+        "paused=1 flying=1 frames=407 cx=1440 cy=218 cz=-21802 yaw=1800 pitch=-1 moved=11802 keys=0 rebuild=0 keytime=0 rate=0 along=0 turn=0 gamecam_dist=0 resume_dt=-1000 px=1440 py=-479 pz=-10000 vx=0 vy=0 vz=0 burn=0 o2=1000 time=449519 clock=75447 fires=96 fire_c=-576487 fire_i=96000 fire_m=0 victims=28782935"
+      ],
+      [
+        "freecam reset",
+        "paused=1 flying=1 frames=487 cx=1440 cy=219 cz=-20799 yaw=1800 pitch=-1 moved=12806 keys=0 rebuild=0 keytime=0 rate=0 along=0 turn=0 gamecam_dist=0 resume_dt=-1000 px=1440 py=-479 pz=-10000 vx=0 vy=0 vz=0 burn=0 o2=1000 time=449519 clock=75447 fires=96 fire_c=-576487 fire_i=96000 fire_m=0 victims=28782935"
+      ],
+      [
+        "freecam reset",
+        "paused=1 flying=1 frames=545 cx=1440 cy=2600 cz=-20799 yaw=1800 pitch=-1 moved=15186 keys=0 rebuild=0 keytime=0 rate=0 along=0 turn=0 gamecam_dist=0 resume_dt=-1000 px=1440 py=-479 pz=-10000 vx=0 vy=0 vz=0 burn=0 o2=1000 time=449519 clock=75447 fires=96 fire_c=-576487 fire_i=96000 fire_m=0 victims=28782935"
+      ]
+    ],
+    "screenshot.flew_forward.luma": 88.3,
+    "screenshot.flew_up.luma": 47.5,
+    "screenshot.turned.luma": 48.4,
+    "r0": {
+      "paused": "0",
+      "flying": "0",
+      "frames": "646",
+      "cx": "466",
+      "cy": "2597",
+      "cz": "-22486",
+      "yaw": "2100",
+      "pitch": "-1",
+      "moved": "17135",
+      "keys": "0",
+      "rebuild": "0",
+      "keytime": "487",
+      "rate": "4000",
+      "along": "999",
+      "turn": "300",
+      "gamecam_dist": "27",
+      "resume_dt": "17",
+      "px": "1440",
+      "py": "-479",
+      "pz": "-10000",
+      "vx": "0",
+      "vy": "0",
+      "vz": "0",
+      "burn": "0",
+      "o2": "1000",
+      "time": "449512",
+      "clock": "76171",
+      "fires": "95",
+      "fire_c": "-569909",
+      "fire_i": "95000",
+      "fire_m": "0",
+      "victims": "28795781"
+    },
+    "screenshot.resumed.luma": 10.6
+  },
+  "video": null
+}

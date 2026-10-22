@@ -119,6 +119,13 @@ later session might "simplify" away; change one only with the owner's approval
     - a camera set at RenderFrame entry (above).
 - **D35 View-relative panels hide while paused (`textdraw::HideWhilePaused`)**. An arrow relative to the player's view (fd_juggle) means nothing to a free camera. The panel declares it, and textdraw skips it while `pause::Active()`, so the pause feature never names another feature (R2).
 
+- **D36 fd_pause: default key P; free camera W/A/S/D + E/Q, Shift ×4 / Ctrl ×0.25, mouse from the game's own sums** (owner-agreed design, 2026-10-22).
+  - **Keys:** P is not a game control (GameControls::Construct binds W A S D C, 1-3, Ctrl, Shift, Space, arrows, LMB/RMB, and F2-F4/F6-F8/F11 only in dev mode) and not an FDNYCore default (T, F9/F10/F12; F5/F6 suggested for the teleporter). It is bound through `binds::BindDefault`, so the player's own binds win. E/Q (up/down) are free too. Shift and Ctrl are the game's USE / CROUCH, harmless while input is blocked.
+  - **Mouse:** `controls.mouse_x/y` are the game's per-frame DirectInput sums, still polled while paused. The Windows cursor is useless: the game re-centres it every frame. Default 0.15°/count (`fd_freecam_sens`).
+  - **Speed:** `fd_freecam_speed` 400 u/s (the run speed) × real frame time (QPC; the game clock is paused), capped at 0.1 s per frame; no acceleration.
+  - **Start pose:** the game's last camera transform. Genesis camera columns are right / up / back (the view is −column 2). The rebuild error against the game's matrix is checked by the test (0.000 in fc4).
+  - `fd_pause` is not archived: a session never starts paused. Practice-only, so `fd_profile run` refuses it and resets it to 0, which resumes.
+
 ## Process
 
 - **D21 Tests are never weakened or deleted to pass.** An environmental failure (slow VM frame rate, a race in a read) is rerun and reported with evidence, for example the previous version failing identically.

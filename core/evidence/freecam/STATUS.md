@@ -20,7 +20,7 @@ Owner request (2026-10-22): a practice-only pause with a free-flying camera.
 | 1 Spike: Ghidra + live probes, verdict | **done**: feasible; the override goes at geEngine_RenderWorld (README.md) |
 | 2 addresses.json entries | **done**: 10 entries, 137 total; addr_verified PASS |
 | 3 Core: sim-pause service + camera override | **done**: `pause` service, camera override, textdraw HideWhilePaused; pause_service PASS 2/2; regressions PASS |
-| 4 Feature src/features/freecam.cpp | pending |
+| 4 Feature src/features/freecam.cpp | **done**: fd_pause / fd_pause_toggle (key P), free camera; tests/freecam.yaml PASS (fc4b) |
 | 5 Suite test tests/freecam.yaml | pending |
 | 6 Suite, docs, version, commit, owner report | pending |
 
@@ -210,4 +210,46 @@ Owner request (2026-10-22): a practice-only pause with a free-flying camera.
   - The geXForm3d axis convention (which row is forward) must be checked against the
     measured yaw convention.
   - Debug pipe `freecam`.
+- it4 (step 4, done): `src/features/freecam.cpp` (order 80; needs controls.mouse_x/y,
+  the pause service and the camera override).
+  - `fd_pause` (practice-only, not archived): on = pause::Set + start flying from
+    camera::LastWorldXForm.
+  - `fd_pause_toggle` (practice-only, default key **P** via binds::BindDefault).
+  - `fd_freecam_speed` 400, `fd_freecam_sens` 0.15.
+  - Each paused frame (frame begin):
+    - QPC frame time, capped at 0.1 s;
+    - mouse from the game's sums;
+    - W/S/A/D/E/Q, Shift ?4, Ctrl ?0.25, only while binds::KeysLive;
+    - pitch ?89;
+    - the transform built with columns right / up / back.
+  - It follows the service when that ends a pause itself (fd_pause back to 0).
+  - Debug pipe `freecam`:
+    - pause/fly state, camera, yaw/pitch;
+    - measured since `freecam reset`: keytime, rate, along, turn;
+    - gamecam_dist, resume_dt;
+    - a frozen-state snapshot: player pos/vel, burn, O2, time, clock, victims sum,
+      fire sums.
+  - Harness: `assert_pipe_stat` takes `max` (and min+max together).
+  - **tests/freecam.yaml written now** (R3: the module's test must exist).
+    - Run fc4: two test-expectation fixes.
+      - The game camera bobs ~2 u with the player still, so the snap-back check is now
+        ? 5 u (the camera had flown 1726 u).
+      - The console prints `fd_pause is "0"`.
+    - Run **fc4b PASS**:
+      - frozen 4 s: all 15 state fields unchanged;
+      - rate exactly 4000 / 16000 / 1000 / 4000 tenths (W, Shift+W, Ctrl+S, E);
+      - along +1.000 / -1.000; turn 30.0 deg; rebuild error 0;
+      - resume_dt 17 ms;
+      - the timer counts down after resume; the player never moved;
+      - a level load resumes;
+      - refused under run (command and key).
+  - D36 (keys, mouse source, speed, start pose).
+  - Evidence: `step4/` (screenshots: the camera flies up through the ceiling and turns).
+- Next (it5, step 5): harden the test.
+  - Show the fire / victim sums are sensitive while running (so "unchanged while
+    paused" means something).
+  - Repeat runs.
+  - Check the fd_juggle arrow is hidden while paused (screenshot / textdraw pipe).
+  - Confirm keys pressed during the pause have no effect after it (W + jump: player
+    position unchanged after resume).
 
