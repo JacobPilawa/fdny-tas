@@ -69,7 +69,10 @@ struct View {  // what the panel and the pipe show (game thread writes, pipe thr
     uint32_t flinch;
     int32_t state;
     int dir;
+    bool frozen;         // locked and the spot is still where it was when the lock began
     uint32_t selfCheck;  // frames where the spot moved although it was strictly locked
+    uint32_t outFrames;  // frames passed out (state 6) while fd_juggle was on
+    uint32_t outMiss;    // ... of those, frames without an arrow / "o" (must stay 0)
 };
 View g_view = {};
 CRITICAL_SECTION g_lock;
@@ -80,6 +83,7 @@ float g_prevSafe[3] = {};
 bool g_prevStrict = false, g_prevValid = false;
 int32_t g_prevState = 0;
 uintptr_t g_prevPlayer = 0;
+float g_lockSafe[3] = {};  // the spot when the current lock began
 
 bool On(const cmd::Cvar& v) { return v.value[0] != '0'; }
 cmd::Cvar g_fdJuggle = {"fd_juggle", "0",
@@ -157,11 +161,13 @@ void Draw(const View& v) {
 
 #ifdef FDCORE_DEBUG
 void ApplySetPos();
+void StepToFire();
 #endif
 
 void FrameEnd() {
 #ifdef FDCORE_DEBUG
     ApplySetPos();
+    StepToFire();
 #endif
     const state::State& s = state::Current();
     View v = {};
@@ -203,7 +209,14 @@ void FrameEnd() {
     __builtin_memcpy(g_prevSafe, v.safe, sizeof(g_prevSafe));
 
     EnterCriticalSection(&g_lock);
+    if (v.locked && !g_view.locked) __builtin_memcpy(g_lockSafe, v.safe, sizeof(g_lockSafe));
+    v.frozen = v.locked && v.safe[0] == g_lockSafe[0] && v.safe[1] == g_lockSafe[1] && v.safe[2] == g_lockSafe[2];
     v.selfCheck = g_view.selfCheck + bad;
+    v.outFrames = g_view.outFrames, v.outMiss = g_view.outMiss;
+    if (v.on && v.valid && v.state == kPassedOut) {
+        ++v.outFrames;
+        if (!v.locked || v.dir == kDirNone) ++v.outMiss;
+    }
     if (v.locked != g_view.locked && v.on && v.valid)
         log::Info("juggle: %s (burn %ld/1000, o2 %ld/100, flinch %lx, state %ld)", v.locked ? "locked" : "following",
                   Round(v.burn * 1000), Round(v.o2 * 100), static_cast<unsigned long>(v.flinch),
@@ -266,6 +279,107 @@ void CmdO2(int argc, const char* const* argv) {
     log::Info("juggle: o2 %ld/100: %s", Round(o2 * 100), ok ? "ok" : "failed");
 }
 
+// Test hook: `fd_dbg_tofire [burn]` stands the player in a fire that really burns: it tries
+// the level's FireRescueEnt nodes (fire.center) one after another until the burn meter
+// rises, stays until burn >= the target (default 0.5), then returns to where it started.
+// A target >= 1 stays until the player passes out (state 6). Fire nodes move along their
+// paths, so fixed coordinates don't reliably burn (it3 lesson).
+struct ToFire {
+    int phase;  // 0 idle, 1 trying a node, 2 burning
+    float target, home[3], startBurn;
+    int node, waited, stall;
+    float lastBurn;
+};
+ToFire g_toFire = {};
+constexpr int kTryFrames = 30, kStallFrames = 90, kMaxNodes = 256;
+
+bool Teleport(uintptr_t pl, const float* p) {
+    static const float zero[3] = {0, 0, 0};
+    return addr::SafeWrite(pl + addr::Field(Id::player_f_pos), p, 12) &&
+           addr::SafeWrite(pl + addr::Field(Id::player_f_vel), zero, 12) &&
+           addr::SafeWrite(pl + addr::Field(Id::player_f_disp), zero, 12) &&
+           addr::SafeWrite(pl + addr::Field(Id::player_f_impulse), zero, 12);
+}
+
+// The n-th fire node with a non-zero centre, or false when there are no more.
+bool FireNode(int n, float* centre) {
+    uintptr_t head = 0;
+    uint32_t node = 0;
+    if (!addr::Resolve(Id::entities_head, &head) || !addr::SafeRead(head, &node, 4)) return false;
+    for (int guard = 0; node && guard < 8192; ++guard) {
+        uint32_t ent = 0, next = 0;
+        int32_t kind = 0;
+        if (!At(node, Id::node_elem, &ent) || !At(node, Id::node_next, &next)) return false;
+        node = next;
+        if (!ent || !At(ent, Id::entity_kind, &kind) || kind != 6) continue;
+        float c[3];
+        if (!At(ent, Id::fire_center, &c) || (c[0] == 0 && c[1] == 0 && c[2] == 0)) continue;
+        if (n-- == 0) {
+            __builtin_memcpy(centre, c, sizeof(c));
+            return true;
+        }
+    }
+    return false;
+}
+
+void CmdToFire(int argc, const char* const* argv) {
+    ToFire t = {};
+    t.target = 0.5f;
+    const uintptr_t pl = Player();
+    if ((argc > 1 && !ParseFloat(argv[1], &t.target)) || !pl || !At(pl, Id::player_f_pos, &t.home)) {
+        console::Print("usage: fd_dbg_tofire [burn target, >= 1 = until passed out] (in a level)");
+        return;
+    }
+    t.phase = 1, t.node = -1, t.waited = kTryFrames;  // the first step moves to node 0
+    g_toFire = t;
+    log::Info("juggle: tofire: searching (target %ld/1000)", Round(t.target * 1000));
+}
+
+void StepToFire() {
+    ToFire& t = g_toFire;
+    if (!t.phase) return;
+    const uintptr_t pl = Player();
+    float burn = 0;
+    int32_t st = 0;
+    if (!pl || !At(pl, Id::player_f_burn, &burn) || !At(pl, Id::player_f_state, &st)) {
+        t.phase = 0;
+        log::Warn("juggle: tofire: no player");
+        return;
+    }
+    if (t.phase == 1) {
+        if (t.waited < kTryFrames) {
+            if (burn > t.startBurn + 0.02f) {
+                t.phase = 2, t.stall = 0, t.lastBurn = burn;
+                log::Info("juggle: tofire: node %d burns (burn %ld/1000)", t.node, Round(burn * 1000));
+            } else {
+                ++t.waited;
+            }
+            return;
+        }
+        float c[3];
+        if (++t.node >= kMaxNodes || !FireNode(t.node, c)) {
+            t.phase = 0;
+            Teleport(pl, t.home);
+            log::Warn("juggle: tofire: no fire node burns (tried %d)", t.node);
+            return;
+        }
+        c[1] += 30.0f;  // above the centre, as in the spike
+        Teleport(pl, c);
+        t.waited = 0, t.startBurn = burn;
+        return;
+    }
+    // phase 2: burning
+    if (t.target >= 1.0f ? st == kPassedOut : burn >= t.target) {
+        t.phase = 0;
+        if (t.target < 1.0f) Teleport(pl, t.home);
+        log::Info("juggle: tofire: done (burn %ld/1000, state %ld)%s", Round(burn * 1000), static_cast<long>(st),
+                  t.target < 1.0f ? ", back where it started" : "");
+        return;
+    }
+    if (burn > t.lastBurn) t.lastBurn = burn, t.stall = 0;
+    else if (++t.stall > kStallFrames) t.phase = 1, t.waited = kTryFrames;  // node moved on: next one
+}
+
 void ApplySetPos() {
     if (!g_setPos.pending) return;
     g_setPos.pending = false;
@@ -299,6 +413,9 @@ bool Init() {
     cmd::SetPracticeOnly("fd_dbg_setpos");
     cmd::RegisterCommand("fd_dbg_o2", "(Debug test hook) set the player's O2, 0..1", CmdO2);
     cmd::SetPracticeOnly("fd_dbg_o2");
+    cmd::RegisterCommand("fd_dbg_tofire", "(Debug test hook) stand in a burning fire: [burn target, >= 1 = pass out]",
+                         CmdToFire);
+    cmd::SetPracticeOnly("fd_dbg_tofire");
     testpipe::Register("juggle", [](const char*, char* resp, int cap) {
         (void)cap;
         EnterCriticalSection(&g_lock);
@@ -307,14 +424,15 @@ bool Init() {
         // Tenths of a unit (wsprintf has no %f).
         wsprintfA(resp,
                   "enabled=%d valid=%d locked=%d dir=%d glyph=%s dist=%ld dy=%ld safe=%ld,%ld,%ld target=%ld,%ld,%ld "
-                  "pos=%ld,%ld,%ld burn=%ld o2=%ld flinch=%lx state=%ld selfcheck=%lu",
+                  "pos=%ld,%ld,%ld burn=%ld o2=%ld flinch=%lx state=%ld selfcheck=%lu frozen=%d outframes=%lu outmiss=%lu",
                   v.on, v.valid, v.locked, v.dir,
                   !v.locked ? "-" : v.dir == kDirNear ? "o" : v.dir >= 0 ? kDirName[v.dir] : "?", Round(v.dist * 10),
                   Round(v.dy * 10), Round(v.safe[0] * 10), Round(v.safe[1] * 10), Round(v.safe[2] * 10),
                   Round(v.target[0] * 10), Round(v.target[1] * 10), Round(v.target[2] * 10), Round(v.pos[0] * 10),
                   Round(v.pos[1] * 10), Round(v.pos[2] * 10), Round(v.burn * 1000), Round(v.o2 * 1000),
                   static_cast<unsigned long>(v.flinch), static_cast<long>(v.state),
-                  static_cast<unsigned long>(v.selfCheck));
+                  static_cast<unsigned long>(v.selfCheck), v.frozen, static_cast<unsigned long>(v.outFrames),
+                  static_cast<unsigned long>(v.outMiss));
     });
 #endif
     log::Info("juggle: ready (fd_juggle%s)", g_panel < 0 ? "; no text panel free: display off" : "");

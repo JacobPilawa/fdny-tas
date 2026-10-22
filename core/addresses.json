@@ -1080,6 +1080,15 @@
           "ghidra": "FireRescueEnt (vptr 0x004E1780; entity kind 6, verified live in bank: 84 instances): mode 0 idle, 4 advancing/burning, 5 extinguished",
           "note": "fire state"
         },
+        "fire.center": {
+          "module": "field",
+          "rva": "0x7C",
+          "chain": [],
+          "type": "f32",
+          "sig": null,
+          "ghidra": "FireRescueEnt world centre x,y,z: FireRescueEnt::Spawn/AdvanceSpread writes point + (0,4,0) here, TrySpawnSpreadFire writes the child's spawn point, and the touch callback 0x004483A0 (queues msg 0x7531 = fire damage) tests the toucher against it. Entity +0x4C reads (0,0,0) for fires (verified live on bank, core/evidence/fire_juggling/run3.log)",
+          "note": "x,y,z; fd_juggle's Debug test hook stands the player here"
+        },
         "fire.intensity": {
           "module": "field",
           "rva": "0x128",

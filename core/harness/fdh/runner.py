@@ -16,9 +16,11 @@ import ctypes
 import ctypes.wintypes as wt
 import datetime
 import json
+import math
 import os
 import re
 import shutil
+import struct
 import time
 
 import yaml
@@ -138,6 +140,20 @@ class Run:
                             f"player moved {d:.1f} u (must be <= {arg['tolerance']})")
             else:
                 self.record(kind, d >= float(arg["min"]), f"player moved {d:.1f} u (must be >= {arg['min']})")
+        elif kind == "wait_log":
+            # {contains, timeout}: wait for one more occurrence of the text in FDNYCore.log
+            # than there was when the step started (for events with no fixed timing).
+            def count():
+                with open(self.g.core_log, encoding="utf-8", errors="replace") as f:
+                    return f.read().count(arg["contains"])
+            n0, t0, timeout = count(), time.time(), float(arg.get("timeout", 30))
+            while count() <= n0 and time.time() - t0 < timeout:
+                time.sleep(0.1)
+            seen = count() > n0
+            self.record("wait_log", seen, f"{arg['contains']!r} {'after' if seen else 'not within'} "
+                                          f"{time.time() - t0:.1f} s")
+        elif kind == "assert_juggle":
+            self.assert_juggle(arg if isinstance(arg, dict) else {})
         elif kind == "assert_hooks_idle":
             # Hook group switched off: its counters must not move while the game renders.
             group = arg.get("group", "frame")
@@ -332,6 +348,39 @@ class Run:
                     and abs(db - de) <= 1 and abs(dv - de) <= 1,
                     f"{seconds}s: clock ticks={ticks} BeginFrame={db} EndFrame={de} frame_end events={dv} "
                     f"(tolerance {tolerance} for window-edge races)")
+
+    def assert_juggle(self, opt):
+        """fd_juggle's arrow against the harness's own computation: player position, yaw
+        and the safe spot (+0x3400) read directly from memory; landing point T = spot -
+        30 X; view axes measured live (forward = (sin yaw, cos yaw), right = (-cos yaw,
+        sin yaw), evidence/fire_juggle_overlay/yaw_probe.log); 8 sectors of 45 degrees,
+        8 = "o" under 16 u. {locked: 0|1} (default 1) is asserted too."""
+        reply = dict(kv.split("=", 1) for kv in pipe.call("juggle").split() if "=" in kv)
+        r = self.resolver
+        pl = self.g.pm.read_uint(r.address("player.object"))
+        f32 = lambda off, i=0: struct.unpack("<f", self.g.pm.read_bytes(pl + off + 4 * i, 4))[0]
+        pos = [f32(r.field("player.f_pos"), i) for i in range(3)]
+        safe = [f32(r.field("player.f_safe"), i) for i in range(3)]
+        yaw = f32(r.field("player.f_yaw"))
+        tx, tz = safe[0] - 30.0, safe[2]
+        dx, dz = tx - pos[0], tz - pos[2]
+        dist = math.hypot(dx, dz)
+        s, c = math.sin(math.radians(yaw)), math.cos(math.radians(yaw))
+        fwd, right = dx * s + dz * c, -dx * c + dz * s
+        ang = math.degrees(math.atan2(right, fwd)) % 360
+        want = {8} if dist < 16 else {int(((ang + 22.5) % 360) // 45)}
+        edge = (ang + 22.5) % 45
+        if dist >= 16 and (edge < 1 or edge > 44):  # within 1 degree of a sector edge: either side
+            want |= {int(((ang + 22.5 + (2 if edge > 44 else -2)) % 360) // 45)}
+        locked = int(opt.get("locked", 1))
+        got_dir, got_dist = int(reply.get("dir", "-9")), int(reply.get("dist", "-1"))
+        tgt = [int(v) for v in reply.get("target", "0,0,0").split(",")]
+        ok = (int(reply.get("locked", "-1")) == locked and (got_dir in want or not locked)
+              and abs(got_dist - dist * 10) <= 10 and abs(tgt[0] - tx * 10) <= 1 and abs(tgt[2] - tz * 10) <= 1)
+        self.record("assert_juggle", ok,
+                    f"pipe locked={reply.get('locked')} dir={got_dir} dist={got_dist / 10:.1f} target={tgt}; harness: "
+                    f"pos=({pos[0]:.1f},{pos[2]:.1f}) spot=({safe[0]:.1f},{safe[2]:.1f}) yaw={yaw:.1f} -> "
+                    f"angle {ang:.1f} dir {sorted(want)} dist {dist:.1f}; want locked={locked}")
 
     def assert_snapshot(self, opt):
         """Item 9: the core's per-frame snapshot (Debug pipe) vs. the harness's

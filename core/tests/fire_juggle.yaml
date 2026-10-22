@@ -79,6 +79,51 @@ steps:
   - console: "fd_dbg_o2 1"
   - wait_s: 1
   - assert_pipe_stat: {cmd: juggle, key: locked, equals: 0}
+  # Real fire. fd_dbg_tofire (Debug test hook) tries the level's fire nodes until the burn
+  # meter rises (fire nodes move along their paths, so fixed coordinates don't reliably
+  # burn), burns to the target, then returns to the spawn: clean ground.
+  - console: "fd_dbg_setpos -697 -47 1196 0"
+  - wait_s: 1
+  - assert_pipe_stat: {cmd: juggle, key: locked, equals: 0}
+  - assert_pipe_contains: {cmd: juggle, contains: "glyph=- "}
+  - assert_juggle: {locked: 0}
+  - console: "fd_dbg_tofire 0.6"
+  - wait_log: {contains: "juggle: tofire: done", timeout: 60}
+  - assert_log: {contains: "juggle: tofire: node"}
+  # back on clean ground: still locked (burn >= 0.1), the spot frozen since the lock began,
+  # and the arrow agrees with the harness's own computation
+  - assert_pipe_stat: {cmd: juggle, key: locked, equals: 1}
+  - assert_pipe_stat: {cmd: juggle, key: frozen, equals: 1}
+  - assert_pipe_stat: {cmd: juggle, key: burn, min: 100}
+  - assert_juggle: {locked: 1}
+  - screenshot: fire_out_locked
+  - wait_s: 2.5
+  - assert_pipe_stat: {cmd: juggle, key: locked, equals: 1}
+  - assert_pipe_stat: {cmd: juggle, key: frozen, equals: 1}
+  - assert_juggle: {locked: 1}
+  # the meter cools 0.1/s: from 0.6, below 0.1 after ~5 s -> the spot follows again
+  - wait_s: 6
+  - assert_pipe_stat: {cmd: juggle, key: burn, equals: 0}
+  - assert_pipe_stat: {cmd: juggle, key: locked, equals: 0}
+  - assert_pipe_contains: {cmd: juggle, contains: "glyph=- "}
+  - assert_juggle: {locked: 0}
+  - screenshot: cooled_following
+  - assert_log: {contains: "juggle: following"}
+  # pass out in the fire: the arrow stays up while passed out, "-" after the respawn
+  - console: "fd_dbg_tofire 2"
+  - wait_log: {contains: "juggle: tofire: done", timeout: 60}
+  - assert_pipe_stat: {cmd: juggle, key: state, equals: 6}
+  - assert_pipe_stat: {cmd: juggle, key: locked, equals: 1}
+  - assert_juggle: {locked: 1}
+  - screenshot: passed_out
+  - wait_s: 7
+  - assert_pipe_stat: {cmd: juggle, key: state, equals: 3}
+  - assert_pipe_stat: {cmd: juggle, key: locked, equals: 0}
+  - assert_pipe_contains: {cmd: juggle, contains: "glyph=- "}
+  - assert_pipe_stat: {cmd: juggle, key: outframes, min: 60}
+  - assert_pipe_stat: {cmd: juggle, key: outmiss, equals: 0}
+  - assert_pipe_stat: {cmd: juggle, key: selfcheck, equals: 0}
+  - screenshot: respawned
   # practice-only
   - console: "fd_profile run"
   - wait_s: 1

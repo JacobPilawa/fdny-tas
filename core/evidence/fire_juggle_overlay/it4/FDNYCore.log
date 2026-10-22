@@ -1,0 +1,124 @@
+[2026-10-22 17:39:43.550] [INFO] FDNYCore loaded from C:\fdny-decomp\FDNY SP 1.1\FDNYCore.asi
+[2026-10-22 17:39:43.603] [INFO] patches: console creation ungated at 00499370
+[2026-10-22 17:39:43.636] [INFO] patches: intro movies skipped (fd_skip_intro)
+[2026-10-22 17:39:43.678] [WARN] window: cursor-warp site doesn't match (already patched by another mod, e.g. alttabfix.asi?); window module inactive
+[2026-10-22 17:39:43.711] [INFO] speedrun: victim-spawn hook at 0045d717 -> trampoline 021b0000
+[2026-10-22 17:39:43.793] [INFO] FDNYCore 0.17.0 (Debug) exe=C:\fdny-decomp\FDNY SP 1.1\FDNYFirefighter.exe sha256=4b3b4dc1cc0b05bcb42c8e27ac6f6ca72fe5f7064ca8122fda7d41e7f6d2fc3e base=00400000
+[2026-10-22 17:39:43.819] [INFO] Genesis.dll sha256=5014bb879706bfb5ae6cf9ce1de63dc3deebdcc5b8e1b41f247b284a336c4643 base=10000000
+[2026-10-22 17:39:43.861] [INFO] address table: version retail-1.1 selected
+[2026-10-22 17:39:43.895] [INFO] patch site patch.cursor_warp occupied by another mod; left alone
+[2026-10-22 17:39:43.937] [INFO] signatures: all OK (125/125, 1 patch site(s) occupied by other mods)
+[2026-10-22 17:39:43.994] [INFO] hooks: created genesis.begin_frame at 10025b70 (group frame)
+[2026-10-22 17:39:44.053] [INFO] hooks: created genesis.end_frame at 100260e0 (group frame)
+[2026-10-22 17:39:44.122] [INFO] hooks: created con.exec_line at 00470f10 (group console)
+[2026-10-22 17:39:44.159] [INFO] console: ready (game console; FDNYCore commands intercepted at ScriptEngine::ExecLine)
+[2026-10-22 17:39:44.203] [INFO] hooks: created genesis.camera_set_attributes at 10001350 (group camera)
+[2026-10-22 17:39:44.242] [INFO] camera: ready (geCamera_SetAttributes hooked)
+[2026-10-22 17:39:44.286] [INFO] state: snapshot ready (refreshed at frame end)
+[2026-10-22 17:39:44.319] [INFO] hooks: created genesis.render_world at 10024950 (group gfx)
+[2026-10-22 17:39:44.368] [INFO] gfx: ready (decals, alpha surfaces, solid rects, world boxes)
+[2026-10-22 17:39:44.402] [INFO] textdraw: ready
+[2026-10-22 17:39:44.445] [INFO] profile: ready (fd_profile, fd_watermark); other asi: alttabfix FDNYFirefighterAmericanHeroFOVFix
+[2026-10-22 17:39:44.477] [INFO] modules: 10 registered (levelwatch fov window speedrun hud glitch tp triggers juggle bench)
+[2026-10-22 17:39:44.519] [INFO] module levelwatch: enabled
+[2026-10-22 17:39:44.552] [INFO] fov: ready (filter on the camera service)
+[2026-10-22 17:39:44.594] [INFO] module fov: enabled
+[2026-10-22 17:39:44.627] [INFO] module window: disabled (init failed; see above)
+[2026-10-22 17:39:44.669] [INFO] speedrun: ready (static spawns available, rescuebot available)
+[2026-10-22 17:39:44.702] [INFO] module speedrun: enabled
+[2026-10-22 17:39:44.744] [INFO] hud: ready (fd_hud_player)
+[2026-10-22 17:39:44.778] [INFO] module hud: enabled
+[2026-10-22 17:39:44.819] [INFO] glitch: ready (fd_hud_glitch)
+[2026-10-22 17:39:44.852] [INFO] module glitch: enabled
+[2026-10-22 17:39:44.894] [INFO] tp: ready (fd_tp_save, fd_tp_load)
+[2026-10-22 17:39:44.928] [INFO] module tp: enabled
+[2026-10-22 17:39:44.969] [INFO] triggers: ready (fd_triggers, key T)
+[2026-10-22 17:39:45.002] [INFO] module triggers: enabled
+[2026-10-22 17:39:45.044] [INFO] juggle: ready (fd_juggle)
+[2026-10-22 17:39:45.078] [INFO] module juggle: enabled
+[2026-10-22 17:39:45.119] [INFO] module bench: enabled
+[2026-10-22 17:39:45.152] [INFO] testpipe: listening on \\.\pipe\FDNYCore (Debug build)
+[2026-10-22 17:39:45.194] [INFO] FDNYCore ready
+[2026-10-22 17:39:45.191] [INFO] gfx: world 037b7b28
+[2026-10-22 17:39:45.276] [INFO] levelwatch: map '' state -1
+[2026-10-22 17:39:45.311] [INFO] gfx: font Consolas 9 px, cell 5x10
+[2026-10-22 17:39:45.344] [INFO] gfx: view 1024x768 (window; window client 1024x768)
+[2026-10-22 17:39:45.378] [INFO] textdraw: watermark: 383x18 at 8,690 (view 1024x768), opaque
+[2026-10-22 17:39:47.322] [INFO] fov: camera 0775be90 game_fov=2.000000 stored=2.669333
+[2026-10-22 17:39:48.612] [INFO] console: game console present at 03417848
+[2026-10-22 17:39:48.688] [INFO] config: startup (FDNYCore.cfg: none, autoexec.cfg: none)
+[2026-10-22 17:39:48.769] [INFO] gfx: world 0383d008
+[2026-10-22 17:39:48.810] [INFO] levelwatch: map '' state 0
+[2026-10-22 17:39:48.840] [INFO] gfx: view 640x480 (camera; window client 640x480)
+[2026-10-22 17:40:05.174] [INFO] event: victim_spawn training #0 'victim1' (random spot kept)
+[2026-10-22 17:40:05.678] [INFO] event: victim_spawn training #1 'victim2' (random spot kept)
+[2026-10-22 17:40:05.881] [INFO] gfx: world 0775cfa0
+[2026-10-22 17:40:05.929] [INFO] levelwatch: map 'training' state 3
+[2026-10-22 17:40:05.967] [INFO] levelwatch: map 'training' state 1
+[2026-10-22 17:40:05.997] [INFO] event: level_load 'training'
+[2026-10-22 17:40:06.028] [INFO] triggers: map 'training': 25 trigger(s): 5 rescue, 0 exit (0 open), 20 other
+[2026-10-22 17:40:26.434] [INFO] cmd: fd_watermark 0
+[2026-10-22 17:40:28.175] [INFO] cmd: fd_rescuebot 0
+[2026-10-22 17:40:28.725] [INFO] speedrun: rescuebot disabled (patched)
+[2026-10-22 17:40:31.102] [INFO] event: victim_spawn bank #0 'betty' (random spot kept)
+[2026-10-22 17:40:32.139] [INFO] event: victim_spawn bank #1 '<null>' (random spot kept)
+[2026-10-22 17:40:32.851] [INFO] event: victim_spawn bank #2 '<null>' (random spot kept)
+[2026-10-22 17:40:34.063] [INFO] event: victim_spawn bank #3 '<null>' (random spot kept)
+[2026-10-22 17:40:35.366] [INFO] event: victim_spawn bank #4 '<null>' (random spot kept)
+[2026-10-22 17:40:35.405] [INFO] event: victim_spawn bank #5 '<null>' (random spot kept)
+[2026-10-22 17:40:35.714] [INFO] levelwatch: map 'bank' state 3
+[2026-10-22 17:40:37.008] [INFO] levelwatch: map 'bank' state 1
+[2026-10-22 17:40:37.965] [INFO] event: level_load 'bank'
+[2026-10-22 17:40:38.003] [INFO] triggers: map 'bank': 14 trigger(s): 1 rescue, 1 exit (0 open), 12 other
+[2026-10-22 17:41:12.103] [INFO] cmd: fd_juggle 1
+[2026-10-22 17:41:12.135] [INFO] juggle: fd_juggle 1
+[2026-10-22 17:41:12.172] [INFO] textdraw: juggle: 23x18 at 308,270 (view 640x480), translucent
+[2026-10-22 17:41:16.074] [INFO] cmd: fd_dbg_setpos -697 -47 1196 0
+[2026-10-22 17:41:16.102] [INFO] juggle: setpos -697 -47 1196 (+yaw): ok
+[2026-10-22 17:41:19.987] [INFO] cmd: fd_dbg_setpos -697 -47 1196 0 0.1
+[2026-10-22 17:41:20.035] [INFO] juggle: setpos -697 -47 1196 (+yaw) (+o2): ok
+[2026-10-22 17:41:20.066] [INFO] juggle: locked (burn 0/1000, o2 10/100, flinch 0, state 3)
+[2026-10-22 17:41:23.389] [INFO] cmd: fd_dbg_setpos -697 -47 1196 0 0.1
+[2026-10-22 17:41:23.422] [INFO] juggle: setpos -697 -47 1196 (+yaw) (+o2): ok
+[2026-10-22 17:41:26.883] [INFO] cmd: fd_dbg_setpos -697 -47 1196 45 0.1
+[2026-10-22 17:41:26.924] [INFO] juggle: setpos -697 -47 1196 (+yaw) (+o2): ok
+[2026-10-22 17:41:30.372] [INFO] cmd: fd_dbg_setpos -697 -47 1196 90 0.1
+[2026-10-22 17:41:30.407] [INFO] juggle: setpos -697 -47 1196 (+yaw) (+o2): ok
+[2026-10-22 17:41:33.930] [INFO] cmd: fd_dbg_setpos -697 -47 1196 135 0.1
+[2026-10-22 17:41:33.973] [INFO] juggle: setpos -697 -47 1196 (+yaw) (+o2): ok
+[2026-10-22 17:41:37.500] [INFO] cmd: fd_dbg_setpos -697 -47 1196 180 0.1
+[2026-10-22 17:41:37.535] [INFO] juggle: setpos -697 -47 1196 (+yaw) (+o2): ok
+[2026-10-22 17:41:41.077] [INFO] cmd: fd_dbg_setpos -697 -47 1196 225 0.1
+[2026-10-22 17:41:41.103] [INFO] juggle: setpos -697 -47 1196 (+yaw) (+o2): ok
+[2026-10-22 17:41:44.668] [INFO] cmd: fd_dbg_setpos -697 -47 1196 270 0.1
+[2026-10-22 17:41:44.695] [INFO] juggle: setpos -697 -47 1196 (+yaw) (+o2): ok
+[2026-10-22 17:41:48.215] [INFO] cmd: fd_dbg_setpos -697 -47 1196 315 0.1
+[2026-10-22 17:41:48.252] [INFO] juggle: setpos -697 -47 1196 (+yaw) (+o2): ok
+[2026-10-22 17:41:50.083] [INFO] cmd: fd_dbg_o2 1
+[2026-10-22 17:41:50.157] [INFO] juggle: o2 100/100: ok
+[2026-10-22 17:41:50.198] [INFO] juggle: following (burn 0/1000, o2 100/100, flinch 0, state 3)
+[2026-10-22 17:41:53.728] [INFO] cmd: fd_dbg_setpos -697 -47 1196 0
+[2026-10-22 17:41:53.759] [INFO] juggle: setpos -697 -47 1196 (+yaw): ok
+[2026-10-22 17:41:56.554] [INFO] cmd: fd_dbg_tofire 0.6
+[2026-10-22 17:41:56.580] [INFO] juggle: tofire: searching (target 600/1000)
+[2026-10-22 17:41:56.759] [INFO] juggle: locked (burn 5/1000, o2 100/100, flinch 10000, state 3)
+[2026-10-22 17:41:56.922] [INFO] juggle: tofire: node 0 burns (burn 23/1000)
+[2026-10-22 17:41:58.779] [INFO] juggle: tofire: done (burn 609/1000, state 3), back where it started
+[2026-10-22 17:42:03.928] [INFO] juggle: following (burn 99/1000, o2 100/100, flinch 0, state 3)
+[2026-10-22 17:42:09.116] [INFO] cmd: fd_dbg_tofire 2
+[2026-10-22 17:42:09.177] [INFO] juggle: tofire: searching (target 2000/1000)
+[2026-10-22 17:42:09.368] [INFO] juggle: locked (burn 1/1000, o2 100/100, flinch 10000, state 3)
+[2026-10-22 17:42:09.533] [INFO] juggle: tofire: node 0 burns (burn 20/1000)
+[2026-10-22 17:42:11.989] [INFO] juggle: tofire: done (burn 1002/1000, state 6)
+[2026-10-22 17:42:15.990] [INFO] juggle: following (burn 0/1000, o2 100/100, flinch 0, state 3)
+[2026-10-22 17:42:20.642] [INFO] cmd: fd_profile run
+[2026-10-22 17:42:20.689] [INFO] juggle: fd_juggle 0
+[2026-10-22 17:42:20.724] [INFO] profile: run
+[2026-10-22 17:42:20.764] [INFO] console> fd_profile run: practice-only settings off until fd_profile practice
+[2026-10-22 17:42:23.220] [INFO] cmd: fd_juggle 1
+[2026-10-22 17:42:23.247] [INFO] console> fd_juggle is practice-only (fd_profile is run)
+[2026-10-22 17:42:23.281] [INFO] profile: refused fd_juggle "1" in run
+[2026-10-22 17:42:25.641] [INFO] cmd: fd_profile practice
+[2026-10-22 17:42:25.672] [INFO] juggle: fd_juggle 1
+[2026-10-22 17:42:25.704] [INFO] profile: practice
+[2026-10-22 17:42:25.730] [INFO] console> fd_profile practice

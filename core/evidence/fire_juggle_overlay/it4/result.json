@@ -1,0 +1,326 @@
+{
+  "test": "fire_juggle",
+  "core": "Debug",
+  "pass": true,
+  "crash": null,
+  "assertions": [
+    {
+      "step": "focus",
+      "pass": true,
+      "detail": "game window foreground at launch"
+    },
+    {
+      "step": "core_ready",
+      "pass": true,
+      "detail": "ready line seen"
+    },
+    {
+      "step": "address_table_version",
+      "pass": true,
+      "detail": "retail-1.1"
+    },
+    {
+      "step": "assert_log",
+      "pass": true,
+      "detail": "contains 'module juggle: enabled'"
+    },
+    {
+      "step": "assert_log",
+      "pass": true,
+      "detail": "contains 'juggle: ready (fd_juggle)'"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.enabled = 0, want == 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.enabled = 1, want == 1"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.valid = 1, want == 1"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.locked = 0, want == 0"
+    },
+    {
+      "step": "assert_pipe_contains",
+      "pass": true,
+      "detail": "juggle contains 'glyph=- ': 'enabled=1 valid=1 locked=0 dir=-1 glyph=- dist=300 dy=0 safe=-6970,-479,11960 target=-7270,-479,11960 pos=-6970,-479,11960 burn=0 o2=1000 flinch=0 state=3 selfcheck=0 frozen=0 outframes=0 outmiss=0'"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.locked = 1, want == 1"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.dir = 2, want == 2"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.dist = 300, want == 300"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.dir = 3, want == 3"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.dist = 300, want == 300"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.dir = 4, want == 4"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.dist = 300, want == 300"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.dir = 5, want == 5"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.dist = 300, want == 300"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.dir = 6, want == 6"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.dist = 300, want == 300"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.dir = 7, want == 7"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.dist = 300, want == 300"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.dir = 0, want == 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.dist = 300, want == 300"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.dir = 1, want == 1"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.dist = 300, want == 300"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.selfcheck = 0, want == 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.locked = 0, want == 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.locked = 0, want == 0"
+    },
+    {
+      "step": "assert_pipe_contains",
+      "pass": true,
+      "detail": "juggle contains 'glyph=- ': 'enabled=1 valid=1 locked=0 dir=-1 glyph=- dist=300 dy=0 safe=-6970,-479,11960 target=-7270,-479,11960 pos=-6970,-479,11960 burn=0 o2=1000 flinch=0 state=3 selfcheck=0 frozen=0 outframes=0 outmiss=0'"
+    },
+    {
+      "step": "assert_juggle",
+      "pass": true,
+      "detail": "pipe locked=0 dir=-1 dist=30.0 target=[-7270, -479, 11960]; harness: pos=(-697.0,1196.0) spot=(-697.0,1196.0) yaw=0.0 -> angle 90.0 dir [2] dist 30.0; want locked=0"
+    },
+    {
+      "step": "wait_log",
+      "pass": true,
+      "detail": "'juggle: tofire: done' after 2.0 s"
+    },
+    {
+      "step": "assert_log",
+      "pass": true,
+      "detail": "contains 'juggle: tofire: node'"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.locked = 1, want == 1"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.frozen = 1, want == 1"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.burn = 598, want >= 100"
+    },
+    {
+      "step": "assert_juggle",
+      "pass": true,
+      "detail": "pipe locked=1 dir=4 dist=2647.3 target=[1140, 2500, -13240]; harness: pos=(-697.0,1196.0) spot=(144.0,-1324.0) yaw=0.0 -> angle 197.8 dir [4] dist 2647.3; want locked=1"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.locked = 1, want == 1"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.frozen = 1, want == 1"
+    },
+    {
+      "step": "assert_juggle",
+      "pass": true,
+      "detail": "pipe locked=1 dir=4 dist=2647.3 target=[1140, 2500, -13240]; harness: pos=(-697.0,1196.0) spot=(144.0,-1324.0) yaw=0.0 -> angle 197.8 dir [4] dist 2647.3; want locked=1"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.burn = 0, want == 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.locked = 0, want == 0"
+    },
+    {
+      "step": "assert_pipe_contains",
+      "pass": true,
+      "detail": "juggle contains 'glyph=- ': 'enabled=1 valid=1 locked=0 dir=-1 glyph=- dist=300 dy=0 safe=-6970,-479,11960 target=-7270,-479,11960 pos=-6970,-479,11960 burn=0 o2=1000 flinch=0 state=3 selfcheck=0 frozen=0 outframes=0 outmiss=0'"
+    },
+    {
+      "step": "assert_juggle",
+      "pass": true,
+      "detail": "pipe locked=0 dir=-1 dist=30.0 target=[-7270, -479, 11960]; harness: pos=(-697.0,1196.0) spot=(-697.0,1196.0) yaw=0.0 -> angle 90.0 dir [2] dist 30.0; want locked=0"
+    },
+    {
+      "step": "assert_log",
+      "pass": true,
+      "detail": "contains 'juggle: following'"
+    },
+    {
+      "step": "wait_log",
+      "pass": true,
+      "detail": "'juggle: tofire: done' after 2.7 s"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.state = 6, want == 6"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.locked = 1, want == 1"
+    },
+    {
+      "step": "assert_juggle",
+      "pass": true,
+      "detail": "pipe locked=1 dir=2 dist=30.0 target=[1140, 2500, -13240]; harness: pos=(144.0,-1324.0) spot=(144.0,-1324.0) yaw=0.0 -> angle 90.0 dir [2] dist 30.0; want locked=1"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.state = 3, want == 3"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.locked = 0, want == 0"
+    },
+    {
+      "step": "assert_pipe_contains",
+      "pass": true,
+      "detail": "juggle contains 'glyph=- ': 'enabled=1 valid=1 locked=0 dir=-1 glyph=- dist=300 dy=0 safe=-6970,-479,11960 target=-7270,-479,11960 pos=-6970,-479,11960 burn=0 o2=1000 flinch=0 state=3 selfcheck=0 frozen=0 outframes=207 outmiss=0'"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.outframes = 207, want >= 60"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.outmiss = 0, want == 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.selfcheck = 0, want == 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.enabled = 0, want == 0"
+    },
+    {
+      "step": "assert_pipe_stat",
+      "pass": true,
+      "detail": "juggle.enabled = 0, want == 0"
+    },
+    {
+      "step": "no_crash",
+      "pass": true,
+      "detail": "no crash, hang or dialog"
+    },
+    {
+      "step": "log_errors",
+      "pass": true,
+      "detail": "0 ERROR line(s), limit 0"
+    }
+  ],
+  "samples": {
+    "module.exe": "0x400000",
+    "module.genesis": "0x10000000",
+    "screenshot.spawn_following.luma": 53.5,
+    "screenshot.glyph_yaw000_right.luma": 62.3,
+    "screenshot.glyph_yaw045_down-right.luma": 61.9,
+    "screenshot.glyph_yaw090_down.luma": 56.4,
+    "screenshot.glyph_yaw135_down-left.luma": 51.0,
+    "screenshot.glyph_yaw180_left.luma": 55.3,
+    "screenshot.glyph_yaw225_up-left.luma": 60.2,
+    "screenshot.glyph_yaw270_up.luma": 68.9,
+    "screenshot.glyph_yaw315_up-right.luma": 69.0,
+    "screenshot.fire_out_locked.luma": 72.4,
+    "screenshot.cooled_following.luma": 62.2,
+    "screenshot.passed_out.luma": 109.1,
+    "screenshot.respawned.luma": 55.7
+  },
+  "video": null
+}

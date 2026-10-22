@@ -22,8 +22,8 @@ Background: KB `fire-juggling`, `core/evidence/fire_juggling/`.
 | 1 addresses.json entries | **done**: player.f_safe / f_burn / f_flinch / f_o2; build clean (126 entries), addr_verified PASS |
 | 2 Core: textdraw centre anchor + no-background style | **done**: `CENTER` anchor + `STYLE_TEXT_ONLY` (D31); text_panels / text_alpha / hud_player PASS |
 | 3 Feature src/features/juggle.cpp | **done**: feature + Debug hooks; tests/fire_juggle.yaml (first version) PASS; glyph sheet `glyphs.png` for owner review |
-| 4 Suite test tests/fire_juggle.yaml | next |
-| 5 Suite, docs, version, commit, owner report | |
+| 4 Suite test tests/fire_juggle.yaml | **done**: real fire + pass-out, harness-side direction check; PASS (run 2026-10-22-173943, `it4/`) |
+| 5 Suite, docs, version, commit, owner report | next |
 
 ## Log
 
@@ -107,3 +107,38 @@ Background: KB `fire-juggling`, `core/evidence/fire_juggling/`.
   - Then assert: locked after burning with S frozen; stepping out keeps the lock until
     burn < 0.1, then "-"; dir/dist vs the harness's own computation (pipe pos / target /
     yaw); the arrow through the pass-out (state 6); "-" after respawn; selfcheck 0.
+- it4 (step 4, done):
+  - addresses.json: `fire.center` (+0x7C), field entry, 127 entries.
+  - juggle.cpp, Debug only:
+    - `fd_dbg_tofire [burn]`: walks the kind-6 entities, teleports above each fire
+      centre (+30 y) for up to 30 frames until the burn meter rises, burns to the
+      target, then returns to the start. A target >= 1 stays until passed out. It
+      moves to the next node after 90 frames without a rise.
+    - Pipe keys `frozen` (locked and the spot unchanged since the lock began),
+      `outframes` / `outmiss` (passed-out frames, and those without an arrow or "o").
+  - Harness:
+    - `wait_log {contains, timeout}`: waits for one more occurrence of a log line.
+    - `assert_juggle {locked}`: reads pos, the safe spot and yaw from memory itself,
+      computes T, the distance and the sector with the measured view axes, and checks
+      the pipe's dir (1-degree edge tolerance), dist (+-1 u) and target.
+  - tests/fire_juggle.yaml PASS, run 2026-10-22-173943 (evidence `it4/`):
+    - spawn "-" (assert_juggle locked 0);
+    - `fd_dbg_tofire 0.6` done after 2.0 s, found the node at (144, 220, -1324);
+    - back at the spawn: locked, frozen, burn 0.598, arrow "down" 2647.3 u, matching
+      the harness (angle 197.8);
+    - after 2.5 s still locked and frozen;
+    - after 6 more s: burn 0, "-", log "juggle: following";
+    - `fd_dbg_tofire 2` passes out after 2.7 s: state 6, locked, arrow "right" 30.0 u
+      (the player stands on the spot), matching the harness;
+    - after 7 s: state 3, "-", outframes 207, outmiss 0, selfcheck 0;
+    - the O2 glyph checks (8 sectors) and the run-profile refusal still PASS.
+  - Screenshots: `it4/fire_out_locked.png` ("down" + "2647u ^"), `it4/passed_out.png`
+    ("right" + "30u", in the burn tint), cooled_following, respawned, spawn_following.
+- Next (it5, step 5):
+  - full suite;
+  - QUICKSTART: feature row, known gaps (9 px text without outline; the arrow aims
+    at the spot -30 X before the floor search; jumping doesn't show the lock), and
+    module-author notes for textdraw CENTER / STYLE_TEXT_ONLY;
+  - DECISIONS: the lock gate = the game's own gate, airborne excluded; the self-check
+    margin; the test hooks;
+  - PROGRESS it entry; VERSION 0.18.0; commit, push, owner report, stop the loop.
