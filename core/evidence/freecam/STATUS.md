@@ -21,7 +21,7 @@ Owner request (2026-10-22): a practice-only pause with a free-flying camera.
 | 2 addresses.json entries | **done**: 10 entries, 137 total; addr_verified PASS |
 | 3 Core: sim-pause service + camera override | **done**: `pause` service, camera override, textdraw HideWhilePaused; pause_service PASS 2/2; regressions PASS |
 | 4 Feature src/features/freecam.cpp | **done**: fd_pause / fd_pause_toggle (key P), free camera; tests/freecam.yaml PASS (fc4b) |
-| 5 Suite test tests/freecam.yaml | pending |
+| 5 Suite test tests/freecam.yaml | **done**: sensitivity, arrow hidden, Esc blocked; PASS (fc5b) |
 | 6 Suite, docs, version, commit, owner report | pending |
 
 ## Log
@@ -252,4 +252,25 @@ Owner request (2026-10-22): a practice-only pause with a free-flying camera.
   - Check the fd_juggle arrow is hidden while paused (screenshot / textdraw pipe).
   - Confirm keys pressed during the pause have no effect after it (W + jump: player
     position unchanged after resume).
+- it5 (step 5, done):
+  - **Sensitivity while running** (3 s): clock +, timer -, victims sum changed (the
+    roaming victim), fire centre sum changed (spreading fires; 94-101 fires seen). So the
+    15 "unchanged while paused" checks can fail.
+  - **fd_juggle arrow:** drawn while running, not drawn while paused (still visible=1),
+    drawn again after resume. New Debug pipe `textdraw <panel>` (drawn on the last
+    frame).
+  - **Keys during the pause:** W, jump (right button) and **Esc**, all released before
+    resume. Then the player is unchanged in x/y/z, `game.state` is 1 and the arrow is
+    back.
+  - **Bug found (run fc5):** Esc while paused opened the in-game menu.
+    - Esc is a window message: WndProc -> 0x00498FC0 -> GameSession::OnKey 0x004295F0.
+      The input-block byte only gates DirectInput actions.
+    - Fix: the pause service also hooks `session.on_key` (new entry, 139 total; group
+      "pause", on only while paused) and drops key-downs; key-ups pass.
+    - D34 updated.
+  - Harness: `assert_pipe_stat changed: true`.
+  - **freecam PASS (fc5b).**
+- Owner request mid-loop (2026-10-22): bind every feature to a letter key (no F keys) and
+  a quick-reference doc (feature, console toggle, key). Done as its own commit before
+  step 6.
 

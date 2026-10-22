@@ -14,8 +14,10 @@ namespace {
 using addr::Id;
 using TickFn = void(__fastcall*)(void* session, void* edx);    // thiscall, no stack args
 using ClockFn = void(__fastcall*)(void* subtimer, void* edx);  // thiscall, no stack args
+using OnKeyFn = void(__fastcall*)(void* session, void* edx, int key, int down);  // thiscall, RET 8
 
 TickFn g_origTick = nullptr;
+OnKeyFn g_origOnKey = nullptr;
 bool g_ok = false, g_active = false;
 uintptr_t g_subtimer = 0;  // the subtimer this pause paused (0 = none)
 uint32_t g_frames = 0;
@@ -24,7 +26,7 @@ LONG g_frameTicks = 0;  // 1/60 s in QPC ticks (32-bit division: no 64-bit helpe
 
 const Id kNeeds[] = {Id::sim_tick_subsystems, Id::clock_pause,     Id::clock_resume,
                      Id::clock_game_timer,    Id::clock_real_timer, Id::clock_selector,
-                     Id::controls_block_input, Id::console_state, Id::game_state};  // + field clock.f_paused
+                     Id::controls_block_input, Id::console_state, Id::game_state, Id::session_on_key};  // + field clock.f_paused
 
 bool SetImpl(bool on, const char* why);
 
@@ -38,6 +40,14 @@ void __fastcall TickDetour(void* session, void* edx) {
         SetImpl(false, "level change");
     }
     g_origTick(session, edx);
+}
+
+// Window-message keys (Esc opens the in-game menu) bypass the input-block byte, which only
+// gates DirectInput actions: key-downs to the game session are dropped while paused, key-ups
+// pass so the game's own key latches still clear (freecam run fc5: Esc opened the menu).
+void __fastcall OnKeyDetour(void* session, void* edx, int key, int down) {
+    if (g_active && (down & 0xFF)) return;
+    g_origOnKey(session, edx, key, down);
 }
 
 // The subtimer GameClock::Tick runs on, chosen as MainWindow::RunMessageLoop does on alt-tab.
@@ -107,7 +117,9 @@ bool Init() {
             return false;
         }
     if (!hooks::Create("pause", Id::sim_tick_subsystems, reinterpret_cast<void*>(&TickDetour),
-                       reinterpret_cast<void**>(&g_origTick)))
+                       reinterpret_cast<void**>(&g_origTick)) ||
+        !hooks::Create("pause", Id::session_on_key, reinterpret_cast<void*>(&OnKeyDetour),
+                       reinterpret_cast<void**>(&g_origOnKey)))
         return false;
     hooks::OnFrameBegin(FrameBegin);
     hooks::OnLevelLoad(OnLevel);

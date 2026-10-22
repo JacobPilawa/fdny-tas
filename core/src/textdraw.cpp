@@ -8,6 +8,7 @@
 #include "hooks.h"
 #include "log.h"
 #include "pause.h"
+#include "testpipe.h"
 
 namespace fdcore::textdraw {
 namespace {
@@ -52,6 +53,7 @@ struct Panel {
     bool translucent;   // how it was drawn last frame (fd_textdraw, logged on change)
     int x, y;           // last draw position
     bool reported, failed;
+    unsigned long drawnFrame;  // last frame it was drawn (Debug pipe `textdraw <name>`)
 };
 constexpr int kMaxPanels = 8;
 Panel g_panels[kMaxPanels] = {};  // constant-initialised: no CRT runs constructors (rule R7)
@@ -155,6 +157,7 @@ void Draw() {
                       translucent ? "translucent" : "opaque");
         }
         p.translucent = translucent;
+        p.drawnFrame = g_frame;
     }
 }
 
@@ -237,6 +240,22 @@ bool Init() {
     cmd::RegisterCommand("fd_textdraw", "list the on-screen text panels: shown, size, position, translucent/opaque",
                          CmdInfo);
     hooks::OnFrameEndLate(Draw);  // after every module updated its panels
+#ifdef FDCORE_DEBUG
+    // Test hook: `textdraw <panel name>`: was it drawn on the last frame (or the one before:
+    // the pipe thread may read mid-frame)?
+    testpipe::Register("textdraw", [](const char* args, char* resp, int cap) {
+        (void)cap;
+        while (*args == ' ') ++args;
+        for (int i = 0; i < g_nPanels; ++i) {
+            const Panel& p = g_panels[i];
+            if (lstrcmpA(p.name, args) != 0) continue;
+            wsprintfA(resp, "found=1 visible=%d pause_hidden=%d drawn=%d", p.visible, p.pauseHidden,
+                      p.drawnFrame && g_frame - p.drawnFrame <= 1);
+            return;
+        }
+        wsprintfA(resp, "found=0");
+    });
+#endif
     log::Info("textdraw: ready");
     return true;
 }

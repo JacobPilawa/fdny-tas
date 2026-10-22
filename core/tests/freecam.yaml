@@ -24,11 +24,16 @@ steps:
   - console: "fd_juggle 1"
   - focus: {}
   - assert_pipe_stat: {cmd: freecam, key: paused, equals: 0}
-  # running: the clock and the mission timer move (the snapshot is live)
+  # running: the snapshot is live, so "unchanged while paused" below means something: the
+  # clock, the mission timer, the roaming victim and the spreading fires all change
   - sample_pipe: {cmd: freecam, as: run0}
-  - wait_s: 2
-  - assert_pipe_stat: {cmd: freecam, key: clock, min: 1500, since: run0}
-  - assert_pipe_stat: {cmd: freecam, key: time, max: -15, since: run0}
+  - wait_s: 3
+  - assert_pipe_stat: {cmd: freecam, key: clock, min: 2500, since: run0}
+  - assert_pipe_stat: {cmd: freecam, key: time, max: -25, since: run0}
+  - assert_pipe_stat: {cmd: freecam, key: victims, changed: true, since: run0}
+  - assert_pipe_stat: {cmd: freecam, key: fire_c, changed: true, since: run0}
+  # the fire-juggling arrow (view-relative) is drawn while running ...
+  - assert_pipe_stat: {cmd: textdraw juggle, key: drawn, equals: 1}
   - screenshot: running
   # pause with the default key
   - key: {key: p, hold: 0.1}
@@ -59,6 +64,9 @@ steps:
   - assert_pipe_stat: {cmd: freecam, key: fire_i, equals: 0, since: p0}
   - assert_pipe_stat: {cmd: freecam, key: fire_m, equals: 0, since: p0}
   - assert_pipe_stat: {cmd: freecam, key: frames, min: 100}
+  # ... and hidden while paused (D35), though still switched on
+  - assert_pipe_stat: {cmd: textdraw juggle, key: drawn, equals: 0}
+  - assert_pipe_stat: {cmd: textdraw juggle, key: visible, equals: 1}
   # W for ~1 s: speed x key time along the view (rate within 1 %, direction within 0.1 %)
   - pipe: "freecam reset"
   - key: {key: w, hold: 1.0}
@@ -97,10 +105,13 @@ steps:
   - assert_pipe_stat: {cmd: freecam, key: px, equals: 0, since: p0}
   - assert_pipe_stat: {cmd: freecam, key: pz, equals: 0, since: p0}
   - assert_pipe_stat: {cmd: freecam, key: clock, equals: 0, since: p0}
-  # keys pressed during the pause don't reach the game after it (W and jump, released)
+  # keys pressed during the pause don't reach the game after it: W, jump (right button)
+  # and Esc (the in-game menu), all released before the resume
   - key: {key: w, hold: 0.5}
   - rclick: {}
+  - key: {key: esc, hold: 0.1}
   - wait_s: 0.3
+  - screenshot: after_esc_paused
   # resume with the key: the view is the player's again, the timer counts, a normal delta
   - key: {key: p, hold: 0.1}
   - wait_pipe: {cmd: freecam, key: paused, equals: 0, timeout: 3}
@@ -117,7 +128,10 @@ steps:
   - wait_s: 3
   - assert_pipe_stat: {cmd: freecam, key: time, min: -40, max: -20, since: r0}
   - assert_pipe_stat: {cmd: freecam, key: px, equals: 0, since: p0}
+  - assert_pipe_stat: {cmd: freecam, key: py, equals: 0, since: p0}
   - assert_pipe_stat: {cmd: freecam, key: pz, equals: 0, since: p0}
+  - assert_mem: {name: game.state, equals: 1}
+  - assert_pipe_stat: {cmd: textdraw juggle, key: drawn, equals: 1}
   - screenshot: resumed
   # a level load ends a pause (and fd_pause goes back to 0)
   - console: "fd_pause 1"

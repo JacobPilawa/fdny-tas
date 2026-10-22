@@ -290,13 +290,15 @@ class Run:
             else:
                 self.record(kind, arg["absent"] not in reply, f"{arg['cmd']} lacks {arg['absent']!r}: {reply[:200]!r}")
         elif kind == "assert_pipe_stat":
-            # {cmd, key, min|max|equals, since: <sample label>} numeric field of a pipe reply
-            # (min and max may be combined)
+            # {cmd, key, min|max|equals|changed, since: <sample label>} numeric field of a pipe
+            # reply (min and max may be combined; changed: true = differs from the sample)
             reply = dict(kv.split("=", 1) for kv in pipe.call(arg["cmd"]).split() if "=" in kv)
             val = int(reply.get(arg["key"], "-1"))
             base = int(self.samples.get(arg["since"], {}).get(arg["key"], 0)) if arg.get("since") else 0
             d = val - base
-            if "equals" in arg:
+            if arg.get("changed"):
+                ok, want = d != 0, "changed"
+            elif "equals" in arg:
                 ok, want = d == int(arg["equals"]), f"== {arg['equals']}"
             else:
                 ok = ("min" not in arg or d >= int(arg["min"])) and ("max" not in arg or d <= int(arg["max"]))

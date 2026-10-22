@@ -109,6 +109,9 @@ later session might "simplify" away; change one only with the owner's approval
     - Its 60 FPS Sleep cap is in the paused `ComputeFrameDelta`, so the service caps paused frames at ~60 fps itself.
     - The game's alt-tab Resume would un-pause the subtimer, so it is paused again each paused frame.
   - **Input:** `controls.block_input` is held while paused. It only gates the game's action queries; polling and the mouse sums go on. On resume it is released unless the console is open.
+    - Window-message keys bypass it: Esc while paused opened the in-game menu (freecam run fc5). So the service also hooks `GameSession::OnKey` (`session.on_key`, reached from WM_KEYDOWN after the console) and drops key-downs while paused.
+    - Key-ups pass, so the game's Esc latch still clears.
+    - The console and FDNYCore binds come before it, so they still work.
   - **Hook state:** the hook is enabled only while paused (no cost otherwise; group toggle).
   - **Ending a pause:** leaving the level (game state != 1, a level load) ends it.
   - **Camera:** a transform set on the render camera at frame start reads back but is rewritten inside the render before the world is drawn (p2-p4). Set on the camera passed to `geEngine_RenderWorld` it shows (p5). gfx owns that hook, so it calls `camera::BeforeWorldRender` (core to core). Clearing the override hands the camera back to the game's per-frame set.
