@@ -21,8 +21,8 @@ Background: KB `fire-juggling`, `core/evidence/fire_juggling/`.
 | 0 Preconditions (core_loads) | **done**: PASS (session on console) |
 | 1 addresses.json entries | **done**: player.f_safe / f_burn / f_flinch / f_o2; build clean (126 entries), addr_verified PASS |
 | 2 Core: textdraw centre anchor + no-background style | **done**: `CENTER` anchor + `STYLE_TEXT_ONLY` (D31); text_panels / text_alpha / hud_player PASS |
-| 3 Feature src/features/juggle.cpp | next |
-| 4 Suite test tests/fire_juggle.yaml | |
+| 3 Feature src/features/juggle.cpp | **done**: feature + Debug hooks; tests/fire_juggle.yaml (first version) PASS; glyph sheet `glyphs.png` for owner review |
+| 4 Suite test tests/fire_juggle.yaml | next |
 | 5 Suite, docs, version, commit, owner report | |
 
 ## Log
@@ -59,3 +59,51 @@ Background: KB `fire-juggling`, `core/evidence/fire_juggling/`.
   - Glyph screenshot: if needed, a probe test in tests/probes/ that loads bank, burns
     via the step-4 hook, and turns the view; or a Debug-only command that forces each
     direction for the screenshot.
+- it3 (step 3, done):
+  - **Yaw convention, measured live** (`yaw_probe.log`, probes/yaw_probe.py):
+    - W moves (sin yaw, cos yaw) in world (x, z): yaw 0 -> +Z, 90 -> +X, 180 -> -Z,
+      270 -> -X.
+    - D (strafe right) moves (-cos yaw, sin yaw).
+  - **src/features/juggle.cpp**, order 75, kNeeds {player_object}:
+    - cvar fd_juggle (default 0), practice-only;
+    - textdraw panel "juggle": CENTER 0,30, STYLE_TEXT_ONLY, white bold;
+    - OnFrameEnd: locked = flinch || burn >= 0.1 || O2 <= 0.5 || state 6; T = S - 30 X;
+      horizontal distance; dy;
+    - direction: 8 sectors without trig (tan 22.5 test) on (forward, right) from x87
+      fsincos of the yaw;
+    - "o" under 16 u, " ^" / " v" beyond +-48 u;
+    - log lines "juggle: locked / following (...)".
+  - **Self-check counter**: the spot moved on a frame after a *strictly* locked one
+    (burn >= 0.11, since Think cools by 0.1*dt <= 0.01 before comparing). The end of a
+    pass-out is exempt (ResetLocomotionState writes the checkpoint), and so is a new
+    player object.
+  - **Debug-only hooks (R6):**
+    - `fd_dbg_setpos x y z [yaw [o2]]`, applied at frame end like fd_tp_load (D18);
+    - `fd_dbg_o2 v`;
+    - pipe `juggle`: enabled / valid / locked / dir / glyph / dist (tenths) / dy / safe /
+      target / pos / burn (x1000) / o2 (x1000) / flinch / state / selfcheck. The key is
+      "enabled", not "on": YAML reads `on` as true.
+  - **Lessons:**
+    - A console step costs ~3 s, because it is typed.
+    - The spike's fire coordinates (144, 250, -1324) are not reliable: fire nodes move
+      along their paths, so some stints did little or no damage (run 172616).
+    - O2 refills ~0.1/s on clean ground, so O2 0.45 unlocked within 0.5 s. Each step now
+      sets O2 0.1.
+  - **tests/fire_juggle.yaml** (first version) PASS, run 2026-10-22-173220:
+    - off by default; "-" at spawn;
+    - O2 lock on clean ground (the spot freezes where the player stands, so T is exactly
+      30 u to -X): 8 yaws x 45 deg each give the computed sector (0 right, 45 down-right,
+      90 down, 135 down-left, 180 left, 225 up-left, 270 up, 315 up-right) and dist 300
+      (tenths);
+    - selfcheck 0; unlocked after O2 1;
+    - refused under fd_profile run.
+  - `glyphs.png`: crops of the 9 states, enlarged, **for owner review**. The text uses
+    the shared 9 px font (fd_text_size); no outline.
+- Next (it4, step 4): real fire.
+  - Add a Debug hook that finds a burning fire node live: e.g. `fd_dbg_tofire`, which
+    walks kind-6 entities and teleports into the nearest FireRescueEnt centre (+0x7C;
+    needs an addresses.json field entry fire.center) whose touch damages, or tries nodes
+    until the burn rises.
+  - Then assert: locked after burning with S frozen; stepping out keeps the lock until
+    burn < 0.1, then "-"; dir/dist vs the harness's own computation (pipe pos / target /
+    yaw); the arrow through the pass-out (state 6); "-" after respawn; selfcheck 0.

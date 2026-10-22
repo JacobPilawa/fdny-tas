@@ -1,0 +1,92 @@
+name: fire_juggle
+# fd_juggle (core/evidence/fire_juggle_overlay): the fire-juggling arrow. On bank with
+# the RescueBot off: "-" while the safe spot (+0x3400) follows the player; a real burn
+# or O2 <= 0.5 (Debug-only test hooks fd_dbg_setpos / fd_dbg_o2) locks it, and the arrow then points at the landing point T = spot - 30 X, relative to
+# the view. The glyph set: the view is turned in 45-degree steps (yaw set by the hook)
+# while the lock holds. Refused under fd_profile run.
+pre_files:
+  - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
+  - {src: null, dst: FDNYCore.cfg}
+setup: load_training
+record: false
+steps:
+  - assert_log: {contains: "module juggle: enabled"}
+  - assert_log: {contains: "juggle: ready (fd_juggle)"}
+  - console: "fd_watermark 0"
+  - console: "fd_rescuebot 0"
+  - console: "loadmap bank"
+  - wait_s: 40
+  # off by default
+  - assert_pipe_stat: {cmd: juggle, key: enabled, equals: 0}
+  - console: "fd_juggle 1"
+  - wait_s: 1
+  - assert_pipe_stat: {cmd: juggle, key: enabled, equals: 1}
+  - assert_pipe_stat: {cmd: juggle, key: valid, equals: 1}
+  - assert_pipe_stat: {cmd: juggle, key: locked, equals: 0}
+  - assert_pipe_contains: {cmd: juggle, contains: "glyph=- "}
+  - screenshot: spawn_following
+  # Glyph set with an exact answer per view: O2 <= 0.5 is one of the game's own locks,
+  # so with O2 at 0.1 on clean ground the spot freezes where the player stands and
+  # T is exactly 30 u to -X (O2 refills ~0.1/s, so each step sets it again). Turning the
+  # view (yaw set by the hook) must give the
+  # computed direction: forward = (sin yaw, cos yaw), right = (-cos yaw, sin yaw).
+  - console: "fd_dbg_setpos -697 -47 1196 0"
+  - wait_s: 1
+  - console: "fd_dbg_setpos -697 -47 1196 0 0.1"
+  - wait_s: 0.5
+  - assert_pipe_stat: {cmd: juggle, key: locked, equals: 1}
+  - console: "fd_dbg_setpos -697 -47 1196 0 0.1"
+  - wait_s: 0.4
+  - assert_pipe_stat: {cmd: juggle, key: dir, equals: 2}  # right
+  - assert_pipe_stat: {cmd: juggle, key: dist, equals: 300}  # tenths: 30 u
+  - screenshot: glyph_yaw000_right
+  - console: "fd_dbg_setpos -697 -47 1196 45 0.1"
+  - wait_s: 0.4
+  - assert_pipe_stat: {cmd: juggle, key: dir, equals: 3}  # down-right
+  - assert_pipe_stat: {cmd: juggle, key: dist, equals: 300}  # tenths: 30 u
+  - screenshot: glyph_yaw045_down-right
+  - console: "fd_dbg_setpos -697 -47 1196 90 0.1"
+  - wait_s: 0.4
+  - assert_pipe_stat: {cmd: juggle, key: dir, equals: 4}  # down
+  - assert_pipe_stat: {cmd: juggle, key: dist, equals: 300}  # tenths: 30 u
+  - screenshot: glyph_yaw090_down
+  - console: "fd_dbg_setpos -697 -47 1196 135 0.1"
+  - wait_s: 0.4
+  - assert_pipe_stat: {cmd: juggle, key: dir, equals: 5}  # down-left
+  - assert_pipe_stat: {cmd: juggle, key: dist, equals: 300}  # tenths: 30 u
+  - screenshot: glyph_yaw135_down-left
+  - console: "fd_dbg_setpos -697 -47 1196 180 0.1"
+  - wait_s: 0.4
+  - assert_pipe_stat: {cmd: juggle, key: dir, equals: 6}  # left
+  - assert_pipe_stat: {cmd: juggle, key: dist, equals: 300}  # tenths: 30 u
+  - screenshot: glyph_yaw180_left
+  - console: "fd_dbg_setpos -697 -47 1196 225 0.1"
+  - wait_s: 0.4
+  - assert_pipe_stat: {cmd: juggle, key: dir, equals: 7}  # up-left
+  - assert_pipe_stat: {cmd: juggle, key: dist, equals: 300}  # tenths: 30 u
+  - screenshot: glyph_yaw225_up-left
+  - console: "fd_dbg_setpos -697 -47 1196 270 0.1"
+  - wait_s: 0.4
+  - assert_pipe_stat: {cmd: juggle, key: dir, equals: 0}  # up
+  - assert_pipe_stat: {cmd: juggle, key: dist, equals: 300}  # tenths: 30 u
+  - screenshot: glyph_yaw270_up
+  - console: "fd_dbg_setpos -697 -47 1196 315 0.1"
+  - wait_s: 0.4
+  - assert_pipe_stat: {cmd: juggle, key: dir, equals: 1}  # up-right
+  - assert_pipe_stat: {cmd: juggle, key: dist, equals: 300}  # tenths: 30 u
+  - screenshot: glyph_yaw315_up-right
+  - assert_pipe_stat: {cmd: juggle, key: selfcheck, equals: 0}
+  - console: "fd_dbg_o2 1"
+  - wait_s: 1
+  - assert_pipe_stat: {cmd: juggle, key: locked, equals: 0}
+  # practice-only
+  - console: "fd_profile run"
+  - wait_s: 1
+  - assert_pipe_stat: {cmd: juggle, key: enabled, equals: 0}
+  - console: "fd_juggle 1"
+  - wait_s: 0.5
+  - assert_pipe_stat: {cmd: juggle, key: enabled, equals: 0}
+  - console: "fd_profile practice"
+expect:
+  no_crash: true
+  log_errors: 0

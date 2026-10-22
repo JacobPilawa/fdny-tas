@@ -1,0 +1,328 @@
+// Tests: tests/fire_juggle.yaml
+// juggle feature (owner request 2026-10-22, core/evidence/fire_juggle_overlay): the
+// fire-juggling helper. When the player passes out (fire or O2) while carrying a
+// survivor, Verb_Reset copies the "last safe spot" player.f_safe (+0x3400) into the
+// player, and DropAtPlayer puts the survivor there, -30 on X, on the floor below
+// (research.db KB fire-juggling; core/evidence/fire_juggling). Think writes that spot
+// only while the flinch flags are clear, burn < 0.1, the player is on the ground, O2 >
+// 0.5 and they aren't passed out, so a fire hit "locks" it.
+//
+// fd_juggle 1 shows, 30 px below the screen centre with no background:
+//   "-"          the spot is still following the player (not locked);
+//   an arrow     locked: points at the landing point T = (S.x - 30, S.y, S.z), relative
+//                to the view (up = straight ahead), 8 directions, with the horizontal
+//                distance below ("120u", plus " ^" / " v" when T is over 48 u above / below);
+//   "o"          locked and within 16 u.
+// Locked = flinch || burn >= 0.1 || O2 <= 0.5 || passed out (state 6). Airborne alone
+// doesn't count (owner: no flicker on jumps), although Think doesn't write in the air.
+// Read in OnFrameEnd, i.e. after Think and after that frame's fire damage
+// (round2_frame_order.txt), so it predicts the next Think.
+// View yaw (live, evidence/fire_juggle_overlay/yaw_probe.log): forward = (sin yaw, cos yaw)
+// in world (x, z), strafe right = (-cos yaw, sin yaw).
+#include <windows.h>
+
+#include "addr.h"
+#include "cmd.h"
+#include "console.h"
+#include "hooks.h"
+#include "log.h"
+#include "modules.h"
+#include "state.h"
+#include "testpipe.h"
+#include "textdraw.h"
+
+namespace fdcore::juggle {
+namespace {
+
+using addr::Id;
+
+constexpr float kDropDx = -30.0f;     // Verb_Reset: the survivor ends 30 u to -X of the spot
+constexpr float kBurnLock = 0.1f;     // Think: write only while burn (after cooling) < 0.1
+constexpr float kBurnStrict = 0.11f;  // self-check margin: cooling is 0.1*dt, dt <= 0.1 s
+constexpr float kO2Lock = 0.5f;       // Think: write only while O2 > 0.5
+constexpr int32_t kPassedOut = 6;     // player.f_state
+constexpr float kNear = 16.0f;        // closer than this: "o"
+constexpr float kFloorStep = 48.0f;   // SnapToFloor lifts 48 u: beyond that it's another floor
+constexpr float kTan22 = 0.41421356f; // tan(22.5 deg): 8 sectors of 45 deg
+
+// 8 directions clockwise from straight ahead, then "o" (near), then "-" (not locked).
+constexpr int kDirNear = 8, kDirNone = -1;
+#ifdef FDCORE_DEBUG
+const char* const kDirName[] = {"up", "up-right", "right", "down-right", "down", "down-left", "left", "up-left"};
+#endif
+// Two lines of three characters each, ASCII only.
+const char* const kGlyph[8][2] = {
+    {" ^ ", " | "},    // up
+    {"  ^", " / "},    // up-right
+    {"-->", "   "},    // right
+    {" \\ ", "  v"},   // down-right
+    {" | ", " v "},    // down
+    {" / ", "v  "},    // down-left
+    {"<--", "   "},    // left
+    {"^  ", " \\ "},   // up-left
+};
+
+struct View {  // what the panel and the pipe show (game thread writes, pipe thread reads)
+    bool on, valid, locked;
+    float safe[3], target[3], pos[3];
+    float dist, dy, burn, o2;
+    uint32_t flinch;
+    int32_t state;
+    int dir;
+    uint32_t selfCheck;  // frames where the spot moved although it was strictly locked
+};
+View g_view = {};
+CRITICAL_SECTION g_lock;
+int g_panel = -1;
+
+// Previous frame, for the self-check.
+float g_prevSafe[3] = {};
+bool g_prevStrict = false, g_prevValid = false;
+int32_t g_prevState = 0;
+uintptr_t g_prevPlayer = 0;
+
+bool On(const cmd::Cvar& v) { return v.value[0] != '0'; }
+cmd::Cvar g_fdJuggle = {"fd_juggle", "0",
+                        "1 = fire-juggling arrow: where a carried survivor lands if you pass out now", false, true,
+                        nullptr, {0}};
+
+float Sqrt(float x) {
+    float r;
+    __asm__("fsqrt" : "=t"(r) : "0"(x));
+    return r;
+}
+void SinCos(float deg, float* s, float* c) {
+    const float rad = deg * 0.017453292f;
+    __asm__("fsincos" : "=t"(*c), "=u"(*s) : "0"(rad));
+}
+
+template <typename T>
+bool At(uintptr_t base, Id field, T* out) {
+    return addr::SafeRead(base + addr::Field(field), out, sizeof(T));
+}
+
+uintptr_t Player() {
+    uintptr_t slot;
+    uint32_t player = 0;
+    if (addr::Resolve(Id::player_object, &slot)) addr::SafeRead(slot, &player, 4);
+    return player;
+}
+
+// Sector of (forward f, right r): 0 = ahead, clockwise in 45-degree steps.
+int Sector(float f, float r) {
+    const float af = f < 0 ? -f : f, ar = r < 0 ? -r : r;
+    if (ar <= kTan22 * af) return f >= 0 ? 0 : 4;
+    if (af <= kTan22 * ar) return r >= 0 ? 2 : 6;
+    if (f >= 0) return r >= 0 ? 1 : 7;
+    return r >= 0 ? 3 : 5;
+}
+
+long Round(float v) { return static_cast<long>(v + (v >= 0 ? 0.5f : -0.5f)); }
+
+void Draw(const View& v) {
+    if (g_panel < 0) return;
+    if (!v.on || !v.valid) {
+        textdraw::Show(g_panel, false);
+        return;
+    }
+    char dist[24] = "";
+    const char* lines[3];
+    int n = 0;
+    if (!v.locked) {
+        lines[n++] = " - ";
+    } else if (v.dir == kDirNear) {
+        lines[n++] = " o ";
+    } else {
+        lines[n++] = kGlyph[v.dir][0];
+        lines[n++] = kGlyph[v.dir][1];
+    }
+    if (v.locked) {
+        wsprintfA(dist, "%ldu%s", Round(v.dist), v.dy > kFloorStep ? " ^" : v.dy < -kFloorStep ? " v" : "");
+        lines[n++] = dist;
+    }
+    // Centre the 3-column glyph over the distance line (monospace grid, panel centred).
+    static char pad[3][24];
+    const int width = lstrlenA(dist) > 3 ? lstrlenA(dist) : 3;
+    for (int i = 0; i < n; ++i) {
+        const int len = lstrlenA(lines[i]);
+        const int left = lines[i] == dist ? (width - len) / 2 : (width - 3) / 2;
+        int o = 0;
+        for (; o < left; ++o) pad[i][o] = ' ';
+        lstrcpynA(pad[i] + o, lines[i], 24 - o);
+        lines[i] = pad[i];
+    }
+    textdraw::SetLines(g_panel, lines, n);
+    textdraw::Show(g_panel, true);
+}
+
+#ifdef FDCORE_DEBUG
+void ApplySetPos();
+#endif
+
+void FrameEnd() {
+#ifdef FDCORE_DEBUG
+    ApplySetPos();
+#endif
+    const state::State& s = state::Current();
+    View v = {};
+    v.on = On(g_fdJuggle);
+    v.dir = kDirNone;
+    const uintptr_t pl = s.gameState == 1 && s.playerValid ? Player() : 0;
+    bool strict = false;
+    if (pl && At(pl, Id::player_f_safe, &v.safe) && At(pl, Id::player_f_pos, &v.pos) &&
+        At(pl, Id::player_f_burn, &v.burn) && At(pl, Id::player_f_o2, &v.o2) &&
+        At(pl, Id::player_f_flinch, &v.flinch) && At(pl, Id::player_f_state, &v.state)) {
+        v.valid = true;
+        const bool out = v.state == kPassedOut;
+        v.locked = v.flinch != 0 || v.burn >= kBurnLock || v.o2 <= kO2Lock || out;
+        strict = v.flinch != 0 || v.burn >= kBurnStrict || v.o2 <= kO2Lock || out;
+        v.target[0] = v.safe[0] + kDropDx, v.target[1] = v.safe[1], v.target[2] = v.safe[2];
+        const float dx = v.target[0] - v.pos[0], dz = v.target[2] - v.pos[2];
+        v.dist = Sqrt(dx * dx + dz * dz);
+        v.dy = v.target[1] - v.pos[1];
+        if (v.locked) {
+            float sn, cs;
+            SinCos(s.yaw, &sn, &cs);
+            const float f = dx * sn + dz * cs;    // along forward (sin, cos)
+            const float r = -dx * cs + dz * sn;   // along strafe right (-cos, sin)
+            v.dir = v.dist < kNear ? kDirNear : Sector(f, r);
+        }
+    }
+    // Self-check: the spot must not move on a frame after a strictly locked one. The end
+    // of a pass-out is exempt (ResetLocomotionState writes the checkpoint there), as is
+    // a new player object (level load).
+    uint32_t bad = 0;
+    if (v.valid && g_prevValid && pl == g_prevPlayer && g_prevStrict && g_prevState != kPassedOut &&
+        (v.safe[0] != g_prevSafe[0] || v.safe[1] != g_prevSafe[1] || v.safe[2] != g_prevSafe[2])) {
+        bad = 1;
+        log::Warn("juggle: safe spot moved while locked (%ld %ld %ld -> %ld %ld %ld)", Round(g_prevSafe[0]),
+                  Round(g_prevSafe[1]), Round(g_prevSafe[2]), Round(v.safe[0]), Round(v.safe[1]),
+                  Round(v.safe[2]));
+    }
+    g_prevValid = v.valid, g_prevStrict = strict, g_prevState = v.state, g_prevPlayer = pl;
+    __builtin_memcpy(g_prevSafe, v.safe, sizeof(g_prevSafe));
+
+    EnterCriticalSection(&g_lock);
+    v.selfCheck = g_view.selfCheck + bad;
+    if (v.locked != g_view.locked && v.on && v.valid)
+        log::Info("juggle: %s (burn %ld/1000, o2 %ld/100, flinch %lx, state %ld)", v.locked ? "locked" : "following",
+                  Round(v.burn * 1000), Round(v.o2 * 100), static_cast<unsigned long>(v.flinch),
+                  static_cast<long>(v.state));
+    g_view = v;
+    LeaveCriticalSection(&g_lock);
+    Draw(v);
+}
+
+void OnToggle(cmd::Cvar& c) { log::Info("juggle: fd_juggle %s", c.value); }
+
+#ifdef FDCORE_DEBUG
+// Test hook (Debug builds only): `fd_dbg_setpos x y z [yaw [o2]]` moves the player at the
+// next frame end, like fd_tp_load (position, zeroed motion; D18), so tests can stand in a
+// fire; o2 (0..1) sets the player's O2 in the same frame (O2 <= 0.5 is a lock; it refills
+// at about 0.1/s on clean ground).
+struct SetPos {
+    bool pending, yawToo, o2Too;
+    float pos[3], yaw, o2;
+};
+SetPos g_setPos = {};
+
+bool ParseFloat(const char* s, float* out) {
+    float sign = 1.0f, v = 0.0f, scale = 0.1f;
+    if (*s == '-') sign = -1.0f, ++s;
+    else if (*s == '+') ++s;
+    bool any = false;
+    while (*s >= '0' && *s <= '9') v = v * 10.0f + static_cast<float>(*s++ - '0'), any = true;
+    if (*s == '.') {
+        ++s;
+        while (*s >= '0' && *s <= '9') v += static_cast<float>(*s++ - '0') * scale, scale *= 0.1f, any = true;
+    }
+    if (!any || *s) return false;
+    *out = sign * v;
+    return true;
+}
+
+void CmdSetPos(int argc, const char* const* argv) {
+    SetPos p = {};
+    if (argc < 4 || !ParseFloat(argv[1], &p.pos[0]) || !ParseFloat(argv[2], &p.pos[1]) ||
+        !ParseFloat(argv[3], &p.pos[2]) || (argc > 4 && !ParseFloat(argv[4], &p.yaw)) ||
+        (argc > 5 && !ParseFloat(argv[5], &p.o2))) {
+        console::Print("usage: fd_dbg_setpos x y z [yaw [o2]]");
+        return;
+    }
+    p.yawToo = argc > 4, p.o2Too = argc > 5, p.pending = true;
+    g_setPos = p;
+}
+
+// Test hook: `fd_dbg_o2 <0..1>` sets the player's O2. O2 <= 0.5 is one of the game's own
+// safe-spot locks, so a test can hold a lock on clean ground without fire.
+void CmdO2(int argc, const char* const* argv) {
+    float o2;
+    const uintptr_t pl = Player();
+    if (argc < 2 || !ParseFloat(argv[1], &o2) || !pl) {
+        console::Print("usage: fd_dbg_o2 <0..1> (in a level)");
+        return;
+    }
+    const bool ok = addr::SafeWrite(pl + addr::Field(Id::player_f_o2), &o2, 4);
+    log::Info("juggle: o2 %ld/100: %s", Round(o2 * 100), ok ? "ok" : "failed");
+}
+
+void ApplySetPos() {
+    if (!g_setPos.pending) return;
+    g_setPos.pending = false;
+    const uintptr_t pl = Player();
+    static const float zero[3] = {0, 0, 0};
+    const bool ok = pl && addr::SafeWrite(pl + addr::Field(Id::player_f_pos), g_setPos.pos, 12) &&
+                    addr::SafeWrite(pl + addr::Field(Id::player_f_vel), zero, 12) &&
+                    addr::SafeWrite(pl + addr::Field(Id::player_f_disp), zero, 12) &&
+                    addr::SafeWrite(pl + addr::Field(Id::player_f_impulse), zero, 12) &&
+                    (!g_setPos.yawToo || addr::SafeWrite(pl + addr::Field(Id::player_f_yaw), &g_setPos.yaw, 4)) &&
+                    (!g_setPos.o2Too || addr::SafeWrite(pl + addr::Field(Id::player_f_o2), &g_setPos.o2, 4));
+    log::Info("juggle: setpos %ld %ld %ld%s%s: %s", Round(g_setPos.pos[0]), Round(g_setPos.pos[1]),
+              Round(g_setPos.pos[2]), g_setPos.yawToo ? " (+yaw)" : "", g_setPos.o2Too ? " (+o2)" : "",
+              ok ? "ok" : "failed");
+}
+#endif
+
+const Id kNeeds[] = {Id::player_object};
+
+bool Init() {
+    InitializeCriticalSection(&g_lock);
+    g_fdJuggle.onChange = OnToggle;
+    cmd::RegisterCvar(&g_fdJuggle);
+    cmd::SetPracticeOnly("fd_juggle");
+    g_panel = textdraw::Create("juggle", textdraw::CENTER, 0, 30, 1, textdraw::C_WHITE | textdraw::A_BOLD,
+                               textdraw::STYLE_TEXT_ONLY);
+    if (g_panel >= 0) textdraw::Show(g_panel, false);
+    hooks::OnFrameEnd(FrameEnd);
+#ifdef FDCORE_DEBUG
+    cmd::RegisterCommand("fd_dbg_setpos", "(Debug test hook) move the player: x y z [yaw [o2]]", CmdSetPos);
+    cmd::SetPracticeOnly("fd_dbg_setpos");
+    cmd::RegisterCommand("fd_dbg_o2", "(Debug test hook) set the player's O2, 0..1", CmdO2);
+    cmd::SetPracticeOnly("fd_dbg_o2");
+    testpipe::Register("juggle", [](const char*, char* resp, int cap) {
+        (void)cap;
+        EnterCriticalSection(&g_lock);
+        const View v = g_view;
+        LeaveCriticalSection(&g_lock);
+        // Tenths of a unit (wsprintf has no %f).
+        wsprintfA(resp,
+                  "enabled=%d valid=%d locked=%d dir=%d glyph=%s dist=%ld dy=%ld safe=%ld,%ld,%ld target=%ld,%ld,%ld "
+                  "pos=%ld,%ld,%ld burn=%ld o2=%ld flinch=%lx state=%ld selfcheck=%lu",
+                  v.on, v.valid, v.locked, v.dir,
+                  !v.locked ? "-" : v.dir == kDirNear ? "o" : v.dir >= 0 ? kDirName[v.dir] : "?", Round(v.dist * 10),
+                  Round(v.dy * 10), Round(v.safe[0] * 10), Round(v.safe[1] * 10), Round(v.safe[2] * 10),
+                  Round(v.target[0] * 10), Round(v.target[1] * 10), Round(v.target[2] * 10), Round(v.pos[0] * 10),
+                  Round(v.pos[1] * 10), Round(v.pos[2] * 10), Round(v.burn * 1000), Round(v.o2 * 1000),
+                  static_cast<unsigned long>(v.flinch), static_cast<long>(v.state),
+                  static_cast<unsigned long>(v.selfCheck));
+    });
+#endif
+    log::Info("juggle: ready (fd_juggle%s)", g_panel < 0 ? "; no text panel free: display off" : "");
+    return true;
+}
+
+} // namespace
+} // namespace fdcore::juggle
+
+// id, log name, required Ids, count, DllMain-phase step (or nullptr), init, start order
+FDCORE_MODULE(juggle, "juggle", fdcore::juggle::kNeeds, 1, nullptr, &fdcore::juggle::Init, 75)
