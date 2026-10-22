@@ -8,6 +8,14 @@ FDNYSP1.1_*.zip
 # GhidrAssist plugin runtime state (written to whatever dir Ghidra ran from).
 ghidrassist_*.db
 
+# SQLite transient side files (research.db itself is tracked).
+research/research.db-shm
+research/research.db-wal
+
+# Third-party release archive and debug symbols (re-downloadable; kept on disk only).
+asi/freeman/FreemanAPI_v1.60_release.zip
+asi/freeman/FreemanAPI_gcp.pdb
+
 __pycache__/
 *.pyc
 
