@@ -1575,6 +1575,147 @@
           "ghidra": "capstone 2026-10-22: fastcall ECX=camera, EDX=const geVec3d* camSpace, [esp+4]=geVec3d* out; RET 4. Z = max(-cam.z, [0x100511A4]); x = [cam+0x28] + [cam+0x24]*x/Z; y = [cam+0x2C] - [cam+0x24]*y/Z; out.z = Z*[cam+0x11C]. out.z as the TLVertex z of a queued RenderPoly is depth-tested against the world (trigger_boxes spike)",
           "note": "gfx world-space polygons (trigger boxes)"
         },
+        "sim.tick_subsystems": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x29520",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x29520",
+            "bytes": "56 8B F1 8B 46 08 8D 4E 08 6A 00 6A 00 FF 10 8B",
+            "ref": "first 16 bytes of the function at 0x00429520"
+          },
+          "ghidra": "GameSession::TickSubsystems 0x00429520 (thiscall ECX=session, no stack args), called once per frame from GameSession::RunFrame at 0x0042AF0A (returns to 0x0042AF0F), before ROCRender::RenderFrame at 0x0042AF19. Runs the entity lists (+0x08/+0x50/+0x98 sweep 0x0049C0E0, +0xE0), the spawn/callback queues and ROCSoundSystem::Frame. Skipping it froze player, victims and mission timer while rendering went on (core/evidence/freecam, probe runs p2-p5)",
+          "note": "pause service: one owner of this hook; skipped while paused"
+        },
+        "clock.pause": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x2BF20",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x2BF20",
+            "bytes": "56 8B F1 8A 46 1C 84 C0 75 0D C6 46 1C 01 FF 15",
+            "ref": "first 16 bytes of the function at 0x0042bf20"
+          },
+          "ghidra": "GameClock::Pause 0x0042BF20: this = subtimer in ECX, no stack args, plain RET; sets +0x1C paused and +0x0C = timeGetTime. Called by MainWindow::RunMessageLoop 0x004994F8 on focus loss with ECX = 0x502AD8 if [0x502AF8] else 0x502AB8. While paused ComputeFrameDelta 0x0042BF70 skips its body: elapsed stops, dt keeps its last value, no 60 FPS Sleep cap (live: core/evidence/freecam p5, clock frozen at 81739 ms)",
+          "note": "pause service; call on the active subtimer (clock.selector)"
+        },
+        "clock.resume": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x2BF40",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x2BF40",
+            "bytes": "56 8B F1 8A 46 1C 84 C0 74 17 C6 46 1C 00 FF 15",
+            "ref": "first 16 bytes of the function at 0x0042bf40"
+          },
+          "ghidra": "GameClock::Resume 0x0042BF40: this = subtimer in ECX, plain RET; clears +0x1C and adds the paused span to the base +0x08. Caller 0x004995D3 (focus regained), same ECX choice as Pause. Live: first dt after resume 0.017 (core/evidence/freecam p5)",
+          "note": "pause service"
+        },
+        "clock.game_timer": {
+          "module": "exe",
+          "rva": "0x102AB8",
+          "chain": [],
+          "type": "ptr",
+          "deref_root": false,
+          "sig": {
+            "rva": "0x2aec0",
+            "bytes": "B9 B8 2A 50 00 E8 B6 11 00 00 8B",
+            "ref": "instruction at 0x0042aec0 embeds 0x00502ab8",
+            "ghidra": "xref confirmed 2026-10-21: MOV ECX,0x00502ab8 in GameSession::RunFrame @0x0042aea0"
+          },
+          "ghidra": "g_gameClock 0x00502AB8: SubTimer[0] \"game\" is the struct's first 0x20 bytes (+0x1C paused byte)",
+          "note": "the subtimer GameClock::Pause/Resume act on when clock.selector is 0"
+        },
+        "clock.real_timer": {
+          "module": "exe",
+          "rva": "0x102AB8",
+          "chain": ["0x20"],
+          "type": "ptr",
+          "deref_root": false,
+          "sig": {
+            "rva": "0x2aec0",
+            "bytes": "B9 B8 2A 50 00 E8 B6 11 00 00 8B",
+            "ref": "instruction at 0x0042aec0 embeds 0x00502ab8",
+            "ghidra": "xref confirmed 2026-10-21: MOV ECX,0x00502ab8 in GameSession::RunFrame @0x0042aea0"
+          },
+          "ghidra": "g_gameClock_realTimer 0x00502AD8 = g_gameClock+0x20 (SubTimer[1])",
+          "note": "the subtimer GameClock::Pause/Resume act on when clock.selector is set"
+        },
+        "clock.selector": {
+          "module": "exe",
+          "rva": "0x102AB8",
+          "chain": ["0x40"],
+          "type": "u8",
+          "deref_root": false,
+          "sig": {
+            "rva": "0x2aec0",
+            "bytes": "B9 B8 2A 50 00 E8 B6 11 00 00 8B",
+            "ref": "instruction at 0x0042aec0 embeds 0x00502ab8",
+            "ghidra": "xref confirmed 2026-10-21: MOV ECX,0x00502ab8 in GameSession::RunFrame @0x0042aea0"
+          },
+          "ghidra": "g_gameClock_timeSource 0x00502AF8 (+0x40): nonzero = SubTimer[1] drives Tick; MainWindow::RunMessageLoop 0x004994E6 picks the subtimer to pause with it",
+          "note": "which subtimer to pause"
+        },
+        "controls.mouse_x": {
+          "module": "exe",
+          "rva": "0x103A78",
+          "chain": ["0x0", "0x18"],
+          "type": "i32",
+          "sig": {
+            "rva": "0x274c2",
+            "bytes": "8B 15 78 3A 50 00 8B 12 83 F8 02 0F",
+            "ref": "instruction at 0x004274c2 embeds 0x00503a78"
+          },
+          "ghidra": "GameControls+0x18 (DirectInputProvider+8): DrainMouseBuffer 0x00437AB0 zeroes it, then sums DIMOFS_X deltas each poll (GameControls::PollFrame 0x00439330, before the simulation; not gated by +0x330). GetAxis 0x00437620 axis 0. Live: +30 per frame for a 300 px move while paused (core/evidence/freecam p2)",
+          "note": "free camera yaw: this frame's mouse X sum"
+        },
+        "controls.mouse_y": {
+          "module": "exe",
+          "rva": "0x103A78",
+          "chain": ["0x0", "0x1C"],
+          "type": "i32",
+          "sig": {
+            "rva": "0x274c2",
+            "bytes": "8B 15 78 3A 50 00 8B 12 83 F8 02 0F",
+            "ref": "instruction at 0x004274c2 embeds 0x00503a78"
+          },
+          "ghidra": "GameControls+0x1C: DIMOFS_Y sum per poll (as controls.mouse_x). Live: +10 per frame for a 100 px move (core/evidence/freecam p2)",
+          "note": "free camera pitch: this frame's mouse Y sum"
+        },
+        "genesis.camera_set_world_xform": {
+          "module": "genesis",
+          "rva": "0x1990",
+          "export": "@geCamera_SetWorldSpaceXForm@8",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x1990",
+            "bytes": "53 55 8B E9 56 8B DA 57 8D BD D0 00 00 00 B9 0C",
+            "ref": "first 16 bytes of Genesis.dll export @geCamera_SetWorldSpaceXForm@8"
+          },
+          "ghidra": "fastcall ECX=camera, EDX=const geXForm3d* (9 floats AX..CZ + translation); copies it to camera+0xD0 and derives the camera-space transform. Exe: called once per frame from 0x0049217E (sim side; none while paused). Live: set at RenderFrame entry it is overwritten before the world render; set inside geEngine_RenderWorld on the passed camera it shows (core/evidence/freecam p2-p5)",
+          "note": "camera service: free-camera override, applied from gfx's RenderWorld detour"
+        },
+        "genesis.camera_get_world_xform": {
+          "module": "genesis",
+          "rva": "0x1A40",
+          "export": "@geCamera_GetWorldSpaceXForm@4",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x1A40",
+            "bytes": "8D 81 D0 00 00 00 C3",
+            "ref": "Genesis.dll export @geCamera_GetWorldSpaceXForm@4 (lea eax,[ecx+0xD0]; ret)"
+          },
+          "ghidra": "fastcall ECX=camera, returns &camera->worldXForm (+0xD0)",
+          "note": "camera service: the free camera's start pose"
+        },
         "genesis.add_bitmap": {
           "module": "genesis",
           "rva": "0x24000",

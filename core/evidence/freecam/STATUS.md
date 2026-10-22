@@ -18,7 +18,7 @@ Owner request (2026-10-22): a practice-only pause with a free-flying camera.
 |---|---|
 | 0 Preconditions (core_loads) | **done**: PASS in suite s0181 (2026-10-22) |
 | 1 Spike: Ghidra + live probes, verdict | **done**: feasible; the override goes at geEngine_RenderWorld (README.md) |
-| 2 addresses.json entries | pending |
+| 2 addresses.json entries | **done**: 10 entries, 137 total; addr_verified PASS |
 | 3 Core: sim-pause service + camera override | pending |
 | 4 Feature src/features/freecam.cpp | pending |
 | 5 Suite test tests/freecam.yaml | pending |
@@ -122,3 +122,40 @@ Owner request (2026-10-22): a practice-only pause with a free-flying camera.
   - controls.f_mouse_x / f_mouse_y (GameControls +0x18 / +0x1c);
   - genesis.camera_get_world_xform / camera_set_world_xform (exports).
   Check existing entries first (clock.*, controls.block_input, genesis.render_world).
+- it2 (step 2, done): git pull (up to date). Ten addresses.json entries; their 16-byte
+  signatures were read from the game files on disk (read-only):
+  - code: `sim.tick_subsystems` (0x29520), `clock.pause` (0x2BF20), `clock.resume`
+    (0x2BF40);
+  - clock data (g_gameClock root and signature): `clock.game_timer` (+0),
+    `clock.real_timer` (+0x20), `clock.selector` (+0x40, u8);
+  - input (g_everGame root, the block_input signature): `controls.mouse_x` / `mouse_y`
+    (GameControls +0x18 / +0x1C, i32);
+  - Genesis exports: `genesis.camera_set_world_xform` (0x1990: copies the xform to
+    camera+0xD0), `genesis.camera_get_world_xform` (0x1A40: `lea eax,[ecx+0xD0]; ret`).
+  - Each has a ghidra/note citing the spike.
+  - Existing entries reused: `controls.block_input`, `clock.dt` / `elapsed_ms`,
+    `genesis.render_world` (gfx's hook).
+  - Build clean, both configs. addr_verified PASS ("signatures: all OK", run
+    2026-10-22-215221).
+- **Noted for step 3:** `glitch.tick` (an inline hook at 0x0042AF0F, the return from
+  TickSubsystems) still fires on paused frames, because it sits in RunFrame and not in the
+  skipped call.
+  - The collision overlay counts it as "one simulated frame", so while paused it would
+    record frames in which nothing moved.
+  - The pause service will publish its paused state; glitch should skip its tick then.
+    That's a core-service read, not a dependency on a feature.
+- Next (it3, step 3): core services.
+  - New service `pause`:
+    - owns the sim.tick_subsystems hook; `pause::Set(bool)` / `pause::Active()`;
+    - clock Pause/Resume on the active subtimer;
+    - holds the input block while active (restoring the console's own use);
+    - a ~60 fps Sleep cap while active;
+    - auto-unpause on level load, menu and the run profile (`profile` asks the service);
+    - "view-relative overlays hidden": textdraw panels flagged view-relative hide while
+      active.
+  - camera: `camera::SetWorldOverride(const float xform[12])` / `ClearWorldOverride()`,
+    applied by gfx's RenderWorld detour through `camera::ApplyWorldOverride(cam)`, plus
+    `camera::LastWorldXForm()` for the start pose.
+  - DECISIONS entries. Regression: fov_sets_camera, fov_parity_reference, text_panels,
+    text_alpha, triggers, glitch_records.
+
