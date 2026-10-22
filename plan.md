@@ -14,11 +14,13 @@ its subsystem map, current top-down decompilation strategy, open
 questions. This file (`plan.md`) is the infrastructure/build plan;
 `RESEARCH.md` is the domain understanding. Keep them separate.
 
-No git on the VM — this repo reaches it as a plain file copy via the
-Packer file provisioner (see `environment/packer/windows-server.pkr.hcl`),
-not a clone. If you edit `plan.md`, `RESEARCH.md`, or `CLAUDE.md` while
-working on the VM, those edits only exist on the VM until someone
-copies them back to the dev machine — there's no push/pull.
+The repo reaches a freshly built VM as a plain file copy via the Packer file
+provisioner (see `environment/packer/windows-server.pkr.hcl`), not a clone.
+Since 2026-10-21 the VM copy is a git repo (PortableGit), and since 2026-10-22
+it pushes to the private GitHub repo `RichardFranksComputer/fdny-tas` (branches
+`main`, `fdny-bxt`). That GitHub repo is now the source of truth: the VM pushes
+after every commit, and the owner reads and edits from elsewhere and pushes back.
+See `CLAUDE.md`.
 
 ## Prime directive (project owner, 2026-08-27)
 
