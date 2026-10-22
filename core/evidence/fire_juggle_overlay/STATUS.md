@@ -20,8 +20,8 @@ Background: KB `fire-juggling`, `core/evidence/fire_juggling/`.
 |---|---|
 | 0 Preconditions (core_loads) | **done**: PASS (session on console) |
 | 1 addresses.json entries | **done**: player.f_safe / f_burn / f_flinch / f_o2; build clean (126 entries), addr_verified PASS |
-| 2 Core: textdraw centre anchor + no-background style | next |
-| 3 Feature src/features/juggle.cpp | |
+| 2 Core: textdraw centre anchor + no-background style | **done**: `CENTER` anchor + `STYLE_TEXT_ONLY` (D31); text_panels / text_alpha / hud_player PASS |
+| 3 Feature src/features/juggle.cpp | next |
 | 4 Suite test tests/fire_juggle.yaml | |
 | 5 Suite, docs, version, commit, owner report | |
 
@@ -42,3 +42,20 @@ Background: KB `fire-juggling`, `core/evidence/fire_juggling/`.
   (horizontal centre, dy from the vertical centre) and a per-panel "no background"
   option (background alpha 0, text only). Existing panels stay unchanged:
   text_panels and text_alpha must pass. DECISIONS entry.
+- it2 (step 2, done):
+  - textdraw now has `Anchor CENTER`: x = (view w - panel w) / 2 + dx, y = view h / 2 + dy.
+  - `Style STYLE_TEXT_ONLY`: the AlphaSurface with background slot 0 at alpha 0. The
+    font is non-antialiased, so only glyph pixels remain. There is no opaque fallback:
+    without a world it is not drawn.
+  - D31 in DECISIONS.md. Build clean (both configs).
+  - Regression runs PASS: text_panels (2026-10-22-171056), text_alpha (-171235),
+    hud_player (-171326).
+  - Panels in use: 3 of 8 (watermark, glitch, hud_player), so there is room for juggle.
+- Next (it3, step 3): src/features/juggle.cpp per the goal.
+  - cvar fd_juggle; practice-only; kNeeds {player_object}. Field entries never count
+    as Usable.
+  - Panel: CENTER, 0, 30, STYLE_TEXT_ONLY.
+  - Debug pipe `juggle`.
+  - Glyph screenshot: if needed, a probe test in tests/probes/ that loads bank, burns
+    via the step-4 hook, and turns the view; or a Debug-only command that forces each
+    direction for the screenshot.

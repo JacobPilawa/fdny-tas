@@ -108,7 +108,9 @@ void Draw() {
     const uint8_t high = alpha > kHighlightAlpha ? alpha : kHighlightAlpha;
     for (int i = 0; i < g_nPanels; ++i) {
         Panel& p = g_panels[i];
-        const gfx::AlphaKey keys[] = {{p.bg[0], alpha}, {p.bg[1], high}, {p.bg[2], high}, {p.bg[3], high}};
+        const bool textOnly = p.style == STYLE_TEXT_ONLY;
+        const gfx::AlphaKey keys[] = {
+            {p.bg[0], textOnly ? static_cast<uint8_t>(0) : alpha}, {p.bg[1], high}, {p.bg[2], high}, {p.bg[3], high}};
         if (!p.visible || p.n <= 0) continue;
         if (p.dirty && (!p.rendered || g_frame - p.lastRender >= static_cast<unsigned long>(p.minFrames))) {
             if (!Render(p)) {
@@ -118,23 +120,30 @@ void Draw() {
             p.rendered = true, p.dirty = false, p.lastRender = g_frame;
             const uint32_t* px = p.canvas.Pixels();
             const int stride = p.canvas.Stride(), w = p.canvas.Width(), h = p.canvas.Height();
-            p.alphaReady = p.style == STYLE_TRANSLUCENT &&
+            p.alphaReady = p.style != STYLE_OPAQUE &&
                            p.surf.Upload(px, stride, w, h, keys, 4, static_cast<uint8_t>(Byte(g_fdTextFgAlpha)));
             p.decalStale = true;
-            if (!p.alphaReady && !p.decal.Upload(px, stride, w, h)) Fail(p, "could not create / upload its bitmap");
-            else if (!p.alphaReady) p.decalStale = false;
+            if (textOnly) {
+                if (!p.alphaReady) Fail(p, "could not upload its text-only surface");
+            } else if (!p.alphaReady && !p.decal.Upload(px, stride, w, h)) {
+                Fail(p, "could not create / upload its bitmap");
+            } else if (!p.alphaReady) {
+                p.decalStale = false;
+            }
         }
         if (!p.rendered) continue;
         const int w = p.canvas.Width(), h = p.canvas.Height();
         int x = p.dx, y = p.dy;
         if (p.anchor == TOP_RIGHT) x = vw - p.dx - w;
         if (p.anchor == BOTTOM_LEFT) y = vh - p.dy - h;
+        if (p.anchor == CENTER) x = (vw - w) / 2 + p.dx, y = vh / 2 + p.dy;
         if (x < 0) x = 0;
         if (y < 0) y = 0;
         p.x = x, p.y = y;
         // Translucent when the frame has a world; otherwise the opaque decal (menus).
+        // Text-only panels have no fallback: without a world they are not drawn.
         bool translucent = p.alphaReady && p.surf.Draw(x, y);
-        if (!translucent) {
+        if (!translucent && !textOnly) {
             if (p.decalStale && p.decal.Upload(p.canvas.Pixels(), p.canvas.Stride(), w, h)) p.decalStale = false;
             p.decal.Draw(x, y);
         }

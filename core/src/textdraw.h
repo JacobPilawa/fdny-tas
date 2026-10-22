@@ -28,13 +28,18 @@ constexpr uint8_t A_COLOR_MASK = 0x1F, A_BOLD = 0x20, A_BG_SHIFT = 6;
 constexpr uint8_t C_TEXT = 0, C_WHITE = 1;
 constexpr int kMaxColors = 32;
 
-enum Anchor : uint8_t { TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT };
+// CENTER: dx from the horizontal centre (the panel is centred on it), dy from the
+// vertical centre to the panel's top edge.
+enum Anchor : uint8_t { TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, CENTER };
 // STYLE_TRANSLUCENT: gfx::AlphaSurface (background at fd_text_alpha) while the frame has a
 // world, the opaque decal otherwise (menus). STYLE_OPAQUE: always the decal.
-enum Style : uint8_t { STYLE_TRANSLUCENT, STYLE_OPAQUE };
+// STYLE_TEXT_ONLY: the AlphaSurface with the panel background fully transparent (text
+// only); not drawn at all without a world (no opaque fallback box).
+enum Style : uint8_t { STYLE_TRANSLUCENT, STYLE_OPAQUE, STYLE_TEXT_ONLY };
 
-// A panel: anchor + offset (pixels from that corner of the view), how often its
-// bitmap may be re-rendered, the attribute for lines set without attrs, and its style.
+// A panel: anchor + offset (pixels from that corner of the view, or from the centre for
+// CENTER), how often its bitmap may be re-rendered, the attribute for lines set without
+// attrs, and its style.
 int Create(const char* name, Anchor anchor, int dx, int dy, int minFrames, uint8_t defaultAttr,
            Style style = STYLE_TRANSLUCENT);
 // The panel's colours: fg[nFg] (0x00RRGGBB, nFg <= kMaxColors) and the four

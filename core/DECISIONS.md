@@ -83,6 +83,12 @@ later session might "simplify" away; change one only with the owner's approval
   - The world can't be identified by its pointer alone: bank, loaded after Training, got Training's world address. The tiles looked attached but had no handle, so nothing was drawn and text panels would have stayed on the opaque fallback.
   - The handle check after the settle frames is the signal. Log line: `gfx: world box tile without a handle; re-adding`.
   - Rejected: re-attaching on `OnLevelLoad`. It races the first render of the new world, and the handle check also covers anything else that drops a texture.
+- **D31 textdraw gains `CENTER` and `STYLE_TEXT_ONLY`** (fd_juggle, owner: "no background, 30 px below centre").
+  - **`CENTER`:** the panel is centred horizontally (`dx` shifts it), and `dy` is measured from the view's vertical centre to the panel's top.
+  - **`STYLE_TEXT_ONLY`:** the same `AlphaSurface` path, with background slot 0 keyed to alpha 0. The font is non-antialiased (D17), so only glyph pixels stay; there's no fringe.
+  - **No world (menus):** it isn't drawn at all, rather than falling back to the opaque decal: a world-space hint has no meaning there, and a box would contradict "no background".
+  - Existing anchors and styles are unchanged.
+  - Rejected: a per-panel background-alpha parameter. It would be one more knob for no use beyond "none", and `fd_text_alpha` would have to be special-cased for it anyway.
 
 ## Process
 
