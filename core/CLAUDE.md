@@ -55,6 +55,10 @@ Not machine-checked, still rules:
 3. **Evidence** in `evidence/<topic>/`: logs, screenshots, measurements, plus a README for anything investigative (spikes: what was tried, numbers, verdict).
 4. **Docs:** `QUICKSTART.md` for anything user-visible (commands, variables, keys); `DECISIONS.md` for any non-obvious choice; a `PROGRESS.md` entry (`- <date> it<N>: **<version>** ...`).
 5. **Version:** bump `VERSION` (minor for features/architecture, patch for fixes).
+   - Rebuild.
+   - Copy `build\Release\FDNYCore.asi` to `dist\FDNYCore.asi` (repo root, tracked; owner 2026-10-22: the owner installs from GitHub).
+   - Update `dist\README.md`: version, commit, SHA-256 of the file.
+   - Only Release, and only on a version bump.
 6. **Commit:** one topic per commit; message via `-F` from a UTF-8 file without BOM, ending with the Co-Authored-By / Claude-Session lines; don't stage `research/research.db-*` side files.
 7. **Report to the owner** (end of every task):
    - the outcome and version/commit, first sentence;
