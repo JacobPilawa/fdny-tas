@@ -1,4 +1,5 @@
-// Tests: tests/tp_teleport.yaml
+// Tests: tests/tp_teleport.yaml tests/keys_default.yaml
+#include "binds.h"
 #include "tp.h"
 
 #include <windows.h>
@@ -125,6 +126,8 @@ bool Init() {
     cmd::RegisterCommand("fd_tp_load", "teleport to the fd_tp_save location (same map only)", CmdLoad);
     cmd::SetPracticeOnly("fd_tp_save");
     cmd::SetPracticeOnly("fd_tp_load");
+    binds::BindDefault("k", "fd_tp_save");  // D37: K keep, L load
+    binds::BindDefault("l", "fd_tp_load");
     hooks::OnFrameEnd(Apply);
     log::Info("tp: ready (fd_tp_save, fd_tp_load)");
     return true;

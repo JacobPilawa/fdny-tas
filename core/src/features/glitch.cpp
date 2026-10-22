@@ -1,4 +1,4 @@
-// Tests: tests/glitch_records.yaml tests/glitch_parity_log.yaml tests/glitch_parity_fuzz.yaml tests/glitch_box_cost.yaml tests/text_panels.yaml
+// Tests: tests/glitch_records.yaml tests/glitch_parity_log.yaml tests/glitch_parity_fuzz.yaml tests/glitch_box_cost.yaml tests/text_panels.yaml tests/keys_default.yaml
 // hud_glitch record layer (backlog item 11a): a port of the code caves in
 // tools/collision_overlay/fdny_collision_overlay.py (GameSource._install).
 // The cave code below is emitted byte for byte like the Python Asm emitter
@@ -432,7 +432,7 @@ void ReadSnapshot(analysis::Snapshot& s) {
 }
 
 // --- the boxes (Overlay: build / render / hotkeys) ----------------------------------
-bool g_hidden = false, g_frozen = false;  // F9 / F10
+bool g_hidden = false, g_frozen = false;  // B / Z (were F9 / F10, D37)
 char g_build[analysis::kBoxLines][analysis::kBoxLineLen];
 uint8_t g_buildA[analysis::kBoxLines][analysis::kBoxLineLen];  // colour tags
 char g_shown[analysis::kBoxLines][analysis::kBoxLineLen];  // what is drawn (kept while frozen)
@@ -459,7 +459,7 @@ void DumpBox(const char (*lines)[analysis::kBoxLineLen], int n) {
 }
 #endif
 
-void ClearBoxHistory() {  // F12
+void ClearBoxHistory() {  // X (was F12)
     analysis::ClearHistory();
 #ifdef FDCORE_DEBUG
     DumpMarker(0xF5);
@@ -472,10 +472,12 @@ void CmdClear(int, const char* const*) {
     if (g_installed) ClearBoxHistory();
 }
 
-// Overlay._hotkeys: F9 show/hide, F10 freeze, F12 clear -- edge-triggered,
-// only while the game has the keyboard (binds' rule); the game still gets them.
+// Overlay._hotkeys (the original's F9 show/hide, F10 freeze, F12 clear; letters since
+// D37: B, Z, X) -- edge-triggered, only while the game has the keyboard (binds' rule);
+// the game still gets them. Kept here, not as binds: the clear must stay between this
+// frame's hotkeys and build(), as in the original (the replay's 0xF5 marker order).
 void Hotkeys() {
-    static const int kVk[3] = {VK_F9, VK_F10, VK_F12};
+    static const int kVk[3] = {'B', 'Z', 'X'};
     static bool was[3];
     const bool live = binds::KeysLive();
     for (int i = 0; i < 3; ++i) {
@@ -586,12 +588,13 @@ bool Init() {
     char env[8];
     g_boxDump = GetEnvironmentVariableA("FDNYCORE_TEST_GLITCHBOX", env, sizeof(env)) && env[0] == '1';
 #endif
-    cmd::RegisterCommand("fd_glitch_hide", "show / hide the hud_glitch boxes (default key F9)", CmdHide);
-    cmd::RegisterCommand("fd_glitch_freeze", "freeze / unfreeze the hud_glitch boxes; logging continues (F10)", CmdFreeze);
-    cmd::RegisterCommand("fd_glitch_clear", "clear the hud_glitch history and last warp (F12)", CmdClear);
+    cmd::RegisterCommand("fd_glitch_hide", "show / hide the hud_glitch boxes (key B)", CmdHide);
+    cmd::RegisterCommand("fd_glitch_freeze", "freeze / unfreeze the hud_glitch boxes; logging continues (key Z)", CmdFreeze);
+    cmd::RegisterCommand("fd_glitch_clear", "clear the hud_glitch history and last warp (key X)", CmdClear);
     cmd::RegisterCvar(&g_fdHudGlitch);
     static const char* const kPractice[] = {"fd_hud_glitch", "fd_glitch_hide", "fd_glitch_freeze", "fd_glitch_clear"};
     for (const char* n : kPractice) cmd::SetPracticeOnly(n);
+    binds::BindDefault("g", "toggle fd_hud_glitch");  // D37
     hooks::OnFrameEnd(FrameEnd);
 #ifdef FDCORE_DEBUG
     testpipe::Register("glitch", [](const char*, char* resp, int cap) { Stats(resp, cap); });

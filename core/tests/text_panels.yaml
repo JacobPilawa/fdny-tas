@@ -2,7 +2,7 @@ name: text_panels
 # In-frame text (textdraw): the collision boxes, the player HUD and the
 # watermark all drawn in-frame as one Genesis bitmap blit each (after
 # geEngine_FlushPipeline). Frame rate stays at the cap with all three on,
-# F9 hides the boxes, and the panels survive a level change.
+# B (was F9) hides the boxes, and the panels survive a level change.
 pre_files:
   - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
   - {src: tests/data/fdcore_panels.cfg, dst: FDNYCore.cfg}
@@ -17,10 +17,10 @@ steps:
   - screenshot: 01_all_panels_training
   - key: {key: w, hold: 1.5}
   - screenshot: 02_moving
-  - key: {key: f9, hold: 0.2}
+  - key: {key: b, hold: 0.2}
   - assert_pipe_stat: {cmd: glitch_box, key: hidden, equals: 1}
   - screenshot: 03_boxes_hidden
-  - key: {key: f9, hold: 0.2}
+  - key: {key: b, hold: 0.2}
   - console: "loadmap bank"
   - wait_s: 40
   - sample_pipe: {cmd: stats, as: bank}

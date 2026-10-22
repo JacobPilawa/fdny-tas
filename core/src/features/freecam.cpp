@@ -1,4 +1,4 @@
-// Tests: tests/freecam.yaml
+// Tests: tests/freecam.yaml tests/keys_default.yaml
 // freecam feature (owner request 2026-10-22, core/evidence/freecam): `fd_pause` freezes
 // the game (core `pause` service: the simulation step is skipped and the game clock
 // paused) and gives a free-flying camera until it is turned off; then the view snaps

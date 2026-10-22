@@ -129,6 +129,17 @@ later session might "simplify" away; change one only with the owner's approval
   - **Start pose:** the game's last camera transform. Genesis camera columns are right / up / back (the view is −column 2). The rebuild error against the game's matrix is checked by the test (0.000 in fc4).
   - `fd_pause` is not archived: a session never starts paused. Practice-only, so `fd_profile run` refuses it and resets it to 0, which resumes.
 
+- **D37 Every feature has a default letter key; no F keys** (owner, 2026-10-22).
+  - **Map:** P pause; J juggle; H player HUD; G collision HUD with its B / Z / X (were F9 / F10 / F12); T / Y / U trigger boxes / all / x-ray; K / L teleporter save / load.
+  - **Excluded letters:**
+    - the game's keys (W A S D C, Shift, Ctrl, Space; GameControls::Construct);
+    - the free camera's (W A S D E Q);
+    - O (held to free the cursor).
+  - **Not bound, on purpose:** the speedrun options, profile, watermark, FOV and text settings. A stray press would change a run's setup.
+  - **Mechanism:** toggles run the new `toggle <var>` builtin through `binds::BindDefault`, so the player's binds win (D29) and the profile gate applies.
+  - **The collision HUD's three hotkeys stay edge-triggered inside its frame step** (only the key codes changed). The clear must keep its place between the frame's hotkeys and build() for the replay parity (the 0xF5 marker). Its note text "history cleared (F12)" is the original overlay's and stays identical.
+  - Supersedes the F-key part of D29 (F5/F6 are no longer suggested for the teleporter).
+
 ## Process
 
 - **D21 Tests are never weakened or deleted to pass.** An environmental failure (slow VM frame rate, a race in a read) is rerun and reported with evidence, for example the previous version failing identically.

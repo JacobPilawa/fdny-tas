@@ -2,7 +2,7 @@ name: glitch_box_cost
 # Item 11d: the boxes must not cost frame rate. Drawn in-frame with
 # geEngine_Printf they cut simulated ticks from ~346 to 84 per 6 s; drawn as one
 # in-frame bitmap (textdraw) they keep ~346. Guard: >= 250 ticks in 6 s while shown,
-# and the same window hidden (F9) for comparison.
+# and the same window hidden (key B, was F9) for comparison.
 pre_files:
   - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
   - {src: tests/data/fdcore_hud_glitch.cfg, dst: FDNYCore.cfg}
@@ -14,11 +14,11 @@ steps:
   - assert_pipe_stat: {cmd: glitch, key: tick, min: 250, since: shown0}
   - assert_pipe_stat: {cmd: glitch_box, key: hidden, equals: 0}
   - screenshot: box_shown
-  - key: {key: f9, hold: 0.2}
+  - key: {key: b, hold: 0.2}
   - sample_pipe: {cmd: glitch, as: hidden0}
   - wait_s: 6
   - assert_pipe_stat: {cmd: glitch, key: tick, min: 250, since: hidden0}
-  - key: {key: f9, hold: 0.2}
+  - key: {key: b, hold: 0.2}
   - sample_pipe: {cmd: glitch, as: cost}   # draw_us_avg = game-thread box cost
 expect:
   no_crash: true

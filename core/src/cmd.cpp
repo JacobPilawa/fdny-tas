@@ -58,6 +58,16 @@ Command* FindCommand(const char* name) {
 }
 
 // --- builtins --------------------------------------------------------------
+// `toggle <var>`: 0 <-> 1, through the profile gate like any other set (a key bind's line).
+void CmdToggle(int argc, const char* const* argv) {
+    Cvar* v = argc > 1 ? FindCvar(argv[1]) : nullptr;
+    if (!v) {
+        console::Print("usage: toggle <variable> (0 <-> 1)");
+        return;
+    }
+    if (SetCvar(v, v->value[0] == '0' ? "1" : "0")) console::Print("%s %s", v->name, v->value);
+}
+
 void CmdEcho(int argc, const char* const* argv) {
     char out[512];
     int o = 0;
@@ -278,6 +288,7 @@ void RegisterBuiltins() {
         g_qInit = true;
     }
     RegisterCommand("echo", "echo <text>: print text to the console", CmdEcho);
+    RegisterCommand("toggle", "toggle <variable>: switch a 0/1 variable (for key binds)", CmdToggle);
     RegisterCommand("cvarlist", "list FDNYCore variables", CmdCvarlist);
     RegisterCommand("cmdlist", "list FDNYCore commands", CmdCmdlist);
     RegisterCvar(&g_fdVersion);

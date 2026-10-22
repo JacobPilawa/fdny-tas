@@ -1,4 +1,4 @@
-// Tests: tests/fire_juggle.yaml
+// Tests: tests/fire_juggle.yaml tests/keys_default.yaml
 // juggle feature (owner request 2026-10-22, core/evidence/fire_juggle_overlay): the
 // fire-juggling helper. When the player passes out (fire or O2) while carrying a
 // survivor, Verb_Reset copies the "last safe spot" player.f_safe (+0x3400) into the
@@ -25,6 +25,7 @@
 #include <windows.h>
 
 #include "addr.h"
+#include "binds.h"
 #include "cmd.h"
 #include "console.h"
 #include "hooks.h"
@@ -419,6 +420,7 @@ bool Init() {
     g_fdJuggle.onChange = OnToggle;
     cmd::RegisterCvar(&g_fdJuggle);
     cmd::SetPracticeOnly("fd_juggle");
+    binds::BindDefault("j", "toggle fd_juggle");  // D37
     g_panel = textdraw::Create("juggle", textdraw::CENTER, 0, 30, 1, textdraw::C_WHITE | textdraw::A_BOLD,
                                textdraw::STYLE_TEXT_ONLY);
     if (g_panel >= 0) textdraw::Show(g_panel, false), textdraw::HideWhilePaused(g_panel, true);  // D35

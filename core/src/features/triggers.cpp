@@ -1,4 +1,4 @@
-// Tests: tests/triggers.yaml
+// Tests: tests/triggers.yaml tests/keys_default.yaml
 // triggers feature (owner request 2026-10-22, core/evidence/trigger_boxes): draws every
 // RCS_BoundsTrigger of the loaded map as a 50% box -- blue = rescue/escape zone, red =
 // closed final exit, green = open final exit, grey = any other trigger (only with
@@ -246,6 +246,8 @@ bool Init() {
     cmd::SetPracticeOnly("fd_triggers_toggle");
     cmd::SetPracticeOnly("fd_triggers_list");
     binds::BindDefault("t", "fd_triggers_toggle");
+    binds::BindDefault("y", "toggle fd_triggers_all");    // D37
+    binds::BindDefault("u", "toggle fd_triggers_xray");
     hooks::OnFrameEnd(FrameEnd);
 #ifdef FDCORE_DEBUG
     testpipe::Register("triggers", [](const char*, char* resp, int cap) {

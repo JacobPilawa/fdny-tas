@@ -4,7 +4,7 @@ name: glitch_parity_log
 # classes (Model / FrameAnalyzer / TextLog / GameSource._classify / MapFinder /
 # Bsp / Overlay.build) produce from the same raw record stream.
 # Training, then bank (roaming victims, fires = non-player writers), walking,
-# turning, crouching, two hook sessions (off/on), and the F9 / F10 / F12 keys.
+# turning, crouching, two hook sessions (off/on), and the B / Z / X keys (the original's F9 / F10 / F12).
 pre_files:
   - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
   - {src: tests/data/fdcore_hud_glitch.cfg, dst: FDNYCore.cfg}
@@ -41,23 +41,23 @@ steps:
       steps:
         - key: {key: w, hold: 2.0}
         - mouse_rel: [300, 0]
-  # F9 hides / shows (old overlay hotkeys; the game still receives them)
-  - key: {key: f9, hold: 0.2}
+  # B hides / shows (the old overlay's F9; letters since D37; the game still receives them)
+  - key: {key: b, hold: 0.2}
   - assert_pipe_stat: {cmd: glitch_box, key: hidden, equals: 1}
   - screenshot: boxes_hidden
-  - key: {key: f9, hold: 0.2}
+  - key: {key: b, hold: 0.2}
   - assert_pipe_stat: {cmd: glitch_box, key: hidden, equals: 0}
-  # F10 freezes the drawn boxes (analysis and log continue)
-  - key: {key: f10, hold: 0.2}
+  # Z (was F10) freezes the drawn boxes (analysis and log continue)
+  - key: {key: z, hold: 0.2}
   - sample_pipe: {cmd: glitch_box, as: frozen_at}
   - key: {key: w, hold: 1.0}
   - assert_pipe_stat: {cmd: glitch_box, key: shown_tick, equals: 0, since: frozen_at}
   - assert_pipe_stat: {cmd: glitch_box, key: frozen, equals: 1}
-  - key: {key: f10, hold: 0.2}
+  - key: {key: z, hold: 0.2}
   - key: {key: w, hold: 1.0}
   - assert_pipe_stat: {cmd: glitch_box, key: shown_tick, min: 10, since: frozen_at}
-  # F12 clears history + last warp (logged, and replayed from the 0xF5 marker)
-  - key: {key: f12, hold: 0.2}
+  # X (was F12) clears history + last warp (logged, and replayed from the 0xF5 marker)
+  - key: {key: x, hold: 0.2}
   - assert_log: {contains: "history cleared (F12)"}
   - sample_pipe: {cmd: glitch, as: glitch_stats}   # analysis cost per frame
 expect:

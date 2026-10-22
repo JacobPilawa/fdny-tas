@@ -53,10 +53,29 @@ Settings persist automatically: set something once and it's there next launch.
 
 ## 4. Key binds
 
+Every feature has a default letter key (owner, D37; no F keys):
+
+| Feature | Console | Key |
+|---|---|---|
+| Pause + free camera | `fd_pause_toggle` (`fd_pause 1`) | **P** (paused: W A S D, E up, Q down, Shift x4, Ctrl x0.25, mouse) |
+| Fire-juggling arrow | `toggle fd_juggle` | **J** |
+| Player HUD | `toggle fd_hud_player` | **H** |
+| Collision-warp HUD | `toggle fd_hud_glitch` | **G** |
+| ... show / hide its boxes | `fd_glitch_hide` | **B** |
+| ... freeze its boxes | `fd_glitch_freeze` | **Z** |
+| ... clear its history | `fd_glitch_clear` | **X** |
+| Trigger boxes | `fd_triggers_toggle` | **T** |
+| ... every trigger | `toggle fd_triggers_all` | **Y** |
+| ... through walls | `toggle fd_triggers_xray` | **U** |
+| Teleporter save / load | `fd_tp_save` / `fd_tp_load` | **K** / **L** |
+
+No default key on purpose: the speedrun options (`fd_static_spawns`, `fd_rescuebot`),
+`fd_profile`, `fd_watermark`, `fd_fov` and the text settings (a stray press would change a
+run's setup). Free letters: F I M N R V. `toggle <variable>` switches any 0/1 variable.
+
 ```
-bind f5 "fd_tp_save"
-bind f6 "fd_tp_load"
-unbind f5
+bind n "toggle fd_juggle"
+unbind j
 bindlist
 unbindall
 ```
@@ -73,18 +92,18 @@ console. Binds are saved with the config.
 
 | | |
 |---|---|
-| `fd_hud_player 1` | top-left: position, velocity, XY speed, player state, screen state |
-| `fd_hud_glitch 1` | top-right: collision-warp boxes (what you're touching, warp prediction) |
-| `fd_glitch_hide` (**F9**) | show / hide the boxes |
-| `fd_glitch_freeze` (**F10**) | freeze the boxes; logging continues |
-| `fd_glitch_clear` (**F12**) | clear box history and the last warp |
-| `fd_tp_save` | save position + view (pitch/yaw) |
-| `fd_tp_load` | teleport back to it |
+| `fd_hud_player 1` (**H**) | top-left: position, velocity, XY speed, player state, screen state |
+| `fd_hud_glitch 1` (**G**) | top-right: collision-warp boxes (what you're touching, warp prediction) |
+| `fd_glitch_hide` (**B**) | show / hide the boxes |
+| `fd_glitch_freeze` (**Z**) | freeze the boxes; logging continues |
+| `fd_glitch_clear` (**X**) | clear box history and the last warp (the note still reads "(F12)", the original overlay's text) |
+| `fd_tp_save` (**K**) | save position + view (pitch/yaw) |
+| `fd_tp_load` (**L**) | teleport back to it |
 | `fd_triggers 1` / `fd_triggers_toggle` (**T**) | trigger boxes, 50%: **blue** rescue zone (drop-off for a carried victim), **red** final exit still closed, **green** exit open (every victim accounted for) |
-| `fd_triggers_all 1` | also every other trigger, grey: room zones, hints, doors, sounds |
-| `fd_triggers_xray 1` | trigger boxes show through walls (default: walls hide them) |
+| `fd_triggers_all 1` (**Y**) | also every other trigger, grey: room zones, hints, doors, sounds |
+| `fd_triggers_xray 1` (**U**) | trigger boxes show through walls (default: walls hide them) |
 | `fd_triggers_list` | the map's triggers in the console: class, open/shut, name, box corners |
-| `fd_juggle 1` | fire-juggling arrow, 30 px below the screen centre, no background: where a carried survivor would land if you passed out now |
+| `fd_juggle 1` (**J**) | fire-juggling arrow, 30 px below the screen centre, no background: where a carried survivor would land if you passed out now |
 
 Trigger boxes are read from the loaded map every level (no files). A box you are
 standing in is drawn at 25%, so the whole view is tinted its colour. T is a default
@@ -115,7 +134,7 @@ Teleporter rules: one slot, in memory only (gone on exit); only works on the map
 it was saved on ("saved on X, this is Y -- refused"); only inside a level.
 Velocity is zeroed on arrival. Crouch/stance is not saved.
 
-F9 / F10 / F12 only act while `fd_hud_glitch` is on, the game is focused and the
+B / Z / X (the original overlay's F9 / F10 / F12) only act while `fd_hud_glitch` is on, the game is focused and the
 console is closed. The boxes' full detail goes to `FDNYCore.log`.
 
 ### Profiles and watermark
@@ -159,12 +178,10 @@ Put anything you want applied on a switch (binds, settings) in
 fd_profile practice
 fd_hud_player 1
 fd_hud_glitch 1
-bind f5 "fd_tp_save"
-bind f6 "fd_tp_load"
 ```
 
-Load Training, walk into a wall, watch the top-right boxes; F5 to mark a spot,
-F6 to return. For a run: `fd_profile run` and check the watermark bottom-left.
+Load Training, walk into a wall, watch the top-right boxes; K to mark a spot,
+L to return; P to pause and fly around. For a run: `fd_profile run` and check the watermark bottom-left.
 
 ## 7. Tests (VM only)
 

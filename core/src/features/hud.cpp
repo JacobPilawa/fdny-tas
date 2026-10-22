@@ -1,4 +1,5 @@
-// Tests: tests/hud_player.yaml tests/text_panels.yaml tests/text_alpha.yaml
+// Tests: tests/hud_player.yaml tests/text_panels.yaml tests/text_alpha.yaml tests/keys_default.yaml
+#include "binds.h"
 #include "hud.h"
 
 #include <windows.h>
@@ -106,6 +107,7 @@ bool Init() {
     InitializeCriticalSection(&g_lock);
     cmd::RegisterCvar(&g_fdHudPlayer);
     cmd::SetPracticeOnly("fd_hud_player");
+    binds::BindDefault("h", "toggle fd_hud_player");  // D37
     hooks::OnFrameEnd(Draw);
 #ifdef FDCORE_DEBUG
     testpipe::Register("hud", [](const char*, char* resp, int cap) { LastDrawn(resp, cap); });
