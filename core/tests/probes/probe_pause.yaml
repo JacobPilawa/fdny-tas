@@ -1,0 +1,91 @@
+name: probe_pause
+# Not in the suite: the fd_pause / free-camera spike (evidence/freecam). Installs
+# zz_pauseprobe.asi (probes/pauseprobe.cpp). On bank with the RescueBot off:
+#   round A: F5 pauses (TickSubsystems skipped, game clock running), samples before and
+#            after 5 s, mouse motion while paused, F7 = camera override, F5 resumes;
+#   round B: F6, then F5: the same with GameClock::Pause / Resume.
+# The probe logs zz_pauseprobe.log in the game folder (clock, mouse sums, camera, the
+# geCamera_SetWorldSpaceXForm callers); the harness samples state from memory.
+pre_files:
+  - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
+  - {src: null, dst: FDNYCore.cfg}
+  - {src: build/probes/zz_pauseprobe.asi, dst: zz_pauseprobe.asi}
+setup: load_training
+record: false
+steps:
+  - console: "fd_watermark 0"
+  - console: "fd_rescuebot 0"
+  - console: "loadmap bank"
+  - wait_s: 40
+  - focus: {}
+  - screenshot: running
+  # round A: sim skipped, clock running
+  - sample_victims: a0
+  - sample_mem: {name: player.pos_x, as: a_x, append: true}
+  - sample_mem: {name: player.pos_z, as: a_z, append: true}
+  - sample_mem: {name: mission.time_left, as: a_time, append: true}
+  - sample_mem: {name: clock.elapsed_ms, as: a_clock, append: true}
+  - key: {key: f5, hold: 0.1}
+  - wait_s: 0.5
+  - sample_victims: a1
+  - sample_mem: {name: player.pos_x, as: a_x, append: true}
+  - sample_mem: {name: player.pos_z, as: a_z, append: true}
+  - sample_mem: {name: mission.time_left, as: a_time, append: true}
+  - sample_mem: {name: clock.elapsed_ms, as: a_clock, append: true}
+  - screenshot: a_paused
+  - wait_s: 5
+  - sample_victims: a2
+  - sample_mem: {name: player.pos_x, as: a_x, append: true}
+  - sample_mem: {name: player.pos_z, as: a_z, append: true}
+  - sample_mem: {name: mission.time_left, as: a_time, append: true}
+  - sample_mem: {name: clock.elapsed_ms, as: a_clock, append: true}
+  - assert_victims_equal: {runs: [a1, a2], tolerance: 0.01}
+  - key_down: w
+  - wait_s: 1
+  - key_up: w
+  - mouse_rel: [300, 0]
+  - wait_s: 0.5
+  - screenshot: a_after_mouse
+  - key: {key: f7, hold: 0.1}
+  - wait_s: 1
+  - screenshot: a_override
+  - key: {key: f7, hold: 0.1}
+  - wait_s: 1
+  - screenshot: a_override_off
+  - sample_mem: {name: player.pos_x, as: a_x, append: true}
+  - sample_mem: {name: player.pos_z, as: a_z, append: true}
+  - key: {key: f5, hold: 0.1}
+  - wait_s: 2
+  - sample_mem: {name: mission.time_left, as: a_time, append: true}
+  - sample_mem: {name: clock.elapsed_ms, as: a_clock, append: true}
+  - screenshot: a_resumed
+  # round B: also the game clock
+  - key: {key: f6, hold: 0.1}
+  - wait_s: 0.3
+  - sample_victims: b0
+  - sample_mem: {name: mission.time_left, as: b_time, append: true}
+  - sample_mem: {name: clock.elapsed_ms, as: b_clock, append: true}
+  - key: {key: f5, hold: 0.1}
+  - wait_s: 0.5
+  - sample_victims: b1
+  - sample_mem: {name: mission.time_left, as: b_time, append: true}
+  - sample_mem: {name: clock.elapsed_ms, as: b_clock, append: true}
+  - wait_s: 5
+  - sample_victims: b2
+  - sample_mem: {name: mission.time_left, as: b_time, append: true}
+  - sample_mem: {name: clock.elapsed_ms, as: b_clock, append: true}
+  - assert_victims_equal: {runs: [b1, b2], tolerance: 0.01}
+  - mouse_rel: [-300, 100]
+  - wait_s: 0.5
+  - key: {key: f7, hold: 0.1}
+  - wait_s: 1
+  - screenshot: b_override
+  - key: {key: f5, hold: 0.1}
+  - wait_s: 2
+  - sample_mem: {name: mission.time_left, as: b_time, append: true}
+  - sample_mem: {name: clock.elapsed_ms, as: b_clock, append: true}
+  - screenshot: b_resumed
+  - wait_s: 3
+  - screenshot: end
+expect:
+  no_crash: true

@@ -1,0 +1,121 @@
+pauseprobe loaded
+genesis 10000000 set 10001990 get 10001a40
+hook SetWorldSpaceXForm 10001990 [53 55 8b e9 56 8b da 57]: MH_OK
+hook TickSubsystems 00429520 [56 8b f1 8b 46 08 8d 4e]: MH_OK
+hook RenderFrame 00494670 [6a ff 68 c0 42 4d 00 64]: MH_OK
+f=600 setxform caller ret=1003ce86 cam=034fae80 running=7 paused=0
+f=600 setxform caller ret=1003ced5 cam=034fae80 running=7 paused=0
+f=600 setxform caller ret=1003b80c cam=034fae80 running=7 paused=0
+f=600 setxform caller ret=1003b876 cam=034fae80 running=7 paused=0
+f=600 setxform caller ret=0049217e cam=078cfdb8 (render cam) running=599 paused=0
+f=600 setxform caller ret=1003ce86 cam=078cfdb8 (render cam) running=599 paused=0
+f=600 setxform caller ret=1003ced5 cam=078cfdb8 (render cam) running=599 paused=0
+f=600 setxform caller ret=1003b80c cam=078cfdb8 (render cam) running=599 paused=0
+f=600 setxform caller ret=1003b876 cam=078cfdb8 (render cam) running=599 paused=0
+f=1200 setxform caller ret=1003ce86 cam=034fae80 running=7 paused=0
+f=1200 setxform caller ret=1003ced5 cam=034fae80 running=7 paused=0
+f=1200 setxform caller ret=1003b80c cam=034fae80 running=7 paused=0
+f=1200 setxform caller ret=1003b876 cam=034fae80 running=7 paused=0
+f=1200 setxform caller ret=0049217e cam=078cfdb8 running=935 paused=0
+f=1200 setxform caller ret=1003ce86 cam=078cfdb8 running=935 paused=0
+f=1200 setxform caller ret=1003ced5 cam=078cfdb8 running=935 paused=0
+f=1200 setxform caller ret=1003b80c cam=078cfdb8 running=935 paused=0
+f=1200 setxform caller ret=1003b876 cam=078cfdb8 running=935 paused=0
+f=1200 setxform caller ret=0049217e cam=0b9a21b8 (render cam) running=524 paused=0
+f=1200 setxform caller ret=1003ce86 cam=0b9a21b8 (render cam) running=260 paused=0
+f=1200 setxform caller ret=1003ced5 cam=0b9a21b8 (render cam) running=260 paused=0
+f=1200 setxform caller ret=1003b80c cam=0b9a21b8 (render cam) running=260 paused=0
+f=1200 setxform caller ret=1003b876 cam=0b9a21b8 (render cam) running=260 paused=0
+f=1200 setxform caller ret=1003f19d cam=0b9a21b8 (render cam) running=780 paused=0
+f=1200 setxform caller ret=1003f20c cam=0b9a21b8 (render cam) running=780 paused=0
+f=1800 setxform caller ret=1003ce86 cam=034fae80 running=7 paused=0
+f=1800 setxform caller ret=1003ced5 cam=034fae80 running=7 paused=0
+f=1800 setxform caller ret=1003b80c cam=034fae80 running=7 paused=0
+f=1800 setxform caller ret=1003b876 cam=034fae80 running=7 paused=0
+f=1800 setxform caller ret=0049217e cam=078cfdb8 running=935 paused=0
+f=1800 setxform caller ret=1003ce86 cam=078cfdb8 running=935 paused=0
+f=1800 setxform caller ret=1003ced5 cam=078cfdb8 running=935 paused=0
+f=1800 setxform caller ret=1003b80c cam=078cfdb8 running=935 paused=0
+f=1800 setxform caller ret=1003b876 cam=078cfdb8 running=935 paused=0
+f=1800 setxform caller ret=0049217e cam=0b9a21b8 (render cam) running=1724 paused=0
+f=1800 setxform caller ret=1003ce86 cam=0b9a21b8 (render cam) running=860 paused=0
+f=1800 setxform caller ret=1003ced5 cam=0b9a21b8 (render cam) running=860 paused=0
+f=1800 setxform caller ret=1003b80c cam=0b9a21b8 (render cam) running=860 paused=0
+f=1800 setxform caller ret=1003b876 cam=0b9a21b8 (render cam) running=860 paused=0
+f=1800 setxform caller ret=1003f19d cam=0b9a21b8 (render cam) running=2580 paused=0
+f=1800 setxform caller ret=1003f20c cam=0b9a21b8 (render cam) running=2580 paused=0
+f=2117 clock-pause mode 1
+f=2268 PAUSE elapsed=23991 dt=0.017 mouse=(0 0) block=1 pos=(-1268.0 -225.7 4692.0) cam=(-1268.0 -154.9 4692.0) skipped=0
+f=2268 paused elapsed=23991 dt=0.017 mouse=(0 0) block=1 pos=(-1268.0 -225.7 4692.0) cam=(-1268.0 -154.9 4692.0) skipped=0
+f=2292 clock-pause mode 0
+f=2298 paused elapsed=23991 dt=0.017 mouse=(0 0) block=1 pos=(0.0 0.0 0.0) cam=(0.0 0.0 0.0) skipped=30
+f=2328 paused elapsed=23991 dt=0.017 mouse=(0 0) block=1 pos=(0.0 0.0 0.0) cam=(0.0 0.0 0.0) skipped=60
+f=2358 paused elapsed=23991 dt=0.017 mouse=(0 0) block=1 pos=(0.0 0.0 0.0) cam=(0.0 0.0 0.0) skipped=90
+f=2387 setxform caller ret=1003ce86 cam=034fae80 running=7 paused=0
+f=2387 setxform caller ret=1003ced5 cam=034fae80 running=7 paused=0
+f=2387 setxform caller ret=1003b80c cam=034fae80 running=7 paused=0
+f=2387 setxform caller ret=1003b876 cam=034fae80 running=7 paused=0
+f=2387 setxform caller ret=0049217e cam=078cfdb8 running=935 paused=0
+f=2387 setxform caller ret=1003ce86 cam=078cfdb8 running=935 paused=0
+f=2387 setxform caller ret=1003ced5 cam=078cfdb8 running=935 paused=0
+f=2387 setxform caller ret=1003b80c cam=078cfdb8 running=935 paused=0
+f=2387 setxform caller ret=1003b876 cam=078cfdb8 running=935 paused=0
+f=2387 setxform caller ret=0049217e cam=0b9a21b8 running=2660 paused=28
+f=2387 setxform caller ret=1003ce86 cam=0b9a21b8 running=1328 paused=28
+f=2387 setxform caller ret=1003ced5 cam=0b9a21b8 running=1328 paused=28
+f=2387 setxform caller ret=1003b80c cam=0b9a21b8 running=1328 paused=28
+f=2387 setxform caller ret=1003b876 cam=0b9a21b8 running=1328 paused=28
+f=2387 setxform caller ret=1003f19d cam=0b9a21b8 running=3984 paused=84
+f=2387 setxform caller ret=1003f20c cam=0b9a21b8 running=3984 paused=84
+f=2388 paused elapsed=23991 dt=0.017 mouse=(0 0) block=1 pos=(0.0 0.0 0.0) cam=(0.0 0.0 0.0) skipped=120
+f=2400 setxform caller ret=1003ce86 cam=034fae80 running=7 paused=0
+f=2400 setxform caller ret=1003ced5 cam=034fae80 running=7 paused=0
+f=2400 setxform caller ret=1003b80c cam=034fae80 running=7 paused=0
+f=2400 setxform caller ret=1003b876 cam=034fae80 running=7 paused=0
+f=2400 setxform caller ret=0049217e cam=078cfdb8 running=935 paused=0
+f=2400 setxform caller ret=1003ce86 cam=078cfdb8 running=935 paused=0
+f=2400 setxform caller ret=1003ced5 cam=078cfdb8 running=935 paused=0
+f=2400 setxform caller ret=1003b80c cam=078cfdb8 running=935 paused=0
+f=2400 setxform caller ret=1003b876 cam=078cfdb8 running=935 paused=0
+f=2400 setxform caller ret=0049217e cam=0b9a21b8 running=2660 paused=28
+f=2400 setxform caller ret=1003ce86 cam=0b9a21b8 running=1328 paused=28
+f=2400 setxform caller ret=1003ced5 cam=0b9a21b8 running=1328 paused=28
+f=2400 setxform caller ret=1003b80c cam=0b9a21b8 running=1328 paused=28
+f=2400 setxform caller ret=1003b876 cam=0b9a21b8 running=1328 paused=28
+f=2400 setxform caller ret=1003f19d cam=0b9a21b8 running=3984 paused=84
+f=2400 setxform caller ret=1003f20c cam=0b9a21b8 running=3984 paused=84
+f=2418 paused elapsed=23991 dt=0.017 mouse=(0 0) block=1 pos=(0.0 0.0 0.0) cam=(0.0 0.0 0.0) skipped=150
+f=2448 paused elapsed=23991 dt=0.017 mouse=(0 0) block=1 pos=(0.0 0.0 0.0) cam=(0.0 0.0 0.0) skipped=180
+f=2478 paused elapsed=23991 dt=0.017 mouse=(0 0) block=1 pos=(0.0 0.0 0.0) cam=(0.0 0.0 0.0) skipped=210
+f=2508 paused elapsed=23991 dt=0.017 mouse=(0 0) block=1 pos=(0.0 0.0 0.0) cam=(0.0 0.0 0.0) skipped=240
+f=2538 paused elapsed=23991 dt=0.017 mouse=(0 0) block=1 pos=(0.0 0.0 0.0) cam=(0.0 0.0 0.0) skipped=270
+f=2568 paused elapsed=23991 dt=0.017 mouse=(0 0) block=1 pos=(0.0 0.0 0.0) cam=(0.0 0.0 0.0) skipped=300
+f=2598 paused elapsed=23991 dt=0.017 mouse=(0 0) block=1 pos=(0.0 0.0 0.0) cam=(0.0 0.0 0.0) skipped=330
+f=2628 paused elapsed=23991 dt=0.017 mouse=(0 0) block=1 pos=(0.0 0.0 0.0) cam=(0.0 0.0 0.0) skipped=360
+f=2658 paused elapsed=23991 dt=0.017 mouse=(0 0) block=1 pos=(0.0 0.0 0.0) cam=(0.0 0.0 0.0) skipped=390
+f=2688 paused elapsed=23991 dt=0.017 mouse=(0 0) block=1 pos=(0.0 0.0 0.0) cam=(0.0 0.0 0.0) skipped=420
+f=2718 paused elapsed=23991 dt=0.017 mouse=(0 0) block=1 pos=(0.0 0.0 0.0) cam=(0.0 0.0 0.0) skipped=450
+f=2748 paused elapsed=23991 dt=0.017 mouse=(0 0) block=1 pos=(0.0 0.0 0.0) cam=(0.0 0.0 0.0) skipped=480
+f=2778 paused elapsed=23991 dt=0.017 mouse=(0 0) block=1 pos=(0.0 0.0 0.0) cam=(0.0 0.0 0.0) skipped=510
+f=2808 paused elapsed=23991 dt=0.017 mouse=(0 0) block=1 pos=(0.0 0.0 0.0) cam=(0.0 0.0 0.0) skipped=540
+f=2838 paused elapsed=23991 dt=0.017 mouse=(0 0) block=1 pos=(0.0 0.0 0.0) cam=(0.0 0.0 0.0) skipped=570
+f=2868 paused elapsed=23991 dt=0.017 mouse=(0 0) block=1 pos=(0.0 0.0 0.0) cam=(0.0 0.0 0.0) skipped=600
+f=2898 paused elapsed=23991 dt=0.017 mouse=(0 0) block=1 pos=(0.0 0.0 0.0) cam=(0.0 0.0 0.0) skipped=630
+f=2928 paused elapsed=23991 dt=0.017 mouse=(0 0) block=1 pos=(0.0 0.0 0.0) cam=(0.0 0.0 0.0) skipped=660
+f=2958 paused elapsed=23991 dt=0.017 mouse=(0 0) block=1 pos=(0.0 0.0 0.0) cam=(0.0 0.0 0.0) skipped=690
+f=2988 paused elapsed=23991 dt=0.017 mouse=(0 0) block=1 pos=(0.0 0.0 0.0) cam=(0.0 0.0 0.0) skipped=720
+f=3000 setxform caller ret=1003ce86 cam=034fae80 running=7 paused=0
+f=3000 setxform caller ret=1003ced5 cam=034fae80 running=7 paused=0
+f=3000 setxform caller ret=1003b80c cam=034fae80 running=7 paused=0
+f=3000 setxform caller ret=1003b876 cam=034fae80 running=7 paused=0
+f=3000 setxform caller ret=0049217e cam=078cfdb8 running=935 paused=0
+f=3000 setxform caller ret=1003ce86 cam=078cfdb8 running=935 paused=0
+f=3000 setxform caller ret=1003ced5 cam=078cfdb8 running=935 paused=0
+f=3000 setxform caller ret=1003b80c cam=078cfdb8 running=935 paused=0
+f=3000 setxform caller ret=1003b876 cam=078cfdb8 running=935 paused=0
+f=3000 setxform caller ret=0049217e cam=0b9a21b8 running=2660 paused=28
+f=3000 setxform caller ret=1003ce86 cam=0b9a21b8 running=1328 paused=28
+f=3000 setxform caller ret=1003ced5 cam=0b9a21b8 running=1328 paused=28
+f=3000 setxform caller ret=1003b80c cam=0b9a21b8 running=1328 paused=28
+f=3000 setxform caller ret=1003b876 cam=0b9a21b8 running=1328 paused=28
+... (truncated from 22 MB: the paused state logged during a level load)
