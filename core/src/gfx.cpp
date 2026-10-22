@@ -69,6 +69,7 @@ int __cdecl RenderWorldDetour(void* engine, void* world, void* camera, void* a4)
         g_world = g_lastWorld = world;
         g_camera = camera;
     }
+    camera::BeforeWorldRender(camera);  // the free-camera override goes on here (D34)
     return g_origRenderWorld(engine, world, camera, a4);
 }
 

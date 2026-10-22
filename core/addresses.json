@@ -1662,6 +1662,15 @@
           "ghidra": "g_gameClock_timeSource 0x00502AF8 (+0x40): nonzero = SubTimer[1] drives Tick; MainWindow::RunMessageLoop 0x004994E6 picks the subtimer to pause with it",
           "note": "which subtimer to pause"
         },
+        "clock.f_paused": {
+          "module": "field",
+          "rva": "0x1C",
+          "chain": [],
+          "type": "u8",
+          "sig": null,
+          "ghidra": "GameClock subtimer +0x1C: paused byte. GameClock::Pause 0x0042BF20 sets it (if clear) with a timeGetTime stamp at +0x0C; Resume 0x0042BF40 clears it and adds the span to +0x08; ComputeFrameDelta 0x0042BF70 skips its body while it is set (0x0042BF74 JNZ)",
+          "note": "pause service: re-pause after the game's own alt-tab Resume"
+        },
         "controls.mouse_x": {
           "module": "exe",
           "rva": "0x103A78",

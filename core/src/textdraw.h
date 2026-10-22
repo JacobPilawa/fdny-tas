@@ -50,6 +50,9 @@ void SetPalette(int panel, const uint32_t* fg, int nFg, const uint32_t* bg4);
 void Set(int panel, const char (*lines)[kLineLen], const uint8_t (*attrs)[kLineLen], int n);
 void SetLines(int panel, const char* const* lines, int n);  // plain text, the panel's default tag
 void Show(int panel, bool visible);
+// A view-relative panel (e.g. an arrow relative to the player's view) is meaningless to a
+// free camera: not drawn while the game is paused (pause service, D35).
+void HideWhilePaused(int panel, bool on);
 
 // Core service: registers the draw as a late frame-end subscriber, so it runs
 // after every module's frame-end update of its panels.

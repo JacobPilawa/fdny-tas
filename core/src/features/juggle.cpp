@@ -421,7 +421,7 @@ bool Init() {
     cmd::SetPracticeOnly("fd_juggle");
     g_panel = textdraw::Create("juggle", textdraw::CENTER, 0, 30, 1, textdraw::C_WHITE | textdraw::A_BOLD,
                                textdraw::STYLE_TEXT_ONLY);
-    if (g_panel >= 0) textdraw::Show(g_panel, false);
+    if (g_panel >= 0) textdraw::Show(g_panel, false), textdraw::HideWhilePaused(g_panel, true);  // D35
     hooks::OnFrameEnd(FrameEnd);
 #ifdef FDCORE_DEBUG
     cmd::RegisterCommand("fd_dbg_setpos", "(Debug test hook) move the player: x y z [yaw [o2]]", CmdSetPos);

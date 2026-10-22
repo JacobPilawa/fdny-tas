@@ -24,4 +24,21 @@ void OnSet(SetFn fn);
 bool Reapply();
 float LastGameFov();
 
+// World transform override (fd_pause free camera; D34, evidence/freecam). geXForm3d:
+// rows AX..CZ, then the translation. While set, it is put on the camera of every
+// geEngine_RenderWorld (gfx's detour calls BeforeWorldRender): set any earlier in the
+// frame, the render rewrites the camera (probe runs p2-p4). Null = off; the game's own
+// per-frame camera set takes over again.
+struct XForm {
+    float m[9];
+    float t[3];
+};
+bool WorldOverrideAvailable();
+void SetWorldOverride(const XForm* x);
+bool WorldOverrideActive();
+// The game's transform on the last world render without an override (the free camera's
+// start pose). False before the first world render.
+bool LastWorldXForm(XForm* out);
+void BeforeWorldRender(void* camera);  // gfx only
+
 } // namespace fdcore::camera

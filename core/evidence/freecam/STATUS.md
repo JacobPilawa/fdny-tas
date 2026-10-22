@@ -19,7 +19,7 @@ Owner request (2026-10-22): a practice-only pause with a free-flying camera.
 | 0 Preconditions (core_loads) | **done**: PASS in suite s0181 (2026-10-22) |
 | 1 Spike: Ghidra + live probes, verdict | **done**: feasible; the override goes at geEngine_RenderWorld (README.md) |
 | 2 addresses.json entries | **done**: 10 entries, 137 total; addr_verified PASS |
-| 3 Core: sim-pause service + camera override | pending |
+| 3 Core: sim-pause service + camera override | **done**: `pause` service, camera override, textdraw HideWhilePaused; pause_service PASS 2/2; regressions PASS |
 | 4 Feature src/features/freecam.cpp | pending |
 | 5 Suite test tests/freecam.yaml | pending |
 | 6 Suite, docs, version, commit, owner report | pending |
@@ -158,4 +158,56 @@ Owner request (2026-10-22): a practice-only pause with a free-flying camera.
     `camera::LastWorldXForm()` for the start pose.
   - DECISIONS entries. Regression: fov_sets_camera, fov_parity_reference, text_panels,
     text_alpha, triggers, glitch_records.
+- it3 (step 3, done):
+  - **`src/pause.{h,cpp}`** (new core service, started in core.cpp after patches):
+    - owns the `sim.tick_subsystems` hook (group "pause"), enabled only while paused;
+    - `Set(on, why)` / `Active()` / `PausedFrames()`;
+    - GameClock::Pause / Resume on the active subtimer, re-paused each frame if the
+      game's alt-tab Resume cleared it (new field entry `clock.f_paused` +0x1C, 138
+      entries);
+    - `controls.block_input` held while paused, released on resume unless the console
+      is open;
+    - a ~60 fps QPC + Sleep(1) cap (the 1/60 s tick count uses 32-bit division; D1 has
+      no 64-bit helpers);
+    - ends itself on a level load, on game state != 1 (frame begin), and **from its own
+      TickSubsystems detour**.
+  - **camera:** `SetWorldOverride` / `WorldOverrideActive` / `LastWorldXForm`, applied
+    in `BeforeWorldRender(camera)`, which gfx's RenderWorld detour calls (core to core).
+    It uses the Genesis Set/GetWorldSpaceXForm exports.
+  - **textdraw:** `HideWhilePaused(panel)`. fd_juggle's arrow panel sets it (D35).
+  - Debug pipes (R6): `pause on|off` and `camera_override <dy>|off`, applied on the game
+    thread.
+  - **Bug found and fixed:** a game `loadmap` typed while paused deadlocked.
+    - While loading, RenderFrame (and so the frame events) stops.
+    - The load waits for the skipped simulation step.
+    - Fix: the detour checks `game.state` and resumes.
+    - Run fc3 failed this way, reproduced in fc3b; fc3c and later pass.
+  - **Console while paused works:** FDNYCore lines and `echo` ran; console.state stayed
+    0. Enter is handled synchronously by Console::OnKeyDown 0x00428C50 from WM_KEYDOWN
+    (Ghidra; `tests/probes/probe_pause_console.yaml` run pc1).
+  - **tests/pause_service.yaml:**
+    - paused 4 s: victims, mission timer, clock and player position unchanged
+      (exactly); the hook on, the block on, the clock paused;
+    - the camera override lifts the view 150 u (screenshot);
+    - on resume: no clock jump, the hook off, the block off;
+    - a loadmap while paused resumes ("level change").
+    - PASS 2/2 (fc3d1, fc3d2).
+  - Regressions PASS (`fc3reg`): core_loads, fov_sets_camera, fov_parity_reference,
+    text_panels, text_alpha, triggers, hooks_frame, hooks_toggle, glitch_records,
+    fire_juggle.
+  - DECISIONS D34 (pause + camera override design, rejected options, glitch tick side
+    effect) and D35 (view-relative panels).
+- Next (it4, step 4): `src/features/freecam.cpp`.
+  - `fd_pause` cvar (practice-only, default 0, default key P): its onChange calls
+    pause::Set. Profile run resets it to 0, which resumes.
+  - Free camera:
+    - start = `camera::LastWorldXForm`; yaw/pitch derived from the rotation;
+    - movement each paused frame from GetAsyncKeyState W/A/S/D/E/Q with Shift/Ctrl, only
+      when `binds::KeysLive()`;
+    - mouse from `controls.mouse_x` / `mouse_y`;
+    - `fd_freecam_speed` 400 and `fd_freecam_sens`;
+    - real time from QPC.
+  - The geXForm3d axis convention (which row is forward) must be checked against the
+    measured yaw convention.
+  - Debug pipe `freecam`.
 

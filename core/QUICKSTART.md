@@ -218,7 +218,8 @@ and everything else still compiles and runs.
 | `addr` | address table: verified addresses by Id (never raw addresses) |
 | `hooks` | `Create` (inline hook in a group), `OnFrameBegin` / `OnFrameEnd` / `OnLevelLoad`; `OnFrameEndLate` is for drawing |
 | `cmd`, `console`, `binds` | variables, commands, config persistence (`RegisterConfigWriter`), `SetPracticeOnly` (refused in `fd_profile run`), console output; `binds::BindDefault(key, line)` for a feature's default key (the player's binds win) |
-| `camera` | view size; one FOV filter (`fov` uses it) |
+| `camera` | view size; one FOV filter (`fov` uses it); a world-transform override (`SetWorldOverride`, `LastWorldXForm`: the free camera, applied at the world render) |
+| `pause` | `Set(on, why)` / `Active()`: skip the simulation step and pause the game clock (input blocked, ~60 fps cap); ends itself on leaving the level. `textdraw::HideWhilePaused` for view-relative panels |
 | `state` | the frame's player snapshot |
 | `gfx`, `textdraw` | in-frame drawing (below) |
 | `profile` | run/practice gates + watermark (reads `SetPracticeOnly`) |

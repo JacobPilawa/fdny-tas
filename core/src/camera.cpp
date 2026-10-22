@@ -1,8 +1,11 @@
 #include "camera.h"
 
+#include <windows.h>
+
 #include "addr.h"
 #include "hooks.h"
 #include "log.h"
+#include "testpipe.h"
 
 namespace fdcore::camera {
 namespace {
@@ -18,6 +21,17 @@ FovFilter g_filter = nullptr;
 constexpr int kMaxSubs = 4;
 SetFn g_subs[kMaxSubs];
 int g_nSubs = 0;
+
+// World transform override (Genesis exports; fastcall ECX = camera).
+using SetXFormFn = int(__fastcall*)(void* camera, const XForm* x);
+using GetXFormFn = const XForm*(__fastcall*)(void* camera);
+SetXFormFn g_setXf = nullptr;
+GetXFormFn g_getXf = nullptr;
+XForm g_override = {}, g_lastXf = {};
+bool g_overrideOn = false, g_haveLastXf = false;
+#ifdef FDCORE_DEBUG
+volatile long g_testLift = 0x7fffffff;  // Debug pipe `camera_override <dy>|off` (none pending)
+#endif
 
 int __fastcall SetAttributesDetour(void* camera, const int* rect, float fov) {
     const float use = g_filter ? g_filter(rect, fov) : fov;
@@ -40,7 +54,27 @@ bool Init() {
                        reinterpret_cast<void**>(&g_orig)) ||
         !hooks::SetEnabled("camera", true))
         return false;
-    log::Info("camera: ready (geCamera_SetAttributes hooked)");
+    if (addr::Usable(Id::genesis_camera_set_world_xform) && addr::Usable(Id::genesis_camera_get_world_xform)) {
+        g_setXf = reinterpret_cast<SetXFormFn>(addr::ExportAddress(Id::genesis_camera_set_world_xform));
+        g_getXf = reinterpret_cast<GetXFormFn>(addr::ExportAddress(Id::genesis_camera_get_world_xform));
+    }
+#ifdef FDCORE_DEBUG
+    testpipe::Register("camera_override", [](const char* args, char* resp, int cap) {
+        (void)cap;
+        while (*args == ' ') ++args;
+        if (args[0] == 'o' && args[1] == 'f') InterlockedExchange(&g_testLift, 0x7ffffffe);
+        else if (args[0]) {
+            long v = 0, sign = 1;
+            if (*args == '-') sign = -1, ++args;
+            while (*args >= '0' && *args <= '9') v = v * 10 + (*args++ - '0');
+            InterlockedExchange(&g_testLift, sign * v);
+        }
+        wsprintfA(resp, "available=%d active=%d have_last=%d last=%ld,%ld,%ld", WorldOverrideAvailable(),
+                  g_overrideOn, g_haveLastXf, static_cast<long>(g_lastXf.t[0]), static_cast<long>(g_lastXf.t[1]),
+                  static_cast<long>(g_lastXf.t[2]));
+    });
+#endif
+    log::Info("camera: ready (geCamera_SetAttributes hooked; world override %s)", g_setXf ? "available" : "unavailable");
     return true;
 }
 
@@ -67,5 +101,37 @@ bool Reapply() {
 }
 
 float LastGameFov() { return g_lastGameFov; }
+
+bool WorldOverrideAvailable() { return g_setXf && g_getXf; }
+
+void SetWorldOverride(const XForm* x) {
+    if (x) g_override = *x;
+    g_overrideOn = x && g_setXf;
+}
+
+bool WorldOverrideActive() { return g_overrideOn; }
+
+bool LastWorldXForm(XForm* out) {
+    if (!g_haveLastXf) return false;
+    *out = g_lastXf;
+    return true;
+}
+
+void BeforeWorldRender(void* camera) {
+    if (!camera || !g_getXf) return;
+#ifdef FDCORE_DEBUG
+    // Test hook: the game's last transform lifted by dy, or off (the free camera's path).
+    if (const long dy = InterlockedExchange(&g_testLift, 0x7fffffff); dy != 0x7fffffff) {
+        XForm x = g_lastXf;
+        x.t[1] += static_cast<float>(dy);
+        SetWorldOverride(dy == 0x7ffffffe ? nullptr : &x);
+    }
+#endif
+    if (g_overrideOn) {
+        g_setXf(camera, &g_override);
+        return;
+    }
+    if (const XForm* x = g_getXf(camera)) g_lastXf = *x, g_haveLastXf = true;
+}
 
 } // namespace fdcore::camera

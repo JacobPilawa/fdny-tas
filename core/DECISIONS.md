@@ -101,6 +101,24 @@ later session might "simplify" away; change one only with the owner's approval
   - The glyph check holds an O2 lock on clean ground and stands the player 30 u off the frozen spot, so every view direction has an exact expected answer.
   - The harness's `assert_juggle` recomputes the arrow from its own memory reads, rather than trusting the pipe.
 
+- **D34 Pause = skip `GameSession::TickSubsystems` + `GameClock::Pause` (core service `pause`); the free camera is a world-transform override in `camera`, applied from gfx's `geEngine_RenderWorld` detour** (fd_pause; spike `freecam/README.md`).
+  - **Why this site:** RunFrame runs the clock tick, the input poll, TickSubsystems (every entity list, the spawn/callback queues, the sound update), then RenderFrame. Skipping the one call froze the player, victims, the mission timer and the clock while rendering went on (probe runs p2-p5).
+  - **The clock:** the game's own Pause/Resume on the active subtimer (as on alt-tab).
+    - It stops elapsed time and the render-side particle keyframes (`ParticleNode::AdvanceSpawn` reads `g_gameTimeMs`).
+    - The first frame after resume has a normal delta.
+    - Its 60 FPS Sleep cap is in the paused `ComputeFrameDelta`, so the service caps paused frames at ~60 fps itself.
+    - The game's alt-tab Resume would un-pause the subtimer, so it is paused again each paused frame.
+  - **Input:** `controls.block_input` is held while paused. It only gates the game's action queries; polling and the mouse sums go on. On resume it is released unless the console is open.
+  - **Hook state:** the hook is enabled only while paused (no cost otherwise; group toggle).
+  - **Ending a pause:** leaving the level (game state != 1, a level load) ends it.
+  - **Camera:** a transform set on the render camera at frame start reads back but is rewritten inside the render before the world is drawn (p2-p4). Set on the camera passed to `geEngine_RenderWorld` it shows (p5). gfx owns that hook, so it calls `camera::BeforeWorldRender` (core to core). Clearing the override hands the camera back to the game's per-frame set.
+  - **Known side effect:** the collision overlay's tick counter (`glitch.tick`, after TickSubsystems in RunFrame) still counts paused frames; nothing it records moves then.
+  - Rejected:
+    - dt = 0: per-frame logic and 1/dt;
+    - the game's own spectator mode (F7): it moves the player, needs Think, and changes the timer, burn and triggers;
+    - a camera set at RenderFrame entry (above).
+- **D35 View-relative panels hide while paused (`textdraw::HideWhilePaused`)**. An arrow relative to the player's view (fd_juggle) means nothing to a free camera. The panel declares it, and textdraw skips it while `pause::Active()`, so the pause feature never names another feature (R2).
+
 ## Process
 
 - **D21 Tests are never weakened or deleted to pass.** An environmental failure (slow VM frame rate, a race in a read) is rerun and reported with evidence, for example the previous version failing identically.

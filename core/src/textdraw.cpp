@@ -7,6 +7,7 @@
 #include "gfx.h"
 #include "hooks.h"
 #include "log.h"
+#include "pause.h"
 
 namespace fdcore::textdraw {
 namespace {
@@ -36,6 +37,7 @@ struct Panel {
     int nFg;
     uint32_t bg[4];
     bool visible;
+    bool pauseHidden;   // HideWhilePaused: not drawn while pause::Active()
     char text[kMaxLines][kLineLen];
     uint8_t attr[kMaxLines][kLineLen];
     int n;
@@ -111,7 +113,7 @@ void Draw() {
         const bool textOnly = p.style == STYLE_TEXT_ONLY;
         const gfx::AlphaKey keys[] = {
             {p.bg[0], textOnly ? static_cast<uint8_t>(0) : alpha}, {p.bg[1], high}, {p.bg[2], high}, {p.bg[3], high}};
-        if (!p.visible || p.n <= 0) continue;
+        if (!p.visible || p.n <= 0 || (p.pauseHidden && pause::Active())) continue;
         if (p.dirty && (!p.rendered || g_frame - p.lastRender >= static_cast<unsigned long>(p.minFrames))) {
             if (!Render(p)) {
                 Fail(p, "GDI could not render it");
@@ -218,6 +220,10 @@ void SetLines(int panel, const char* const* lines, int n) {
     if (n > kMaxLines) n = kMaxLines;
     for (int i = 0; i < n; ++i) lstrcpynA(buf[i], lines[i], kLineLen);
     Set(panel, buf, nullptr, n);
+}
+
+void HideWhilePaused(int panel, bool on) {
+    if (panel >= 0 && panel < g_nPanels) g_panels[panel].pauseHidden = on;
 }
 
 void Show(int panel, bool visible) {

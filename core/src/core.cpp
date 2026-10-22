@@ -15,6 +15,7 @@
 #include "log.h"
 #include "modules.h"
 #include "patches.h"
+#include "pause.h"
 #include "profile.h"
 #include "textdraw.h"
 #include "state.h"
@@ -103,6 +104,7 @@ DWORD WINAPI InitThread(LPVOID) {
         fdcore::camera::Init();
         fdcore::state::Init();
         fdcore::patches::Init();
+        fdcore::pause::Init();     // after state (it reads the level state each paused frame)
         fdcore::textdraw::Init();  // draws late in the frame, after every module's update
         fdcore::profile::Init();   // gates read cmd::IsPracticeOnly at use time
     }
