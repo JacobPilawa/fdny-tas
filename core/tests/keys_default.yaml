@@ -49,9 +49,18 @@ steps:
   - key: {key: z, hold: 0.2}
   - wait_s: 0.3
   - assert_pipe_stat: {cmd: glitch_box, key: frozen, equals: 0}
+  # G off and on again always shows the boxes, even after a B hide (owner 2026-10-22)
+  - key: {key: b, hold: 0.2}
+  - wait_s: 0.3
+  - assert_pipe_stat: {cmd: glitch_box, key: hidden, equals: 1}
   - key: {key: g, hold: 0.1}
   - wait_s: 0.5
   - assert_log: {contains: "console> fd_hud_glitch 0"}
+  - key: {key: g, hold: 0.1}
+  - wait_s: 1
+  - assert_pipe_stat: {cmd: glitch_box, key: hidden, equals: 0}
+  - key: {key: g, hold: 0.1}
+  - wait_s: 0.5
   # T / Y / U: trigger boxes, all triggers, x-ray
   - key: {key: t, hold: 0.1}
   - wait_s: 0.5
@@ -85,6 +94,17 @@ steps:
   - wait_pipe: {cmd: pause, key: active, equals: 1, timeout: 3}
   - key: {key: p, hold: 0.1}
   - wait_pipe: {cmd: pause, key: active, equals: 0, timeout: 3}
+  # FDNYCore.cfg holds only changes: the variables set above, not the default binds
+  # (owner 2026-10-22: every default bind was written out); a changed default is written
+  - console: "fd_writeconfig"
+  - assert_file: {path: FDNYCore.cfg, absent: "bind j"}
+  - assert_file: {path: FDNYCore.cfg, absent: "bind p"}
+  - console: 'bind j "toggle fd_hud_player"'
+  - assert_file: {path: FDNYCore.cfg, contains: "bind j \"toggle fd_hud_player\""}
+  - console: 'bind j "toggle fd_juggle"'
+  - assert_file: {path: FDNYCore.cfg, absent: "bind j"}
+  - console: "unbind y"
+  - assert_file: {path: FDNYCore.cfg, contains: "unbind y"}
   # practice-only keys are refused in run
   - console: "fd_profile run"
   - wait_s: 1

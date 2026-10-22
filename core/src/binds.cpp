@@ -43,6 +43,7 @@ constexpr int kVkCount = 256;
 char g_binds[kVkCount][160];
 bool g_prevDown[kVkCount];
 bool g_isDefault[kVkCount];  // a feature's default key (BindDefault)
+char g_default[kVkCount][160];  // ... and its line: FDNYCore.cfg only records changes from it
 
 // Name of a VK for display / FDNYCore.cfg; letters and digits are themselves.
 void VkName(int vk, char* out) {
@@ -182,6 +183,7 @@ bool BindDefault(const char* key, const char* line) {
         return false;
     }
     lstrcpynA(g_binds[vk], line, sizeof(g_binds[vk]));
+    lstrcpynA(g_default[vk], line, sizeof(g_default[vk]));
     g_isDefault[vk] = true;
     return true;
 }
@@ -199,6 +201,9 @@ int AppendConfig(char* out, int cap) {
     char name[16];
     for (int vk = 0; vk < kVkCount; ++vk) {
         if (!g_binds[vk][0] && !g_isDefault[vk]) continue;
+        // A default key still on its default line is not written: the file holds only the
+        // player's changes, so a later default change reaches them (owner, 0.19.0).
+        if (g_isDefault[vk] && lstrcmpA(g_binds[vk], g_default[vk]) == 0) continue;
         if (o + 200 > cap) break;
         VkName(vk, name);
         if (g_binds[vk][0]) o += wsprintfA(out + o, "bind %s \"%s\"\r\n", name, g_binds[vk]);

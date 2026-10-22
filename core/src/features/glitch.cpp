@@ -566,6 +566,9 @@ void FrameEnd() {
 }
 void OnToggle(cmd::Cvar& v) {
     if (v.value[0] != '0') {
+        // Turning the HUD on always shows it (owner 2026-10-22: a hide from B outlived G off/on,
+        // so G alone looked dead).
+        g_hidden = g_frozen = false;
         if (!Install()) console::Print("fd_hud_glitch: hooks could not be installed (see FDNYCore.log)");
     } else {
         Uninstall();

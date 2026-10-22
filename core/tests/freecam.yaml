@@ -95,11 +95,15 @@ steps:
   - wait_s: 0.3
   - assert_pipe_stat: {cmd: freecam, key: rate, min: 3960, max: 4040}
   - screenshot: flew_up
-  # mouse: 200 counts right at 0.15 deg/count = 30 degrees
+  # mouse: 200 counts right at 0.075 deg/count = 15 degrees, and to the RIGHT: yaw grows to
+  # the left (forward (sin, cos), right (-cos, sin)), so it falls by 15 (owner 2026-10-22:
+  # sensitivity halved; left and right were swapped)
   - pipe: "freecam reset"
+  - sample_pipe: {cmd: freecam, as: before_turn}
   - mouse_rel: [200, 0]
   - wait_s: 0.5
-  - assert_pipe_stat: {cmd: freecam, key: turn, min: 295, max: 305}
+  - assert_pipe_stat: {cmd: freecam, key: turn, min: 145, max: 155}
+  - assert_pipe_stat: {cmd: freecam, key: yaw, min: -155, max: -145, since: before_turn}
   - screenshot: turned
   # the player never moved, the clock never ran
   - assert_pipe_stat: {cmd: freecam, key: px, equals: 0, since: p0}

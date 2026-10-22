@@ -22,7 +22,7 @@ Owner request (2026-10-22): a practice-only pause with a free-flying camera.
 | 3 Core: sim-pause service + camera override | **done**: `pause` service, camera override, textdraw HideWhilePaused; pause_service PASS 2/2; regressions PASS |
 | 4 Feature src/features/freecam.cpp | **done**: fd_pause / fd_pause_toggle (key P), free camera; tests/freecam.yaml PASS (fc4b) |
 | 5 Suite test tests/freecam.yaml | **done**: sensitivity, arrow hidden, Esc blocked; PASS (fc5b) |
-| 6 Suite, docs, version, commit, owner report | pending |
+| 6 Suite, docs, version, commit, owner report | **in progress**: docs written; suite s0190 running |
 
 ## Log
 

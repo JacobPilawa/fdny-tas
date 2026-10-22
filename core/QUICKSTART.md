@@ -94,7 +94,7 @@ console. Binds are saved with the config.
 |---|---|
 | `fd_hud_player 1` (**H**) | top-left: position, velocity, XY speed, player state, screen state |
 | `fd_hud_glitch 1` (**G**) | top-right: collision-warp boxes (what you're touching, warp prediction) |
-| `fd_glitch_hide` (**B**) | show / hide the boxes |
+| `fd_glitch_hide` (**B**) | show / hide the boxes (G on always shows them again) |
 | `fd_glitch_freeze` (**Z**) | freeze the boxes; logging continues |
 | `fd_glitch_clear` (**X**) | clear box history and the last warp (the note still reads "(F12)", the original overlay's text) |
 | `fd_tp_save` (**K**) | save position + view (pitch/yaw) |
@@ -104,6 +104,9 @@ console. Binds are saved with the config.
 | `fd_triggers_xray 1` (**U**) | trigger boxes show through walls (default: walls hide them) |
 | `fd_triggers_list` | the map's triggers in the console: class, open/shut, name, box corners |
 | `fd_juggle 1` (**J**) | fire-juggling arrow, 30 px below the screen centre, no background: where a carried survivor would land if you passed out now |
+| `fd_pause 1` / `fd_pause_toggle` (**P**) | pause the game and fly a free camera; P again resumes and the view snaps back to the player |
+| `fd_freecam_speed <u/s>` | free camera speed (default 400, the run speed; Shift x4, Ctrl x0.25) |
+| `fd_freecam_sens <deg>` | free camera mouse look, degrees per mouse count (default 0.075) |
 
 Trigger boxes are read from the loaded map every level (no files). A box you are
 standing in is drawn at 25%, so the whole view is tinted its colour. T is a default
@@ -129,6 +132,18 @@ position is logged as `juggle: spot written elsewhere (...)` (the respawn does t
 puts the spot on the checkpoint). Standing still, a spot frozen under your feet reads as
 `-`; the survivor would land at your feet either way. Background: research.db KB article
 `fire-juggling`.
+
+Pause + free camera (`fd_pause`, key **P**):
+- Paused, nothing in the game runs: the player, victims, fires, burn and O2, the mission
+  timer and the game clock all stand still (the game's own alt-tab clock pause). Drawing
+  and the FDNYCore overlays go on; the fire-juggling arrow hides (it points relative to
+  the player's view).
+- The free camera starts where your view was: W/S along the view, A/D sideways, E up,
+  Q down, Shift x4, Ctrl x0.25, mouse to look. No collision: it flies through walls.
+- Game keys, Esc included, don't reach the game while paused. FDNYCore keys and the
+  console still work.
+- P again resumes: the view snaps back to the player, the timer counts again, no jump.
+- Loading a level (or a `loadmap` typed while paused) ends the pause. Practice-only.
 
 Teleporter rules: one slot, in memory only (gone on exit); only works on the map
 it was saved on ("saved on X, this is Y -- refused"); only inside a level.
@@ -211,6 +226,14 @@ can still fail on a slow VM.
 - Teleporter: single slot, no stance.
 - In-frame text verified windowed through dgVoodoo only; real fullscreen and OBS
   game capture untested.
+- Pause + free camera:
+  - Sound while paused is untested (the VM has no audio check). The game's sound update
+    is part of the paused step, so a looping sound may keep playing or hang until resume.
+  - The collision overlay's tick counter keeps counting paused frames; nothing it records
+    moves then.
+  - A key still held when you resume acts normally (only presses during the pause are
+    dropped).
+  - Tested on the VM only (bank, windowed through dgVoodoo).
 - Fire-juggling arrow:
   - It uses the shared 9 px font (`fd_text_size`) with no outline, so it can be hard to
     read on bright fire.

@@ -810,3 +810,32 @@ Debug-only benchmarks in `src/bench.cpp` (`fd_bench_text`, `fd_bench_blit`, `fd_
   - **Harness:** `rclick` (JUMP is the right mouse button), `wait_pipe`, `wait_log since_console`, `assert_juggle locked: auto`.
   - **Suite s0181:** 31/32; fire_juggle failed on ~1 s VM frames (asserted before the test hook applied). Fixed by waiting for the hook; 3/3 PASS.
   - **Evidence:** `core/evidence/fire_juggle_overlay/observed/`.
+- 2026-10-22 it28: **0.19.0** pause + free camera (`fd_pause`, key P) and letter keys for every feature (owner).
+  - **Core service `pause`:**
+    - skips GameSession::TickSubsystems (hook on only while paused);
+    - pauses the game clock with GameClock::Pause/Resume on the active subtimer (re-paused
+      after the game's alt-tab Resume);
+    - holds controls.block_input and drops GameSession::OnKey key-downs (Esc opened the
+      menu otherwise);
+    - caps paused frames at ~60 fps;
+    - resumes on leaving the level, including from its own detour (a `loadmap` while
+      paused deadlocked before that fix).
+  - **camera:** a world-transform override applied at geEngine_RenderWorld (set any
+    earlier, the render rewrites it).
+  - **textdraw:** HideWhilePaused (the fd_juggle arrow).
+  - **Feature `freecam`:**
+    - start pose from the game camera (rebuild error 0);
+    - W/S/A/D/E/Q, Shift x4, Ctrl x0.25, speed 400 u/s on QPC time;
+    - mouse from the game's DirectInput sums;
+    - fd_pause practice-only.
+  - **Spike:** `core/evidence/freecam/README.md` (probe runs p1-p5).
+  - **Tests:**
+    - `pause_service` and `freecam`: 15 state fields frozen and proven live while
+      running; measured 400/1600/100 u/s exactly along the view; 30.0 deg turn;
+      resume dt 17 ms; Esc/W/jump during the pause without effect;
+    - `keys_default`.
+  - **Keys (D37):** J juggle, H player HUD, G collision HUD with B/Z/X (were F9/F10/F12),
+    T/Y/U trigger boxes, K/L teleporter; new `toggle <var>` builtin.
+  - DECISIONS D34-D37.
+  - Suite s0190: see `core/evidence/freecam/suite_0190.md`.
+

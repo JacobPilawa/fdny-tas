@@ -15,7 +15,7 @@
 // game clock): W/S along the view (pitch included), A/D strafe, E/Q straight up/down;
 // keys add, no acceleration; speed fd_freecam_speed (400 u/s, the run speed), Shift x4,
 // Ctrl x0.25. Mouse: the game's own per-frame sums (controls.mouse_x/y; DirectInput,
-// still polled while paused) x fd_freecam_sens degrees; pitch kept within +-89. Keys only
+// still polled while paused) x fd_freecam_sens degrees (0.075; owner: 0.15 was too fast); pitch kept within +-89. Keys only
 // act while binds::KeysLive (game focused, console closed). No collision.
 #include <windows.h>
 
@@ -132,7 +132,7 @@ cmd::Cvar g_fdPause = {"fd_pause", "0", "1 = freeze the game and fly a free came
                        false, false, OnPause, {0}};
 cmd::Cvar g_fdSpeed = {"fd_freecam_speed", "400", "free camera speed, units/s (Shift x4, Ctrl x0.25)", false, true,
                        nullptr, {0}};
-cmd::Cvar g_fdSens = {"fd_freecam_sens", "0.15", "free camera mouse look, degrees per mouse count", false, true,
+cmd::Cvar g_fdSens = {"fd_freecam_sens", "0.075", "free camera mouse look, degrees per mouse count", false, true,
                       nullptr, {0}};
 
 void SetPauseVar(const char* v) {
@@ -184,10 +184,12 @@ void FrameBegin() {
     int32_t mx = 0, my = 0;
     addr::ReadI32(Id::controls_mouse_x, &mx);
     addr::ReadI32(Id::controls_mouse_y, &my);
-    const float sens = CvarF(g_fdSens, 0.15f);
+    const float sens = CvarF(g_fdSens, 0.075f);
     if (binds::KeysLive()) {
+        // Yaw grows to the left (forward (sin, cos), right (-cos, sin)): mouse right = yaw down
+        // (owner 2026-10-22: left and right were swapped). g_turn counts degrees to the right.
         g_turn += static_cast<float>(mx) * sens;
-        g_cam.yaw += static_cast<float>(mx) * sens;
+        g_cam.yaw -= static_cast<float>(mx) * sens;
         g_cam.pitch -= static_cast<float>(my) * sens;
     }
     if (g_cam.pitch > kPitchMax) g_cam.pitch = kPitchMax;

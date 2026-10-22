@@ -124,7 +124,7 @@ later session might "simplify" away; change one only with the owner's approval
 
 - **D36 fd_pause: default key P; free camera W/A/S/D + E/Q, Shift ×4 / Ctrl ×0.25, mouse from the game's own sums** (owner-agreed design, 2026-10-22).
   - **Keys:** P is not a game control (GameControls::Construct binds W A S D C, 1-3, Ctrl, Shift, Space, arrows, LMB/RMB, and F2-F4/F6-F8/F11 only in dev mode) and not an FDNYCore default (T, F9/F10/F12; F5/F6 suggested for the teleporter). It is bound through `binds::BindDefault`, so the player's own binds win. E/Q (up/down) are free too. Shift and Ctrl are the game's USE / CROUCH, harmless while input is blocked.
-  - **Mouse:** `controls.mouse_x/y` are the game's per-frame DirectInput sums, still polled while paused. The Windows cursor is useless: the game re-centres it every frame. Default 0.15°/count (`fd_freecam_sens`).
+  - **Mouse:** `controls.mouse_x/y` are the game's per-frame DirectInput sums, still polled while paused. The Windows cursor is useless: the game re-centres it every frame. Default 0.075°/count (`fd_freecam_sens`; owner: 0.15 was twice too fast). Yaw grows to the left (the measured convention), so mouse right lowers it (owner: left and right were swapped at first).
   - **Speed:** `fd_freecam_speed` 400 u/s (the run speed) × real frame time (QPC; the game clock is paused), capped at 0.1 s per frame; no acceleration.
   - **Start pose:** the game's last camera transform. Genesis camera columns are right / up / back (the view is −column 2). The rebuild error against the game's matrix is checked by the test (0.000 in fc4).
   - `fd_pause` is not archived: a session never starts paused. Practice-only, so `fd_profile run` refuses it and resets it to 0, which resumes.
@@ -139,6 +139,12 @@ later session might "simplify" away; change one only with the owner's approval
   - **Mechanism:** toggles run the new `toggle <var>` builtin through `binds::BindDefault`, so the player's binds win (D29) and the profile gate applies.
   - **The collision HUD's three hotkeys stay edge-triggered inside its frame step** (only the key codes changed). The clear must keep its place between the frame's hotkeys and build() for the replay parity (the 0xF5 marker). Its note text "history cleared (F12)" is the original overlay's and stays identical.
   - Supersedes the F-key part of D29 (F5/F6 are no longer suggested for the teleporter).
+  - **FDNYCore.cfg records only changes from the defaults** (owner 2026-10-22: every default bind was written out).
+    - A default key still on its default line is not written.
+    - A rebind is written as `bind`, and a removed default as `unbind`.
+    - Why: a later default change then reaches existing players, whose files hold only their own choices.
+    - Old files with default lines clean themselves on the next save.
+  - **Turning `fd_hud_glitch` on always shows the boxes** (it clears B's hide and Z's freeze). Owner: a B hide outlived G off/on, so G alone looked dead.
 
 ## Process
 
