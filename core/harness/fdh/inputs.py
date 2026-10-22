@@ -13,6 +13,7 @@ user32 = ctypes.windll.user32
 INPUT_MOUSE, INPUT_KEYBOARD = 0, 1
 KEYEVENTF_EXTENDEDKEY, KEYEVENTF_KEYUP, KEYEVENTF_SCANCODE = 0x1, 0x2, 0x8
 MOUSEEVENTF_MOVE, MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP = 0x1, 0x2, 0x4
+MOUSEEVENTF_RIGHTDOWN, MOUSEEVENTF_RIGHTUP = 0x8, 0x10
 MOUSEEVENTF_ABSOLUTE = 0x8000
 
 
@@ -117,10 +118,12 @@ def mouse_move_rel(dx, dy, steps=10):
         time.sleep(0.02)
 
 
-def mouse_click_here():
-    _send(INPUT(INPUT_MOUSE, _U(mi=MOUSEINPUT(0, 0, 0, MOUSEEVENTF_LEFTDOWN, 0, 0))))
+def mouse_click_here(right=False):
+    """Click where the cursor is; right=True for the right button (the game's JUMP)."""
+    down, up = (MOUSEEVENTF_RIGHTDOWN, MOUSEEVENTF_RIGHTUP) if right else (MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP)
+    _send(INPUT(INPUT_MOUSE, _U(mi=MOUSEINPUT(0, 0, 0, down, 0, 0))))
     time.sleep(0.08)
-    _send(INPUT(INPUT_MOUSE, _U(mi=MOUSEINPUT(0, 0, 0, MOUSEEVENTF_LEFTUP, 0, 0))))
+    _send(INPUT(INPUT_MOUSE, _U(mi=MOUSEINPUT(0, 0, 0, up, 0, 0))))
 
 
 def alt_tab():

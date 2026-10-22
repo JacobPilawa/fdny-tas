@@ -1,4 +1,4 @@
-# FDNYCore quickstart (0.18.0)
+# FDNYCore quickstart (0.18.1)
 
 FDNYCore is one `.asi` plugin for *FDNY Firefighter: American Hero* that adds a
 console command layer, practice tools and speedrun options. Everything is driven
@@ -91,16 +91,24 @@ standing in is drawn at 25%, so the whole view is tinted its colour. T is a defa
 bind: `bind t "..."` or `unbind t` overrides it.
 
 Fire-juggling arrow (`fd_juggle`):
-- **`-`**: the game is still saving your position as the drop spot (you're on clean ground).
-- **An arrow**: the spot is locked. That happens after fire contact while the burn meter is
-  0.1 or more (it cools about 0.1 per second), with O2 at 0.5 or less, and while passed out.
+- **`-`**: the game saved your position as the drop spot this frame (it's following you).
+- **An arrow**: the game didn't, so the spot is frozen somewhere else.
   - The arrow points at where the survivor lands: the spot, 30 units to -X. It is relative to
     your view, so up = straight ahead, in 8 directions.
   - Below it is the horizontal distance (`120u`), with ` ^` / ` v` when that point is more than
     48 units above or below you.
-- **`o`**: the landing point is within 16 units.
+- **`o`**: the spot is frozen and the landing point is within 16 units.
 
-Jumping also pauses the spot, but isn't shown. Background: research.db KB article
+The overlay doesn't know *why* the spot froze: it only compares the spot with where you
+were last frame (the game copies that position when it saves). So everything that stops the
+saving shows, including things nobody has documented yet. Known so far: fire contact, a
+burn meter at 0.1 or more, O2 at 0.5 or less, being in the air (a jump shows the arrow for
+its whole length, and landings blip it for a frame or two), and being passed out. Each
+change is logged to `FDNYCore.log` with the burn, O2, flinch, state and on-ground values
+(`juggle: frozen (...)` / `juggle: following (...)`). A save to anywhere other than your last
+position is logged as `juggle: spot written elsewhere (...)` (the respawn does this when it
+puts the spot on the checkpoint). Standing still, a spot frozen under your feet reads as
+`-`; the survivor would land at your feet either way. Background: research.db KB article
 `fire-juggling`.
 
 Teleporter rules: one slot, in memory only (gone on exit); only works on the map
@@ -171,8 +179,9 @@ python -I run_test.py --core none ..\tests\x.yaml  # baseline without the core
 
 The harness launches the game, drives it, and backs up / restores the game
 folder files it touches. Results and screenshots land in `core\runs\`. Last
-result (0.18.0): 31/32 pass (Debug). The one failure, fire_juggle, was a test-hook timing
-bug, since fixed; it then passed 3/3 (`evidence/fire_juggle_overlay/suite_0180.md`).
+result (0.18.1): 31/32 pass (Debug). The one failure, fire_juggle, read the pipe before a
+test hook applied on a ~1 s frame; the test now waits for the hook and passed 3/3
+(`evidence/fire_juggle_overlay/observed/README.md`).
 glitch_box_cost / text_panels (VM frame rate) and state_snapshot (roaming-victim race)
 can still fail on a slow VM.
 
@@ -190,7 +199,7 @@ can still fail on a slow VM.
     read on bright fire.
   - It aims at the spot before the game's floor search (the survivor is dropped onto the
     first floor below it).
-  - A jump pauses the spot without showing the arrow.
+  - Following vs frozen is only visible while you move (standing still they look the same).
 - Trigger boxes: a box you stand in also tints the game's own HUD (it is drawn
   before the core's panels). The `triggers` test opens the bank exit with the
   RescueBot (`runrescuebot`), so the carry-and-deliver path is not exercised by a test.

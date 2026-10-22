@@ -89,17 +89,16 @@ later session might "simplify" away; change one only with the owner's approval
   - **No world (menus):** it isn't drawn at all, rather than falling back to the opaque decal: a world-space hint has no meaning there, and a box would contradict "no background".
   - Existing anchors and styles are unchanged.
   - Rejected: a per-panel background-alpha parameter. It would be one more knob for no use beyond "none", and `fd_text_alpha` would have to be special-cased for it anyway.
-- **D32 fd_juggle shows the lock by evaluating the game's own safe-spot gate, not by watching the spot** (0.18.0, owner-agreed).
-  - Gate: locked = flinch || burn >= 0.1 || O2 <= 0.5 || passed out. It is read at frame end, after Think and that frame's fire damage (spike `fire_juggling/round2_frame_order.txt`), so it predicts the next Think exactly.
-  - **Airborne is excluded** (owner): Think doesn't write in the air either, but showing it would flicker on every jump.
+- **D32 fd_juggle observes the safe spot; it doesn't evaluate any conditions** (0.18.1, owner ruling; replaces the 0.18.0 gate).
+  - Rule: following = this frame's spot equals the player's position at the end of the previous frame (Think's write copies it, spike `fire_juggling/round2_frame_order.txt`); anything else is frozen and shows the arrow. Read at frame end. A new player object starts as following.
+  - **Why (owner):** a gate (flinch / burn >= 0.1 / O2 <= 0.5 / passed out) bakes our current understanding into the tool, so a condition we don't know about would show "-" while the spot was really frozen. Observing the write shows every cause, known or not, and players work out the conditions themselves.
+  - **Consequences, accepted:** a jump shows the arrow for its whole length and landings blip it for 1-2 frames (both are real: the game doesn't save then; the 0.18.0 gate hid airborne on purpose). Standing still, a spot frozen under your feet reads as "-".
+  - Transitions are logged with burn / O2 / flinch / state / on-ground as data, not as a verdict. A write to anywhere but the last position is logged and counted as "written elsewhere" (the respawn's checkpoint mirror is the known case).
   - The arrow aims at **spot - 30 X** (where Verb_Reset puts the survivor), before the floor search. Direction is relative to the view yaw, with axes measured live (`fire_juggle_overlay/yaw_probe.log`).
-  - Rejected:
-    - "spot changed since the last frame -> `-`": standing still on clean ground shows an arrow at your feet;
-    - "more than 5 u away": a few frames late, and wrong at the start of a lock, when the spot is a frame of movement behind.
-  - The self-check counts a spot change after a *strictly* locked frame: burn >= 0.11, because Think cools by 0.1*dt <= 0.01 before comparing. The end of a pass-out (ResetLocomotionState writes the checkpoint) and a new player object are exempt.
+  - Rejected: "more than 5 u away" (a few frames late and wrong at the start of a freeze); the 0.18.0 gate (above).
 - **D33 Test hooks that move or burn the player are Debug-only commands in the feature** (`fd_dbg_setpos`, `fd_dbg_o2`, `fd_dbg_tofire`; R6).
   - `fd_dbg_tofire` searches the fire nodes live, because fire nodes move along their paths: the spike's coordinates burnt only sometimes.
-  - The glyph check holds an O2 lock on clean ground, so every view direction has an exact expected answer.
+  - The glyph check holds an O2 lock on clean ground and stands the player 30 u off the frozen spot, so every view direction has an exact expected answer.
   - The harness's `assert_juggle` recomputes the arrow from its own memory reads, rather than trusting the pipe.
 
 ## Process

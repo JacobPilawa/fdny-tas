@@ -3,20 +3,23 @@
 // fire-juggling helper. When the player passes out (fire or O2) while carrying a
 // survivor, Verb_Reset copies the "last safe spot" player.f_safe (+0x3400) into the
 // player, and DropAtPlayer puts the survivor there, -30 on X, on the floor below
-// (research.db KB fire-juggling; core/evidence/fire_juggling). Think writes that spot
-// only while the flinch flags are clear, burn < 0.1, the player is on the ground, O2 >
-// 0.5 and they aren't passed out, so a fire hit "locks" it.
+// (research.db KB fire-juggling; core/evidence/fire_juggling).
 //
 // fd_juggle 1 shows, 30 px below the screen centre with no background:
-//   "-"          the spot is still following the player (not locked);
-//   an arrow     locked: points at the landing point T = (S.x - 30, S.y, S.z), relative
-//                to the view (up = straight ahead), 8 directions, with the horizontal
-//                distance below ("120u", plus " ^" / " v" when T is over 48 u above / below);
-//   "o"          locked and within 16 u.
-// Locked = flinch || burn >= 0.1 || O2 <= 0.5 || passed out (state 6). Airborne alone
-// doesn't count (owner: no flicker on jumps), although Think doesn't write in the air.
-// Read in OnFrameEnd, i.e. after Think and after that frame's fire damage
-// (round2_frame_order.txt), so it predicts the next Think.
+//   "-"          the spot is following the player;
+//   an arrow     the spot is frozen: points at the landing point T = (S.x - 30, S.y, S.z),
+//                relative to the view (up = straight ahead), 8 directions, with the
+//                horizontal distance below ("120u", plus " ^" / " v" when T is over 48 u
+//                above / below);
+//   "o"          frozen and within 16 u.
+// Following vs frozen is observed, not predicted (owner, D32): when Think writes the spot
+// it copies the position the player had at the end of the previous frame, so
+//   following = this frame's spot == last frame's position.
+// No conditions (burn, O2, airborne, ...) are evaluated: players read those off the
+// overlay themselves. Standing still, a frozen spot under your feet looks like following;
+// the survivor lands at your feet either way. A write to anywhere else (e.g. the respawn
+// mirroring the checkpoint) is logged as "written elsewhere".
+// Read in OnFrameEnd, after Think and that frame's fire damage (round2_frame_order.txt).
 // View yaw (live, evidence/fire_juggle_overlay/yaw_probe.log): forward = (sin yaw, cos yaw)
 // in world (x, z), strafe right = (-cos yaw, sin yaw).
 #include <windows.h>
@@ -37,10 +40,6 @@ namespace {
 using addr::Id;
 
 constexpr float kDropDx = -30.0f;     // Verb_Reset: the survivor ends 30 u to -X of the spot
-constexpr float kBurnLock = 0.1f;     // Think: write only while burn (after cooling) < 0.1
-constexpr float kBurnStrict = 0.11f;  // self-check margin: cooling is 0.1*dt, dt <= 0.1 s
-constexpr float kO2Lock = 0.5f;       // Think: write only while O2 > 0.5
-constexpr int32_t kPassedOut = 6;     // player.f_state
 constexpr float kNear = 16.0f;        // closer than this: "o"
 constexpr float kFloorStep = 48.0f;   // SnapToFloor lifts 48 u: beyond that it's another floor
 constexpr float kTan22 = 0.41421356f; // tan(22.5 deg): 8 sectors of 45 deg
@@ -48,6 +47,7 @@ constexpr float kTan22 = 0.41421356f; // tan(22.5 deg): 8 sectors of 45 deg
 // 8 directions clockwise from straight ahead, then "o" (near), then "-" (not locked).
 constexpr int kDirNear = 8, kDirNone = -1;
 #ifdef FDCORE_DEBUG
+constexpr int32_t kPassedOut = 6;  // player.f_state (test hook fd_dbg_tofire)
 const char* const kDirName[] = {"up", "up-right", "right", "down-right", "down", "down-left", "left", "up-left"};
 #endif
 // Two lines of three characters each, ASCII only.
@@ -63,27 +63,28 @@ const char* const kGlyph[8][2] = {
 };
 
 struct View {  // what the panel and the pipe show (game thread writes, pipe thread reads)
-    bool on, valid, locked;
+    bool on, valid, locked;  // locked = frozen: the spot isn't last frame's position
     float safe[3], target[3], pos[3];
-    float dist, dy, burn, o2;
+    float dist, dy, burn, o2;  // burn .. ground: logged and piped only, never evaluated
     uint32_t flinch;
     int32_t state;
+    uint8_t ground;
     int dir;
     bool frozen;         // locked and the spot is still where it was when the lock began
-    uint32_t selfCheck;  // frames where the spot moved although it was strictly locked
-    uint32_t outFrames;  // frames passed out (state 6) while fd_juggle was on
-    uint32_t outMiss;    // ... of those, frames without an arrow / "o" (must stay 0)
+    uint32_t locks;      // following -> frozen transitions
+    uint32_t elsewhere;  // frames the spot was written to somewhere other than last frame's position
 };
 View g_view = {};
 CRITICAL_SECTION g_lock;
 int g_panel = -1;
 
-// Previous frame, for the self-check.
-float g_prevSafe[3] = {};
-bool g_prevStrict = false, g_prevValid = false;
-int32_t g_prevState = 0;
+// Previous frame.
+float g_prevSafe[3] = {}, g_prevPos[3] = {};
+bool g_prevValid = false;
 uintptr_t g_prevPlayer = 0;
 float g_lockSafe[3] = {};  // the spot when the current lock began
+
+bool Same(const float* a, const float* b) { return a[0] == b[0] && a[1] == b[1] && a[2] == b[2]; }
 
 bool On(const cmd::Cvar& v) { return v.value[0] != '0'; }
 cmd::Cvar g_fdJuggle = {"fd_juggle", "0",
@@ -176,14 +177,17 @@ void FrameEnd() {
     v.on = On(g_fdJuggle);
     v.dir = kDirNone;
     const uintptr_t pl = s.gameState == 1 && s.playerValid ? Player() : 0;
-    bool strict = false;
+    bool elsewhere = false;
     if (pl && At(pl, Id::player_f_safe, &v.safe) && At(pl, Id::player_f_pos, &v.pos) &&
         At(pl, Id::player_f_burn, &v.burn) && At(pl, Id::player_f_o2, &v.o2) &&
-        At(pl, Id::player_f_flinch, &v.flinch) && At(pl, Id::player_f_state, &v.state)) {
+        At(pl, Id::player_f_flinch, &v.flinch) && At(pl, Id::player_f_state, &v.state) &&
+        At(pl, Id::player_f_ground, &v.ground)) {
         v.valid = true;
-        const bool out = v.state == kPassedOut;
-        v.locked = v.flinch != 0 || v.burn >= kBurnLock || v.o2 <= kO2Lock || out;
-        strict = v.flinch != 0 || v.burn >= kBurnStrict || v.o2 <= kO2Lock || out;
+        // Observed: Think's write copies last frame's position. A new player object (level
+        // load) starts as following.
+        const bool known = g_prevValid && pl == g_prevPlayer;
+        v.locked = known && !Same(v.safe, g_prevPos);
+        elsewhere = v.locked && !Same(v.safe, g_prevSafe);
         v.target[0] = v.safe[0] + kDropDx, v.target[1] = v.safe[1], v.target[2] = v.safe[2];
         const float dx = v.target[0] - v.pos[0], dz = v.target[2] - v.pos[2];
         v.dist = Sqrt(dx * dx + dz * dz);
@@ -196,33 +200,28 @@ void FrameEnd() {
             v.dir = v.dist < kNear ? kDirNear : Sector(f, r);
         }
     }
-    // Self-check: the spot must not move on a frame after a strictly locked one. The end
-    // of a pass-out is exempt (ResetLocomotionState writes the checkpoint there), as is
-    // a new player object (level load).
-    uint32_t bad = 0;
-    if (v.valid && g_prevValid && pl == g_prevPlayer && g_prevStrict && g_prevState != kPassedOut &&
-        (v.safe[0] != g_prevSafe[0] || v.safe[1] != g_prevSafe[1] || v.safe[2] != g_prevSafe[2])) {
-        bad = 1;
-        log::Warn("juggle: safe spot moved while locked (%ld %ld %ld -> %ld %ld %ld)", Round(g_prevSafe[0]),
-                  Round(g_prevSafe[1]), Round(g_prevSafe[2]), Round(v.safe[0]), Round(v.safe[1]),
-                  Round(v.safe[2]));
-    }
-    g_prevValid = v.valid, g_prevStrict = strict, g_prevState = v.state, g_prevPlayer = pl;
+    // A write that isn't Think's copy of last frame's position: log it with the fields, so
+    // an unknown writer shows up (the respawn's checkpoint mirror is one known case).
+    if (elsewhere && v.on)
+        log::Info("juggle: spot written elsewhere (%ld %ld %ld -> %ld %ld %ld; burn %ld/1000, o2 %ld/100, flinch %lx, "
+                  "state %ld, ground %d)",
+                  Round(g_prevSafe[0]), Round(g_prevSafe[1]), Round(g_prevSafe[2]), Round(v.safe[0]),
+                  Round(v.safe[1]), Round(v.safe[2]), Round(v.burn * 1000), Round(v.o2 * 100),
+                  static_cast<unsigned long>(v.flinch), static_cast<long>(v.state), v.ground);
+    g_prevValid = v.valid, g_prevPlayer = pl;
     __builtin_memcpy(g_prevSafe, v.safe, sizeof(g_prevSafe));
+    __builtin_memcpy(g_prevPos, v.pos, sizeof(g_prevPos));
 
     EnterCriticalSection(&g_lock);
-    if (v.locked && !g_view.locked) __builtin_memcpy(g_lockSafe, v.safe, sizeof(g_lockSafe));
-    v.frozen = v.locked && v.safe[0] == g_lockSafe[0] && v.safe[1] == g_lockSafe[1] && v.safe[2] == g_lockSafe[2];
-    v.selfCheck = g_view.selfCheck + bad;
-    v.outFrames = g_view.outFrames, v.outMiss = g_view.outMiss;
-    if (v.on && v.valid && v.state == kPassedOut) {
-        ++v.outFrames;
-        if (!v.locked || v.dir == kDirNone) ++v.outMiss;
-    }
+    if (v.locked && (!g_view.locked || elsewhere)) __builtin_memcpy(g_lockSafe, v.safe, sizeof(g_lockSafe));
+    v.frozen = v.locked && Same(v.safe, g_lockSafe);
+    v.locks = g_view.locks + (v.locked && !g_view.locked ? 1 : 0);
+    v.elsewhere = g_view.elsewhere + (elsewhere ? 1 : 0);
+    // The fields at each transition, for players working out what froze or freed the spot.
     if (v.locked != g_view.locked && v.on && v.valid)
-        log::Info("juggle: %s (burn %ld/1000, o2 %ld/100, flinch %lx, state %ld)", v.locked ? "locked" : "following",
-                  Round(v.burn * 1000), Round(v.o2 * 100), static_cast<unsigned long>(v.flinch),
-                  static_cast<long>(v.state));
+        log::Info("juggle: %s (burn %ld/1000, o2 %ld/100, flinch %lx, state %ld, ground %d)",
+                  v.locked ? "frozen" : "following", Round(v.burn * 1000), Round(v.o2 * 100),
+                  static_cast<unsigned long>(v.flinch), static_cast<long>(v.state), v.ground);
     g_view = v;
     LeaveCriticalSection(&g_lock);
     Draw(v);
@@ -270,9 +269,8 @@ void CmdSetPos(int argc, const char* const* argv) {
 
 // Test hook: `fd_dbg_o2 <0..1>` sets the player's O2. O2 <= 0.5 is one of the game's own
 // safe-spot locks, so a test can hold a lock on clean ground without fire. Applied at
-// frame end before the gate is read (like fd_dbg_setpos): written from the console
-// mid-frame, Think would see the new O2 before the overlay does, and the self-check would
-// count the game's own (correct) spot update (suite run s0180).
+// frame end before the spot is read (like fd_dbg_setpos), so the frame a test changes it
+// is well defined (suite run s0180: a mid-frame console write raced Think).
 struct SetO2 {
     bool pending;
     float o2;
@@ -441,15 +439,14 @@ bool Init() {
         // Tenths of a unit (wsprintf has no %f).
         wsprintfA(resp,
                   "enabled=%d valid=%d locked=%d dir=%d glyph=%s dist=%ld dy=%ld safe=%ld,%ld,%ld target=%ld,%ld,%ld "
-                  "pos=%ld,%ld,%ld burn=%ld o2=%ld flinch=%lx state=%ld selfcheck=%lu frozen=%d outframes=%lu outmiss=%lu",
+                  "pos=%ld,%ld,%ld burn=%ld o2=%ld flinch=%lx state=%ld ground=%d frozen=%d locks=%lu elsewhere=%lu",
                   v.on, v.valid, v.locked, v.dir,
                   !v.locked ? "-" : v.dir == kDirNear ? "o" : v.dir >= 0 ? kDirName[v.dir] : "?", Round(v.dist * 10),
                   Round(v.dy * 10), Round(v.safe[0] * 10), Round(v.safe[1] * 10), Round(v.safe[2] * 10),
                   Round(v.target[0] * 10), Round(v.target[1] * 10), Round(v.target[2] * 10), Round(v.pos[0] * 10),
                   Round(v.pos[1] * 10), Round(v.pos[2] * 10), Round(v.burn * 1000), Round(v.o2 * 1000),
-                  static_cast<unsigned long>(v.flinch), static_cast<long>(v.state),
-                  static_cast<unsigned long>(v.selfCheck), v.frozen, static_cast<unsigned long>(v.outFrames),
-                  static_cast<unsigned long>(v.outMiss));
+                  static_cast<unsigned long>(v.flinch), static_cast<long>(v.state), v.ground, v.frozen,
+                  static_cast<unsigned long>(v.locks), static_cast<unsigned long>(v.elsewhere));
     });
 #endif
     log::Info("juggle: ready (fd_juggle%s)", g_panel < 0 ? "; no text panel free: display off" : "");

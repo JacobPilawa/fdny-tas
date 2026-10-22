@@ -804,3 +804,9 @@ Debug-only benchmarks in `src/bench.cpp` (`fd_bench_text`, `fd_bench_blit`, `fd_
     - harness focus fallback for an unattended console (title-bar click);
     - test paths for the owner's `asi-archive/` move.
   - **Evidence:** `core/evidence/fire_juggle_overlay/` (STATUS loop log, yaw_probe.log, glyphs.png, it4/, suite_0180.md).
+- 2026-10-22 it27: **0.18.1** fd_juggle observes the safe spot instead of evaluating conditions (owner ruling, D32 rewritten).
+  - **Rule:** `-` when this frame's spot equals last frame's position (Think's write copies it), the arrow otherwise. No burn / O2 / airborne logic remains; transitions are logged with those fields as data, and a write anywhere else is logged as `spot written elsewhere`.
+  - **Seen live:** walking never freezes; a jump freezes for its whole airborne span and landings blip 1-2 frames with `ground 1` (hidden by the old gate); O2 0.10 holds the spot until it refills to exactly 0.50; the respawn's checkpoint mirror shows as `elsewhere`.
+  - **Harness:** `rclick` (JUMP is the right mouse button), `wait_pipe`, `wait_log since_console`, `assert_juggle locked: auto`.
+  - **Suite s0181:** 31/32; fire_juggle failed on ~1 s VM frames (asserted before the test hook applied). Fixed by waiting for the hook; 3/3 PASS.
+  - **Evidence:** `core/evidence/fire_juggle_overlay/observed/`.

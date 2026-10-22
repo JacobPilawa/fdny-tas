@@ -98,6 +98,8 @@ class Run:
             inputs.mouse_move_rel(*arg)
         elif kind == "lclick":
             inputs.mouse_click_here()
+        elif kind == "rclick":
+            inputs.mouse_click_here(right=True)
         elif kind == "gclick":
             # Game-cursor click: the menus track their own cursor from DirectInput
             # deltas (1:1, clamped to the screen), so slam to the top-left corner,
@@ -143,15 +145,30 @@ class Run:
         elif kind == "wait_log":
             # {contains, timeout}: wait for one more occurrence of the text in FDNYCore.log
             # than there was when the step started (for events with no fixed timing).
+            # since_console: true counts from the start of the last `console` step instead,
+            # for a line the command itself may already have produced.
             def count():
-                with open(self.g.core_log, encoding="utf-8", errors="replace") as f:
-                    return f.read().count(arg["contains"])
+                return self.read_core_log().count(arg["contains"])
             n0, t0, timeout = count(), time.time(), float(arg.get("timeout", 30))
+            if arg.get("since_console"):
+                n0 = getattr(self, "console_log_text", "").count(arg["contains"])
             while count() <= n0 and time.time() - t0 < timeout:
                 time.sleep(0.1)
             seen = count() > n0
             self.record("wait_log", seen, f"{arg['contains']!r} {'after' if seen else 'not within'} "
                                           f"{time.time() - t0:.1f} s")
+        elif kind == "wait_pipe":
+            # {cmd, key, equals, timeout}: poll a numeric pipe field until it equals the value
+            # (for state that settles a frame or two after a hook, on a VM that can hitch)
+            t0, timeout, val = time.time(), float(arg.get("timeout", 3)), None
+            while True:
+                reply = dict(kv.split("=", 1) for kv in pipe.call(arg["cmd"]).split() if "=" in kv)
+                val = int(reply.get(arg["key"], "-1"))
+                if val == int(arg["equals"]) or time.time() - t0 >= timeout:
+                    break
+                time.sleep(0.05)
+            self.record(kind, val == int(arg["equals"]),
+                        f"{arg['cmd']}.{arg['key']} = {val} after {time.time() - t0:.2f} s, want {arg['equals']}")
         elif kind == "assert_juggle":
             self.assert_juggle(arg if isinstance(arg, dict) else {})
         elif kind == "assert_hooks_idle":
@@ -317,6 +334,7 @@ class Run:
             needle = arg["contains"].replace("{core_version}", core_version())
             self.record("assert_log", needle in text, f"contains {needle!r}")
         elif kind == "console":
+            self.console_log_text = self.read_core_log()  # for wait_log {since_console}
             inputs.type_text("`")  # backtick opens the game console in typing mode (R3b)
             time.sleep(0.2)
             inputs.type_text(str(arg))
@@ -325,6 +343,13 @@ class Run:
             inputs.type_text("`")
         else:
             raise ValueError(f"unknown step {kind}")
+
+    def read_core_log(self):
+        try:
+            with open(self.g.core_log, encoding="utf-8", errors="replace") as f:
+                return f.read()
+        except OSError:
+            return ""
 
     def assert_frame_hooks(self, seconds, tolerance):
         """Independent frame count: g_gameClock's published elapsed-ms changes
@@ -354,7 +379,10 @@ class Run:
         and the safe spot (+0x3400) read directly from memory; landing point T = spot -
         30 X; view axes measured live (forward = (sin yaw, cos yaw), right = (-cos yaw,
         sin yaw), evidence/fire_juggle_overlay/yaw_probe.log); 8 sectors of 45 degrees,
-        8 = "o" under 16 u. {locked: 0|1} (default 1) is asserted too."""
+        8 = "o" under 16 u. {locked: 0|1} (default 1) is asserted too; {locked: auto} derives
+        it from memory for a player who isn't moving (frozen = spot != position, exactly,
+        since Think's write copies the position), and fails if the position changes
+        between two reads."""
         reply = dict(kv.split("=", 1) for kv in pipe.call("juggle").split() if "=" in kv)
         r = self.resolver
         pl = self.g.pm.read_uint(r.address("player.object"))
@@ -362,6 +390,23 @@ class Run:
         pos = [f32(r.field("player.f_pos"), i) for i in range(3)]
         safe = [f32(r.field("player.f_safe"), i) for i in range(3)]
         yaw = f32(r.field("player.f_yaw"))
+        if opt.get("locked") == "auto":
+            # wait (up to 2 s) for two equal position reads 0.1 s apart: a teleported player
+            # settles onto the floor first
+            t0 = time.time()
+            while True:
+                time.sleep(0.1)
+                pos2 = [f32(r.field("player.f_pos"), i) for i in range(3)]
+                if pos2 == pos or time.time() - t0 > 2:
+                    break
+                pos = pos2
+            if pos2 != pos:
+                self.record("assert_juggle", False, f"locked: auto needs a still player: pos {pos} -> {pos2}")
+                return
+            reply = dict(kv.split("=", 1) for kv in pipe.call("juggle").split() if "=" in kv)
+            safe = [f32(r.field("player.f_safe"), i) for i in range(3)]
+            yaw = f32(r.field("player.f_yaw"))
+            opt = dict(opt, locked=0 if safe == pos else 1)
         tx, tz = safe[0] - 30.0, safe[2]
         dx, dz = tx - pos[0], tz - pos[2]
         dist = math.hypot(dx, dz)
