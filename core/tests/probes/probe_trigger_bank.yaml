@@ -1,0 +1,44 @@
+name: probe_trigger_bank
+# Trigger-box spike on a rescue map (bank): dump the triggers (names, script lines,
+# +0x164/+0x165), then draw them x-ray (flags 1) and depth-tested (queued, z = depth)
+# while looking around.
+pre_files:
+  - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
+  - {src: null, dst: FDNYCore.cfg}
+  - {src: build/probes/zz_triggerprobe.asi, dst: zz_triggerprobe.asi}
+setup: load_training
+record: false
+steps:
+  - console: "fd_watermark 0"
+  - console: "loadmap bank"
+  - wait_s: 45
+  - console: "fd_zzt_1"
+  - wait_s: 2
+  - screenshot: base
+  - console: "fd_zzt_3_1_0"
+  - wait_s: 2
+  - screenshot: xray_0
+  - console: "fd_zzt_3_0_2"
+  - wait_s: 2
+  - screenshot: occl_0
+  - mouse_rel: [600, 0]
+  - wait_s: 1
+  - screenshot: occl_1
+  - console: "fd_zzt_3_1_0"
+  - wait_s: 2
+  - screenshot: xray_1
+  - mouse_rel: [600, 0]
+  - wait_s: 1
+  - screenshot: xray_2
+  - console: "fd_zzt_3_0_2"
+  - wait_s: 2
+  - screenshot: occl_2
+  - mouse_rel: [600, 150]
+  - wait_s: 1
+  - screenshot: occl_3
+  - console: "fd_zzt_3_1_0"
+  - wait_s: 2
+  - screenshot: xray_3
+expect:
+  no_crash: true
+  log_errors: 0

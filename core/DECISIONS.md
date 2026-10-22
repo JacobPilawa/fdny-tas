@@ -55,6 +55,34 @@ later session might "simplify" away; change one only with the owner's approval
 - **D18 Teleporter writes position, view and zeroed motion at frame end; it does not use the game's Verb_Reset.** Verb_Reset drops held objects and the victim, resets health and zones, moves to an escape-mutated checkpoint, and SnapToFloor commits (0,1,0) without a floor. Owner: it only works on the map it was saved on. It has a single in-memory slot; stance is not saved.
 - **D19 Collision-overlay output goes to `FDNYCore.log` (`glitch|` lines), no extra files** (owner).
 - **D20 Speedrun options (static spawns, RescueBot off) re-implement FDNYDeterministic and stand down when it is installed** (D5). Replacing the standalone `.asi` is an open owner question.
+- **D24 Trigger boxes come from live memory every level; there is no BSP scan or coordinate file** (owner). Triggers are the entities whose vtable is `trigger.vtbl`. The set is rescanned on a map change and about once a second. The exits' open flag is read every frame. Spike: `trigger_boxes/README.md`.
+- **D25 Trigger classes are the game's own tests, not kind and not our own parsing rules:**
+  - Kind is 8 for every trigger: the constructor writes it, so it can't separate exits.
+  - Rescue zone = `trigger.escape`, the flag the game sets when a trigger binds `touch` → `tell player escape`.
+  - Exit = a `touch:` line containing `tell player finalexit` or `tell player (finalexitloadmap`. These are the two has-binding tests in `PlayerRescueEnt::UpdateZonesAndWin`, which match by substring.
+  - Open = `trigger.enabled`, set by `BoundsTrigger_SetEnabled(1)` when every victim is delivered.
+  - An exit is also an escape trigger, and exit wins.
+- **D26 World boxes are a `gfx` block (`SubmitWorldBoxes`), drawn in gfx's own late step before the text panels.**
+  - Only gfx may call RenderPoly (R5).
+  - A queued poly would land on top of the panels at EndFrame's flush. So gfx flushes the queued boxes itself, from an `OnFrameEndLate` subscriber registered before textdraw's.
+  - Faces are clipped to the near plane (2 u) and the view, and drawn far to near.
+  - One 64-px solid white 4444 tile per alpha level, tinted by vertex colour (the spike showed D3DDrv modulates textured polys).
+- **D27 Trigger boxes are depth-tested by default; `fd_triggers_xray 1` draws them over walls.**
+  - Depth-tested: queued polys (flags 0) with `geCamera_Project`'s z, so the world hides them.
+  - X-ray: immediate polys, which skip the z-test.
+  - Rejected: x-ray as the default. Big zones behind walls cover the view and hide the room you're in.
+- **D28 A box around the camera is drawn at 25% instead of 50%.** The spawn often stands inside large zones, which tinted the whole view (`spike/training_bank.png`).
+- **D29 Default key T (`fd_triggers_toggle`) through `binds::BindDefault`.**
+  - The default applies before `FDNYCore.cfg`, so the player's own binds win. An unbound default is saved as `unbind t`.
+  - The F-keys were rejected:
+    - F2–F4, F6–F8 and F11 are the game's developer keys (F11 crashes, F8 wins the level);
+    - F9, F10 and F12 are the collision overlay's;
+    - F5 / F6 are suggested for the teleporter.
+  - T isn't one of the game's controls (`GameControls::Construct`).
+- **D30 A world-attached tile that settles without a driver handle is re-added** (0.17.0, gfx: world boxes and `AlphaSurface`).
+  - The world can't be identified by its pointer alone: bank, loaded after Training, got Training's world address. The tiles looked attached but had no handle, so nothing was drawn and text panels would have stayed on the opaque fallback.
+  - The handle check after the settle frames is the signal. Log line: `gfx: world box tile without a handle; re-adding`.
+  - Rejected: re-attaching on `OnLevelLoad`. It races the first render of the new world, and the handle check also covers anything else that drops a texture.
 
 ## Process
 

@@ -775,6 +775,73 @@
           "ghidra": "VictimRescueEnt",
           "note": "number of authored spots (0 = editor origin, 1..N alt spots)"
         },
+        "trigger.vtbl": {
+          "module": "exe",
+          "rva": "0xE1090",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x41ca8",
+            "bytes": "C7 06 90 10 4E 00 C7 07 88 10 4E 00",
+            "ref": "instruction at 0x00441ca8 embeds 0x004e1090 (MOV [ESI],0x4e1090; MOV [EDI],0x4e1088)"
+          },
+          "ghidra": "BoundsTriggerEnt::Construct 0x00441C60 installs it at [this+0] (0x00441CA8); the same ctor writes kind 8 unconditionally (0x00441D2F), so kind can't tell exits from other triggers. Live 2026-10-22: Training 25 / bank 14 entities with this vtable (core/evidence/trigger_boxes)",
+          "note": "RCS_BoundsTrigger instances are entities whose [entity+0] equals this address (triggers feature)"
+        },
+        "trigger.box": {
+          "module": "field",
+          "rva": "0xE4",
+          "chain": [],
+          "type": "f32",
+          "sig": null,
+          "ghidra": "6 floats min xyz, max xyz: AABB overlap 0x004817A0 reads min +0/+4/+8, max +0xC/+0x10/+0x14; TestEntityOverlap 0x00440CE0 passes this+0xE4; filled by Spawn 0x00441040 from the model bounds (0x004818C0). World space (live alignment, core/evidence/trigger_boxes)",
+          "note": "trigger volume, world space (triggers feature)"
+        },
+        "trigger.userdata": {
+          "module": "field",
+          "rva": "0xFC",
+          "chain": [],
+          "type": "ptr",
+          "sig": null,
+          "ghidra": "BoundsTrigger::Spawn 0x00441040 reads P=[this+0xFC]: +4 name, +8 model, +0xC, +0x10..+0x34 ten script-line char* (bound via 0x00475310)",
+          "note": "editor keyvalue record of the trigger"
+        },
+        "trigdata.name": {
+          "module": "field",
+          "rva": "0x4",
+          "chain": [],
+          "type": "ptr",
+          "sig": null,
+          "ghidra": "Spawn log strings 0x004E0FD8/0x004E0FE8 use P+4",
+          "note": "trigger name char* (often the literal \"<null>\")"
+        },
+        "trigdata.lines": {
+          "module": "field",
+          "rva": "0x10",
+          "chain": [],
+          "type": "ptr",
+          "sig": null,
+          "ghidra": "Spawn: P+0x10, +0x14 ... +0x34 each to String::ConstructCStr 0x00402790 when non-null (0x00441216..0x00441782). Exit test in UpdateZonesAndWin: has-binding 0x0046ED70(\"touch\", \"tell player finalexit\" 0x004E1AC4) at 0x0045065C, else (\"touch\", \"tell player (finalexitloadmap\" 0x004E1AA4) at 0x00450702; 0x0046ED70 matches the command by substring search (0x00404C80 >= 0)",
+          "note": "first of 10 consecutive script-line char* (\"event: command\", e.g. \"touch: tell player finalexit\")"
+        },
+        "trigger.escape": {
+          "module": "field",
+          "rva": "0x164",
+          "chain": [],
+          "type": "u8",
+          "sig": null,
+          "ghidra": "Spawn 0x004418C5 stores the result of 0x0046ED70(this+0x24, \"touch\", \"tell player escape\"); SetEnabled 0x00440F50 returns early when 0. Live: 1 exactly on triggers with a 'touch: tell player escape' line",
+          "note": "1 = rescue/escape trigger (the game's own flag)"
+        },
+        "trigger.enabled": {
+          "module": "field",
+          "rva": "0x165",
+          "chain": [],
+          "type": "u8",
+          "sig": null,
+          "ghidra": "Spawn sets 0 (0x004418BF); BoundsTrigger_SetEnabled 0x00440F50 stores its stack argument's low byte here (0x00441007), only when +0x164 != 0; UpdateZonesAndWin calls SetEnabled(1) on the exits once every victim is delivered (0x00450984)",
+          "note": "final exit open (triggers feature: red 0 / green 1)"
+        },
         "patch.victim_spawn": {
           "module": "exe",
           "kind": "code",
@@ -1434,6 +1501,34 @@
           "sig": null,
           "ghidra": "geBitmap: driver handle (read by 0x10017250 for RenderPoly); 0 until attached; handle +4 w, +8 h, +0x18 driver format (7 = 4444), +0x1C flags (capstone + live probe 2026-10-21)",
           "note": "offset into the geBitmap*; gfx skips drawing an alpha surface while it is 0"
+        },
+        "genesis.camera_transform": {
+          "module": "genesis",
+          "rva": "0x1850",
+          "export": "@geCamera_Transform@12",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x1850",
+            "bytes": "8B 44 24 04 50 52 83 C1 30 51 E8 91 F8 FF FF 83",
+            "ref": "first 16 bytes of Genesis.dll export @geCamera_Transform@12"
+          },
+          "ghidra": "capstone 2026-10-22: fastcall ECX=camera, EDX=const geVec3d* world, [esp+4]=geVec3d* out; RET 4; applies the camera xform at camera+0x30 (0x100010F0). Camera space: forward depth = -z",
+          "note": "gfx world-space polygons (trigger boxes)"
+        },
+        "genesis.camera_project": {
+          "module": "genesis",
+          "rva": "0x16D0",
+          "export": "@geCamera_Project@12",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x16D0",
+            "bytes": "51 D9 42 08 D9 E0 D8 15",
+            "ref": "first 8 bytes of Genesis.dll export @geCamera_Project@12 (the next 4 are an absolute address)"
+          },
+          "ghidra": "capstone 2026-10-22: fastcall ECX=camera, EDX=const geVec3d* camSpace, [esp+4]=geVec3d* out; RET 4. Z = max(-cam.z, [0x100511A4]); x = [cam+0x28] + [cam+0x24]*x/Z; y = [cam+0x2C] - [cam+0x24]*y/Z; out.z = Z*[cam+0x11C]. out.z as the TLVertex z of a queued RenderPoly is depth-tested against the world (trigger_boxes spike)",
+          "note": "gfx world-space polygons (trigger boxes)"
         },
         "genesis.add_bitmap": {
           "module": "genesis",

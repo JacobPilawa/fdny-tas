@@ -32,6 +32,10 @@ using FlushFn = int(__cdecl*)(void* engine);
 using RenderPolyFn = int(__fastcall*)(void* engine, const TLVertex* pts, int n, void* bmp, uint32_t flags);
 using WorldBmpFn = int(__cdecl*)(void* world, void* bmp);
 using RenderWorldFn = int(__cdecl*)(void* engine, void* world, void* camera, void* a4);
+struct Vec3 {
+    float x, y, z;  // geVec3d
+};
+using CameraFn = void(__fastcall*)(void* camera, const Vec3* in, Vec3* out);
 
 CreateFn g_create;
 LockFn g_lock;
@@ -45,7 +49,8 @@ FlushFn g_flush;
 RenderPolyFn g_poly;
 WorldBmpFn g_worldAdd, g_worldRemove;
 RenderWorldFn g_origRenderWorld;
-bool g_ok = false, g_alphaOk = false;
+CameraFn g_camXform, g_camProject;
+bool g_ok = false, g_alphaOk = false, g_boxOk = false;
 
 constexpr int kFormat565 = 5;   // gePixelFormat 565 RGB: the driver's own format, cheapest upload
 constexpr int kFormat4444 = 7;  // 4444 ARGB: the only alpha texture format D3DDrv keeps
@@ -54,6 +59,7 @@ constexpr uint32_t kImmediate = 1;  // RenderPoly flags bit 0: straight to the d
 
 // --- frame state -------------------------------------------------------------------
 void* g_world = nullptr;      // rendered this frame
+void* g_camera = nullptr;     // the camera it was rendered with
 void* g_lastWorld = nullptr;  // last one seen (detach on Destroy outside a frame)
 bool g_flushed = false;
 
@@ -61,13 +67,22 @@ int __cdecl RenderWorldDetour(void* engine, void* world, void* camera, void* a4)
     if (world) {
         if (world != g_lastWorld) log::Info("gfx: world %08lx", reinterpret_cast<unsigned long>(world));
         g_world = g_lastWorld = world;
+        g_camera = camera;
     }
     return g_origRenderWorld(engine, world, camera, a4);
 }
 
+// World boxes submitted this frame (drawn in DrawWorldBoxes, the late step).
+const WorldBox* g_boxList = nullptr;
+int g_boxCount = 0;
+bool g_boxXray = false;
+WorldBoxStats g_boxStats = {};
+
 void FrameBegin() {
     g_world = nullptr;
+    g_camera = nullptr;
     g_flushed = false;
+    g_boxList = nullptr, g_boxCount = 0;
 }
 
 // --- font ----------------------------------------------------------------------------
@@ -341,7 +356,12 @@ bool AlphaSurface::Draw(int x, int y) {
                 continue;
             }
             uint32_t handle = 0;
-            if (!HandleOf(t.bmp, &handle) || !handle) return false;  // never attached: let the caller fall back
+            if (!HandleOf(t.bmp, &handle) || !handle) {
+                // Settled without a handle: a level change put the new world at the old
+                // world's address (seen bank after Training), so re-add next frame.
+                t.world = nullptr;
+                return false;  // let the caller fall back this frame
+            }
             const int w = w_ - tx * kTile < kTile ? w_ - tx * kTile : kTile;
             const int h = h_ - ty * kTile < kTile ? h_ - ty * kTile : kTile;
             // Half a pixel back: texel centres on pixel centres, so the text stays crisp.
@@ -380,6 +400,193 @@ bool SolidRect(int x, int y, int w, int h, uint32_t rgb) {
                            {x0, y1, 1.0f, 0, 0, r, g, b, 255}};
     return g_poly(Engine(), v, 4, nullptr, kImmediate) != 0;
 }
+
+// --- World boxes ---------------------------------------------------------------------------------
+namespace {
+
+// One solid white 4444 tile per alpha level in use; vertex colour tints it (spike:
+// D3DDrv modulates textured polys, it ignores alpha on untextured ones).
+constexpr int kBoxTex = 64;
+struct BoxTile {
+    void* bmp;
+    void* world;
+    int settle;
+    int a4;  // alpha nibble
+};
+BoxTile g_boxTiles[4] = {};
+
+void* BoxTile_(int a4) {
+    BoxTile* t = nullptr;
+    for (BoxTile& c : g_boxTiles)
+        if (c.bmp && c.a4 == a4) t = &c;
+    if (!t) {
+        for (BoxTile& c : g_boxTiles)
+            if (!c.bmp && !t) t = &c;
+        if (!t) return nullptr;  // more than 4 alpha levels in one list
+        if (!(t->bmp = g_create(kBoxTex, kBoxTex, 1, kFormat4444))) return nullptr;
+        void* target = nullptr;
+        if (!g_lock(t->bmp, &target, 0, 0, kFormat4444) || !target) return nullptr;
+        uint32_t info[9] = {};
+        g_info(target, info, nullptr);
+        auto* d = static_cast<uint16_t*>(g_bits(target));
+        const auto texel = static_cast<uint16_t>((a4 << 12) | 0x0FFF);
+        for (int y = 0; d && static_cast<int>(info[2]) >= kBoxTex && y < kBoxTex; ++y)
+            for (int x = 0; x < kBoxTex; ++x) d[y * info[2] + x] = texel;
+        g_unlock(target);
+        t->a4 = a4, t->world = nullptr;
+    }
+    if (t->world != g_world) {
+        if (!g_worldAdd(g_world, t->bmp)) return nullptr;
+        t->world = g_world, t->settle = kSettle;
+    }
+    if (t->settle > 0) {
+        --t->settle;
+        return nullptr;
+    }
+    uint32_t handle = 0;
+    if (HandleOf(t->bmp, &handle) && handle) return t->bmp;
+    log::Info("gfx: world box tile without a handle; re-adding to world %08lx",
+              reinterpret_cast<unsigned long>(g_world));
+    t->world = nullptr;  // settled without a handle: the world was replaced at the same address, re-add
+    return nullptr;
+}
+
+constexpr float kNear = 2.0f;  // world units in front of the eye
+constexpr int kMaxBoxes = 512;
+struct CamV {
+    float x, y, d;  // camera space; d = forward depth (= -z)
+};
+struct ScrV {
+    float x, y, z;  // projected; z = geCamera_Project's depth
+};
+struct Face {
+    CamV c[4];
+    float depth;
+    uint32_t rgb;
+    int a4;
+};
+Face g_faces[kMaxBoxes * 6];
+
+template <class V, class D> int Clip(const V* in, int n, V* out, D dist) {  // keep dist >= 0
+    int m = 0;
+    for (int i = 0; i < n; ++i) {
+        const V &a = in[i], &b = in[(i + 1) % n];
+        const float da = dist(a), db = dist(b);
+        if (da >= 0) out[m++] = a;
+        if ((da >= 0) != (db >= 0)) {
+            const float t = da / (da - db);
+            V v = a;
+            const float* pa = &a.x;
+            const float* pb = &b.x;
+            float* pv = &v.x;
+            for (int k = 0; k < 3; ++k) pv[k] = pa[k] + (pb[k] - pa[k]) * t;
+            out[m++] = v;
+        }
+    }
+    return m;
+}
+
+float Dot(float ax, float ay, float az, float bx, float by, float bz) { return ax * bx + ay * by + az * bz; }
+
+void DrawWorldBoxes() {
+    const WorldBox* list = g_boxList;
+    const int n = g_boxCount < kMaxBoxes ? g_boxCount : kMaxBoxes;
+    g_boxList = nullptr, g_boxCount = 0;
+    if (!list || n <= 0) return;
+    void* engine = Engine();
+    if (!g_boxOk || !g_world || !g_camera || !BeginDraw()) return;
+    WorldBoxStats st = {n, 0, 0, 0};
+    int nf = 0;
+    static const int kFace[6][4] = {{0, 1, 3, 2}, {4, 6, 7, 5}, {0, 4, 5, 1}, {2, 3, 7, 6}, {0, 2, 6, 4}, {1, 5, 7, 3}};
+    for (int b = 0; b < n; ++b) {
+        const WorldBox& box = list[b];
+        CamV c[8];
+        for (int i = 0; i < 8; ++i) {
+            const Vec3 w = {(i & 1) ? box.max[0] : box.min[0], (i & 2) ? box.max[1] : box.min[1],
+                            (i & 4) ? box.max[2] : box.min[2]};
+            Vec3 o;
+            g_camXform(g_camera, &w, &o);
+            c[i] = {o.x, o.y, -o.z};
+        }
+        // Camera (the origin) inside: 0 <= (O - c0).e <= e.e along the three edges.
+        bool inside = true;
+        static const int kEdge[3] = {1, 2, 4};
+        for (int e : kEdge) {
+            const float ex = c[e].x - c[0].x, ey = c[e].y - c[0].y, ed = c[e].d - c[0].d;
+            const float t = Dot(-c[0].x, -c[0].y, -c[0].d, ex, ey, ed);
+            inside = inside && t >= 0 && t <= Dot(ex, ey, ed, ex, ey, ed);
+        }
+        st.inside += inside;
+        const int a4 = (inside ? box.alphaInside : box.alpha) >> 4;
+        if (a4 == 0) continue;
+        for (const auto& f : kFace) {
+            Face& face = g_faces[nf];
+            float sum = 0, maxd = c[f[0]].d;
+            for (int k = 0; k < 4; ++k) {
+                face.c[k] = c[f[k]], sum += c[f[k]].d;
+                if (c[f[k]].d > maxd) maxd = c[f[k]].d;
+            }
+            if (maxd < kNear) continue;  // wholly behind the eye
+            face.depth = sum * 0.25f, face.rgb = box.rgb, face.a4 = a4;
+            ++nf;
+        }
+    }
+    st.faces = nf;
+    // Far to near (shell sort: up to 3072 faces).
+    for (int gap = nf / 2; gap > 0; gap /= 2)
+        for (int i = gap; i < nf; ++i) {
+            const Face t = g_faces[i];
+            int j = i;
+            for (; j >= gap && g_faces[j - gap].depth < t.depth; j -= gap) g_faces[j] = g_faces[j - gap];
+            g_faces[j] = t;
+        }
+    int vw, vh;
+    ViewSize(&vw, &vh);
+    const float W = static_cast<float>(vw), H = static_cast<float>(vh);
+    const uint32_t flags = g_boxXray ? kImmediate : 0;
+    void* tiles[16] = {};  // per alpha nibble, resolved once a frame (BoxTile_ counts settle frames)
+    bool asked[16] = {};
+    for (int i = 0; i < nf; ++i) {
+        const Face& f = g_faces[i];
+        if (!asked[f.a4]) asked[f.a4] = true, tiles[f.a4] = BoxTile_(f.a4);
+        void* tile = tiles[f.a4];
+        if (!tile) continue;
+        CamV cv[8];
+        const int m = Clip(f.c, 4, cv, [](const CamV& v) { return v.d - kNear; });
+        if (m < 3) continue;
+        ScrV a[16], b[16];
+        for (int k = 0; k < m; ++k) {
+            const Vec3 in = {cv[k].x, cv[k].y, -cv[k].d};
+            Vec3 p;
+            g_camProject(g_camera, &in, &p);
+            a[k] = {p.x, p.y, p.z};
+        }
+        int k = Clip(a, m, b, [](const ScrV& v) { return v.x; });
+        k = Clip(b, k, a, [W](const ScrV& v) { return W - v.x; });
+        k = Clip(a, k, b, [](const ScrV& v) { return v.y; });
+        k = Clip(b, k, a, [H](const ScrV& v) { return H - v.y; });
+        if (k < 3) continue;
+        const float r = static_cast<float>((f.rgb >> 16) & 0xFF), g = static_cast<float>((f.rgb >> 8) & 0xFF),
+                    bl = static_cast<float>(f.rgb & 0xFF);
+        TLVertex v[16];
+        for (int q = 0; q < k; ++q) v[q] = {a[q].x, a[q].y, g_boxXray ? 1.0f : a[q].z, 0.5f, 0.5f, r, g, bl, 255};
+        g_poly(engine, v, k, tile, flags);
+        ++st.polys;
+    }
+    if (!g_boxXray) g_flush(engine);  // draw the queued polys now, under the text panels
+    g_boxStats = st;
+}
+
+} // namespace
+
+bool WorldBoxesReady() { return g_boxOk; }
+
+void SubmitWorldBoxes(const WorldBox* boxes, int n, bool xray) {
+    g_boxList = boxes, g_boxCount = n, g_boxXray = xray;
+    if (n <= 0) g_boxStats = {};
+}
+
+WorldBoxStats LastWorldBoxStats() { return g_boxStats; }
 
 // --- init ----------------------------------------------------------------------------------------
 bool Init() {
@@ -423,7 +630,19 @@ bool Init() {
                     hooks::SetEnabled("gfx", true);
         if (!g_alphaOk) log::Warn("gfx: geEngine_RenderWorld not hooked; panels drawn opaque");
     }
-    log::Info("gfx: ready (decals%s)", g_alphaOk ? ", alpha surfaces, solid rects" : "");
+    // World boxes: the alpha path plus the camera transform / projection.
+    if (g_alphaOk) {
+        if (!addr::Usable(Id::genesis_camera_transform) || !addr::Usable(Id::genesis_camera_project)) {
+            log::Warn("gfx: no world boxes (needs genesis.camera_transform / camera_project)");
+        } else {
+            g_camXform = reinterpret_cast<CameraFn>(addr::ExportAddress(Id::genesis_camera_transform));
+            g_camProject = reinterpret_cast<CameraFn>(addr::ExportAddress(Id::genesis_camera_project));
+            g_boxOk = true;
+            hooks::OnFrameEndLate(DrawWorldBoxes);  // registered before textdraw's: boxes under the panels
+        }
+    }
+    log::Info("gfx: ready (decals%s%s)", g_alphaOk ? ", alpha surfaces, solid rects" : "",
+              g_boxOk ? ", world boxes" : "");
     return true;
 }
 

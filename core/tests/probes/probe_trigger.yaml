@@ -1,0 +1,72 @@
+name: probe_trigger
+# Trigger-box spike (not in the suite): zz_triggerprobe.asi dumps the entity list, then
+# draws every BoundsTrigger box (vertex-coloured white tile / per-colour tiles, z modes,
+# a repeat-cost run), looking around; then the same on a second map (bank).
+pre_files:
+  - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
+  - {src: null, dst: FDNYCore.cfg}
+  - {src: build/probes/zz_triggerprobe.asi, dst: zz_triggerprobe.asi}
+setup: load_training
+record: false
+steps:
+  - console: "fd_watermark 0"
+  - wait_s: 2
+  - console: "fd_zzt_1"
+  - wait_s: 1
+  - sample_pipe: {cmd: stats, as: base_0}
+  - wait_s: 5
+  - sample_pipe: {cmd: stats, as: base_1}
+  - screenshot: base
+  - console: "fd_zzt_2_1_0"
+  - wait_s: 2
+  - sample_pipe: {cmd: stats, as: m2_0}
+  - wait_s: 5
+  - sample_pipe: {cmd: stats, as: m2_1}
+  - screenshot: m2_vertexcolour
+  - console: "fd_zzt_3_1_0"
+  - wait_s: 2
+  - screenshot: m3_colourtex
+  - console: "fd_zzt_3_1_1"
+  - wait_s: 2
+  - screenshot: m3_z_recip
+  - console: "fd_zzt_3_0_1"
+  - wait_s: 2
+  - screenshot: m3_queued_z_recip
+  - console: "fd_zzt_3_0_2"
+  - wait_s: 2
+  - screenshot: m3_queued_z_depth
+  - console: "fd_zzt_3_1_0"
+  - mouse_rel: [400, 0]
+  - wait_s: 1
+  - screenshot: look_right
+  - mouse_rel: [400, 0]
+  - wait_s: 1
+  - screenshot: look_back
+  - mouse_rel: [400, 0]
+  - wait_s: 1
+  - screenshot: look_left
+  - mouse_rel: [400, 0]
+  - wait_s: 1
+  - console: "fd_zzt_4_20"
+  - wait_s: 2
+  - sample_pipe: {cmd: stats, as: cost20_0}
+  - wait_s: 5
+  - sample_pipe: {cmd: stats, as: cost20_1}
+  - screenshot: cost20
+  - console: "fd_zzt_3_1_0"
+  - console: "loadmap bank"
+  - wait_s: 40
+  - console: "fd_zzt_1"
+  - wait_s: 1
+  - console: "fd_zzt_3_1_0"
+  - wait_s: 2
+  - sample_pipe: {cmd: stats, as: bank_0}
+  - wait_s: 5
+  - sample_pipe: {cmd: stats, as: bank_1}
+  - screenshot: bank
+  - mouse_rel: [800, 0]
+  - wait_s: 1
+  - screenshot: bank_back
+expect:
+  no_crash: true
+  log_errors: 0

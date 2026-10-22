@@ -1,0 +1,937 @@
+[02:22:02.548] triggerprobe loaded
+[02:22:02.548] trigger vtables: 1 (first 004E1090)
+[02:22:02.548] EndFrame entry byte E9 (already hooked: core present)
+[02:22:02.555] hook geEngine_EndFrame: MH_OK
+[02:22:02.562] hook geEngine_RenderWorld: MH_OK
+[02:22:04.552] world 03BB7B28 (camera 03BCAE80)
+[02:22:09.044] world 03C3F008 (camera 06D9CD70)
+[02:22:26.573] world 06D9B068 (camera 0BBCE128)
+[02:22:51.504] cmd (console): mode 1 a 1 b 0
+[02:22:51.549] dump: 70 entities
+[02:22:51.549] ent   0 08CA0718 vtbl 004E4458 kind 0 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (2000000000.0 2000000000.0 2000000000.0)
+[02:22:51.549] ent   1 08CA21E0 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[-72.0 -172.0 144.0] pos (0.0 0.0 0.0)
+[02:22:51.549] ent   2 08CA2548 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[532.0 -172.0 252.0] pos (0.0 0.0 0.0)
+[02:22:51.549] ent   3 08CA2920 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[-248.0 -384.0 -44.0] pos (0.0 0.0 0.0)
+[02:22:51.549] ent   4 08CA2D10 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[-302.0 -224.0 -219.0] pos (0.0 0.0 0.0)
+[02:22:51.549] ent   5 08C9DE68 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[208.0 -384.0 -1020.0] pos (0.0 0.0 0.0)
+[02:22:51.549] ent   6 08C9E258 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[146.0 -224.0 -883.0] pos (0.0 0.0 0.0)
+[02:22:51.549] ent   7 08C9E648 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[141.5 -217.5 -599.0] pos (0.0 0.0 0.0)
+[02:22:51.549] ent   8 08C9EA38 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[145.5 -217.7 -363.0] pos (0.0 0.0 0.0)
+[02:22:51.549] ent   9 08C9CAE0 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[-736.0 -172.0 2108.0] pos (0.0 0.0 0.0)
+[02:22:51.549] ent  10 08C9CEA0 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[-132.0 -172.0 2216.0] pos (0.0 0.0 0.0)
+[02:22:51.549] ent  11 08C9D290 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[668.0 -172.0 -1820.0] pos (0.0 0.0 0.0)
+[02:22:51.549] ent  12 08C9D680 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[1272.0 -172.0 -1712.0] pos (0.0 0.0 0.0)
+[02:22:51.549] ent  13 08C9DA70 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[1308.0 -172.0 -3784.0] pos (0.0 0.0 0.0)
+[02:22:51.549] ent  14 08CA3118 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[1912.0 -172.0 -3676.0] pos (0.0 0.0 0.0)
+[02:22:51.549] ent  15 08CA3508 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[1102.2 -176.0 -4667.7] pos (0.0 0.0 0.0)
+[02:22:51.549] ent  16 08CA38F8 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[1278.2 -176.0 -4667.7] pos (0.0 0.0 0.0)
+[02:22:51.549] ent  17 08CA3CE8 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[1462.2 -176.0 -4667.7] pos (0.0 0.0 0.0)
+[02:22:51.549] ent  18 08CA4160 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[1626.2 -176.0 -4667.7] pos (0.0 0.0 0.0)
+[02:22:51.549] ent  19 08CA4508 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[1790.2 -176.0 -4667.7] pos (0.0 0.0 0.0)
+[02:22:51.549] ent  20 08CA48F8 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[1962.2 -176.0 -4667.7] pos (0.0 0.0 0.0)
+[02:22:51.549] ent  21 08CA4CE8 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[-306.2 -216.0 -888.6] pos (0.0 0.0 0.0)
+[02:22:51.549] ent  22 08CA50D8 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[601.7 -216.0 -208.6] pos (0.0 0.0 0.0)
+[02:22:51.549] ent  23 08CA54C8 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[-1248.0 -172.0 4072.0] pos (0.0 0.0 0.0)
+[02:22:51.549] ent  24 08CA58B8 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[-644.0 -172.0 4180.0] pos (0.0 0.0 0.0)
+[02:22:51.549] ent  25 08CA5CA8 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[-692.0 -172.0 2830.0] pos (0.0 0.0 0.0)
+[02:22:51.549] ent  26 08CA6098 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[-116.0 -172.0 866.0] pos (0.0 0.0 0.0)
+[02:22:51.549] ent  27 08CA6488 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[600.0 -172.0 -1098.0] pos (0.0 0.0 0.0)
+[02:22:51.549] ent  28 08CA6878 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[1288.0 -172.0 -3062.0] pos (0.0 0.0 0.0)
+[02:22:51.549] ent  29 08CA6C68 vtbl 004E1090 kind 8 box [160.0 -256.0 68.0]-[420.0 -32.0 216.0] pos (0.0 0.0 0.0) SANE
+[02:22:51.549] ent  30 08CA6F30 vtbl 004E1090 kind 8 box [12.0 -240.0 652.0]-[272.0 -16.0 800.0] pos (0.0 0.0 0.0) SANE
+[02:22:51.549] ent  31 08CA71F8 vtbl 004E1090 kind 8 box [-476.0 -580.0 -1096.0]-[760.0 348.0 848.0] pos (0.0 0.0 0.0) SANE
+[02:22:51.549] ent  32 08CA74C0 vtbl 004E1090 kind 8 box [-504.0 -256.0 2032.0]-[-244.0 -32.0 2180.0] pos (0.0 0.0 0.0) SANE
+[02:22:51.549] ent  33 08CA7788 vtbl 004E1090 kind 8 box [-652.0 -240.0 2616.0]-[-392.0 -16.0 2764.0] pos (0.0 0.0 0.0) SANE
+[02:22:51.549] ent  34 08CA7B18 vtbl 004E1090 kind 8 box [-1140.0 -580.0 868.0]-[96.0 348.0 2812.0] pos (0.0 0.0 0.0) SANE
+[02:22:51.549] ent  35 08CA7D58 vtbl 004E1090 kind 8 box [-388.0 -256.0 1596.0]-[-28.0 -32.0 1936.0] pos (0.0 0.0 0.0) SANE
+[02:22:51.549] ent  36 08CA8020 vtbl 004E1090 kind 8 box [-996.0 -308.0 1216.0]-[-444.0 -284.0 1944.0] pos (0.0 0.0 0.0) SANE
+[02:22:51.549] ent  37 08CA82E8 vtbl 004E1090 kind 8 box [-988.0 -232.0 972.0]-[-808.0 -92.0 1168.0] pos (0.0 0.0 0.0) SANE
+[02:22:51.549] ent  38 08CA85B0 vtbl 004E1090 kind 8 box [1144.0 -236.0 -1892.0]-[1376.0 -32.0 -1744.0] pos (0.0 0.0 0.0) SANE
+[02:22:51.549] ent  39 08CA8878 vtbl 004E1090 kind 8 box [752.0 -240.0 -1312.0]-[1012.0 -16.0 -1164.0] pos (0.0 0.0 0.0) SANE
+[02:22:51.549] ent  40 08CA8B40 vtbl 004E1090 kind 8 box [264.0 -580.0 -3060.0]-[1500.0 348.0 -1116.0] pos (0.0 0.0 0.0) SANE
+[02:22:51.549] ent  41 08CA8E08 vtbl 004E1090 kind 8 box [416.0 -256.0 -2188.0]-[592.0 -32.0 -1900.0] pos (0.0 0.0 0.0) SANE
+[02:22:51.549] ent  42 08CA90D0 vtbl 004E1090 kind 8 box [1540.0 -256.0 -3860.0]-[1800.0 -32.0 -3712.0] pos (0.0 0.0 0.0) SANE
+[02:22:51.549] ent  43 08CA9398 vtbl 004E1090 kind 8 box [1392.0 -240.0 -3276.0]-[1652.0 -16.0 -3128.0] pos (0.0 0.0 0.0) SANE
+[02:22:51.549] ent  44 08CA9660 vtbl 004E1090 kind 8 box [904.0 -580.0 -5024.0]-[2140.0 348.0 -3076.0] pos (0.0 0.0 0.0) SANE
+[02:22:51.549] ent  45 08CA9928 vtbl 004E1090 kind 8 box [1084.0 -232.0 -4148.0]-[1292.0 -8.0 -3952.0] pos (0.0 0.0 0.0) SANE
+[02:22:51.549] ent  46 08CA9BF0 vtbl 004E1090 kind 8 box [1836.0 -256.0 -4232.0]-[2036.0 36.0 -3944.0] pos (0.0 0.0 0.0) SANE
+[02:22:51.549] ent  47 08CA9EB8 vtbl 004E1090 kind 8 box [-1016.0 -256.0 3996.0]-[-756.0 -32.0 4144.0] pos (0.0 0.0 0.0) SANE
+[02:22:51.549] ent  48 08CAA180 vtbl 004E1090 kind 8 box [-1164.0 -240.0 4580.0]-[-904.0 -16.0 4728.0] pos (0.0 0.0 0.0) SANE
+[02:22:51.549] ent  49 08CAA448 vtbl 004E1090 kind 8 box [-1652.0 -580.0 2832.0]-[-416.0 348.0 4776.0] pos (0.0 0.0 0.0) SANE
+[02:22:51.549] ent  50 08CAA818 vtbl 004E1090 kind 8 box [-1312.0 -236.0 2892.0]-[-1052.0 -12.0 3040.0] pos (0.0 0.0 0.0) SANE
+[02:22:51.549] ent  51 08CAAA28 vtbl 004E1090 kind 8 box [-1196.0 -260.0 3284.0]-[-936.0 -36.0 3352.0] pos (0.0 0.0 0.0) SANE
+[02:22:51.549] ent  52 08CAACF0 vtbl 004E1090 kind 8 box [-788.0 -236.0 3748.0]-[-528.0 -12.0 3896.0] pos (0.0 0.0 0.0) SANE
+[02:22:51.549] ent  53 08CAAFB8 vtbl 004E1090 kind 8 box [900.0 -236.0 -1888.0]-[1052.0 -32.0 -1740.0] pos (0.0 0.0 0.0) SANE
+[02:22:51.549] ent  54 08CAB280 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (1368.0 -176.0 -2080.0)
+[02:22:51.549] ent  55 08CAB6D8 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (1288.0 -176.0 -2744.0)
+[02:22:51.549] ent  56 08CABB30 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (780.0 -164.0 -1748.0)
+[02:22:51.549] ent  57 08CABF88 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (416.0 -176.0 -2404.0)
+[02:22:51.549] ent  58 08CAC3E0 vtbl 004E1C48 kind 1 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (-1268.0 -225.8 4692.0)
+[02:22:51.549] ent  59 08CB0B98 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:22:51.549] ent  60 08CB0E00 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:22:51.549] ent  61 08CB1020 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:22:51.549] ent  62 08CB1240 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:22:51.549] ent  63 08CB1460 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:22:51.549] ent  64 08CB1680 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:22:51.549] ent  65 08CB18A0 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:22:51.549] ent  66 08CB1C08 vtbl 004E25B8 kind 2 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (1300.0 -230.8 -4952.0)
+[02:22:51.549] ent  67 08CB1F58 vtbl 004E25B8 kind 2 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (1656.0 -230.8 -4968.0)
+[02:22:51.549] ent  68 08CB2598 vtbl 004E1620 kind 3 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:22:51.549] ent  69 08CCD750 vtbl 004E1558 kind 5 box [0.0 0.0 1990.0]-[2000.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:22:51.549] class vtbl 004E4458 kind 0: 1 entities, 0 with a sane +0xe4 box
+[02:22:51.549] class vtbl 004E0DF8 kind 4: 28 entities, 0 with a sane +0xe4 box
+[02:22:51.549] class vtbl 004E1090 kind 8: 25 entities, 25 with a sane +0xe4 box
+[02:22:51.549] class vtbl 004E1390 kind 0: 4 entities, 0 with a sane +0xe4 box
+[02:22:51.549] class vtbl 004E1C48 kind 1: 1 entities, 0 with a sane +0xe4 box
+[02:22:51.549] class vtbl 004E1780 kind 6: 7 entities, 0 with a sane +0xe4 box
+[02:22:51.549] class vtbl 004E25B8 kind 2: 2 entities, 0 with a sane +0xe4 box
+[02:22:51.549] class vtbl 004E1620 kind 3: 1 entities, 0 with a sane +0xe4 box
+[02:22:51.549] class vtbl 004E1558 kind 5: 1 entities, 0 with a sane +0xe4 box
+[02:22:51.549] trig  29 name "hinttrigger" model 06E18CFC P+0xc 00000000 +0x160 00000000 +0x164 1 +0x165 0
+[02:22:51.549] trig  29   line 0: touch: hint 5 (In this level, you will practice basic chopping and throwing techniques for clearing obstacles.)
+[02:22:51.549] trig  29   line 1: touch: tell player escape
+[02:22:51.549] trig  29   line 2: <null>
+[02:22:51.549] trig  29   line 3: <null>
+[02:22:51.549] trig  29   line 4: <null>
+[02:22:51.549] trig  29   line 5: <null>
+[02:22:51.549] trig  29   line 6: <null>
+[02:22:51.549] trig  29   line 7: <null>
+[02:22:51.549] trig  29   line 8: <null>
+[02:22:51.549] trig  29   line 9: <null>
+[02:22:51.549] trig  30 name "hinttrigger1" model 06E18DD0 P+0xc 00000000 +0x160 00000000 +0x164 0 +0x165 0
+[02:22:51.549] trig  30   line 0: touch: hint 5 (Excellent!  Let's proceed to the next exercise.)
+[02:22:51.549] trig  30   line 1: 
+[02:22:51.549] trig  30   line 2: <null>
+[02:22:51.549] trig  30   line 3: <null>
+[02:22:51.550] trig  30   line 4: <null>
+[02:22:51.550] trig  30   line 5: <null>
+[02:22:51.550] trig  30   line 6: <null>
+[02:22:51.550] trig  30   line 7: <null>
+[02:22:51.550] trig  30   line 8: <null>
+[02:22:51.550] trig  30   line 9: <null>
+[02:22:51.550] trig  31 name "hinttrigger2" model 06E1B16C P+0xc 00000000 +0x160 00000000 +0x164 0 +0x165 0
+[02:22:51.550] trig  31   line 0: makezone (Chopping and Throwing Exercise)
+[02:22:51.550] trig  31   line 1: 
+[02:22:51.550] trig  31   line 2: <null>
+[02:22:51.550] trig  31   line 3: <null>
+[02:22:51.550] trig  31   line 4: <null>
+[02:22:51.550] trig  31   line 5: <null>
+[02:22:51.550] trig  31   line 6: <null>
+[02:22:51.550] trig  31   line 7: <null>
+[02:22:51.550] trig  31   line 8: <null>
+[02:22:51.550] trig  31   line 9: <null>
+[02:22:51.550] trig  32 name "hinttrigger3" model 06E1B664 P+0xc 00000000 +0x160 00000000 +0x164 1 +0x165 0
+[02:22:51.550] trig  32   line 0: touch: *Enter1
+[02:22:51.550] trig  32   line 1: touch: tell player escape
+[02:22:51.550] trig  32   line 2: <null>
+[02:22:51.550] trig  32   line 3: <null>
+[02:22:51.550] trig  32   line 4: <null>
+[02:22:51.550] trig  32   line 5: <null>
+[02:22:51.550] trig  32   line 6: <null>
+[02:22:51.550] trig  32   line 7: <null>
+[02:22:51.550] trig  32   line 8: <null>
+[02:22:51.550] trig  32   line 9: <null>
+[02:22:51.550] trig  33 name "hinttrigger4" model 06E1B590 P+0xc 00000000 +0x160 00000000 +0x164 0 +0x165 0
+[02:22:51.550] trig  33   line 0: touch:  hint 5 (Excellent!  Let's proceed to the next exercise.)
+[02:22:51.550] trig  33   line 1: 
+[02:22:51.550] trig  33   line 2: <null>
+[02:22:51.550] trig  33   line 3: <null>
+[02:22:51.550] trig  33   line 4: <null>
+[02:22:51.550] trig  33   line 5: <null>
+[02:22:51.550] trig  33   line 6: <null>
+[02:22:51.550] trig  33   line 7: <null>
+[02:22:51.550] trig  33   line 8: <null>
+[02:22:51.550] trig  33   line 9: <null>
+[02:22:51.550] trig  34 name "hinttrigger5" model 06E1B4BC P+0xc 00000000 +0x160 00000000 +0x164 0 +0x165 0
+[02:22:51.550] trig  34   line 0: makezone (Jumping and Navigation Exercise)
+[02:22:51.550] trig  34   line 1: 
+[02:22:51.550] trig  34   line 2: <null>
+[02:22:51.550] trig  34   line 3: <null>
+[02:22:51.550] trig  34   line 4: <null>
+[02:22:51.550] trig  34   line 5: <null>
+[02:22:51.550] trig  34   line 6: <null>
+[02:22:51.550] trig  34   line 7: <null>
+[02:22:51.550] trig  34   line 8: <null>
+[02:22:51.550] trig  34   line 9: <null>
+[02:22:51.550] trig  35 name "hinttrigger6" model 06E1B3E8 P+0xc 00000000 +0x160 00000000 +0x164 0 +0x165 0
+[02:22:51.550] trig  35   line 0: touch: hint 3 (Good!  Now see if you can navigate across the beam.)
+[02:22:51.550] trig  35   line 1: 
+[02:22:51.550] trig  35   line 2: <null>
+[02:22:51.550] trig  35   line 3: <null>
+[02:22:51.550] trig  35   line 4: <null>
+[02:22:51.550] trig  35   line 5: <null>
+[02:22:51.550] trig  35   line 6: <null>
+[02:22:51.550] trig  35   line 7: <null>
+[02:22:51.550] trig  35   line 8: <null>
+[02:22:51.550] trig  35   line 9: <null>
+[02:22:51.550] trig  36 name "hinttrigger7" model 06E1B314 P+0xc 00000000 +0x160 00000000 +0x164 0 +0x165 0
+[02:22:51.550] trig  36   line 0: touch: if NotFirst 1 (*Failure1)
+[02:22:51.550] trig  36   line 1: touch: set NotFirst 1
+[02:22:51.550] trig  36   line 2: <null>
+[02:22:51.550] trig  36   line 3: <null>
+[02:22:51.550] trig  36   line 4: <null>
+[02:22:51.550] trig  36   line 5: <null>
+[02:22:51.550] trig  36   line 6: <null>
+[02:22:51.550] trig  36   line 7: <null>
+[02:22:51.550] trig  36   line 8: <null>
+[02:22:51.550] trig  36   line 9: <null>
+[02:22:51.550] trig  37 name "hinttrigger8" model 06E1B240 P+0xc 00000000 +0x160 00000000 +0x164 0 +0x165 0
+[02:22:51.550] trig  37   line 0: touch: hint 4 (Good work!  Now jump across the platforms to proceed to the next section.)
+[02:22:51.550] trig  37   line 1: 
+[02:22:51.550] trig  37   line 2: <null>
+[02:22:51.550] trig  37   line 3: <null>
+[02:22:51.550] trig  37   line 4: <null>
+[02:22:51.550] trig  37   line 5: <null>
+[02:22:51.550] trig  37   line 6: <null>
+[02:22:51.550] trig  37   line 7: <null>
+[02:22:51.550] trig  37   line 8: <null>
+[02:22:51.550] trig  37   line 9: <null>
+[02:22:51.550] trig  38 name "hinttrigger9" model 06E1BC30 P+0xc 00000000 +0x160 00000000 +0x164 0 +0x165 0
+[02:22:51.550] trig  38   line 0: touch: *Welcome2
+[02:22:51.550] trig  38   line 1: 
+[02:22:51.550] trig  38   line 2: <null>
+[02:22:51.550] trig  38   line 3: <null>
+[02:22:51.550] trig  38   line 4: <null>
+[02:22:51.550] trig  38   line 5: <null>
+[02:22:51.550] trig  38   line 6: <null>
+[02:22:51.550] trig  38   line 7: <null>
+[02:22:51.550] trig  38   line 8: <null>
+[02:22:51.550] trig  38   line 9: <null>
+[02:22:51.550] trig  39 name "hinttrigger10" model 06E1BB5C P+0xc 00000000 +0x160 00000000 +0x164 0 +0x165 0
+[02:22:51.550] trig  39   line 0: touch: hint 5 (Excellent!  Let's proceed to the next exercise.)
+[02:22:51.550] trig  39   line 1: 
+[02:22:51.550] trig  39   line 2: <null>
+[02:22:51.550] trig  39   line 3: <null>
+[02:22:51.550] trig  39   line 4: <null>
+[02:22:51.550] trig  39   line 5: <null>
+[02:22:51.550] trig  39   line 6: <null>
+[02:22:51.551] trig  39   line 7: <null>
+[02:22:51.551] trig  39   line 8: <null>
+[02:22:51.551] trig  39   line 9: <null>
+[02:22:51.551] trig  40 name "hinttrigger11" model 06E1BA88 P+0xc 00000000 +0x160 00000000 +0x164 0 +0x165 0
+[02:22:51.551] trig  40   line 0: makezone (Fire Extinguishing Exercise)
+[02:22:51.551] trig  40   line 1: 
+[02:22:51.551] trig  40   line 2: <null>
+[02:22:51.551] trig  40   line 3: <null>
+[02:22:51.551] trig  40   line 4: <null>
+[02:22:51.551] trig  40   line 5: <null>
+[02:22:51.551] trig  40   line 6: <null>
+[02:22:51.551] trig  40   line 7: <null>
+[02:22:51.551] trig  40   line 8: <null>
+[02:22:51.551] trig  40   line 9: <null>
+[02:22:51.551] trig  41 name "hinttrigger12" model 06E1B9B4 P+0xc 00000000 +0x160 00000000 +0x164 0 +0x165 0
+[02:22:51.551] trig  41   line 0: touch: if gothose 1 (*Cmd2b)
+[02:22:51.551] trig  41   line 1: touch: ifnot gothose 1 (*Cmd2a)
+[02:22:51.551] trig  41   line 2: tell player (setashdensity 0.5)
+[02:22:51.551] trig  41   line 3: <null>
+[02:22:51.551] trig  41   line 4: <null>
+[02:22:51.551] trig  41   line 5: <null>
+[02:22:51.551] trig  41   line 6: <null>
+[02:22:51.551] trig  41   line 7: <null>
+[02:22:51.551] trig  41   line 8: <null>
+[02:22:51.551] trig  41   line 9: <null>
+[02:22:51.551] trig  42 name "hinttrigger13" model 06E1C89C P+0xc 00000000 +0x160 00000000 +0x164 0 +0x165 0
+[02:22:51.551] trig  42   line 0: touch: hint 4 (This final exercise illustrates how to locate and rescue survivors.)
+[02:22:51.551] trig  42   line 1: 
+[02:22:51.551] trig  42   line 2: <null>
+[02:22:51.551] trig  42   line 3: <null>
+[02:22:51.551] trig  42   line 4: <null>
+[02:22:51.551] trig  42   line 5: <null>
+[02:22:51.551] trig  42   line 6: <null>
+[02:22:51.551] trig  42   line 7: <null>
+[02:22:51.551] trig  42   line 8: <null>
+[02:22:51.551] trig  42   line 9: <null>
+[02:22:51.551] trig  43 name "hinttrigger14" model 06E1C7C8 P+0xc 00000000 +0x160 00000000 +0x164 0 +0x165 0
+[02:22:51.551] trig  43   line 0: touch: hint 5 (Excellent!  Let's proceed to the next exercise.)
+[02:22:51.551] trig  43   line 1: tell player (setashdensity 0)
+[02:22:51.551] trig  43   line 2: <null>
+[02:22:51.551] trig  43   line 3: <null>
+[02:22:51.551] trig  43   line 4: <null>
+[02:22:51.551] trig  43   line 5: <null>
+[02:22:51.551] trig  43   line 6: <null>
+[02:22:51.551] trig  43   line 7: <null>
+[02:22:51.551] trig  43   line 8: <null>
+[02:22:51.551] trig  43   line 9: <null>
+[02:22:51.551] trig  44 name "hinttrigger15" model 06E1C6F4 P+0xc 00000000 +0x160 00000000 +0x164 0 +0x165 0
+[02:22:51.551] trig  44   line 0: makezone (Survivor Extraction Exercise)
+[02:22:51.551] trig  44   line 1: 
+[02:22:51.551] trig  44   line 2: <null>
+[02:22:51.551] trig  44   line 3: <null>
+[02:22:51.551] trig  44   line 4: <null>
+[02:22:51.551] trig  44   line 5: <null>
+[02:22:51.551] trig  44   line 6: <null>
+[02:22:51.551] trig  44   line 7: <null>
+[02:22:51.551] trig  44   line 8: <null>
+[02:22:51.551] trig  44   line 9: <null>
+[02:22:51.551] trig  45 name "hinttrigger16" model 06E1C620 P+0xc 00000000 +0x160 00000000 +0x164 0 +0x165 0
+[02:22:51.551] trig  45   line 0: touch: que [ wait 3, (*Cmd3a) ]
+[02:22:51.551] trig  45   line 1: touch: once (tell player (equip goggles))
+[02:22:51.551] trig  45   line 2: <null>
+[02:22:51.551] trig  45   line 3: <null>
+[02:22:51.551] trig  45   line 4: <null>
+[02:22:51.551] trig  45   line 5: <null>
+[02:22:51.551] trig  45   line 6: <null>
+[02:22:51.551] trig  45   line 7: <null>
+[02:22:51.551] trig  45   line 8: <null>
+[02:22:51.551] trig  45   line 9: <null>
+[02:22:51.551] trig  46 name "hinttrigger17" model 06E1C054 P+0xc 00000000 +0x160 00000000 +0x164 1 +0x165 0
+[02:22:51.551] trig  46   line 0: 
+[02:22:51.551] trig  46   line 1: touch: tell player escape
+[02:22:51.551] trig  46   line 2: <null>
+[02:22:51.551] trig  46   line 3: <null>
+[02:22:51.551] trig  46   line 4: <null>
+[02:22:51.551] trig  46   line 5: <null>
+[02:22:51.551] trig  46   line 6: <null>
+[02:22:51.551] trig  46   line 7: <null>
+[02:22:51.551] trig  46   line 8: <null>
+[02:22:51.551] trig  46   line 9: <null>
+[02:22:51.551] trig  47 name "hinttrigger23" model 06E1D010 P+0xc 00000000 +0x160 00000000 +0x164 1 +0x165 0
+[02:22:51.551] trig  47   line 0: touch: hint 5 (In this level, you will practice basic jumping and crouching techniques.)
+[02:22:51.551] trig  47   line 1: touch: tell player escape
+[02:22:51.551] trig  47   line 2: <null>
+[02:22:51.551] trig  47   line 3: <null>
+[02:22:51.551] trig  47   line 4: <null>
+[02:22:51.551] trig  47   line 5: <null>
+[02:22:51.551] trig  47   line 6: <null>
+[02:22:51.551] trig  47   line 7: <null>
+[02:22:51.551] trig  47   line 8: <null>
+[02:22:51.551] trig  47   line 9: <null>
+[02:22:51.551] trig  48 name "hinttrigger24" model 06E1CF3C P+0xc 00000000 +0x160 00000000 +0x164 0 +0x165 0
+[02:22:51.551] trig  48   line 0: touch: *Welcome1
+[02:22:51.551] trig  48   line 1: 
+[02:22:51.551] trig  48   line 2: <null>
+[02:22:51.551] trig  48   line 3: <null>
+[02:22:51.551] trig  48   line 4: <null>
+[02:22:51.551] trig  48   line 5: <null>
+[02:22:51.551] trig  48   line 6: <null>
+[02:22:51.551] trig  48   line 7: <null>
+[02:22:51.551] trig  48   line 8: <null>
+[02:22:51.551] trig  48   line 9: <null>
+[02:22:51.551] trig  49 name "hinttrigger25" model 06E1CE68 P+0xc 00000000 +0x160 00000000 +0x164 0 +0x165 0
+[02:22:51.551] trig  49   line 0: makezone (Crouching and Jumping Exercise)
+[02:22:51.551] trig  49   line 1: 
+[02:22:51.551] trig  49   line 2: <null>
+[02:22:51.551] trig  49   line 3: <null>
+[02:22:51.551] trig  49   line 4: <null>
+[02:22:51.551] trig  49   line 5: <null>
+[02:22:51.551] trig  49   line 6: <null>
+[02:22:51.551] trig  49   line 7: <null>
+[02:22:51.551] trig  49   line 8: <null>
+[02:22:51.551] trig  49   line 9: <null>
+[02:22:51.551] trig  50 name "hinttrigger26" model 06E1CD94 P+0xc 00000000 +0x160 00000000 +0x164 0 +0x165 0
+[02:22:51.551] trig  50   line 0: touch: hint 4 (Use the right mouse button to jump.)
+[02:22:51.551] trig  50   line 1: 
+[02:22:51.551] trig  50   line 2: <null>
+[02:22:51.551] trig  50   line 3: <null>
+[02:22:51.551] trig  50   line 4: <null>
+[02:22:51.551] trig  50   line 5: <null>
+[02:22:51.551] trig  50   line 6: <null>
+[02:22:51.551] trig  50   line 7: <null>
+[02:22:51.551] trig  50   line 8: <null>
+[02:22:51.551] trig  50   line 9: <null>
+[02:22:51.551] trig  51 name "hinttrigger27" model 06E1CCC0 P+0xc 00000000 +0x160 00000000 +0x164 0 +0x165 0
+[02:22:51.551] trig  51   line 0: touch: hint 4 (Press 'C' or 'CTRL' to crouch.)
+[02:22:51.551] trig  51   line 1: 
+[02:22:51.551] trig  51   line 2: <null>
+[02:22:51.551] trig  51   line 3: <null>
+[02:22:51.551] trig  51   line 4: <null>
+[02:22:51.551] trig  51   line 5: <null>
+[02:22:51.551] trig  51   line 6: <null>
+[02:22:51.551] trig  51   line 7: <null>
+[02:22:51.551] trig  51   line 8: <null>
+[02:22:51.551] trig  51   line 9: <null>
+[02:22:51.551] trig  52 name "hinttrigger28" model 06E1CBEC P+0xc 00000000 +0x160 00000000 +0x164 0 +0x165 0
+[02:22:51.551] trig  52   line 0: touch: hint 4 (Good work!)
+[02:22:51.551] trig  52   line 1: 
+[02:22:51.551] trig  52   line 2: <null>
+[02:22:51.551] trig  52   line 3: <null>
+[02:22:51.551] trig  52   line 4: <null>
+[02:22:51.551] trig  52   line 5: <null>
+[02:22:51.551] trig  52   line 6: <null>
+[02:22:51.551] trig  52   line 7: <null>
+[02:22:51.551] trig  52   line 8: <null>
+[02:22:51.551] trig  52   line 9: <null>
+[02:22:51.551] trig  53 name "hinttrigger18" model 06E1D360 P+0xc 00000000 +0x160 00000000 +0x164 1 +0x165 0
+[02:22:51.551] trig  53   line 0: 
+[02:22:51.551] trig  53   line 1: touch: tell player escape
+[02:22:51.551] trig  53   line 2: <null>
+[02:22:51.551] trig  53   line 3: <null>
+[02:22:51.551] trig  53   line 4: <null>
+[02:22:51.551] trig  53   line 5: <null>
+[02:22:51.551] trig  53   line 6: <null>
+[02:22:51.551] trig  53   line 7: <null>
+[02:22:51.551] trig  53   line 8: <null>
+[02:22:51.551] trig  53   line 9: <null>
+[02:22:59.965] cmd (console): mode 2 a 1 b 0
+[02:22:59.973] tex 0 added to world 06D9B068: 1
+[02:22:59.973] draw: mode 2 flags 1 z 0: 25 boxes, 150 faces, 0 polys, view 639x479
+[02:22:59.973] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:22:59.973] cost: 1167 us/frame avg, 1167 us max, 150 faces, 0 polys over 1 frames
+[02:23:00.990] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:00.990] cost: 1796 us/frame avg, 19755 us max, 150 faces, 19 polys over 32 frames
+[02:23:01.990] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:01.990] cost: 1060 us/frame avg, 1525 us max, 150 faces, 19 polys over 34 frames
+[02:23:02.991] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:02.991] cost: 1138 us/frame avg, 2846 us max, 150 faces, 19 polys over 36 frames
+[02:23:03.990] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:03.990] cost: 1195 us/frame avg, 3928 us max, 150 faces, 19 polys over 35 frames
+[02:23:04.990] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:04.990] cost: 1326 us/frame avg, 3206 us max, 150 faces, 19 polys over 37 frames
+[02:23:05.990] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:05.990] cost: 1045 us/frame avg, 1261 us max, 150 faces, 19 polys over 36 frames
+[02:23:06.991] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:06.991] cost: 1189 us/frame avg, 4171 us max, 150 faces, 19 polys over 37 frames
+[02:23:07.990] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:07.990] cost: 1368 us/frame avg, 6334 us max, 150 faces, 19 polys over 35 frames
+[02:23:08.626] cmd (console): mode 3 a 1 b 0
+[02:23:08.647] tex 1 added to world 06D9B068: 1
+[02:23:08.647] draw: mode 3 flags 1 z 0: 25 boxes, 150 faces, 0 polys, view 639x479
+[02:23:08.991] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:08.991] cost: 3425 us/frame avg, 16316 us max, 150 faces, 16 polys over 8 frames
+[02:23:09.991] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:09.991] cost: 1280 us/frame avg, 4683 us max, 150 faces, 19 polys over 35 frames
+[02:23:10.990] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:10.990] cost: 1233 us/frame avg, 4544 us max, 150 faces, 19 polys over 34 frames
+[02:23:11.990] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:11.990] cost: 1220 us/frame avg, 3342 us max, 150 faces, 19 polys over 35 frames
+[02:23:12.155] cmd (console): mode 3 a 1 b 1
+[02:23:12.180] draw: mode 3 flags 1 z 1: 25 boxes, 150 faces, 19 polys, view 639x479
+[02:23:12.990] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:12.990] cost: 1228 us/frame avg, 3472 us max, 150 faces, 19 polys over 31 frames
+[02:23:13.991] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:13.991] cost: 1083 us/frame avg, 1530 us max, 150 faces, 19 polys over 36 frames
+[02:23:14.990] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:14.990] cost: 1191 us/frame avg, 4206 us max, 150 faces, 19 polys over 34 frames
+[02:23:15.683] cmd (console): mode 3 a 0 b 1
+[02:23:15.703] draw: mode 3 flags 0 z 1: 25 boxes, 150 faces, 19 polys, view 639x479
+[02:23:15.991] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:15.991] cost: 1249 us/frame avg, 2888 us max, 150 faces, 19 polys over 11 frames
+[02:23:16.994] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:16.994] cost: 1096 us/frame avg, 3812 us max, 150 faces, 19 polys over 36 frames
+[02:23:18.022] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:18.022] cost: 1188 us/frame avg, 3688 us max, 150 faces, 19 polys over 38 frames
+[02:23:19.022] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:19.022] cost: 1234 us/frame avg, 4043 us max, 150 faces, 19 polys over 32 frames
+[02:23:19.214] cmd (console): mode 3 a 0 b 2
+[02:23:19.228] draw: mode 3 flags 0 z 2: 25 boxes, 150 faces, 19 polys, view 639x479
+[02:23:20.022] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:20.022] cost: 1340 us/frame avg, 3386 us max, 150 faces, 19 polys over 30 frames
+[02:23:21.021] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:21.021] cost: 1086 us/frame avg, 3023 us max, 150 faces, 19 polys over 35 frames
+[02:23:22.021] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:22.021] cost: 1108 us/frame avg, 1439 us max, 150 faces, 19 polys over 34 frames
+[02:23:22.742] cmd (console): mode 3 a 1 b 0
+[02:23:22.776] draw: mode 3 flags 1 z 0: 25 boxes, 150 faces, 19 polys, view 639x479
+[02:23:23.021] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:23.021] cost: 1442 us/frame avg, 3225 us max, 150 faces, 17 polys over 11 frames
+[02:23:24.025] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:24.025] cost: 824 us/frame avg, 3065 us max, 150 faces, 9 polys over 38 frames
+[02:23:25.037] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:25.038] cost: 546 us/frame avg, 765 us max, 150 faces, 3 polys over 37 frames
+[02:23:26.024] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:26.024] cost: 500 us/frame avg, 2305 us max, 150 faces, 1 polys over 39 frames
+[02:23:27.025] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:27.025] cost: 877 us/frame avg, 3577 us max, 150 faces, 2 polys over 37 frames
+[02:23:28.024] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:28.024] cost: 673 us/frame avg, 2244 us max, 150 faces, 2 polys over 40 frames
+[02:23:29.052] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:29.052] cost: 1150 us/frame avg, 9593 us max, 150 faces, 2 polys over 37 frames
+[02:23:29.287] cmd (console): mode 4 a 20 b 0
+[02:23:29.318] draw: mode 4 flags 20 z 0: 500 boxes, 3000 faces, 40 polys, view 639x479
+[02:23:30.057] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:30.057] cost: 5083 us/frame avg, 5509 us max, 3000 faces, 40 polys over 26 frames
+[02:23:31.057] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:31.057] cost: 4955 us/frame avg, 5390 us max, 3000 faces, 40 polys over 32 frames
+[02:23:32.057] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:32.057] cost: 4916 us/frame avg, 5130 us max, 3000 faces, 40 polys over 32 frames
+[02:23:33.059] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:33.059] cost: 5234 us/frame avg, 7101 us max, 3000 faces, 40 polys over 32 frames
+[02:23:34.057] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:34.057] cost: 5245 us/frame avg, 6515 us max, 3000 faces, 40 polys over 32 frames
+[02:23:35.056] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:35.056] cost: 5008 us/frame avg, 6448 us max, 3000 faces, 40 polys over 32 frames
+[02:23:36.057] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:36.057] cost: 4983 us/frame avg, 7198 us max, 3000 faces, 40 polys over 32 frames
+[02:23:37.057] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:37.057] cost: 5142 us/frame avg, 6075 us max, 3000 faces, 40 polys over 32 frames
+[02:23:37.950] cmd (console): mode 3 a 1 b 0
+[02:23:37.987] draw: mode 3 flags 1 z 0: 25 boxes, 150 faces, 2 polys, view 639x479
+[02:23:38.084] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:38.084] cost: 1168 us/frame avg, 2105 us max, 150 faces, 2 polys over 5 frames
+[02:23:39.084] player (-1268.0 -225.8 4692.0) inside: 49(k8)
+[02:23:39.084] cost: 574 us/frame avg, 824 us max, 150 faces, 2 polys over 37 frames
+[02:23:39.992] world 0B2F0048 (camera 0C528038)
+[02:23:40.047] tex 1 added to world 0B2F0048: 1
+[02:23:40.371] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:23:40.371] cost: 3953 us/frame avg, 21594 us max, 136 faces, 7 polys over 10 frames
+[02:23:41.399] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:23:41.399] cost: 1459 us/frame avg, 3210 us max, 84 faces, 61 polys over 31 frames
+[02:23:42.429] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:23:42.429] cost: 1633 us/frame avg, 3539 us max, 84 faces, 61 polys over 33 frames
+[02:23:43.428] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:23:43.428] cost: 1440 us/frame avg, 1945 us max, 84 faces, 61 polys over 32 frames
+[02:23:44.429] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:23:44.429] cost: 1339 us/frame avg, 1705 us max, 84 faces, 61 polys over 32 frames
+[02:23:45.430] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:23:45.430] cost: 1544 us/frame avg, 3083 us max, 84 faces, 61 polys over 32 frames
+[02:23:46.460] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:23:46.460] cost: 1442 us/frame avg, 1831 us max, 84 faces, 61 polys over 33 frames
+[02:23:47.460] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:23:47.460] cost: 1448 us/frame avg, 3513 us max, 84 faces, 61 polys over 32 frames
+[02:23:48.460] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:23:48.460] cost: 1472 us/frame avg, 2599 us max, 84 faces, 61 polys over 32 frames
+[02:23:49.461] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:23:49.461] cost: 1550 us/frame avg, 2562 us max, 84 faces, 61 polys over 32 frames
+[02:23:50.460] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:23:50.460] cost: 1622 us/frame avg, 4934 us max, 84 faces, 61 polys over 32 frames
+[02:23:51.460] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:23:51.460] cost: 1419 us/frame avg, 2088 us max, 84 faces, 61 polys over 32 frames
+[02:23:52.460] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:23:52.460] cost: 1392 us/frame avg, 2990 us max, 84 faces, 61 polys over 32 frames
+[02:23:53.460] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:23:53.460] cost: 1448 us/frame avg, 2724 us max, 84 faces, 61 polys over 32 frames
+[02:23:54.460] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:23:54.460] cost: 1352 us/frame avg, 1830 us max, 84 faces, 61 polys over 32 frames
+[02:23:55.460] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:23:55.460] cost: 1402 us/frame avg, 3261 us max, 84 faces, 61 polys over 32 frames
+[02:23:56.461] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:23:56.461] cost: 1315 us/frame avg, 1586 us max, 84 faces, 61 polys over 32 frames
+[02:23:57.461] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:23:57.461] cost: 1390 us/frame avg, 1785 us max, 84 faces, 61 polys over 32 frames
+[02:23:58.491] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:23:58.491] cost: 1402 us/frame avg, 2747 us max, 84 faces, 61 polys over 33 frames
+[02:23:59.492] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:23:59.492] cost: 1404 us/frame avg, 3906 us max, 84 faces, 61 polys over 32 frames
+[02:24:00.492] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:24:00.492] cost: 1329 us/frame avg, 1901 us max, 84 faces, 61 polys over 32 frames
+[02:24:01.522] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:24:01.522] cost: 1447 us/frame avg, 3464 us max, 84 faces, 61 polys over 33 frames
+[02:24:02.523] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:24:02.523] cost: 1387 us/frame avg, 1902 us max, 84 faces, 61 polys over 32 frames
+[02:24:03.523] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:24:03.523] cost: 1378 us/frame avg, 4137 us max, 84 faces, 61 polys over 32 frames
+[02:24:04.522] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:24:04.522] cost: 1336 us/frame avg, 2124 us max, 84 faces, 61 polys over 32 frames
+[02:24:05.523] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:24:05.523] cost: 1447 us/frame avg, 3362 us max, 84 faces, 61 polys over 32 frames
+[02:24:06.523] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:24:06.523] cost: 1352 us/frame avg, 1668 us max, 84 faces, 61 polys over 32 frames
+[02:24:07.522] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:24:07.523] cost: 1389 us/frame avg, 3154 us max, 84 faces, 61 polys over 32 frames
+[02:24:08.524] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:24:08.524] cost: 1399 us/frame avg, 2598 us max, 84 faces, 61 polys over 32 frames
+[02:24:09.555] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:24:09.555] cost: 1345 us/frame avg, 1904 us max, 84 faces, 61 polys over 33 frames
+[02:24:10.554] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:24:10.554] cost: 1432 us/frame avg, 2452 us max, 84 faces, 61 polys over 32 frames
+[02:24:11.555] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:24:11.555] cost: 1331 us/frame avg, 1882 us max, 84 faces, 61 polys over 32 frames
+[02:24:12.554] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:24:12.554] cost: 1393 us/frame avg, 2986 us max, 84 faces, 61 polys over 32 frames
+[02:24:13.554] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:24:13.554] cost: 1379 us/frame avg, 1933 us max, 84 faces, 61 polys over 32 frames
+[02:24:14.554] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:24:14.554] cost: 1415 us/frame avg, 3007 us max, 84 faces, 61 polys over 32 frames
+[02:24:15.554] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:24:15.554] cost: 1409 us/frame avg, 1921 us max, 84 faces, 61 polys over 32 frames
+[02:24:16.553] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:24:16.553] cost: 1316 us/frame avg, 1517 us max, 84 faces, 61 polys over 32 frames
+[02:24:17.555] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:24:17.555] cost: 1346 us/frame avg, 1823 us max, 84 faces, 61 polys over 32 frames
+[02:24:18.585] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:24:18.586] cost: 1404 us/frame avg, 1952 us max, 84 faces, 61 polys over 33 frames
+[02:24:19.586] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:24:19.586] cost: 1325 us/frame avg, 2595 us max, 84 faces, 61 polys over 32 frames
+[02:24:20.586] player (-697.0 -47.3 1196.0) inside: 56(k8) 61(k8)
+[02:24:20.586] cost: 1549 us/frame avg, 2158 us max, 84 faces, 61 polys over 32 frames
+[02:24:20.665] cmd (console): mode 1 a 1 b 0
+[02:24:20.666] dump: 205 entities
+[02:24:20.666] ent   0 08CCCB10 vtbl 004E4458 kind 0 box [1.0 194143.5 0.0]-[0.0 0.0 0.0] pos (3911.0 2000000000.0 2000000000.0)
+[02:24:20.666] ent   1 08CB2B60 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[379.6 424.6 -140.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent   2 08CB1C08 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[907.5 -22.0 434.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent   3 08CB2FD8 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[1278.5 -17.1 -167.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent   4 08CB41A8 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[1323.4 -16.2 -144.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent   5 08CB5BC0 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[1168.0 5.0 -476.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent   6 08CD4C98 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[-1496.0 -26.4 259.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent   7 08CB8270 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[-1446.0 -26.3 328.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent   8 08CB1F40 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[1028.0 16.0 -1600.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent   9 08CBAA40 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[890.5 -22.4 -2018.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  10 08CB99C8 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[888.5 -17.5 -1867.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  11 08CB8968 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[888.5 -17.5 -1867.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  12 08CB7C60 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[-152.0 16.0 -1600.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  13 08CB6608 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[1027.5 -22.4 -2018.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  14 08CA16D8 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[263.7 -30.5 -1956.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  15 08CB23D0 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[-581.6 -30.5 -1970.9] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  16 08CB2668 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[157.4 -25.3 -1976.9] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  17 08CB6B58 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[177.5 -25.4 -1837.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  18 08CB6DF0 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[-181.0 -30.5 -1969.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  19 08CB4D90 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[-182.0 -30.5 -1830.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  20 08CB5028 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[265.3 -30.5 -1819.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  21 08CBA438 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[-580.0 -30.5 -1833.9] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  22 08CBA6D0 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[-274.8 -25.3 -1827.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  23 08CBC168 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[-680.4 -25.6 -1983.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  24 08CBC400 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[-680.5 -25.2 -1855.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  25 08CC8BB8 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[-476.4 -27.5 -1968.9] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  26 08CC8E50 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[-82.5 -27.8 -1840.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  27 08CCB008 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[368.7 -27.8 -1827.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  28 08CCB2A0 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[907.5 -22.0 540.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  29 08CCA858 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[1044.5 -22.0 540.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  30 08CCAAF0 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[1044.5 -22.0 435.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  31 08CCA0A8 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[1028.0 -22.4 -1170.5] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  32 08CCA340 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[664.0 272.0 -740.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  33 08CCB7B8 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[660.0 272.0 480.0] pos (0.0 0.0 0.0) SANE
+[02:24:20.666] ent  34 08CCBA50 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[-631.0 -26.0 -1204.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  35 08CCBF98 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[-1241.5 32.5 -1931.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  36 08CCC230 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[1008.0 272.0 228.0] pos (0.0 0.0 0.0) SANE
+[02:24:20.666] ent  37 08CCC4C8 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[663.5 16.0 483.8] pos (0.0 0.0 0.0) SANE
+[02:24:20.666] ent  38 08CC92D0 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[660.0 16.0 -740.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  39 08CC9568 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[978.1 222.5 463.2] pos (0.0 0.0 0.0) SANE
+[02:24:20.666] ent  40 08CC9800 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[-221.9 38.5 761.6] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  41 08CC9A98 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[-1984.0 272.0 -104.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  42 08CC9D30 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[-627.0 -26.0 -1292.9] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  43 08CBAED8 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[-2168.2 270.5 -284.7] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  44 08CBB170 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[-1718.8 292.5 -606.5] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  45 08CBB408 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[-1188.0 16.0 -1370.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  46 08CBB6A0 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[-721.0 16.0 775.6] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  47 08CBB938 vtbl 004E0DF8 kind 4 box [1.0 0.0 0.0]-[-721.0 16.0 575.6] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  48 08CB9170 vtbl 004E1090 kind 8 box [-208.0 -60.0 -21.0]-[328.0 119.0 756.0] pos (0.0 0.0 0.0) SANE
+[02:24:20.666] ent  49 08CBBC18 vtbl 004E1090 kind 8 box [673.0 -75.0 -2274.0]-[1360.0 136.0 -1601.0] pos (0.0 0.0 0.0) SANE
+[02:24:20.666] ent  50 08CCD6D8 vtbl 004E1090 kind 8 box [-935.0 -51.0 -2287.0]-[655.0 167.0 -1606.0] pos (0.0 0.0 0.0) SANE
+[02:24:20.666] ent  51 08CCD848 vtbl 004E1090 kind 8 box [-2524.0 -70.0 -2282.0]-[-1263.0 167.0 -1601.0] pos (0.0 0.0 0.0) SANE
+[02:24:20.666] ent  52 08CCDA88 vtbl 004E1090 kind 8 box [659.0 -70.0 -1369.0]-[1391.0 167.0 219.0] pos (0.0 0.0 0.0) SANE
+[02:24:20.666] ent  53 08CCDD50 vtbl 004E1090 kind 8 box [659.0 181.0 -1369.0]-[1391.0 418.0 219.0] pos (0.0 0.0 0.0) SANE
+[02:24:20.666] ent  54 08CCE018 vtbl 004E1090 kind 8 box [659.0 184.0 225.0]-[1391.0 421.0 776.0] pos (0.0 0.0 0.0) SANE
+[02:24:20.666] ent  55 08CCE2E0 vtbl 004E1090 kind 8 box [-1971.0 -80.0 -1373.0]-[659.0 429.0 773.0] pos (0.0 0.0 0.0) SANE
+[02:24:20.666] ent  56 08CCE5A8 vtbl 004E1090 kind 8 box [-2596.0 -80.0 -2366.0]-[1513.0 429.0 1709.0] pos (0.0 0.0 0.0) SANE
+[02:24:20.666] ent  57 08CCE870 vtbl 004E1090 kind 8 box [-2347.0 184.0 -296.0]-[-1984.0 435.0 782.0] pos (0.0 0.0 0.0) SANE
+[02:24:20.666] ent  58 08CC41D8 vtbl 004E1090 kind 8 box [-848.0 -64.0 1245.0]-[-512.0 104.0 1477.0] pos (0.0 0.0 0.0) SANE
+[02:24:20.666] ent  59 08CC4390 vtbl 004E1090 kind 8 box [-1918.0 -64.0 -1555.0]-[-1726.0 136.0 -1407.0] pos (0.0 0.0 0.0) SANE
+[02:24:20.666] ent  60 08CC4658 vtbl 004E1090 kind 8 box [-1970.0 174.0 563.0]-[-1761.0 398.0 766.0] pos (0.0 0.0 0.0) SANE
+[02:24:20.666] ent  61 08CC4920 vtbl 004E1090 kind 8 box [-1023.0 -106.0 838.0]-[-319.0 68.0 1545.0] pos (0.0 0.0 0.0) SANE
+[02:24:20.666] ent  62 08CC4BE8 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 1.0 0.0] pos (-1709.0 51.0 -1579.0)
+[02:24:20.666] ent  63 08CC5028 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (1319.0 51.0 -1494.0)
+[02:24:20.666] ent  64 08CC5480 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 -5.9 0.0] pos (-2031.0 193.0 743.0)
+[02:24:20.666] ent  65 08CC58D8 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (-2117.0 -64.0 -2228.0)
+[02:24:20.666] ent  66 08CC5E78 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (1082.0 15.0 -778.0)
+[02:24:20.666] ent  67 08CC61C8 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 31.8 0.0] pos (375.0 -63.0 -1980.0)
+[02:24:20.666] ent  68 08CC6620 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (-1477.0 -57.0 -1116.0)
+[02:24:20.666] ent  69 08CC6A78 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 2815.7 0.0] pos (-2157.0 14.0 -1795.0)
+[02:24:20.666] ent  70 08CC6EB8 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (-2162.0 -58.0 -1941.0)
+[02:24:20.666] ent  71 08CC7310 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (-2161.0 -58.0 -2096.0)
+[02:24:20.666] ent  72 08C9C410 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (-2267.0 -64.0 -1801.0)
+[02:24:20.666] ent  73 08C9C820 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (-2266.0 -64.0 -1943.0)
+[02:24:20.666] ent  74 08C9CC48 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (-2265.0 -64.0 -2098.0)
+[02:24:20.666] ent  75 08C9D0A0 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (-1867.0 12.0 -1789.0)
+[02:24:20.666] ent  76 08C9D4F8 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 2000000000.0 0.0] pos (-1866.0 12.0 -1931.0)
+[02:24:20.666] ent  77 08C9D950 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (-1803.0 14.0 -1789.0)
+[02:24:20.666] ent  78 08C9DDA8 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (-1808.0 -58.0 -1935.0)
+[02:24:20.666] ent  79 08C9E200 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (-1807.0 -58.0 -2090.0)
+[02:24:20.666] ent  80 08C9E658 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 -38.5 0.0] pos (-2161.0 -62.0 -1796.0)
+[02:24:20.666] ent  81 08C9EAB0 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (-2231.0 12.0 -1803.0)
+[02:24:20.666] ent  82 08C9F090 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (-2230.0 12.0 -1945.0)
+[02:24:20.666] ent  83 08C9F3B0 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (-2225.0 12.0 -2099.0)
+[02:24:20.666] ent  84 08C9F808 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (-1465.0 14.0 -1790.0)
+[02:24:20.666] ent  85 08C9FC48 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (-1470.0 -58.0 -1936.0)
+[02:24:20.666] ent  86 08CA00A0 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (-1469.0 -58.0 -2091.0)
+[02:24:20.666] ent  87 08CCF840 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 1.0 0.0] pos (-1575.0 -64.0 -1796.0)
+[02:24:20.666] ent  88 08CCFB90 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 7.4 0.0] pos (-1574.0 -64.0 -1938.0)
+[02:24:20.666] ent  89 08CCFFE8 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (-1573.0 -64.0 -2093.0)
+[02:24:20.666] ent  90 08CD0440 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (-1469.0 -62.0 -1791.0)
+[02:24:20.666] ent  91 08CD0898 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 1.0 0.0] pos (-1539.0 12.0 -1798.0)
+[02:24:20.666] ent  92 08CD0CF0 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 1.0 0.0] pos (-1538.0 12.0 -1940.0)
+[02:24:20.666] ent  93 08CD1148 vtbl 004E1390 kind 0 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (-1533.0 12.0 -2094.0)
+[02:24:20.666] ent  94 08CD15A0 vtbl 004E1158 kind 0 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  95 08CD1750 vtbl 004E1158 kind 0 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  96 08CD1900 vtbl 004E1158 kind 0 box [0.4 -0.0 0.0]-[0.0 1.0 0.4] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  97 08CD1D58 vtbl 004E1158 kind 0 box [0.4 -0.0 0.0]-[0.0 1.0 0.4] pos (0.0 0.0 0.0)
+[02:24:20.666] ent  98 08CBDCF0 vtbl 004E1C48 kind 1 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (-697.0 -47.3 1196.0)
+[02:24:20.666] ent  99 08CD3428 vtbl 004E1780 kind 6 box [0.0 255.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 100 08CD3678 vtbl 004E1780 kind 6 box [0.0 0.0 75.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 101 08CD3898 vtbl 004E1780 kind 6 box [0.0 255.0 255.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 102 08CD3AB8 vtbl 004E1780 kind 6 box [0.0 0.0 -3.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 103 08CD3CC0 vtbl 004E1780 kind 6 box [0.0 255.0 255.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 104 08CD3EE0 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 105 08CD4100 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 106 08CD4320 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 107 08CD4540 vtbl 004E1780 kind 6 box [0.0 255.0 255.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 108 08CC1278 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 109 08CC1450 vtbl 004E1780 kind 6 box [0.0 1.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 110 08CC1628 vtbl 004E1780 kind 6 box [0.0 1.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 111 08CC1830 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 112 08CC1A50 vtbl 004E1780 kind 6 box [0.0 1.0 1.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 113 08CC1C58 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 114 08CC2080 vtbl 004E1780 kind 6 box [0.0 1.0 1.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 115 08CC2258 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 116 08CC2430 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 117 08CC2608 vtbl 004E1780 kind 6 box [0.0 -50837.3 636.2]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 118 08CC27E0 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 119 08CC29B8 vtbl 004E1780 kind 6 box [0.0 0.0 1.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 120 08CC2BC0 vtbl 004E1780 kind 6 box [0.0 1.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 121 08CC2DE0 vtbl 004E1780 kind 6 box [0.0 0.0 0.9]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 122 08CC3000 vtbl 004E1780 kind 6 box [0.0 -836.1 18.1]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 123 08CC3220 vtbl 004E1780 kind 6 box [0.0 0.0 0.9]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 124 08CC3440 vtbl 004E1780 kind 6 box [0.0 1.0 -1175.5]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 125 08CC3660 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 126 08CC3880 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 127 08CC3AA0 vtbl 004E1780 kind 6 box [0.0 19.9 -47.6]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 128 08CC3CC0 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 129 08CC3EE0 vtbl 004E1780 kind 6 box [0.0 0.0 1.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 130 08CC1E78 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 131 08CA2428 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 132 08CA26C8 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 133 08CA28A0 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 134 08CA2A78 vtbl 004E1780 kind 6 box [0.0 -252.0 -504.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 135 08CA2C68 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 136 08CA2E88 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 137 08CA30A8 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 138 08CA32C8 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 139 08CA34E8 vtbl 004E1780 kind 6 box [0.0 0.0 1.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 140 08CA3708 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 141 08CA3928 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 142 08CA3B48 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 143 08CA3D68 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 144 08CA3F88 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 145 08CA41A8 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 146 08CA21E0 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 147 08CA4650 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 148 08CA4930 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 149 08CA4B08 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 150 08CA4CE0 vtbl 004E1780 kind 6 box [0.0 1.0 1.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 151 08CA4F00 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 152 08CA5120 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 153 08CA5328 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 154 08CA5548 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 155 08CA5768 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 156 08CA5988 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 157 08CA5BA8 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 158 08CA5DC8 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 159 08CA5FE8 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 160 08CA6208 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 161 08CA6428 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 162 08CA43C8 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 163 08CA6910 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 164 08CA6C30 vtbl 004E1780 kind 6 box [0.0 0.0 1.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 165 08CA6E08 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 166 08CA6FE0 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 167 08CA71B8 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 168 08CA7390 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 169 08CA75B0 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 170 08CA77D0 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 171 08CA79F0 vtbl 004E25B8 kind 2 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (1192.0 -38.9 -772.0)
+[02:24:20.666] ent 172 08CA7E68 vtbl 004E25B8 kind 2 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (-547.1 -38.9 -360.1)
+[02:24:20.666] ent 173 08CA82E0 vtbl 004E25B8 kind 2 box [0.0 0.0 0.0]-[0.0 972.0 0.0] pos (735.0 -38.9 -2184.0)
+[02:24:20.666] ent 174 08CA8708 vtbl 004E25B8 kind 2 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (-768.0 -38.9 -2160.0)
+[02:24:20.666] ent 175 08CA8B60 vtbl 004E25B8 kind 2 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (1256.0 217.1 -1312.0)
+[02:24:20.666] ent 176 08CA8FD8 vtbl 004E25B8 kind 2 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (-2144.4 217.1 486.2)
+[02:24:20.666] ent 177 08CA67B0 vtbl 004E1620 kind 3 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 178 08CA98D8 vtbl 004E1620 kind 3 box [0.0 0.0 0.0]-[0.0 1.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 179 08CA9B60 vtbl 004E1620 kind 3 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 180 08CA9DE8 vtbl 004E1620 kind 3 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 181 08CAA070 vtbl 004E1620 kind 3 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 182 08CAA2F8 vtbl 004E1620 kind 3 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 183 08CAA580 vtbl 004E1620 kind 3 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 184 08CAA808 vtbl 004E1620 kind 3 box [0.0 0.0 0.0]-[0.0 -1312.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 185 08CAAA90 vtbl 004E1620 kind 3 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 186 08CAAD18 vtbl 004E1620 kind 3 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 187 08CAAFA0 vtbl 004E1620 kind 3 box [0.0 0.0 0.0]-[0.0 1.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 188 08D0FBF8 vtbl 004E1558 kind 5 box [0.0 0.0 1.0]-[600.0 50.0 50.0] pos (0.0 0.0 0.0) SANE
+[02:24:20.666] ent 189 08D56720 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 190 08D32020 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 191 08D0C048 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 192 08D10108 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 193 08D104B8 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 194 08D580C0 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 195 08D206B8 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (2000000000.0 2000000000.0 0.0)
+[02:24:20.666] ent 196 08D321F8 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 197 08D102E0 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 198 08D530C0 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 199 08D592D0 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 200 08D51940 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 201 08D59CE0 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 202 08D5A628 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 203 08D402A0 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] ent 204 08D5BD58 vtbl 004E1780 kind 6 box [0.0 0.0 0.0]-[0.0 0.0 0.0] pos (0.0 0.0 0.0)
+[02:24:20.666] class vtbl 004E4458 kind 0: 1 entities, 0 with a sane +0xe4 box
+[02:24:20.666] class vtbl 004E0DF8 kind 4: 47 entities, 4 with a sane +0xe4 box
+[02:24:20.666] class vtbl 004E1090 kind 8: 14 entities, 14 with a sane +0xe4 box
+[02:24:20.666] class vtbl 004E1390 kind 0: 32 entities, 0 with a sane +0xe4 box
+[02:24:20.666] class vtbl 004E1158 kind 0: 4 entities, 0 with a sane +0xe4 box
+[02:24:20.666] class vtbl 004E1C48 kind 1: 1 entities, 0 with a sane +0xe4 box
+[02:24:20.666] class vtbl 004E1780 kind 6: 88 entities, 0 with a sane +0xe4 box
+[02:24:20.666] class vtbl 004E25B8 kind 2: 6 entities, 0 with a sane +0xe4 box
+[02:24:20.666] class vtbl 004E1620 kind 3: 11 entities, 0 with a sane +0xe4 box
+[02:24:20.666] class vtbl 004E1558 kind 5: 1 entities, 1 with a sane +0xe4 box
+[02:24:20.666] trig  48 name "fgh" model 0B82D500 P+0xc 00000000 +0x160 00000000 +0x164 0 +0x165 0
+[02:24:20.666] trig  48   line 0: touch: tell break open
+[02:24:20.666] trig  48   line 1: touch: once (playsnd Pressure2 0)
+[02:24:20.666] trig  48   line 2: <null>
+[02:24:20.666] trig  48   line 3: <null>
+[02:24:20.666] trig  48   line 4: <null>
+[02:24:20.666] trig  48   line 5: <null>
+[02:24:20.666] trig  48   line 6: <null>
+[02:24:20.666] trig  48   line 7: <null>
+[02:24:20.666] trig  48   line 8: <null>
+[02:24:20.666] trig  48   line 9: <null>
+[02:24:20.666] trig  49 name "<null>" model 0B83C380 P+0xc 00000000 +0x160 00000000 +0x164 0 +0x165 0
+[02:24:20.666] trig  49   line 0: makezone (Safety Deposit Boxes)
+[02:24:20.666] trig  49   line 1: touch: tell player oxyon
+[02:24:20.666] trig  49   line 2: untouch: tell player oxyoff
+[02:24:20.666] trig  49   line 3: touch: fogenable 0 250 50 50 50
+[02:24:20.666] trig  49   line 4: untouch: fogenable *DefaultFogParams
+[02:24:20.666] trig  49   line 5: <null>
+[02:24:20.666] trig  49   line 6: <null>
+[02:24:20.666] trig  49   line 7: <null>
+[02:24:20.666] trig  49   line 8: <null>
+[02:24:20.667] trig  49   line 9: <null>
+[02:24:20.667] trig  50 name "<null>" model 0B83C454 P+0xc 00000000 +0x160 00000000 +0x164 0 +0x165 0
+[02:24:20.667] trig  50   line 0: makezone (Break Room)
+[02:24:20.667] trig  50   line 1: <null>
+[02:24:20.667] trig  50   line 2: <null>
+[02:24:20.667] trig  50   line 3: <null>
+[02:24:20.667] trig  50   line 4: <null>
+[02:24:20.667] trig  50   line 5: <null>
+[02:24:20.667] trig  50   line 6: <null>
+[02:24:20.667] trig  50   line 7: <null>
+[02:24:20.667] trig  50   line 8: <null>
+[02:24:20.667] trig  50   line 9: <null>
+[02:24:20.667] trig  51 name "<null>" model 0B83C528 P+0xc 00000000 +0x160 00000000 +0x164 0 +0x165 0
+[02:24:20.667] trig  51   line 0: makezone (Vault)
+[02:24:20.667] trig  51   line 1: <null>
+[02:24:20.667] trig  51   line 2: <null>
+[02:24:20.667] trig  51   line 3: <null>
+[02:24:20.667] trig  51   line 4: <null>
+[02:24:20.667] trig  51   line 5: <null>
+[02:24:20.667] trig  51   line 6: <null>
+[02:24:20.667] trig  51   line 7: <null>
+[02:24:20.667] trig  51   line 8: <null>
+[02:24:20.667] trig  51   line 9: <null>
+[02:24:20.667] trig  52 name "<null>" model 0B83C5FC P+0xc 00000000 +0x160 00000000 +0x164 0 +0x165 0
+[02:24:20.667] trig  52   line 0: makezone (Office Area)
+[02:24:20.667] trig  52   line 1: <null>
+[02:24:20.667] trig  52   line 2: <null>
+[02:24:20.667] trig  52   line 3: <null>
+[02:24:20.667] trig  52   line 4: <null>
+[02:24:20.667] trig  52   line 5: <null>
+[02:24:20.667] trig  52   line 6: <null>
+[02:24:20.667] trig  52   line 7: <null>
+[02:24:20.667] trig  52   line 8: <null>
+[02:24:20.667] trig  52   line 9: <null>
+[02:24:20.667] trig  53 name "<null>" model 0B83C6D0 P+0xc 00000000 +0x160 00000000 +0x164 0 +0x165 0
+[02:24:20.667] trig  53   line 0: makezone (Conference Room)
+[02:24:20.667] trig  53   line 1: touch: tell player oxyon
+[02:24:20.667] trig  53   line 2: untouch: tell player oxyoff
+[02:24:20.667] trig  53   line 3: touch: fogenable 0 250 50 50 50
+[02:24:20.667] trig  53   line 4: untouch: fogenable *DefaultFogParams
+[02:24:20.667] trig  53   line 5: <null>
+[02:24:20.667] trig  53   line 6: <null>
+[02:24:20.667] trig  53   line 7: <null>
+[02:24:20.667] trig  53   line 8: <null>
+[02:24:20.667] trig  53   line 9: <null>
+[02:24:20.667] trig  54 name "<null>" model 0B83C7A4 P+0xc 00000000 +0x160 00000000 +0x164 0 +0x165 0
+[02:24:20.667] trig  54   line 0: makezone (Bank Manager's Office)
+[02:24:20.667] trig  54   line 1: touch: fogenable 0 250 50 50 50
+[02:24:20.667] trig  54   line 2: untouch: fogenable *DefaultFogParams
+[02:24:20.667] trig  54   line 3: 
+[02:24:20.667] trig  54   line 4: 
+[02:24:20.667] trig  54   line 5: <null>
+[02:24:20.667] trig  54   line 6: <null>
+[02:24:20.667] trig  54   line 7: <null>
+[02:24:20.667] trig  54   line 8: <null>
+[02:24:20.667] trig  54   line 9: <null>
+[02:24:20.667] trig  55 name "<null>" model 0B83C878 P+0xc 00000000 +0x160 00000000 +0x164 0 +0x165 0
+[02:24:20.667] trig  55   line 0: makezone (Lobby)
+[02:24:20.667] trig  55   line 1: <null>
+[02:24:20.667] trig  55   line 2: <null>
+[02:24:20.667] trig  55   line 3: <null>
+[02:24:20.667] trig  55   line 4: <null>
+[02:24:20.667] trig  55   line 5: <null>
+[02:24:20.667] trig  55   line 6: <null>
+[02:24:20.667] trig  55   line 7: <null>
+[02:24:20.667] trig  55   line 8: <null>
+[02:24:20.667] trig  55   line 9: <null>
+[02:24:20.667] trig  56 name "<null>" model 0B83C94C P+0xc 00000000 +0x160 00000000 +0x164 0 +0x165 0
+[02:24:20.667] trig  56   line 0: makezone (Bank)
+[02:24:20.667] trig  56   line 1: <null>
+[02:24:20.667] trig  56   line 2: <null>
+[02:24:20.667] trig  56   line 3: <null>
+[02:24:20.667] trig  56   line 4: <null>
+[02:24:20.667] trig  56   line 5: <null>
+[02:24:20.667] trig  56   line 6: <null>
+[02:24:20.667] trig  56   line 7: <null>
+[02:24:20.667] trig  56   line 8: <null>
+[02:24:20.667] trig  56   line 9: <null>
+[02:24:20.667] trig  57 name "<null>36" model 0B83CD70 P+0xc 00000000 +0x160 00000000 +0x164 0 +0x165 0
+[02:24:20.667] trig  57   line 0: makezone (Security Office)
+[02:24:20.667] trig  57   line 1: touch: tell player oxyon
+[02:24:20.667] trig  57   line 2: untouch: tell player oxyoff
+[02:24:20.667] trig  57   line 3: touch: fogenable 0 250 50 50 50
+[02:24:20.667] trig  57   line 4: untouch: fogenable *DefaultFogParams
+[02:24:20.667] trig  57   line 5: <null>
+[02:24:20.667] trig  57   line 6: <null>
+[02:24:20.667] trig  57   line 7: <null>
+[02:24:20.667] trig  57   line 8: <null>
+[02:24:20.667] trig  57   line 9: <null>
+[02:24:20.667] trig  58 name "<null>" model 0B83B7E8 P+0xc 00000000 +0x160 00000000 +0x164 1 +0x165 0
+[02:24:20.667] trig  58   line 0: touch: tell player escape
+[02:24:20.667] trig  58   line 1: touch: tell player finalexit
+[02:24:20.667] trig  58   line 2: <null>
+[02:24:20.667] trig  58   line 3: <null>
+[02:24:20.667] trig  58   line 4: <null>
+[02:24:20.667] trig  58   line 5: <null>
+[02:24:20.667] trig  58   line 6: <null>
+[02:24:20.667] trig  58   line 7: <null>
+[02:24:20.667] trig  58   line 8: <null>
+[02:24:20.667] trig  58   line 9: <null>
+[02:24:20.667] trig  59 name "g" model 0B83D194 P+0xc 00000000 +0x160 00000000 +0x164 1 +0x165 0
+[02:24:20.667] trig  59   line 0: touch: tell player escape
+[02:24:20.667] trig  59   line 1: <null>
+[02:24:20.667] trig  59   line 2: <null>
+[02:24:20.667] trig  59   line 3: <null>
+[02:24:20.667] trig  59   line 4: <null>
+[02:24:20.667] trig  59   line 5: <null>
+[02:24:20.667] trig  59   line 6: <null>
+[02:24:20.667] trig  59   line 7: <null>
+[02:24:20.667] trig  59   line 8: <null>
+[02:24:20.667] trig  59   line 9: <null>
+[02:24:20.667] trig  60 name "edhr" model 0B83D410 P+0xc 00000000 +0x160 00000000 +0x164 0 +0x165 0
+[02:24:20.667] trig  60   line 0: touch: tell column open
+[02:24:20.667] trig  60   line 1: touch: once (playsnd Pressure2 0)
+[02:24:20.667] trig  60   line 2: <null>
+[02:24:20.667] trig  60   line 3: <null>
+[02:24:20.667] trig  60   line 4: <null>
+[02:24:20.667] trig  60   line 5: <null>
+[02:24:20.667] trig  60   line 6: <null>
+[02:24:20.667] trig  60   line 7: <null>
+[02:24:20.667] trig  60   line 8: <null>
+[02:24:20.667] trig  60   line 9: <null>
+[02:24:20.667] trig  61 name "<null>" model 0B83D4E4 P+0xc 00000000 +0x160 00000000 +0x164 0 +0x165 0
+[02:24:20.667] trig  61   line 0: makezone (Outside)
+[02:24:20.667] trig  61   line 1: touch: fogdisable
+[02:24:20.667] trig  61   line 2: untouch: fogenable *DefaultFogParams
+[02:24:20.667] trig  61   line 3: <null>
+[02:24:20.667] trig  61   line 4: <null>
+[02:24:20.667] trig  61   line 5: <null>
+[02:24:20.667] trig  61   line 6: <null>
+[02:24:20.667] trig  61   line 7: <null>
+[02:24:20.667] trig  61   line 8: <null>
+[02:24:20.667] trig  61   line 9: <null>
+[02:24:23.145] cmd (console): mode 3 a 1 b 0
+[02:24:23.213] draw: mode 3 flags 1 z 0: 14 boxes, 84 faces, 61 polys, view 639x479
+[02:24:23.213] player (-697.0 -47.7 1196.0) inside: 56(k8) 61(k8)
+[02:24:23.213] cost: 2074 us/frame avg, 2074 us max, 84 faces, 61 polys over 1 frames
+[02:24:24.211] player (-697.0 -47.7 1196.0) inside: 56(k8) 61(k8)
+[02:24:24.211] cost: 1519 us/frame avg, 3151 us max, 84 faces, 61 polys over 33 frames
+[02:24:25.242] player (-697.0 -47.7 1196.0) inside: 56(k8) 61(k8)
+[02:24:25.242] cost: 1468 us/frame avg, 3705 us max, 84 faces, 61 polys over 33 frames
+[02:24:26.243] player (-697.0 -47.7 1196.0) inside: 56(k8) 61(k8)
+[02:24:26.243] cost: 1382 us/frame avg, 2300 us max, 84 faces, 61 polys over 32 frames
+[02:24:27.274] player (-697.0 -47.7 1196.0) inside: 56(k8) 61(k8)
+[02:24:27.274] cost: 1404 us/frame avg, 3083 us max, 84 faces, 61 polys over 33 frames
+[02:24:28.304] player (-697.0 -47.7 1196.0) inside: 56(k8) 61(k8)
+[02:24:28.304] cost: 1319 us/frame avg, 1544 us max, 84 faces, 61 polys over 33 frames
+[02:24:29.305] player (-697.0 -47.7 1196.0) inside: 56(k8) 61(k8)
+[02:24:29.305] cost: 1458 us/frame avg, 2913 us max, 84 faces, 61 polys over 32 frames
+[02:24:30.304] player (-697.0 -47.7 1196.0) inside: 56(k8) 61(k8)
+[02:24:30.304] cost: 1483 us/frame avg, 3307 us max, 84 faces, 61 polys over 32 frames
+[02:24:31.307] player (-697.0 -47.7 1196.0) inside: 56(k8) 61(k8)
+[02:24:31.307] cost: 4283 us/frame avg, 18117 us max, 84 faces, 46 polys over 32 frames

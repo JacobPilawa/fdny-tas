@@ -105,4 +105,28 @@ private:
 // --- SolidRect -------------------------------------------------------------------------
 bool SolidRect(int x, int y, int w, int h, uint32_t rgb);
 
+// --- World boxes -------------------------------------------------------------------------
+// Translucent axis-aligned boxes in world space (trigger boxes, core/evidence/
+// trigger_boxes). Each face is transformed by the rendered camera, clipped to the near
+// plane and the view, and drawn as a polygon textured with a solid white 4444 tile of
+// the box's alpha, tinted by vertex colour. Faces are drawn far to near.
+//   depth-tested (xray false): queued polys with the projected depth, so walls hide them
+//   x-ray        (xray true):  immediate polys, drawn over everything
+// Submit from OnFrameEnd; gfx draws the list in its own late step, before the text
+// panels (a queued poly would otherwise land on top of them at EndFrame's flush).
+struct WorldBox {
+    float min[3], max[3];
+    uint32_t rgb;           // 0xRRGGBB
+    uint8_t alpha;          // 0..255, kept to 4 bits (4444)
+    uint8_t alphaInside;    // used instead while the camera is inside the box
+};
+bool WorldBoxesReady();     // the camera / poly API resolved
+// The array must stay valid until the frame is drawn (the caller's static storage).
+void SubmitWorldBoxes(const WorldBox* boxes, int n, bool xray);
+struct WorldBoxStats {
+    int boxes, faces, polys;  // last drawn frame: submitted boxes, faces in front of the camera, polys drawn
+    int inside;               // boxes containing the camera
+};
+WorldBoxStats LastWorldBoxStats();
+
 } // namespace fdcore::gfx

@@ -1,4 +1,4 @@
-# FDNYCore quickstart (0.15.0)
+# FDNYCore quickstart (0.17.0)
 
 FDNYCore is one `.asi` plugin for *FDNY Firefighter: American Hero* that adds a
 console command layer, practice tools and speedrun options. Everything is driven
@@ -80,6 +80,14 @@ console. Binds are saved with the config.
 | `fd_glitch_clear` (**F12**) | clear box history and the last warp |
 | `fd_tp_save` | save position + view (pitch/yaw) |
 | `fd_tp_load` | teleport back to it |
+| `fd_triggers 1` / `fd_triggers_toggle` (**T**) | trigger boxes, 50%: **blue** rescue zone (drop-off for a carried victim), **red** final exit still closed, **green** exit open (every victim accounted for) |
+| `fd_triggers_all 1` | also every other trigger, grey: room zones, hints, doors, sounds |
+| `fd_triggers_xray 1` | trigger boxes show through walls (default: walls hide them) |
+| `fd_triggers_list` | the map's triggers in the console: class, open/shut, name, box corners |
+
+Trigger boxes are read from the loaded map every level (no files). A box you are
+standing in is drawn at 25%, so the whole view is tinted its colour. T is a default
+bind: `bind t "..."` or `unbind t` overrides it.
 
 Teleporter rules: one slot, in memory only (gone on exit); only works on the map
 it was saved on ("saved on X, this is Y -- refused"); only inside a level.
@@ -149,7 +157,9 @@ python -I run_test.py --core none ..\tests\x.yaml  # baseline without the core
 
 The harness launches the game, drives it, and backs up / restores the game
 folder files it touches. Results and screenshots land in `core\runs\`. Last
-result: 28/28 pass (Debug).
+result (0.17.0): 28/31 pass (Debug). glitch_box_cost and text_panels fail their
+frame-rate thresholds when the VM runs slow. state_snapshot races on roaming victims;
+0.16.1 fails it the same way (`evidence/trigger_boxes/suite_0170.md`).
 
 ## 8. Known gaps
 
@@ -160,6 +170,9 @@ result: 28/28 pass (Debug).
 - Teleporter: single slot, no stance.
 - In-frame text verified windowed through dgVoodoo only; real fullscreen and OBS
   game capture untested.
+- Trigger boxes: a box you stand in also tints the game's own HUD (it is drawn
+  before the core's panels). The `triggers` test opens the bank exit with the
+  RescueBot (`runrescuebot`), so the carry-and-deliver path is not exercised by a test.
 - Translucent panels need a loaded world; in menus they are drawn opaque. Their
   colours are 4 bits per channel (the driver's only alpha format), so dim greys band.
 
@@ -174,7 +187,7 @@ and everything else still compiles and runs.
 |---|---|
 | `addr` | address table: verified addresses by Id (never raw addresses) |
 | `hooks` | `Create` (inline hook in a group), `OnFrameBegin` / `OnFrameEnd` / `OnLevelLoad`; `OnFrameEndLate` is for drawing |
-| `cmd`, `console`, `binds` | variables, commands, config persistence (`RegisterConfigWriter`), `SetPracticeOnly` (refused in `fd_profile run`), console output |
+| `cmd`, `console`, `binds` | variables, commands, config persistence (`RegisterConfigWriter`), `SetPracticeOnly` (refused in `fd_profile run`), console output; `binds::BindDefault(key, line)` for a feature's default key (the player's binds win) |
 | `camera` | view size; one FOV filter (`fov` uses it) |
 | `state` | the frame's player snapshot |
 | `gfx`, `textdraw` | in-frame drawing (below) |
@@ -204,6 +217,7 @@ At startup the log lists `modules: N registered (...)` and one
 | `gfx::Decal` | opaque bitmap (`geEngine_DrawBitmap`); works everywhere, drawn on top |
 | `gfx::AlphaSurface` | per-pixel alpha (256 px 4444 tiles on the rendered world, `geEngine_RenderPoly`); only changed tiles re-upload; `Draw` returns false without a world, so fall back to a Decal |
 | `gfx::SolidRect` | untextured opaque rectangle |
+| `gfx::SubmitWorldBoxes` | translucent world-space boxes (`WorldBox`: min/max, colour, alpha, alpha while the camera is inside), depth-tested or x-ray. Submit from `OnFrameEnd` (static array); gfx draws them in its late step, under the text panels. `LastWorldBoxStats` for tests |
 | `gfx::BeginDraw` / `World` / `ViewSize` | per-frame flush (once), the frame's world, render size |
 
 Text panels should normally go through `textdraw::Create(...)` with `STYLE_TRANSLUCENT`

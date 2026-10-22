@@ -1,0 +1,80 @@
+[2026-10-22 02:56:43.745] [INFO] FDNYCore loaded from C:\fdny-decomp\FDNY SP 1.1\FDNYCore.asi
+[2026-10-22 02:56:43.867] [INFO] patches: console creation ungated at 00499370
+[2026-10-22 02:56:43.906] [INFO] patches: intro movies skipped (fd_skip_intro)
+[2026-10-22 02:56:43.951] [WARN] window: cursor-warp site doesn't match (already patched by another mod, e.g. alttabfix.asi?); window module inactive
+[2026-10-22 02:56:43.981] [INFO] speedrun: victim-spawn hook at 0045d717 -> trampoline 024f0000
+[2026-10-22 02:56:44.033] [INFO] FDNYCore 0.16.1 (Debug) exe=C:\fdny-decomp\FDNY SP 1.1\FDNYFirefighter.exe sha256=4b3b4dc1cc0b05bcb42c8e27ac6f6ca72fe5f7064ca8122fda7d41e7f6d2fc3e base=00400000
+[2026-10-22 02:56:44.064] [INFO] Genesis.dll sha256=5014bb879706bfb5ae6cf9ce1de63dc3deebdcc5b8e1b41f247b284a336c4643 base=10000000
+[2026-10-22 02:56:44.108] [INFO] address table: version retail-1.1 selected
+[2026-10-22 02:56:44.139] [INFO] patch site patch.cursor_warp occupied by another mod; left alone
+[2026-10-22 02:56:44.175] [INFO] signatures: all OK (120/120, 1 patch site(s) occupied by other mods)
+[2026-10-22 02:56:44.223] [INFO] hooks: created genesis.begin_frame at 10025b70 (group frame)
+[2026-10-22 02:56:44.259] [INFO] hooks: created genesis.end_frame at 100260e0 (group frame)
+[2026-10-22 02:56:44.314] [INFO] hooks: created con.exec_line at 00470f10 (group console)
+[2026-10-22 02:56:44.350] [INFO] console: ready (game console; FDNYCore commands intercepted at ScriptEngine::ExecLine)
+[2026-10-22 02:56:44.381] [INFO] hooks: created genesis.camera_set_attributes at 10001350 (group camera)
+[2026-10-22 02:56:44.428] [INFO] camera: ready (geCamera_SetAttributes hooked)
+[2026-10-22 02:56:44.465] [INFO] state: snapshot ready (refreshed at frame end)
+[2026-10-22 02:56:44.500] [INFO] hooks: created genesis.render_world at 10024950 (group gfx)
+[2026-10-22 02:56:44.538] [INFO] gfx: ready (decals, alpha surfaces, solid rects, world boxes)
+[2026-10-22 02:56:44.583] [INFO] textdraw: ready
+[2026-10-22 02:56:44.615] [INFO] profile: ready (fd_profile, fd_watermark); other asi: alttabfix FDNYFirefighterAmericanHeroFOVFix
+[2026-10-22 02:56:44.642] [INFO] modules: 9 registered (levelwatch fov window speedrun hud glitch tp triggers bench)
+[2026-10-22 02:56:44.673] [INFO] module levelwatch: enabled
+[2026-10-22 02:56:44.709] [INFO] fov: ready (filter on the camera service)
+[2026-10-22 02:56:44.739] [INFO] module fov: enabled
+[2026-10-22 02:56:44.767] [INFO] module window: disabled (init failed; see above)
+[2026-10-22 02:56:44.798] [INFO] speedrun: ready (static spawns available, rescuebot available)
+[2026-10-22 02:56:44.825] [INFO] module speedrun: enabled
+[2026-10-22 02:56:44.856] [INFO] hud: ready (fd_hud_player)
+[2026-10-22 02:56:44.892] [INFO] module hud: enabled
+[2026-10-22 02:56:44.931] [INFO] glitch: ready (fd_hud_glitch)
+[2026-10-22 02:56:44.960] [INFO] module glitch: enabled
+[2026-10-22 02:56:44.989] [INFO] tp: ready (fd_tp_save, fd_tp_load)
+[2026-10-22 02:56:45.022] [INFO] module tp: enabled
+[2026-10-22 02:56:45.056] [INFO] triggers: ready (fd_triggers, key T)
+[2026-10-22 02:56:45.089] [INFO] module triggers: enabled
+[2026-10-22 02:56:45.123] [INFO] module bench: enabled
+[2026-10-22 02:56:45.156] [INFO] testpipe: listening on \\.\pipe\FDNYCore (Debug build)
+[2026-10-22 02:56:45.190] [INFO] FDNYCore ready
+[2026-10-22 02:56:45.495] [INFO] gfx: world 033a7b28
+[2026-10-22 02:56:45.546] [INFO] levelwatch: map '' state -1
+[2026-10-22 02:56:45.599] [INFO] gfx: font Consolas 9 px, cell 5x10
+[2026-10-22 02:56:45.638] [INFO] gfx: view 640x480 (camera; window client 1366x768)
+[2026-10-22 02:56:45.677] [INFO] textdraw: watermark: 383x18 at 8,402 (view 640x480), opaque
+[2026-10-22 02:56:48.487] [INFO] fov: camera 06d0be28 game_fov=2.000000 stored=2.669333
+[2026-10-22 02:56:48.507] [INFO] console: game console present at 03477800
+[2026-10-22 02:56:48.521] [INFO] config: startup (FDNYCore.cfg: none, autoexec.cfg: none)
+[2026-10-22 02:56:48.566] [INFO] gfx: world 0342f008
+[2026-10-22 02:56:48.589] [INFO] levelwatch: map '' state 0
+[2026-10-22 02:57:05.066] [INFO] event: victim_spawn training #0 'victim1' (random spot kept)
+[2026-10-22 02:57:06.179] [INFO] event: victim_spawn training #1 'victim2' (random spot kept)
+[2026-10-22 02:57:06.407] [INFO] gfx: world 06d0cf38
+[2026-10-22 02:57:06.428] [INFO] levelwatch: map 'training' state 3
+[2026-10-22 02:57:06.459] [INFO] levelwatch: map 'training' state 1
+[2026-10-22 02:57:06.494] [INFO] event: level_load 'training'
+[2026-10-22 02:57:06.520] [INFO] triggers: map 'training': 25 trigger(s): 5 rescue, 0 exit (0 open), 20 other
+[2026-10-22 02:57:26.520] [INFO] cmd: fd_watermark 0
+[2026-10-22 02:57:27.551] [INFO] bind: t -> fd_triggers_toggle
+[2026-10-22 02:57:27.608] [INFO] cmd: fd_triggers_toggle
+[2026-10-22 02:57:27.635] [INFO] console> fd_triggers 1
+[2026-10-22 02:57:30.364] [INFO] cmd: fd_triggers_all 1
+[2026-10-22 02:57:33.301] [INFO] cmd: fd_triggers_all 0
+[2026-10-22 02:57:34.796] [INFO] event: victim_spawn bank #0 'betty' (random spot kept)
+[2026-10-22 02:57:34.836] [INFO] event: victim_spawn bank #1 '<null>' (random spot kept)
+[2026-10-22 02:57:34.864] [INFO] event: victim_spawn bank #2 '<null>' (random spot kept)
+[2026-10-22 02:57:34.886] [INFO] event: victim_spawn bank #3 '<null>' (random spot kept)
+[2026-10-22 02:57:34.928] [INFO] event: victim_spawn bank #4 '<null>' (random spot kept)
+[2026-10-22 02:57:34.961] [INFO] event: victim_spawn bank #5 '<null>' (random spot kept)
+[2026-10-22 02:57:35.281] [INFO] levelwatch: map 'bank' state 3
+[2026-10-22 02:57:35.334] [INFO] levelwatch: map 'bank' state 1
+[2026-10-22 02:57:35.386] [INFO] event: level_load 'bank'
+[2026-10-22 02:57:35.429] [INFO] triggers: map 'bank': 14 trigger(s): 1 rescue, 1 exit (0 open), 12 other
+[2026-10-22 02:57:35.474] [INFO] gfx: world box tile without a handle; re-adding to world 06d0cf38
+[2026-10-22 02:58:16.833] [INFO] cmd: fd_triggers_xray 1
+[2026-10-22 02:58:19.771] [INFO] cmd: fd_triggers_xray 0
+[2026-10-22 02:58:20.180] [INFO] gfx: world box tile without a handle; re-adding to world 06d0cf38
+[2026-10-22 02:59:28.335] [INFO] triggers: exit '<null>' open
+[2026-10-22 02:59:36.677] [INFO] bind: t -> fd_triggers_toggle
+[2026-10-22 02:59:36.731] [INFO] cmd: fd_triggers_toggle
+[2026-10-22 02:59:36.784] [INFO] console> fd_triggers 0

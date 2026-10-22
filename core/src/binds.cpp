@@ -42,6 +42,7 @@ const int kGameKeys[] = {'W', 'A', 'S', 'D', 'C', VK_SPACE, VK_SHIFT, VK_CONTROL
 constexpr int kVkCount = 256;
 char g_binds[kVkCount][160];
 bool g_prevDown[kVkCount];
+bool g_isDefault[kVkCount];  // a feature's default key (BindDefault)
 
 // Name of a VK for display / FDNYCore.cfg; letters and digits are themselves.
 void VkName(int vk, char* out) {
@@ -174,6 +175,17 @@ void Poll() {
 
 bool KeysLive() { return KeysLive_(); }
 
+bool BindDefault(const char* key, const char* line) {
+    const int vk = ParseKey(key);
+    if (vk < 0 || g_binds[vk][0]) {
+        log::Warn("bind: default %s -> %s not set (%s)", key, line, vk < 0 ? "unknown key" : "key taken");
+        return false;
+    }
+    lstrcpynA(g_binds[vk], line, sizeof(g_binds[vk]));
+    g_isDefault[vk] = true;
+    return true;
+}
+
 void Init() {
     cmd::RegisterCommand("bind", "bind <key> \"<command>\": run a console line when the key is pressed", CmdBind);
     cmd::RegisterCommand("unbind", "unbind <key>", CmdUnbind);
@@ -186,10 +198,11 @@ int AppendConfig(char* out, int cap) {
     int o = 0;
     char name[16];
     for (int vk = 0; vk < kVkCount; ++vk) {
-        if (!g_binds[vk][0]) continue;
+        if (!g_binds[vk][0] && !g_isDefault[vk]) continue;
         if (o + 200 > cap) break;
         VkName(vk, name);
-        o += wsprintfA(out + o, "bind %s \"%s\"\r\n", name, g_binds[vk]);
+        if (g_binds[vk][0]) o += wsprintfA(out + o, "bind %s \"%s\"\r\n", name, g_binds[vk]);
+        else o += wsprintfA(out + o, "unbind %s\r\n", name);  // a default the player removed
     }
     return o;
 }
