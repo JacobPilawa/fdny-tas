@@ -171,4 +171,48 @@ def focus(hwnd, attempts=6):
         time.sleep(0.3)
         if user32.GetForegroundWindow() == hwnd:
             return True
-    return False
+    return _focus_by_title_click(hwnd)
+
+
+def _focus_by_title_click(hwnd):
+    """Last resort when nobody has used this console for a while (e.g. the session
+    was moved there with `tscon 1 /dest:console` and no viewer is attached). Then
+    Windows refuses every programmatic focus and raise, but a real click still
+    activates a window. So: minimize the other top-level windows (without
+    activating them), then click the game's title bar. That is non-client, so the
+    game sees no click. Verified 2026-10-22 when SetForegroundWindow,
+    AttachThreadInput and SwitchToThisWindow all failed."""
+    SW_SHOWMINNOACTIVE, SW_RESTORE, GA_ROOT = 7, 9, 2
+    shell = user32.GetShellWindow()
+    found = []
+    proto = ctypes.WINFUNCTYPE(wt.BOOL, wt.HWND, wt.LPARAM)
+
+    def each(h, _):
+        if h != hwnd and h != shell and user32.IsWindowVisible(h) and not user32.IsIconic(h) \
+                and user32.GetWindowTextLengthW(h) > 0:
+            found.append(h)
+        return True
+
+    user32.EnumWindows(proto(each), 0)
+    for h in found:
+        cls = ctypes.create_unicode_buffer(64)
+        user32.GetClassNameW(h, cls, 64)
+        if cls.value not in ("Shell_TrayWnd", "Progman", "WorkerW"):
+            user32.ShowWindow(h, SW_SHOWMINNOACTIVE)
+    user32.ShowWindow(hwnd, SW_RESTORE)
+    time.sleep(0.5)
+    r = wt.RECT()
+    user32.GetWindowRect(hwnd, ctypes.byref(r))
+    pt = wt.POINT((r.left + r.right) // 2, r.top + 8)
+    if user32.GetAncestor(user32.WindowFromPoint(pt), GA_ROOT) != hwnd:
+        return False
+    sw, sh = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
+    ax, ay = int(pt.x * 65535 / (sw - 1)), int(pt.y * 65535 / (sh - 1))
+    flags = MOUSEEVENTF_ABSOLUTE
+    _send(INPUT(INPUT_MOUSE, _U(mi=MOUSEINPUT(ax, ay, 0, MOUSEEVENTF_MOVE | flags, 0, 0))))
+    time.sleep(0.05)
+    _send(INPUT(INPUT_MOUSE, _U(mi=MOUSEINPUT(ax, ay, 0, MOUSEEVENTF_LEFTDOWN | flags, 0, 0))))
+    time.sleep(0.05)
+    _send(INPUT(INPUT_MOUSE, _U(mi=MOUSEINPUT(ax, ay, 0, MOUSEEVENTF_LEFTUP | flags, 0, 0))))
+    time.sleep(0.4)
+    return user32.GetForegroundWindow() == hwnd

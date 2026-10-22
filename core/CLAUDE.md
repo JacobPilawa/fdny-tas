@@ -42,6 +42,7 @@ Not machine-checked, still rules:
 
 - Never edit the exe or Genesis.dll on disk; in-memory patches only, and only through `addr` / `hooks`. Back up any game-folder file before replacing it.
 - **Never rebuild the VM / run packer** (root `CLAUDE.md`).
+- **Tests need a display.** If every test fails "Failed to initialize main window", the session is disconnected (`query user` shows `Disc`; this happens when the owner closes the Hyper-V / remote viewer). Fix: `tscon 1 /dest:console`, which keeps the desktop live with no viewer attached. Focus on that unattended console goes through the harness's title-bar-click fallback (`fdh/inputs.py`).
 - Ghidra lookups go through subagents; the primary session never calls GhidrAssist MCP itself.
 - Python and git are not on PATH: prepend `C:\fdny-decomp\environment\local\tools\python` and `...\tools\git\cmd`.
 - Edit UTF-8 docs with the Edit/Write tools, not a PowerShell `Get-Content`/`Set-Content` round trip (mojibake). Some `.cpp` and `build.ps1` are CRLF.
