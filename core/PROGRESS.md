@@ -789,3 +789,18 @@ Debug-only benchmarks in `src/bench.cpp` (`fd_bench_text`, `fd_bench_blit`, `fd_
   - **Addresses:** 9 address entries (signatures all OK). Spike: probe `probes/triggerprobe.cpp`, probe tests `tests/probes/probe_trigger*.yaml`.
   - **Tests:** `tests/triggers.yaml` PASS. Training 25 triggers / 5 rescue; bank 14 / 1 rescue / 1 exit. The bank exit goes red -> green when 6x `runrescuebot` makes the game open it (screenshots).
   - **Suite:** 28/31. glitch_box_cost / text_panels are VM fps. state_snapshot is a roaming-victim race: 0.16.1 fails it the same way (1/2). Evidence `core/evidence/trigger_boxes/` (README spike verdict, STATUS loop log, feature/, suite_0170.md).
+- 2026-10-22 it26: **0.18.0 fire-juggling arrow** (owner: a small ASCII arrow pointing to the last safe spot, with the distance below; started with `fd_juggle 1`). New feature `juggle` (practice-only):
+  - **Lock gate:** it evaluates the game's own safe-spot write gate at frame end (flinch / burn >= 0.1 / O2 <= 0.5 / passed out; airborne excluded, owner). It shows `-` while the spot follows the player.
+  - **When locked:** an 8-way view-relative arrow to the landing point (spot - 30 X), the horizontal distance, ` ^`/` v` beyond 48 u, and `o` under 16 u. It stays up while passed out.
+  - **Look:** 30 px below the screen centre, no background. textdraw gained `CENTER` and `STYLE_TEXT_ONLY` (D31).
+  - **Decisions:** D32 gate choice, D33 test hooks.
+  - **Addresses:** player.f_safe / f_burn / f_flinch / f_o2 and fire.center. The yaw convention was measured live (`probes/yaw_probe.py`).
+  - **Tests:** `tests/fire_juggle.yaml` PASS (3/3 after the fix below).
+    - O2 lock: 8 yaws give the computed sector at exactly 30 u.
+    - Real fire via the Debug hook `fd_dbg_tofire` (fire nodes move, so it searches): locked and frozen after stepping out, `-` once the meter cools, the arrow on every passed-out frame, `-` after the respawn, selfcheck 0, refused in run.
+    - New harness steps: `wait_log`, and `assert_juggle` (it recomputes the arrow from its own memory reads).
+  - **Suite:** 31/32. fire_juggle failed `selfcheck = 1` because `fd_dbg_o2` wrote O2 mid-frame. It is now applied at frame end like `fd_dbg_setpos`, and reruns PASS 3/3. glitch_box_cost, text_panels and state_snapshot passed this time.
+  - **Also this session:**
+    - harness focus fallback for an unattended console (title-bar click);
+    - test paths for the owner's `asi-archive/` move.
+  - **Evidence:** `core/evidence/fire_juggle_overlay/` (STATUS loop log, yaw_probe.log, glyphs.png, it4/, suite_0180.md).

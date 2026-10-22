@@ -1,4 +1,4 @@
-# FDNYCore quickstart (0.17.0)
+# FDNYCore quickstart (0.18.0)
 
 FDNYCore is one `.asi` plugin for *FDNY Firefighter: American Hero* that adds a
 console command layer, practice tools and speedrun options. Everything is driven
@@ -84,10 +84,24 @@ console. Binds are saved with the config.
 | `fd_triggers_all 1` | also every other trigger, grey: room zones, hints, doors, sounds |
 | `fd_triggers_xray 1` | trigger boxes show through walls (default: walls hide them) |
 | `fd_triggers_list` | the map's triggers in the console: class, open/shut, name, box corners |
+| `fd_juggle 1` | fire-juggling arrow, 30 px below the screen centre, no background: where a carried survivor would land if you passed out now |
 
 Trigger boxes are read from the loaded map every level (no files). A box you are
 standing in is drawn at 25%, so the whole view is tinted its colour. T is a default
 bind: `bind t "..."` or `unbind t` overrides it.
+
+Fire-juggling arrow (`fd_juggle`):
+- **`-`**: the game is still saving your position as the drop spot (you're on clean ground).
+- **An arrow**: the spot is locked. That happens after fire contact while the burn meter is
+  0.1 or more (it cools about 0.1 per second), with O2 at 0.5 or less, and while passed out.
+  - The arrow points at where the survivor lands: the spot, 30 units to -X. It is relative to
+    your view, so up = straight ahead, in 8 directions.
+  - Below it is the horizontal distance (`120u`), with ` ^` / ` v` when that point is more than
+    48 units above or below you.
+- **`o`**: the landing point is within 16 units.
+
+Jumping also pauses the spot, but isn't shown. Background: research.db KB article
+`fire-juggling`.
 
 Teleporter rules: one slot, in memory only (gone on exit); only works on the map
 it was saved on ("saved on X, this is Y -- refused"); only inside a level.
@@ -157,9 +171,10 @@ python -I run_test.py --core none ..\tests\x.yaml  # baseline without the core
 
 The harness launches the game, drives it, and backs up / restores the game
 folder files it touches. Results and screenshots land in `core\runs\`. Last
-result (0.17.0): 28/31 pass (Debug). glitch_box_cost and text_panels fail their
-frame-rate thresholds when the VM runs slow. state_snapshot races on roaming victims;
-0.16.1 fails it the same way (`evidence/trigger_boxes/suite_0170.md`).
+result (0.18.0): 31/32 pass (Debug). The one failure, fire_juggle, was a test-hook timing
+bug, since fixed; it then passed 3/3 (`evidence/fire_juggle_overlay/suite_0180.md`).
+glitch_box_cost / text_panels (VM frame rate) and state_snapshot (roaming-victim race)
+can still fail on a slow VM.
 
 ## 8. Known gaps
 
@@ -170,6 +185,12 @@ frame-rate thresholds when the VM runs slow. state_snapshot races on roaming vic
 - Teleporter: single slot, no stance.
 - In-frame text verified windowed through dgVoodoo only; real fullscreen and OBS
   game capture untested.
+- Fire-juggling arrow:
+  - It uses the shared 9 px font (`fd_text_size`) with no outline, so it can be hard to
+    read on bright fire.
+  - It aims at the spot before the game's floor search (the survivor is dropped onto the
+    first floor below it).
+  - A jump pauses the spot without showing the arrow.
 - Trigger boxes: a box you stand in also tints the game's own HUD (it is drawn
   before the core's panels). The `triggers` test opens the bank exit with the
   RescueBot (`runrescuebot`), so the carry-and-deliver path is not exercised by a test.
@@ -219,6 +240,10 @@ At startup the log lists `modules: N registered (...)` and one
 | `gfx::SolidRect` | untextured opaque rectangle |
 | `gfx::SubmitWorldBoxes` | translucent world-space boxes (`WorldBox`: min/max, colour, alpha, alpha while the camera is inside), depth-tested or x-ray. Submit from `OnFrameEnd` (static array); gfx draws them in its late step, under the text panels. `LastWorldBoxStats` for tests |
 | `gfx::BeginDraw` / `World` / `ViewSize` | per-frame flush (once), the frame's world, render size |
+
+`textdraw` anchors: `TOP_LEFT`, `TOP_RIGHT`, `BOTTOM_LEFT`, and `CENTER` (centred horizontally; `dy` from the view's
+vertical centre to the panel top). Styles: `STYLE_TRANSLUCENT`, `STYLE_OPAQUE`, and `STYLE_TEXT_ONLY` (no
+background at all; not drawn without a world, e.g. in menus).
 
 Text panels should normally go through `textdraw::Create(...)` with `STYLE_TRANSLUCENT`
 (default) or `STYLE_OPAQUE`, rather than using the blocks directly.

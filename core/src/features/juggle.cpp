@@ -161,12 +161,14 @@ void Draw(const View& v) {
 
 #ifdef FDCORE_DEBUG
 void ApplySetPos();
+void ApplyO2();
 void StepToFire();
 #endif
 
 void FrameEnd() {
 #ifdef FDCORE_DEBUG
     ApplySetPos();
+    ApplyO2();
     StepToFire();
 #endif
     const state::State& s = state::Current();
@@ -267,16 +269,31 @@ void CmdSetPos(int argc, const char* const* argv) {
 }
 
 // Test hook: `fd_dbg_o2 <0..1>` sets the player's O2. O2 <= 0.5 is one of the game's own
-// safe-spot locks, so a test can hold a lock on clean ground without fire.
+// safe-spot locks, so a test can hold a lock on clean ground without fire. Applied at
+// frame end before the gate is read (like fd_dbg_setpos): written from the console
+// mid-frame, Think would see the new O2 before the overlay does, and the self-check would
+// count the game's own (correct) spot update (suite run s0180).
+struct SetO2 {
+    bool pending;
+    float o2;
+};
+SetO2 g_setO2 = {};
+
 void CmdO2(int argc, const char* const* argv) {
     float o2;
-    const uintptr_t pl = Player();
-    if (argc < 2 || !ParseFloat(argv[1], &o2) || !pl) {
+    if (argc < 2 || !ParseFloat(argv[1], &o2)) {
         console::Print("usage: fd_dbg_o2 <0..1> (in a level)");
         return;
     }
-    const bool ok = addr::SafeWrite(pl + addr::Field(Id::player_f_o2), &o2, 4);
-    log::Info("juggle: o2 %ld/100: %s", Round(o2 * 100), ok ? "ok" : "failed");
+    g_setO2.o2 = o2, g_setO2.pending = true;
+}
+
+void ApplyO2() {
+    if (!g_setO2.pending) return;
+    g_setO2.pending = false;
+    const uintptr_t pl = Player();
+    const bool ok = pl && addr::SafeWrite(pl + addr::Field(Id::player_f_o2), &g_setO2.o2, 4);
+    log::Info("juggle: o2 %ld/100: %s", Round(g_setO2.o2 * 100), ok ? "ok" : "failed");
 }
 
 // Test hook: `fd_dbg_tofire [burn]` stands the player in a fire that really burns: it tries

@@ -23,7 +23,7 @@ Background: KB `fire-juggling`, `core/evidence/fire_juggling/`.
 | 2 Core: textdraw centre anchor + no-background style | **done**: `CENTER` anchor + `STYLE_TEXT_ONLY` (D31); text_panels / text_alpha / hud_player PASS |
 | 3 Feature src/features/juggle.cpp | **done**: feature + Debug hooks; tests/fire_juggle.yaml (first version) PASS; glyph sheet `glyphs.png` for owner review |
 | 4 Suite test tests/fire_juggle.yaml | **done**: real fire + pass-out, harness-side direction check; PASS (run 2026-10-22-173943, `it4/`) |
-| 5 Suite, docs, version, commit, owner report | next |
+| 5 Suite, docs, version, commit, owner report | **done**: suite 31/32 + fire_juggle 3/3 after a test-hook fix (suite_0180.md); QUICKSTART, DECISIONS D32-D33, PROGRESS it26, VERSION 0.18.0; loop stopped |
 
 ## Log
 
@@ -142,3 +142,12 @@ Background: KB `fire-juggling`, `core/evidence/fire_juggling/`.
   - DECISIONS: the lock gate = the game's own gate, airborne excluded; the self-check
     margin; the test hooks;
   - PROGRESS it entry; VERSION 0.18.0; commit, push, owner report, stop the loop.
+- it5 (step 5, done):
+  - VERSION 0.18.0; both configs build clean.
+  - Suite (tag s0180): 31/32. fire_juggle failed `selfcheck = 1` because `fd_dbg_o2` wrote
+    O2 mid-frame, before Think: the hook, not the feature. Fix: fd_dbg_o2 is now applied
+    at frame end like fd_dbg_setpos. fire_juggle reruns: 3/3 PASS (tag fix1).
+  - Docs: QUICKSTART (feature row and explanation, known gaps, textdraw anchors and
+    styles for module authors, suite line), DECISIONS D32 (gate) and D33 (test hooks),
+    PROGRESS it26.
+  - Committed and pushed; owner report given; loop stopped.
