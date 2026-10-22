@@ -44,3 +44,12 @@ $out = Join-Path $outDir 'zz_triggerprobe.asi'
     (Join-Path $here 'triggerprobe.cpp') (Join-Path $core 'src\rt.cpp') @objs -lkernel32 -luser32 -lgdi32
 if ($LASTEXITCODE -ne 0) { throw "triggerprobe build failed" }
 "built probes\zz_triggerprobe.asi  $([math]::Round((Get-Item $out).Length / 1KB, 1)) KB"
+
+# zz_juggleprobe.asi: fire-juggling frame-order spike (see juggleprobe.cpp)
+$out = Join-Path $outDir 'zz_juggleprobe.asi'
+& $zig c++ -target x86-windows-gnu -shared -std=c++17 -O2 -fno-rtti -fno-exceptions -fno-stack-protector -fno-builtin `
+    -fno-threadsafe-statics -nostdlib -Wall -Wextra -Wno-nullability-completeness -Wno-unused-command-line-argument `
+    -isystem $winInc '-Wl,--image-base,0x3E400000' '-Wl,--dynamicbase' -o $out `
+    (Join-Path $here 'juggleprobe.cpp') (Join-Path $core 'src\rt.cpp') @objs -lkernel32 -luser32 -lgdi32
+if ($LASTEXITCODE -ne 0) { throw "juggleprobe build failed" }
+"built probes\zz_juggleprobe.asi  $([math]::Round((Get-Item $out).Length / 1KB, 1)) KB"

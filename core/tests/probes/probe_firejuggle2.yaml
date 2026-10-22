@@ -1,0 +1,20 @@
+name: probe_firejuggle2
+# Not in the suite: round 2 of the fire-juggling spike. Installs zz_juggleprobe.asi
+# (per-frame hook log) and holds bank open (RescueBot off) while
+# probes/firejuggle_probe2.py drives it from outside. Start the driver first.
+pre_files:
+  - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
+  - {src: null, dst: FDNYCore.cfg}
+  - {src: build/probes/zz_juggleprobe.asi, dst: zz_juggleprobe.asi}
+setup: load_training
+record: false
+steps:
+  - console: "fd_watermark 0"
+  - console: "fd_rescuebot 0"
+  - console: "loadmap bank"
+  - wait_s: 40
+  - screenshot: bank
+  - wait_s: 200
+  - screenshot: end
+expect:
+  no_crash: true

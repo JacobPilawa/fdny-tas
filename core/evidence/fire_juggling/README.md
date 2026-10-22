@@ -20,6 +20,8 @@ article `fire-juggling`, with the same text in `kb_fire_juggling.md`.
     and a fire's centre is at `+0x7c`.
   - `run3.log`: the full result.
 
+## Round 1
+
 **Verdict: confirmed.** The survivor lands on the player's last safe spot, `+0x3400`,
 minus 30 on X, standing on the floor below that spot.
 - The spot is saved each frame the player is grounded, has O2 above 0.5, has no fire
@@ -39,5 +41,37 @@ minus 30 on X, standing on the floor below that spot.
 | D1, written: spawn + 600 up | (-697.0, 552.2, 1196.0) | (-727.0, -52.9, 1196.0), floor below; picked up again at respawn (state 5) |
 | D2, written: outside the map | (29303.0, -47.8, 31196.0) | (-30.0, 1.0, 0.0), the origin bug |
 
-Not tested: the order of the fire message and Think within a frame; the sender of
-0x7530; hardest difficulty's herodown spawn; crouchbug; a real out-of-bounds spot.
+## Rounds 2-3 (the round-1 unknowns)
+
+- **Static:** five more haiku Ghidra passes:
+  - frame call chain;
+  - 0x7530 senders (MiscEmitterFXImpl::OnTouch, extinguisher, hose douse);
+  - Genesis `geWorld_Collision` content bits (0x4 = actors, skipped for 0x43);
+  - herodown gate (`[[0x502AAC]+0x6E4]+0x2C == 2`, Verb_Reset arg 0);
+  - stance/box fields (`+0x18C`, `+0x88`);
+  - liftable and emitter vtables.
+- **In-process hooks:** `probes/juggleprobe.cpp` -> `zz_juggleprobe.asi` (built by
+  `build_probes.ps1`, image base 0x3E400000), installed by
+  `tests/probes/probe_firejuggle2.yaml` / `probe_firejuggle3.yaml`.
+  - All 8 MinHook hooks: `MH_OK`.
+  - The raw logs are 28 MB+ and stay in `core/runs/` (not committed). The condensed
+    per-frame view is `round2_frame_order.txt`.
+- **Drivers:**
+  - `firejuggle_probe2.py`: `round2_run1.log`;
+  - `firejuggle_probe3.py`: `round3_run1.log`;
+  - `firejuggle_probe3b.py`: `round3b_run1.log`, burn under the type-2 emitters;
+  - a one-off hover check: `round3c_hover.log`, the player held at the emitters;
+  - `firejuggle_probe3d.py`: `round3d_liftable.log`.
+
+| Question | Result |
+|---|---|
+| Frame order | **Resolved.** RunFrame -> Think -> fire touches -> TakeFireDamage, every frame. Think saves the pre-move position, so the spot is the start of the last frame without contact (`round2_frame_order.txt`, episode 2220: saved -59.7, first damage at -39.3). Reset frames show DropAtPlayer entered with the player already on the safe spot. |
+| Crouchbug | **Confirmed.** After a ducked pass-out: state 3, box top 25, 175 u in 0.5 s. C, C: top 85. |
+| Herodown | **Confirmed.** With the difficulty field at 2: a 7th victim, "herodown" / "POFighter3", at the safe spot +30 X; total 6 -> 7. |
+| Actor catch | **No.** The drop went through a victim to the floor. |
+| 48 u lift | **Seen.** A spot 39 u under the upper floor put the survivor on top of it. |
+| Liftable catch | **Partial.** 2 of 5 tests 86 u above the side control; 3 of 5 floor. Not separated from furniture. |
+| 0x7530 source | **Not reached live.** The cool-down and AddHandler hooks never fired. The plain 0.1/s cooling held at, under and around both bank type-2 emitters. |
+
+Not tested: moving a liftable away and repeating; the extinguisher or hose aimed at
+yourself; type-2 emitters on other maps; a real out-of-bounds spot.

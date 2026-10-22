@@ -64,33 +64,103 @@ locals are committed: the survivor goes to world origin, (0, 1, 0), then -30 on 
 | Floor search | Safe spot written 600 u above the spawn while passed out: the survivor landed on the floor below (y -52.9). |
 | No floor | Safe spot written outside the map: the survivor went to **(-30, 1, 0)** = the origin bug, -30 X. |
 
+## Round 2-3: the follow-up questions, answered live
+
+A second probe hooks the game in-process (`core/probes/juggleprobe.cpp` ->
+`zz_juggleprobe.asi`: MinHook, register-preserving detours on RunFrame, Think,
+TakeFireDamage, the fire touch, Verb_Reset, DropAtPlayer, the cool-down and
+AddHandler). It logs, per frame, the order of events with the player fields at each
+event. Drivers: `firejuggle_probe2.py`, `firejuggle_probe3*.py`.
+
+**Frame order: Think, then fire touches, then damage, every frame.**
+`RunFrame -> Think -> fire touch callbacks -> TakeFireDamage` (the queued 0x7531 is
+delivered after Think in the same frame). Walking into a fire with W (no teleport,
+frames 2217-2221):
+
+| Frame | Think sees pos | Saved spot after Think | Damage at pos | Burn |
+| --- | --- | --- | --- | --- |
+| 2219 | -71.0 | -71.0 | none | 0 |
+| 2220 | -59.7 | **-59.7** | -39.3 (first touch) | 0 -> 0.004 |
+| 2221 | -39.3 | -59.7 (flinch set: no save) | -28.0 | 0.009 |
+
+Think saves the position **before** that frame's movement, and the damage comes after
+the move. So the spot is where you stood at the start of the last frame without fire
+contact, one frame of movement (about 11 u at a run) outside the burning area. That
+is literally "the last spot before you took damage".
+
+**Crouchbug: confirmed.** Duck (state 4, box top +0x88 = 25), pass out, respawn:
+state 3 (standing) with box top **still 25**. It moved 175 u in 0.5 s with W, i.e.
+standing speed. C once: state 4, top 25. C twice: state 3, top 85, fixed.
+`ResetLocomotionState` sets the state to 3 and never writes +0x88.
+
+**Herodown: confirmed.** Difficulty field `[[0x00502AAC]+0x6E4]+0x2C` (1 on this
+save) set to 2 for one pass-out. Afterwards there was a 7th victim: type "herodown",
+name "POFighter3", at **(90, 221.1, -1200)**, i.e. the safe spot +30 X. Verb_Reset
+spawns it at the player position after its +30 X nudge. The level total `+0x3528`
+went 6 -> 7. On hardest difficulty, each fire pass-out (up to 3 downed firefighters)
+adds a survivor at the juggled spot, who then has to be rescued.
+
+**Actors do not catch the drop.** Safe spot 120 u above another victim: the survivor
+landed on the floor (same height as that victim's feet), not on them. This matches
+the sweep's contents 0x43 skipping the actor bit 0x4 (Genesis `0x100372a0`).
+
+**The 48 u lift goes through thin floors.** A safe spot 39 u *under* an upper floor's
+surface (y 177 under 216) put the survivor **on top of** that floor (y 217.1). The
+sweep starts 48 u above the spot. A spot up to 48 u below a surface lands on it.
+
+**Liftable props: partly.** `BModelEnt_Liftable` (vtable 0x004E0DF8, kind 4, centre
+`+0xD0`) are BSP sub-models, not actors. Five drops with the spot 100 u above a
+liftable and a control 150 u to the side:
+- **2 of 5** stood the survivor 86 u above the floor (y 47.1 vs control -38.9). That
+  fits the top of an object ~86 u tall centred on that liftable's origin;
+- **3 of 5** landed on the floor.
+
+Not separated: whether the 2 hits were the liftable or furniture under it. The
+decisive test is to carry the object away and repeat.
+
+**Faster cooling (0x7530): no source reached the player on bank.** The registrations
+come from three places:
+- `MiscEmitterFXImpl::OnTouch` 0x00446030: an `RCS_MiscEmitter` of type 2, sent to
+  kind 1 (player) or 6 (fire) within 200 u and 45 degrees;
+- the extinguisher's douse (0x0046229c);
+- the hose douse (0x00464b60).
+
+The cool-down (0x0044bc00) and AddHandler hooks **never fired** during the whole
+session. Bank has two type-2 emitters (positions `impl+0x28`: (-1041, 395, -700) and
+(-314, 383, -714), near the ceiling). Burnt and held at, under and around both, the
+meter cooled at the plain **0.098-0.100/s**. Under the first one it rose 0.28/s, but
+from fire nodes below it (all damage was via the fire message). In normal play the
+only cooling observed is the passive 0.1/s. Still untested: the extinguisher / hose
+aimed at yourself, and type-2 emitters on other maps.
+
 ## What this means for runners
 - **Locking the spot.** After any fire hit, the spot stays frozen until the meter
   cools below 0.1, at 0.1 per second outside fire. The meter goes up by
   `1.2 * severity` per second in fire; passing out needs 1.0. Hopping between fires
   ("juggling") keeps it above 0.1 indefinitely while you reposition.
-- **What gets saved is the last *clean grounded* frame**, not literally "before
-  damage". Airborne frames and O2 <= 0.5 also freeze it. A warp that lands you in a
-  fire saves the arrival point if one clean grounded frame happens first; the probe's
-  teleport did (the on-ground byte was still set from before the teleport), so the
-  spot became the arrival point, 30 u above the fire's floor.
+- **What gets saved is your position at the start of the last clean grounded
+  frame.** Walking in, that is one frame short of the first fire contact. Airborne
+  frames and O2 <= 0.5 also freeze it. A teleport that lands you in a fire saves the
+  arrival point: the on-ground byte is still set from before the teleport, so Think
+  saves it before the touch pass hurts you.
 - **The fire doesn't need to be near the rescue trigger.** Set the spot near the
   trigger, then take the damage anywhere.
 - **Out of bounds.** From an out-of-bounds safe spot the survivor is stood on the first
-  solid surface (mask 0x43) within about 950 u below it. With playable floor below, it
-  lands in play space. Anything solid in between catches it, so holding it out of
-  bounds with an object below is consistent with the code (untested). With nothing
-  below, it goes to world origin.
+  world brush below it, within about 950 u (the sweep starts 48 u above the spot).
+  - With playable floor below, it lands in play space.
+  - Actors (victims; likely any geActor) do not catch it.
+  - BSP sub-models such as liftables may (2 of 5 tests, not yet separated from
+    furniture).
+  - With nothing below, it goes to world origin.
 - **Re-pickup trap.** Pickup is automatic on contact. A survivor dropped within reach
   of the respawn checkpoint is picked up again as soon as you respawn (seen live).
-- **Crouchbug.** The pass-out ends with a respawn through `ResetLocomotionState`; a
-  checkpoint respawn while crouched is a known crouchbug entry (see `speedrun-tech`).
-  It is not tested here.
+- **Crouchbug: yes.** Pass out while crouched and you respawn standing with the
+  crouched box (confirmed live, above). Crouch twice to clear it.
+- **Hardest difficulty:** each fire pass-out also leaves a herodown survivor at the
+  juggled spot (+30 X), up to 3, and each raises the level's victim total.
 
 ## Untested / open
-- Within one frame, does the fire message run before or after Think? This could
-  shift the saved frame by one.
-- The sender of 0x7530 (faster cooling); probably water.
-- Hardest difficulty: `Verb_Reset` can also spawn a "herodown" survivor at the reset
-  position.
-- A real out-of-bounds safe spot (the probe wrote `+0x3400` directly).
+- Whether a liftable itself catches the drop (carry it away and repeat).
+- A source of 0x7530 that reaches the player (extinguisher / hose on yourself;
+  type-2 emitters on maps other than bank).
+- A real out-of-bounds safe spot (the probes wrote `+0x3400` directly).
