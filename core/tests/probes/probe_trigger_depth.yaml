@@ -1,0 +1,62 @@
+name: probe_trigger_depth
+# Not in the suite: owner report 2026-10-23 #2 (oil_rig_A, -712.9 838.4 -927.8, crouched,
+# just outside the helipad rescue box (-900 792 -836)-(-352 1090 -324)): parts of the box
+# vanish along straight screen lines, and the floor hides it in one place but not the next.
+# Hypothesis: some world surfaces don't write depth. Yaw sweep, trigger boxes on, no HUDs.
+pre_files:
+  - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
+  - {src: null, dst: FDNYCore.cfg}
+setup: load_training
+record: false
+steps:
+  - console: "fd_watermark 0"
+  - console: "loadmap oil_rig_A"
+  - wait_s: 45
+  - console: "fd_triggers 1"
+  - console: "fd_dbg_setpos -712.9 838.4 -927.8 0"
+  - wait_s: 2
+  - focus: {}
+  - key: {key: c, hold: 0.3}
+  - wait_s: 1.5
+  - console: "fd_dbg_setpos -712.9 838.4 -927.8 0"
+  - wait_s: 1
+  - screenshot: y000
+  - console: "fd_dbg_setpos -712.9 838.4 -927.8 30"
+  - wait_s: 1
+  - screenshot: y030
+  - console: "fd_dbg_setpos -712.9 838.4 -927.8 60"
+  - wait_s: 1
+  - screenshot: y060
+  - console: "fd_dbg_setpos -712.9 838.4 -927.8 90"
+  - wait_s: 1
+  - screenshot: y090
+  - console: "fd_dbg_setpos -712.9 838.4 -927.8 120"
+  - wait_s: 1
+  - screenshot: y120
+  - console: "fd_dbg_setpos -712.9 838.4 -927.8 150"
+  - wait_s: 1
+  - screenshot: y150
+  - console: "fd_dbg_setpos -712.9 838.4 -927.8 180"
+  - wait_s: 1
+  - screenshot: y180
+  - console: "fd_dbg_setpos -712.9 838.4 -927.8 210"
+  - wait_s: 1
+  - screenshot: y210
+  - console: "fd_dbg_setpos -712.9 838.4 -927.8 240"
+  - wait_s: 1
+  - screenshot: y240
+  - console: "fd_dbg_setpos -712.9 838.4 -927.8 270"
+  - wait_s: 1
+  - screenshot: y270
+  - console: "fd_dbg_setpos -712.9 838.4 -927.8 300"
+  - wait_s: 1
+  - screenshot: y300
+  - console: "fd_dbg_setpos -712.9 838.4 -927.8 330"
+  - wait_s: 1
+  - screenshot: y330
+  - console: "fd_triggers_xray 1"
+  - console: "fd_dbg_setpos -712.9 838.4 -927.8 0"
+  - wait_s: 1
+  - screenshot: xray_y000
+expect:
+  no_crash: true

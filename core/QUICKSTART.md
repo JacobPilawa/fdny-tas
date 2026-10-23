@@ -239,8 +239,11 @@ can still fail on a slow VM.
   - It aims at the spot before the game's floor search (the survivor is dropped onto the
     first floor below it).
   - Following vs frozen is only visible while you move (standing still they look the same).
-- Trigger boxes: a box you stand in also tints the game's own HUD (it is drawn
-  before the core's panels). The `triggers` test opens the bank exit with the
+- Trigger boxes:
+  - Depth-tested boxes are drawn right after the world (0.19, D39), so sprites, particles,
+    actors and the game's HUD are drawn over them. Things standing inside a box aren't
+    tinted.
+  - The `triggers` test opens the bank exit with the
   RescueBot (`runrescuebot`), so the carry-and-deliver path is not exercised by a test.
 - Translucent panels need a loaded world; in menus they are drawn opaque. Their
   colours are 4 bits per channel (the driver's only alpha format), so dim greys band.

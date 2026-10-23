@@ -63,6 +63,8 @@ void* g_camera = nullptr;     // the camera it was rendered with
 void* g_lastWorld = nullptr;  // last one seen (detach on Destroy outside a frame)
 bool g_flushed = false;
 
+void DrawBoxesAfterWorld();
+
 int __cdecl RenderWorldDetour(void* engine, void* world, void* camera, void* a4) {
     if (world) {
         if (world != g_lastWorld) log::Info("gfx: world %08lx", reinterpret_cast<unsigned long>(world));
@@ -70,13 +72,19 @@ int __cdecl RenderWorldDetour(void* engine, void* world, void* camera, void* a4)
         g_camera = camera;
     }
     camera::BeforeWorldRender(camera);  // the free-camera override goes on here (D34)
-    return g_origRenderWorld(engine, world, camera, a4);
+    const int r = g_origRenderWorld(engine, world, camera, a4);
+    if (world) DrawBoxesAfterWorld();  // depth-tested world boxes, before what the game draws next (D39)
+    return r;
 }
 
 // World boxes submitted this frame (drawn in DrawWorldBoxes, the late step).
 const WorldBox* g_boxList = nullptr;
 int g_boxCount = 0;
 bool g_boxXray = false;
+// Depth-tested boxes are drawn inside the NEXT frame's world render, right after
+// geEngine_RenderWorld returns (D39), from the list the feature submitted last frame end.
+const WorldBox* g_prevBoxList = nullptr;
+int g_prevBoxCount = 0;
 WorldBoxStats g_boxStats = {};
 
 void FrameBegin() {
@@ -489,10 +497,29 @@ template <class V, class D> int Clip(const V* in, int n, V* out, D dist) {  // k
 
 float Dot(float ax, float ay, float az, float bx, float by, float bz) { return ax * bx + ay * by + az * bz; }
 
+void DrawBoxes(const WorldBox* list, int n, bool xray);
+
+// Late step: x-ray boxes now (over everything, under the text panels); depth-tested boxes are
+// kept for the next world render.
 void DrawWorldBoxes() {
     const WorldBox* list = g_boxList;
     const int n = g_boxCount < kMaxBoxes ? g_boxCount : kMaxBoxes;
     g_boxList = nullptr, g_boxCount = 0;
+    g_prevBoxList = g_boxXray ? nullptr : list, g_prevBoxCount = n;
+    if (g_boxXray) DrawBoxes(list, n, true);
+}
+
+// Right after geEngine_RenderWorld: immediate polys with the projected z, tested against the
+// world's depth only. Drawn any later (D27's queued polys at the late step), things the game
+// draws after the world (screen-aligned sprites writing depth over large rectangles) cut
+// rectangular holes in the boxes (owner report 2026-10-23, oil_rig_A; evidence/trigger_depth).
+void DrawBoxesAfterWorld() {
+    if (!g_prevBoxList) return;
+    DrawBoxes(g_prevBoxList, g_prevBoxCount, false);
+    g_flushed = false;  // the frame's later immediate draws flush the game's queued polys again
+}
+
+void DrawBoxes(const WorldBox* list, int n, bool xray) {
     if (!list || n <= 0) return;
     void* engine = Engine();
     if (!g_boxOk || !g_world || !g_camera || !BeginDraw()) return;
@@ -544,7 +571,7 @@ void DrawWorldBoxes() {
     int vw, vh;
     ViewSize(&vw, &vh);
     const float W = static_cast<float>(vw), H = static_cast<float>(vh);
-    const uint32_t flags = g_boxXray ? kImmediate : 0;
+    const uint32_t flags = kImmediate;  // both paths: straight to the driver, no depth writes
     void* tiles[16] = {};  // per alpha nibble, resolved once a frame (BoxTile_ counts settle frames)
     bool asked[16] = {};
     for (int i = 0; i < nf; ++i) {
@@ -570,11 +597,10 @@ void DrawWorldBoxes() {
         const float r = static_cast<float>((f.rgb >> 16) & 0xFF), g = static_cast<float>((f.rgb >> 8) & 0xFF),
                     bl = static_cast<float>(f.rgb & 0xFF);
         TLVertex v[16];
-        for (int q = 0; q < k; ++q) v[q] = {a[q].x, a[q].y, g_boxXray ? 1.0f : a[q].z, 0.5f, 0.5f, r, g, bl, 255};
+        for (int q = 0; q < k; ++q) v[q] = {a[q].x, a[q].y, xray ? 1.0f : a[q].z, 0.5f, 0.5f, r, g, bl, 255};
         g_poly(engine, v, k, tile, flags);
         ++st.polys;
     }
-    if (!g_boxXray) g_flush(engine);  // draw the queued polys now, under the text panels
     g_boxStats = st;
 }
 

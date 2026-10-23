@@ -156,6 +156,20 @@ later session might "simplify" away; change one only with the owner's approval
     The log and box text must stay byte-identical to the original Python overlay (glitch_parity_*), and the player never types those names.
   - **Trigger boxes: T cycles off -> on -> on + x-ray -> off** (owner). The separate U key for x-ray is gone; `fd_triggers_xray` remains a variable.
 
+- **D39 Depth-tested world boxes are drawn right after `geEngine_RenderWorld`, as immediate polys with the projected z** (supersedes D26/D27's queued late-step polys for the depth-tested path; owner report 2026-10-23, oil_rig_A).
+  - **What was wrong:** drawn at the late step, the boxes lost large screen-aligned rectangles, even over open sky. The game draws more after the world (sprites, particles), and that writes depth over whole rectangles.
+  - **Evidence:**
+    - x-ray showed the true box;
+    - immediate + projected z at the late step lost the same rectangles;
+    - halving z filled most of them;
+    - drawn right after the world render, the holes went away, and the box was cut only where world geometry really is in front.
+    - `evidence/trigger_depth/`.
+  - **Mechanics:**
+    - gfx's RenderWorld detour (gfx already owns it) draws the list the feature submitted at the previous frame end. The boxes are static and the camera is this frame's, so the one-frame lag doesn't show.
+    - gfx flushes the game's queued polys first.
+    - Immediate polys don't write depth, so what the game draws later (actors, sprites, its HUD) goes over the boxes. The game's HUD is no longer tinted by a box you stand in (an old known gap).
+  - **X-ray is unchanged:** late step, z 1.0, over everything and under the text panels.
+
 ## Process
 
 - **D21 Tests are never weakened or deleted to pass.** An environmental failure (slow VM frame rate, a race in a read) is rerun and reported with evidence, for example the previous version failing identically.
