@@ -62,6 +62,10 @@ void Refresh() {
         addr::ReadF32(Id::player_pitch, &s.pitch);
         addr::ReadF32(Id::player_yaw, &s.yaw);
         addr::ReadI32(Id::player_state, &s.moveState);
+        uintptr_t slot = 0;
+        uint32_t pl = 0;
+        if (addr::Resolve(Id::player_object, &slot) && addr::SafeRead(slot, &pl, 4) && pl)
+            addr::SafeRead(pl + addr::Field(Id::player_f_maxs) + 4, &s.boxTop, 4);  // maxs.y
         int32_t ground = 0;
         addr::ReadI32(Id::player_ground, &ground);
         s.onGround = (ground & 0xFF) != 0;

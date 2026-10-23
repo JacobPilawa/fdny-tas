@@ -24,7 +24,8 @@ struct State {
     float vel[3];            // units/s
     float speedXY;           // horizontal speed, units/s (sqrt(vx^2 + vz^2); y is up)
     float pitch, yaw;        // degrees
-    int32_t moveState;       // 3 crouched, 4 standing, 5 climb/spectator, 6 passed out, 7 jump
+    int32_t moveState;       // 3 standing, 4 crouched, 5 climb/spectator, 6 passed out, 7 jump
+    float boxTop;            // collision box maxs y: 85 standing, 25 crouched (crouchbug: not 4, top < 55)
     bool onGround;
     float timeLeft;          // mission time remaining, seconds
     int32_t victimsTotal, victimsRescued;

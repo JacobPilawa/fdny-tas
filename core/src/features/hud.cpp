@@ -25,7 +25,7 @@ void OnToggle(cmd::Cvar& v) {
     textdraw::Show(g_panel, g_on != 0);
 }
 cmd::Cvar g_fdHudPlayer = {"fd_hud_player", "0",
-                           "1 = show player info in-game: position, velocity, XY speed, player state, screen state",
+                           "1 = show player info in-game: position, velocity, XY speed, stance (standing / crouched / bugged)",
                            false, true, OnToggle, {0}};
 
 constexpr int kLines = 6, kLineLen = 96;
@@ -42,26 +42,27 @@ int F1(char* out, float v) {
     return wsprintfA(out, "%s%ld.%ld", m < 0 ? "-" : "", a / 10, a % 10);
 }
 
-const char* MoveStateName(int s) {
-    switch (s) {
-    case 3: return "crouched";
-    case 4: return "standing";
-    case 5: return "climbing/spectator";
-    case 6: return "passed out";
-    case 7: return "jumping";
-    default: return "?";
-    }
+// Owner 2026-10-23: only "standing", "crouched" or "bugged" (crouchbug). Crouched = state 4;
+// crouchbug = any other state with the crouched collision box (the warp HUD's rule,
+// glitch_analysis TrackCrouchbug: state != 4 and box top < 55; 85 standing, 25 crouched).
+constexpr float kCrouchBoxTop = 55.0f;
+const char* Stance(const state::State& s) {
+    if (s.moveState == 4) return "crouched";
+    return s.boxTop < kCrouchBoxTop ? "bugged" : "standing";
 }
 
-const char* ScreenName(const state::State& s) {
-    static const char* const kMenus[] = {"main menu", "career", "briefing", "options", "level list",
-                                         "results", "video", "credits", "screen 8", "splash"};
-    switch (s.gameState) {
-    case 1: return "in level";
-    case 2:
-    case 3: return "loading";
-    default: return s.menuScreen >= 0 && s.menuScreen < 10 ? kMenus[s.menuScreen] : "menu";
-    }
+// Text right-justified to `width` columns (wsprintf has no %*s).
+int Pad(char* out, const char* text, int width) {
+    const int n = lstrlenA(text);
+    int o = 0;
+    for (; o < width - n; ++o) out[o] = ' ';
+    lstrcpyA(out + o, text);
+    return o + n;
+}
+int Col(char* out, float v, int width) {
+    char num[24];
+    F1(num, v);
+    return Pad(out, num, width);
 }
 
 void Draw() {
@@ -70,21 +71,24 @@ void Draw() {
     const state::State& s = state::Current();
     if (!engine) return;
 
+    // Owner 2026-10-23: x / y / z in right-justified columns; no screen line.
+    constexpr int kW = 9;  // "-12345.6" + a space
     char lines[kLines][kLineLen];
     int n = 0, o;
-    o = wsprintfA(lines[n], "pos   ");
-    o += F1(lines[n] + o, s.pos[0]); lines[n][o++] = ' ';
-    o += F1(lines[n] + o, s.pos[1]); lines[n][o++] = ' ';
-    o += F1(lines[n] + o, s.pos[2]); lines[n++][o] = 0;
-    o = wsprintfA(lines[n], "vel   ");
-    o += F1(lines[n] + o, s.vel[0]); lines[n][o++] = ' ';
-    o += F1(lines[n] + o, s.vel[1]); lines[n][o++] = ' ';
-    o += F1(lines[n] + o, s.vel[2]); lines[n++][o] = 0;
-    o = wsprintfA(lines[n], "speed ");
-    o += F1(lines[n] + o, s.speedXY); lines[n++][o] = 0;
-    wsprintfA(lines[n++], "state %s (%ld) %s", MoveStateName(s.moveState), static_cast<long>(s.moveState),
-              s.onGround ? "ground" : "air");
-    wsprintfA(lines[n++], "screen %s", ScreenName(s));
+    o = wsprintfA(lines[n], "     ");
+    o += Pad(lines[n] + o, "x", kW), o += Pad(lines[n] + o, "y", kW), o += Pad(lines[n] + o, "z", kW);
+    ++n;
+    o = wsprintfA(lines[n], "pos  ");
+    for (int i = 0; i < 3; ++i) o += Col(lines[n] + o, s.pos[i], kW);
+    lines[n++][o] = 0;
+    o = wsprintfA(lines[n], "vel  ");
+    for (int i = 0; i < 3; ++i) o += Col(lines[n] + o, s.vel[i], kW);
+    lines[n++][o] = 0;
+    o = wsprintfA(lines[n], "speed");
+    o += Col(lines[n] + o, s.speedXY, kW);
+    lines[n++][o] = 0;
+    o = wsprintfA(lines[n], "state");
+    Pad(lines[n++] + o, Stance(s), kW);
 
     // Below the game's mission timer (top-left), one in-frame text panel.
     const char* rows[kLines];
@@ -129,8 +133,8 @@ int LastDrawn(char* out, int cap) {
         long a = m < 0 ? -m : m;
         o += wsprintfA(out + o, " %s%ld.%03ld", m < 0 ? "-" : "", a / 1000, a % 1000);
     }
-    o += wsprintfA(out + o, " %ld %ld %ld", static_cast<long>(s.moveState), static_cast<long>(s.gameState),
-                   static_cast<long>(s.menuScreen));
+    o += wsprintfA(out + o, " %ld %ld %ld %ld", static_cast<long>(s.moveState), static_cast<long>(s.gameState),
+                   static_cast<long>(s.menuScreen), static_cast<long>(s.boxTop));  // + box top (stance)
     LeaveCriticalSection(&g_lock);
     return o;
 }

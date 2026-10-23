@@ -125,15 +125,27 @@ int Sector(float f, float r) {
 
 long Round(float v) { return static_cast<long>(v + (v >= 0 ? 0.5f : -0.5f)); }
 
+// "-123.4" (wsprintf has no %f), into out; returns out.
+const char* F1(char* out, float v) {
+    const long m = Round(v * 10.0f), a = m < 0 ? -m : m;
+    wsprintfA(out, "%s%ld.%ld", m < 0 ? "-" : "", a / 10, a % 10);
+    return out;
+}
+
 void Draw(const View& v) {
     if (g_panel < 0) return;
     if (!v.on || !v.valid) {
         textdraw::Show(g_panel, false);
         return;
     }
-    char dist[24] = "";
-    const char* lines[3];
+    char dist[24] = "", spot[48] = "";
+    const char* lines[4];
     int n = 0;
+    if (v.locked) {  // the frozen spot's coordinates above the arrow (owner 2026-10-23)
+        char a[16], b[16], c[16];
+        wsprintfA(spot, "%s %s %s", F1(a, v.safe[0]), F1(b, v.safe[1]), F1(c, v.safe[2]));
+        lines[n++] = spot;
+    }
     if (!v.locked) {
         lines[n++] = " - ";
     } else if (v.dir == kDirNear) {
@@ -146,15 +158,18 @@ void Draw(const View& v) {
         wsprintfA(dist, "%ldu%s", Round(v.dist), v.dy > kFloorStep ? " ^" : v.dy < -kFloorStep ? " v" : "");
         lines[n++] = dist;
     }
-    // Centre the 3-column glyph over the distance line (monospace grid, panel centred).
-    static char pad[3][24];
-    const int width = lstrlenA(dist) > 3 ? lstrlenA(dist) : 3;
+    // Centre every line over the widest (monospace grid, panel centred); the glyph lines are
+    // all 3 columns, so the arrow keeps its shape.
+    static char pad[4][64];
+    int width = 3;
+    for (int i = 0; i < n; ++i)
+        if (lstrlenA(lines[i]) > width) width = lstrlenA(lines[i]);
     for (int i = 0; i < n; ++i) {
         const int len = lstrlenA(lines[i]);
-        const int left = lines[i] == dist ? (width - len) / 2 : (width - 3) / 2;
+        const int left = (width - len) / 2;
         int o = 0;
         for (; o < left; ++o) pad[i][o] = ' ';
-        lstrcpynA(pad[i] + o, lines[i], 24 - o);
+        lstrcpynA(pad[i] + o, lines[i], 64 - o);
         lines[i] = pad[i];
     }
     textdraw::SetLines(g_panel, lines, n);

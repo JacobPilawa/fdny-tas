@@ -194,7 +194,9 @@ bool Init() {
     cmd::SetGates(CvarGate, CommandGate);
     FindMods();
     // Opaque (owner: the watermark stays on the decal path; it must show in menus too).
-    g_panel = textdraw::Create("watermark", textdraw::BOTTOM_LEFT, 8, 60, 1, textdraw::C_WHITE, textdraw::STYLE_OPAQUE);
+    // Pinned to the bottom-left corner (owner 2026-10-23; was 8 px in, 60 px up, clear of the
+    // game's bottom bar, which it now overlaps at its left end).
+    g_panel = textdraw::Create("watermark", textdraw::BOTTOM_LEFT, 0, 0, 1, textdraw::C_WHITE, textdraw::STYLE_OPAQUE);
     hooks::OnFrameEnd(Draw);
 #ifdef FDCORE_DEBUG
     testpipe::Register("watermark", [](const char*, char* resp, int cap) { LastWatermark(resp, cap); });
