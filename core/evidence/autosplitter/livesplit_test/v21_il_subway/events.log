@@ -1,0 +1,33 @@
+  18898.7030 clock=None attached
+  18914.9074 clock=0 GAME gameState: 0 -> 2
+  18914.9075 clock=0 GAME map: None -> 'subway_a'
+  18915.3698 clock=791 GAME result: None -> 0
+  18915.3698 clock=791 GAME total: None -> -1
+  18915.3699 clock=791 GAME delivered: None -> 0
+  18915.3734 clock=791 GAME total: -1 -> 6
+  18915.6476 clock=791 GAME total: 6 -> -1
+  18915.7690 clock=1491 GAME total: -1 -> 6
+  18915.8017 clock=1525 GAME gameState: 2 -> 3
+  18916.0755 clock=1971 GAME gameState: 3 -> 1
+  18919.0757 clock=4971 INPUT delivered := total (6) on subway_a
+  18919.0774 clock=4971 GAME delivered: 0 -> 6
+  18942.4811 clock=28386 GAME pendingMap: '' -> 'subway_b'
+  18942.6058 clock=28386 GAME gameState: 1 -> 2
+  18942.6059 clock=28386 GAME map: 'subway_a' -> 'subway_b'
+  18942.6066 clock=28386 GAME result: 0 -> None
+  18942.6066 clock=28386 GAME total: 6 -> None
+  18942.6066 clock=28386 GAME delivered: 6 -> None
+  18943.4036 clock=30032 GAME result: None -> 0
+  18943.4036 clock=30032 GAME total: None -> -1
+  18943.4036 clock=30032 GAME delivered: None -> 0
+  18943.4051 clock=30032 GAME total: -1 -> 10
+  18944.0439 clock=30032 GAME total: 10 -> -1
+  18944.3284 clock=31785 GAME total: -1 -> 10
+  18944.3635 clock=31820 GAME gameState: 2 -> 3
+  18944.6711 clock=32337 GAME gameState: 3 -> 1
+  18947.6720 clock=35350 INPUT delivered := total (10) on subway_b
+  18947.6735 clock=35350 GAME delivered: 0 -> 10
+  18955.7840 clock=43476 GAME result: 0 -> 1
+  18961.8806 clock=16572 GAME gameState: 1 -> 0
+  18971.3472 clock=None game exited
+  18971.3472 clock=None done

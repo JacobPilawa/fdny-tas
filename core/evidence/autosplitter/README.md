@@ -5,8 +5,8 @@ rig) split late: the timer ran through the load and split when the next stage wa
 Single-stage levels were fine. Owner lead: oil_rig_A's `S_Script01` runs
 `touch: tell player (finalexitloadmap oil_rig_b)`.
 
-**Verdict: stage splits rewritten** (`tools/autosplitter/FDNY_ILs.asl`, `FDNY_rescue%.asl`,
-v2.1):
+**Verdict: stage splits rewritten** (`live split/FDNY_ILs.asl`, `FDNY_rescue%.asl`, v2.1;
+checked by the known-good test in `live split/test/`, results below):
 - **Stage done:** the next map's name appearing in the game session (GameSession+0x660),
   on the exit-touch frame.
 - **Level won:** the owner's v1 end-sound slots, kept. v2 had switched to the mission result
@@ -49,12 +49,14 @@ v2.1):
 - A level started from the menu has `+0x688` at the menu's TLevelInfo, so on the first stage
   `mapName` only changes when the load starts. Then `gameState` is 2, and the old split needs
   `gameState == 1`.
-- So it split when stage B finished loading. In Game Time (paused during the load) that is
-  the moment the load started: about 0.11 s after the touch on the VM.
+- So it split when stage B finished loading: in real time 0.45-0.49 s after the load
+  started (`livesplit_test/v1_il_oilrig`). In Game Time (paused during the load) that is
+  the moment the load started, which on a menu-started stage was one frame (16 ms) after
+  the touch.
 - **Correction (v2.1):** v2 also said the old script then held the timer paused through the
   whole next stage. That was wrong: the replay only evaluated the script when a value
   changed, so it missed the old script's flag reset on the next tick. With the replay ticking
-  at LiveSplit's 60 Hz, the old timer resumes one tick after the split.
+  at LiveSplit's 15 ms, the old timer resumes one tick after the split; the live test agrees.
 - From the console (`loadmap`) `+0x688` already points at the pending block, so `mapName`
   changes on the touch frame. That is why it isn't visible in every test.
 
@@ -81,11 +83,11 @@ can, and logs every change.
 
 ## Replay: old vs new logic over the traces (`replay.txt`)
 
-`tools/autosplitter/asl_replay.py` runs both scripts' logic tick by tick.
+`live split/asl_replay.py` runs a model of both scripts' logic tick by tick.
 - `--menu-start` models the first stage started from the menu. The traces' levels came from
   the console; the model holds `mapName` until the load starts, as the code above does.
-- The menu start of a staged level can't be reproduced on the VM: the harness career slot
-  starts Training.
+- At the time the menu start of a staged level couldn't be reproduced on the VM (the
+  harness career slot starts Training). The test below does it for real, with test saves.
 
 | | Old (menu start) | New (v2.1) |
 |---|---|---|
@@ -93,7 +95,26 @@ can, and logs every change.
 | B -> C, C -> D | the same late split | on the touch |
 | boat B / subway B / oil rig D / single levels | end-sound split | the same end-sound split, same tick |
 
-The replay ticks at 60 Hz between changes, like LiveSplit.
+The replay ticks at 15 ms between changes, like LiveSplit's ASL default.
+
+## Known-good test: the real .asl files in the real game (`livesplit_test/`)
+
+`live split/test/` (how it works: `live split/README.md`). LiveSplit's own ASL engine runs
+the .asl beside scripted runs in the game, and `check.py` compares each timer event with
+the game's own values. The menu starts use test career saves whose next mission is the
+level (`live split/test/saves/`).
+
+| Run | Splitter | Result |
+|---|---|---|
+| `v21_il_bank` | v2.1 IL | PASS: start +0.04 s; win split 0 ms after the win flag; Game Time -0.01 s vs played; reset on the results menu |
+| `v21_il_oilrig` | v2.1 IL | PASS: A -> B 16 ms before the load (touch); Esc RESTART -> reset, new start; A -> B again on the fallback (0.012 s after the load started: pendingMap already read oil_rig_B); B -> C, C -> D on the touch; D won 27 ms (game clock) after the flag; Game Time within 0.03 s at every split |
+| `v21_il_subway` | v2.1 IL | PASS: A -> B on the touch, B won 30 ms after the flag |
+| `v21_rescue_bank_boat` | v2.1 rescue% | PASS: bank won, boat A -> B, boat B won; no reset through two results screens and a briefing; Game Time = time played across both missions (66.25 s vs 66.26 s) |
+| `v1_il_oilrig` | v1 IL (control) | FAIL: the menu-started and the restarted A -> B split 0.49 s / 0.45 s after the load started; a script error every menu tick (`mapName` null before a level loads) |
+| `v1_il_bank` | v1 IL (control) | FAIL only on the menu script error; the win split and reset are right |
+
+Touch to load start: one frame (16 ms) on a stage the menu started; 0.11-0.16 s of real
+time with the game clock not advancing on stages an exit loaded (B -> C, C -> D).
 
 ## Side finding: the harness career save
 

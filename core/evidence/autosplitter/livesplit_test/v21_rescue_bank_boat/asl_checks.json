@@ -1,0 +1,62 @@
+[
+  {
+    "check": "script loaded",
+    "pass": true,
+    "detail": "HOST loaded FDNY_rescue%.asl, 30 segments, refresh 66.6666666666667 Hz"
+  },
+  {
+    "check": "no script errors",
+    "pass": true,
+    "detail": "none"
+  },
+  {
+    "check": "start count",
+    "pass": true,
+    "detail": "game: 1 run start(s); timer: 1 start(s)"
+  },
+  {
+    "check": "start 1",
+    "pass": true,
+    "detail": "gameplay began 18994.714; timer start 18994.738 (+0.024 s, allowed 0.1)"
+  },
+  {
+    "check": "split count",
+    "pass": true,
+    "detail": "game: 3 stage end(s)/win(s) (case expects 3); timer: 3 split(s)"
+  },
+  {
+    "check": "split 1 (bank won)",
+    "pass": true,
+    "detail": "split 0 ms (game clock) after the win flag (allowed 0-70)"
+  },
+  {
+    "check": "split 1 game time",
+    "pass": true,
+    "detail": "timer 25.6201 s, played 25.635 s over 1 interval(s) (tolerance 0.08)"
+  },
+  {
+    "check": "split 2 (boat_a -> boat_b)",
+    "pass": true,
+    "detail": "split 0.017 s before the load started (allowed 0.5 s before to 0.05 s after)"
+  },
+  {
+    "check": "split 2 game time",
+    "pass": true,
+    "detail": "timer 52.1848 s, played 52.196 s over 2 interval(s) (tolerance 0.10)"
+  },
+  {
+    "check": "split 3 (boat_b won)",
+    "pass": true,
+    "detail": "split 0 ms (game clock) after the win flag (allowed 0-70)"
+  },
+  {
+    "check": "split 3 game time",
+    "pass": true,
+    "detail": "timer 66.2501 s, played 66.256 s over 3 interval(s) (tolerance 0.12)"
+  },
+  {
+    "check": "no reset",
+    "pass": true,
+    "detail": "2 menu visit(s) after the start, 0 reset(s)"
+  }
+]

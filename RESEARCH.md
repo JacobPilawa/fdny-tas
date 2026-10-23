@@ -1890,7 +1890,7 @@ mid-play.
 ### 2026-10-23 -- autosplitter: how staged levels and wins look in memory
 Owner report: the LiveSplit splitters split staged levels (boat, subway, oil rig) late.
 Evidence and live traces: `core/evidence/autosplitter/`. New splitters:
-`tools/autosplitter/` v2.
+`live split/` (v2, then v2.1; known-good test in `live split/test/`).
 
 **Stage exit.**
 - The exit trigger's `touch: tell player (finalexitloadmap <next>)` runs

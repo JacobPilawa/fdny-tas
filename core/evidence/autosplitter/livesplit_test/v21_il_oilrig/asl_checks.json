@@ -1,0 +1,97 @@
+[
+  {
+    "check": "script loaded",
+    "pass": true,
+    "detail": "HOST loaded FDNY_ILs.asl, 30 segments, refresh 66.6666666666667 Hz"
+  },
+  {
+    "check": "no script errors",
+    "pass": true,
+    "detail": "none"
+  },
+  {
+    "check": "start count",
+    "pass": true,
+    "detail": "game: 2 run start(s); timer: 2 start(s)"
+  },
+  {
+    "check": "start 1",
+    "pass": true,
+    "detail": "gameplay began 18743.339; timer start 18743.354 (+0.015 s, allowed 0.1)"
+  },
+  {
+    "check": "start 2",
+    "pass": true,
+    "detail": "gameplay began 18787.845; timer start 18787.861 (+0.016 s, allowed 0.1)"
+  },
+  {
+    "check": "split count",
+    "pass": true,
+    "detail": "game: 5 stage end(s)/win(s) (case expects 5); timer: 5 split(s)"
+  },
+  {
+    "check": "split 1 (oil_rig_a -> oil_rig_b)",
+    "pass": true,
+    "detail": "split 0.016 s before the load started (allowed 0.5 s before to 0.05 s after)"
+  },
+  {
+    "check": "split 1 game time",
+    "pass": true,
+    "detail": "timer 27.4773 s, played 27.491 s over 1 interval(s) (tolerance 0.08)"
+  },
+  {
+    "check": "split 2 (oil_rig_a -> oil_rig_b)",
+    "pass": true,
+    "detail": "split 0.012 s after the load started (allowed 0.5 s before to 0.05 s after)"
+  },
+  {
+    "check": "split 2 game time",
+    "pass": true,
+    "detail": "timer 27.1196 s, played 27.126 s over 1 interval(s) (tolerance 0.08)"
+  },
+  {
+    "check": "split 3 (oil_rig_b -> oil_rig_c)",
+    "pass": true,
+    "detail": "split 0.126 s before the load started (allowed 0.5 s before to 0.05 s after)"
+  },
+  {
+    "check": "split 3 game time",
+    "pass": true,
+    "detail": "timer 41.1493 s, played 41.160 s over 2 interval(s) (tolerance 0.10)"
+  },
+  {
+    "check": "split 4 (oil_rig_c -> oil_rig_d)",
+    "pass": true,
+    "detail": "split 0.161 s before the load started (allowed 0.5 s before to 0.05 s after)"
+  },
+  {
+    "check": "split 4 game time",
+    "pass": true,
+    "detail": "timer 56.3589 s, played 56.369 s over 3 interval(s) (tolerance 0.12)"
+  },
+  {
+    "check": "split 5 (oil_rig_d won)",
+    "pass": true,
+    "detail": "split 27 ms (game clock) after the win flag (allowed 0-70)"
+  },
+  {
+    "check": "split 5 game time",
+    "pass": true,
+    "detail": "timer 68.1555 s, played 68.135 s over 4 interval(s) (tolerance 0.14)"
+  },
+  {
+    "check": "reset count",
+    "pass": true,
+    "detail": "game: 2 menu visit(s) during a run; timer: 2 reset(s)"
+  },
+  {
+    "check": "reset 1",
+    "pass": true,
+    "detail": "menu at 18783.128; reset at 18783.140 (+0.012 s, allowed 0.5)"
+  },
+  {
+    "check": "reset 2",
+    "pass": true,
+    "detail": "menu at 18863.756; reset at 18863.765 (+0.009 s, allowed 0.5)"
+  }
+]

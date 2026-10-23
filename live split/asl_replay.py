@@ -39,7 +39,7 @@ def parse(path):
     return events
 
 
-TICK = 1 / 60  # LiveSplit's default refresh rate: the script runs every ~16.7 ms
+TICK = 0.015  # LiveSplit's default ASL refresh: the script runs every 15 ms (66.7 Hz)
 
 
 def ticks(events, menu_start):

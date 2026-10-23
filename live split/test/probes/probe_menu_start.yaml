@@ -1,0 +1,23 @@
+name: lsprobe_menu_start
+# Probe (not a case): does a career slot whose LevelIndex is N start mission N+1 from the
+# menu? Hotrod Stein's save with LevelIndex 5 (const_h done) -> expect bank.
+pre_files:
+  - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
+  - {src: null, dst: FDNYCore.cfg}
+  - {src: "../live split/test/saves/next_bank.rb", dst: Saves/player1.rb}
+record: false
+steps:
+  - wait_s: 4
+  - click: [320, 240]       # splash: any LMB
+  - wait_s: 3
+  - gclick: [97, 457]       # main: "game"
+  - wait_s: 3
+  - screenshot: career
+  - gclick: [195, 165]      # career: Hotrod Stein
+  - wait_s: 3
+  - screenshot: briefing
+  - gclick: [568, 450]      # briefing: GO!
+  - wait_s: 20
+  - screenshot: level
+expect:
+  no_crash: true

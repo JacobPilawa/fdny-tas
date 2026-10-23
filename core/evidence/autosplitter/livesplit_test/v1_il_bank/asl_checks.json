@@ -1,0 +1,47 @@
+[
+  {
+    "check": "script loaded",
+    "pass": true,
+    "detail": "HOST loaded FDNY_ILs.asl, 30 segments, refresh 66.6666666666667 Hz"
+  },
+  {
+    "check": "no script errors",
+    "pass": false,
+    "detail": "HOST update error: Exception thrown: 'Microsoft.CSharp.RuntimeBinder.RuntimeBinderException' in 'update' method: Cannot perform runtime binding on a null reference     at ASL line 54 in 'update'"
+  },
+  {
+    "check": "start count",
+    "pass": true,
+    "detail": "game: 1 run start(s); timer: 1 start(s)"
+  },
+  {
+    "check": "start 1",
+    "pass": true,
+    "detail": "gameplay began 19273.225; timer start 19273.237 (+0.013 s, allowed 0.1)"
+  },
+  {
+    "check": "split count",
+    "pass": true,
+    "detail": "game: 1 stage end(s)/win(s) (case expects 1); timer: 1 split(s)"
+  },
+  {
+    "check": "split 1 (bank won)",
+    "pass": true,
+    "detail": "split 0 ms (game clock) after the win flag (allowed 0-70)"
+  },
+  {
+    "check": "split 1 game time",
+    "pass": true,
+    "detail": "timer 26.8731 s, played 26.872 s over 1 interval(s) (tolerance 0.08)"
+  },
+  {
+    "check": "reset count",
+    "pass": true,
+    "detail": "game: 1 menu visit(s) during a run; timer: 1 reset(s)"
+  },
+  {
+    "check": "reset 1",
+    "pass": true,
+    "detail": "menu at 19306.162; reset at 19306.176 (+0.014 s, allowed 0.5)"
+  }
+]
