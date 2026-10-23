@@ -225,10 +225,14 @@ bool DescribedAt(int i, const char** key, const char** action, const char** when
 }
 
 void Init() {
-    cmd::RegisterCommand("bind", "bind <key> \"<command>\": run a console line when the key is pressed", CmdBind);
-    cmd::RegisterCommand("unbind", "unbind <key>", CmdUnbind);
-    cmd::RegisterCommand("unbindall", "remove every bind", CmdUnbindAll);
-    cmd::RegisterCommand("bindlist", "list binds", CmdBindList);
+    cmd::RegisterCommand("bind", "bind <key> \"<command>\": run a console line when the key is pressed; "
+                                     "bind <key> shows it. Keys: a-z, 0-9, f1-f12, mouse1-mouse5, space, tab, enter, "
+                                     "shift, ctrl, alt, uparrow (and the other arrows), kp_0-kp_9, ins, del, home, "
+                                     "end, pgup, pgdn",
+                         CmdBind);
+    cmd::RegisterCommand("unbind", "unbind <key>: remove the key's bind (a default key stays unbound)", CmdUnbind);
+    cmd::RegisterCommand("unbindall", "remove every bind, the default keys too", CmdUnbindAll);
+    cmd::RegisterCommand("bindlist", "list the binds, then the keys features read themselves", CmdBindList);
     hooks::OnFrameBegin(Poll);
 }
 

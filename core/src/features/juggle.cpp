@@ -90,7 +90,7 @@ bool Same(const float* a, const float* b) { return a[0] == b[0] && a[1] == b[1] 
 
 bool On(const cmd::Cvar& v) { return v.value[0] != '0'; }
 cmd::Cvar g_fdJuggle = {"fd_juggle", "0",
-                        "1 = fire-juggling arrow: where a carried survivor lands if you pass out now", false, true,
+                        "1 = fire-juggling arrow: where a carried survivor lands if you pass out now; 0 = off", false, true,
                         nullptr, {0}};
 
 float Sqrt(float x) {

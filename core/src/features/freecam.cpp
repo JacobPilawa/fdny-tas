@@ -131,9 +131,9 @@ float CvarF(const cmd::Cvar& v, float def) {
 void OnPause(cmd::Cvar& v);
 cmd::Cvar g_fdPause = {"fd_pause", "0", "1 = freeze the game and fly a free camera (0 = resume, view back to the player)",
                        false, false, OnPause, {0}};
-cmd::Cvar g_fdSpeed = {"fd_freecam_speed", "400", "free camera speed, units/s (Shift x4, Ctrl x0.25)", false, true,
+cmd::Cvar g_fdSpeed = {"fd_freecam_speed", "400", "free camera speed in units/s (400 = the run speed); Shift x4, Ctrl x0.25", false, true,
                        nullptr, {0}};
-cmd::Cvar g_fdSens = {"fd_freecam_sens", "0.075", "free camera mouse look, degrees per mouse count", false, true,
+cmd::Cvar g_fdSens = {"fd_freecam_sens", "0.075", "free camera mouse look in degrees per mouse count; higher = faster", false, true,
                       nullptr, {0}};
 
 void SetPauseVar(const char* v) {

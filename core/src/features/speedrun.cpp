@@ -270,7 +270,9 @@ bool Init() {
     for (Id id : kSpawnNeeds) spawnsOk = spawnsOk && addr::Usable(id);
     if (spawnsOk) {
         cmd::RegisterCvar(&g_fdStaticSpawns);
-        cmd::RegisterCommand("fd_spawns", "fd_spawns <map> [spot ...]: pin victim spawn spots (see fd_static_spawns)",
+        cmd::RegisterCommand("fd_spawns", "fd_spawns <map> [spot ...]: pin victim spawn spots, one per victim in spawn order "
+                             "(0 = editor origin, 1..N = alt spots, -1 = random; 'default' resets; the map alone "
+                             "shows them; used while fd_static_spawns is 1)",
                              CmdSpawns);
         cmd::RegisterConfigWriter(WritePins);
     }

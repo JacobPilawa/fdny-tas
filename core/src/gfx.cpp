@@ -120,7 +120,7 @@ unsigned g_fontGen = 1;
 int g_fontPx = 0;
 
 void OnTextSize(cmd::Cvar&);
-cmd::Cvar g_fdTextSize = {"fd_text_size", "9", "on-screen text height in pixels (7-16; was 11 before 0.15)", false, true,
+cmd::Cvar g_fdTextSize = {"fd_text_size", "9", "on-screen text height in pixels, 7-16", false, true,
                           OnTextSize, {0}};
 
 int TextPx() {

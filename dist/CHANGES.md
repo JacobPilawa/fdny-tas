@@ -30,4 +30,5 @@ Built and tested on the VM. The full 0.19.0 suite is paused at the owner's reque
   feature key, feature, variable (default, values, saved, practice-only) and command;
 - `bindlist` also lists the keys features read themselves (free camera W/A/S/D/E/Q,
   warp HUD B/Z/X, O to free the cursor);
-- `exec` shows in `cmdlist`.
+- `exec` shows in `cmdlist`;
+- help texts give every variable's values (`0 = ...` for each on/off setting, ranges, what the default means).

@@ -576,7 +576,7 @@ void OnToggle(cmd::Cvar& v) {
     }
 }
 cmd::Cvar g_fdHudGlitch = {"fd_hud_warp", "0",
-                           "1 = warp HUD: what you touch and whether it can warp you (installs hooks; practice only)",
+                           "1 = warp HUD: what you touch and whether it can warp you (installs hooks); 0 = off (removes them)",
                            false, true,
                            OnToggle, {0}};
 

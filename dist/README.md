@@ -8,8 +8,8 @@ releases: `CHANGES.md`.
 |---|---|
 | File | `FDNYCore.asi` (Release build) |
 | Version | 0.18.1 (`fd_version` in the console) |
-| SHA-256 | `c040d0c3dbd220052d5ea3d4350791afcad6df4b17c6f0012ba8833accf65382` |
-| Size | 198,656 bytes |
+| SHA-256 | `ded4f4eb1b14d4b74a39dadc31d2ac316d910710e5cd4eb890bf1550f98ac665` |
+| Size | 199,680 bytes |
 
 **Install:** copy `FDNYCore.asi` next to `FDNYFirefighter.exe`. It loads through Ultimate
 ASI Loader (`dinput8.dll`), like the other `.asi` plugins. Open the game's console with
@@ -24,13 +24,13 @@ your changes are saved (FDNYCore.cfg). **Practice**: refused while `fd_profile` 
 
 | Key | Does | Runs | Practice |
 |---|---|---|---|
-| **H** | on / off: show player info in-game: position, velocity, XY speed, stance (standing / crouched / bugged) | `toggle fd_hud_player` | yes |
-| **G** | on / off: warp HUD: what you touch and whether it can warp you (installs hooks; practice only) | `toggle fd_hud_warp` | yes |
+| **H** | on / off: show player info in-game: position, velocity, XY speed, stance (standing / crouched / bugged); 0 = off | `toggle fd_hud_player` | yes |
+| **G** | on / off: warp HUD: what you touch and whether it can warp you (installs hooks); 0 = off (removes them) | `toggle fd_hud_warp` | yes |
 | **K** | save the player's position + view (practice; this map only) | `fd_tp_save` | yes |
 | **L** | teleport to the fd_tp_save location (same map only) | `fd_tp_load` | yes |
 | **T** | cycle the trigger boxes: off -> on -> on + x-ray -> off (key T) | `fd_triggers_toggle` | yes |
-| **Y** | on / off: also draw every other trigger, grey (zones, hints, doors) | `toggle fd_triggers_all` |  |
-| **J** | on / off: fire-juggling arrow: where a carried survivor lands if you pass out now | `toggle fd_juggle` | yes |
+| **Y** | on / off: also draw every other trigger, grey (zones, hints, doors); 0 = only rescue zones and exits | `toggle fd_triggers_all` |  |
+| **J** | on / off: fire-juggling arrow: where a carried survivor lands if you pass out now; 0 = off | `toggle fd_juggle` | yes |
 | **P** | pause / resume with the free camera (fd_pause; default key P) | `fd_pause_toggle` | yes |
 
 **Feature keys**: read by the feature itself while it is on; they can't be rebound.
@@ -72,29 +72,29 @@ when changed. **Practice**: refused while `fd_profile` is `run`.
 
 | Variable | Default | Values and meaning | Saved | Practice | Feature |
 |---|---|---|---|---|---|
-| `fd_version` | (set by the build) | read-only: FDNYCore version |  |  | Console |
-| `fd_hooks_frame` | `1` | frame hooks on/off (debugging; disables per-frame features) |  |  | Console |
-| `fd_log_commands` | `1` | log every FDNYCore console command to FDNYCore.log (0/1) | yes |  | Console |
-| `fd_profile` | `practice` | practice \| run: run refuses practice-only settings (HUDs, trigger boxes, teleporter, pause) |  |  | Profiles |
-| `fd_watermark` | `1` | 1 = show the FDNYCore watermark (always on in fd_profile run) | yes | yes | Profiles |
-| `fd_text_size` | `9` | on-screen text height in pixels (7-16; was 11 before 0.15) | yes |  | On-screen text |
+| `fd_version` | (set by the build) | read-only: this build's FDNYCore version |  |  | Console |
+| `fd_hooks_frame` | `1` | 1 = per-frame hooks on; 0 = off, which stops every per-frame feature (HUDs, keys, pause): for debugging |  |  | Console |
+| `fd_log_commands` | `1` | 1 = log every FDNYCore console command to FDNYCore.log; 0 = don't | yes |  | Console |
+| `fd_profile` | `practice` | practice = everything allowed; run = practice-only settings switched off and refused, watermark always on (back to practice restores your values) |  |  | Profiles |
+| `fd_watermark` | `1` | 1 = show the watermark (bottom-left: version, profile, non-default settings, other plugins); 0 = hide it (practice only: always on in run) | yes | yes | Profiles |
+| `fd_text_size` | `9` | on-screen text height in pixels, 7-16 | yes |  | On-screen text |
 | `fd_text_alpha` | `160` | panel background opacity 0-255 (translucent panels; 255 = solid) | yes |  | On-screen text |
 | `fd_text_fg_alpha` | `255` | text opacity 0-255 on translucent panels (255 = solid text; same cost either way) | yes |  | On-screen text |
-| `fd_skip_intro` | `0` | 1 = skip the Activision/Mekada intro movies at startup (takes effect next launch) | yes |  | Startup |
-| `fd_fov` | `0` | horizontal FOV in degrees at 4:3, Hor+ for wider screens; 0 = classic FOV fix (1.43 * aspect/(4/3) * fd_fov_factor); -1 = game default | yes |  | Field of view |
-| `fd_fov_factor` | `1.4` | FOV multiplier used when fd_fov is 0 (classic FOV fix) | yes |  | Field of view |
+| `fd_skip_intro` | `0` | 1 = skip the Activision/Mekada intro movies at startup; 0 = play them (takes effect next launch) | yes |  | Startup |
+| `fd_fov` | `0` | horizontal FOV in degrees at 4:3 (up to 170), Hor+ for wider screens; 0 = classic FOV fix (1.43 * aspect/(4/3) * fd_fov_factor); -1 = game default | yes |  | Field of view |
+| `fd_fov_factor` | `1.4` | FOV multiplier used when fd_fov is 0 (classic FOV fix): 1.4 = 90 degrees at 4:3 | yes |  | Field of view |
 | `fd_window_cursor` | `1` | 1 = keep the cursor in the game window only while it is focused (hold O to free it); 0 = game default (warp to 200,200 every frame, even when alt-tabbed) | yes |  | Window |
 | `fd_static_spawns` | `0` | 1 = victims spawn at fixed spots (fd_spawns; default spot 0 for every victim), 0 = the game's random pick | yes |  | Speedrun options |
 | `fd_rescuebot` | `1` | 0 = the AI RescueBot never claims victims and its chatter is muted (all difficulties); 1 = as the game ships (applies fully from the next level load) | yes |  | Speedrun options |
-| `fd_hud_player` | `0` | 1 = show player info in-game: position, velocity, XY speed, stance (standing / crouched / bugged) | yes | yes | Player HUD |
-| `fd_hud_warp` | `0` | 1 = warp HUD: what you touch and whether it can warp you (installs hooks; practice only) | yes | yes | Warp HUD |
-| `fd_triggers` | `0` | 1 = draw trigger boxes: blue rescue zone, red closed exit, green open exit (key T) | yes | yes | Trigger boxes |
-| `fd_triggers_all` | `0` | 1 = also draw every other trigger, grey (zones, hints, doors) | yes |  | Trigger boxes |
-| `fd_triggers_xray` | `0` | 1 = trigger boxes show through walls | yes |  | Trigger boxes |
-| `fd_juggle` | `0` | 1 = fire-juggling arrow: where a carried survivor lands if you pass out now | yes | yes | Fire juggling |
+| `fd_hud_player` | `0` | 1 = show player info in-game: position, velocity, XY speed, stance (standing / crouched / bugged); 0 = off | yes | yes | Player HUD |
+| `fd_hud_warp` | `0` | 1 = warp HUD: what you touch and whether it can warp you (installs hooks); 0 = off (removes them) | yes | yes | Warp HUD |
+| `fd_triggers` | `0` | 1 = draw trigger boxes: blue rescue zone, red closed exit, green open exit (key T); 0 = off | yes | yes | Trigger boxes |
+| `fd_triggers_all` | `0` | 1 = also draw every other trigger, grey (zones, hints, doors); 0 = only rescue zones and exits | yes |  | Trigger boxes |
+| `fd_triggers_xray` | `0` | 1 = trigger boxes show through walls; 0 = walls hide them (T's second press sets it) | yes |  | Trigger boxes |
+| `fd_juggle` | `0` | 1 = fire-juggling arrow: where a carried survivor lands if you pass out now; 0 = off | yes | yes | Fire juggling |
 | `fd_pause` | `0` | 1 = freeze the game and fly a free camera (0 = resume, view back to the player) |  | yes | Pause and free camera |
-| `fd_freecam_speed` | `400` | free camera speed, units/s (Shift x4, Ctrl x0.25) | yes |  | Pause and free camera |
-| `fd_freecam_sens` | `0.075` | free camera mouse look, degrees per mouse count | yes |  | Pause and free camera |
+| `fd_freecam_speed` | `400` | free camera speed in units/s (400 = the run speed); Shift x4, Ctrl x0.25 | yes |  | Pause and free camera |
+| `fd_freecam_sens` | `0.075` | free camera mouse look in degrees per mouse count; higher = faster | yes |  | Pause and free camera |
 
 ## Commands
 
@@ -103,16 +103,16 @@ when changed. **Practice**: refused while `fd_profile` is `run`.
 | `exec` | exec <file>: run an FDNYCore .cfg next to the game exe (FDNYCore.cfg and autoexec.cfg run at startup); a file not found there goes to the game's own exec |  | Console |
 | `echo` | echo <text>: print text to the console |  | Console |
 | `toggle` | toggle <variable>: switch a 0/1 variable (for key binds) |  | Console |
-| `cvarlist` | list FDNYCore variables |  | Console |
-| `cmdlist` | list FDNYCore commands |  | Console |
+| `cvarlist` | list every FDNYCore variable with its value and help |  | Console |
+| `cmdlist` | list every FDNYCore command with its help |  | Console |
 | `fd_writeconfig` | write FDNYCore.cfg now (it is also written on every change) |  | Console |
-| `bind` | bind <key> "<command>": run a console line when the key is pressed |  | Keys |
-| `unbind` | unbind <key> |  | Keys |
-| `unbindall` | remove every bind |  | Keys |
-| `bindlist` | list binds |  | Keys |
+| `bind` | bind <key> "<command>": run a console line when the key is pressed; bind <key> shows it. Keys: a-z, 0-9, f1-f12, mouse1-mouse5, space, tab, enter, shift, ctrl, alt, uparrow (and the other arrows), kp_0-kp_9, ins, del, home, end, pgup, pgdn |  | Keys |
+| `unbind` | unbind <key>: remove the key's bind (a default key stays unbound) |  | Keys |
+| `unbindall` | remove every bind, the default keys too |  | Keys |
+| `bindlist` | list the binds, then the keys features read themselves |  | Keys |
 | `fd_textdraw` | list the on-screen text panels: shown, size, position, translucent/opaque |  | On-screen text |
 | `fd_fovinfo` | show the game's FOV and the camera's current FOV |  | Field of view |
-| `fd_spawns` | fd_spawns <map> [spot ...]: pin victim spawn spots (see fd_static_spawns) |  | Speedrun options |
+| `fd_spawns` | fd_spawns <map> [spot ...]: pin victim spawn spots, one per victim in spawn order (0 = editor origin, 1..N = alt spots, -1 = random; 'default' resets; the map alone shows them; used while fd_static_spawns is 1) |  | Speedrun options |
 | `fd_warp_hide` | show / hide the warp HUD's boxes (key B) | yes | Warp HUD |
 | `fd_warp_freeze` | freeze / unfreeze the warp HUD's boxes; logging continues (key Z) | yes | Warp HUD |
 | `fd_warp_clear` | clear the warp HUD's history and last warp (key X) | yes | Warp HUD |

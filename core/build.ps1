@@ -100,6 +100,12 @@ foreach ($c in $configs) {
     if ($LASTEXITCODE -ne 0) { throw "docgen failed: see above (core/tools/docgen.py explains what it reads)" }
 }
 
+# The source's own sheet (tracked; the pre-commit hook also rewrites and stages it).
+if (-not $Without) {
+    & $PythonExe -I (Join-Path $here 'tools\docgen.py') sheet (Join-Path $here 'KEY_SHEET.md')
+    if ($LASTEXITCODE -ne 0) { throw "docgen failed: see above" }
+}
+
 # dist\ (core/CLAUDE.md "Done means"): the Release build and its sheet, always together.
 $distDir = Join-Path $here '..\dist'
 if ($Dist) {

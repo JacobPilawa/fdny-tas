@@ -102,9 +102,11 @@ void OnProfile(cmd::Cvar& v) {
 // Not archived itself: written last by WriteConfig, after the remembered set,
 // so loading FDNYCore.cfg restores both in the right order.
 cmd::Cvar g_fdProfile = {"fd_profile", "practice",
-                         "practice | run: run refuses practice-only settings (HUDs, trigger boxes, teleporter, pause)",
+                         "practice = everything allowed; run = practice-only settings switched off and refused, watermark "
+                         "always on (back to practice restores your values)",
                          false, false, OnProfile, {0}};
-cmd::Cvar g_fdWatermark = {"fd_watermark", "1", "1 = show the FDNYCore watermark (always on in fd_profile run)",
+cmd::Cvar g_fdWatermark = {"fd_watermark", "1", "1 = show the watermark (bottom-left: version, profile, non-default "
+                           "settings, other plugins); 0 = hide it (practice only: always on in run)",
                            false, true, nullptr, {0}};
 
 // fd_profile_saved <var> <value>: a practice value remembered while in run.

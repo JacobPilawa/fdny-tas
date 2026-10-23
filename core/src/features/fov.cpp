@@ -56,10 +56,10 @@ void FormatFloat(float v, char* out) {
 // --- variables -----------------------------------------------------------------
 void Reapply(cmd::Cvar&) { camera::Reapply(); }
 cmd::Cvar g_fdFov = {"fd_fov", "0",
-                     "horizontal FOV in degrees at 4:3, Hor+ for wider screens; 0 = classic FOV fix "
+                     "horizontal FOV in degrees at 4:3 (up to 170), Hor+ for wider screens; 0 = classic FOV fix "
                      "(1.43 * aspect/(4/3) * fd_fov_factor); -1 = game default",
                      false, true, Reapply, {0}};
-cmd::Cvar g_fdFovFactor = {"fd_fov_factor", "1.4", "FOV multiplier used when fd_fov is 0 (classic FOV fix)",
+cmd::Cvar g_fdFovFactor = {"fd_fov_factor", "1.4", "FOV multiplier used when fd_fov is 0 (classic FOV fix): 1.4 = 90 degrees at 4:3",
                            false, true, Reapply, {0}};
 
 // Fov to store for a camera with this rect, given the game's own Fov (camera filter).

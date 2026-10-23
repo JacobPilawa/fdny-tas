@@ -57,11 +57,11 @@ CRITICAL_SECTION g_lock;  // the pipe thread reads the counts
 
 bool On(const cmd::Cvar& v) { return v.value[0] != '0'; }
 cmd::Cvar g_fdTriggers = {"fd_triggers", "0",
-                          "1 = draw trigger boxes: blue rescue zone, red closed exit, green open exit (key T)", false,
+                          "1 = draw trigger boxes: blue rescue zone, red closed exit, green open exit (key T); 0 = off", false,
                           true, nullptr, {0}};
-cmd::Cvar g_fdTriggersAll = {"fd_triggers_all", "0", "1 = also draw every other trigger, grey (zones, hints, doors)",
+cmd::Cvar g_fdTriggersAll = {"fd_triggers_all", "0", "1 = also draw every other trigger, grey (zones, hints, doors); 0 = only rescue zones and exits",
                              false, true, nullptr, {0}};
-cmd::Cvar g_fdTriggersXray = {"fd_triggers_xray", "0", "1 = trigger boxes show through walls", false, true, nullptr,
+cmd::Cvar g_fdTriggersXray = {"fd_triggers_xray", "0", "1 = trigger boxes show through walls; 0 = walls hide them (T's second press sets it)", false, true, nullptr,
                               {0}};
 
 template <typename T>

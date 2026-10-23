@@ -23,7 +23,7 @@ To add a feature, use the `new-feature` skill (`.claude/skills/new-feature/`).
 | R6 | Harness channels are Debug-only (`#ifdef FDCORE_DEBUG` around `testpipe::Register`). | Release build fails otherwise |
 | R7 | No dynamically initialised globals or exit-time destructors: there is no CRT, they never run. Globals must be constant-initialisable (`= {}`, `constexpr`). | `-Wglobal-constructors -Wexit-time-destructors -Werror` |
 | R8 | The draw order is gfx's: only gfx subscribes to the late frame step (`hooks::OnFrameEndLate`); everything else draws from a gfx layer (D40). | arch_check |
-| R9 | The key sheet is built from the source (D41). Each feature module has a `// User: <Title> -- <one sentence>` line. A feature that reads keys itself (not a bind) declares them with `binds::DescribeKey`. Registrations take string literals. | arch_check, `tools/docgen.py` (in `build.ps1`), `tests/docs_registry.yaml` |
+| R9 | The key sheet is built from the source (D41). Each feature module has a `// User: <Title> -- <one sentence>` line. A feature that reads keys itself (not a bind) declares them with `binds::DescribeKey`. Registrations take string literals. | arch_check, `tools/docgen.py` (in `build.ps1` and the pre-commit hook, which also stages `KEY_SHEET.md`), `tests/docs_registry.yaml` |
 
 Not machine-checked, still rules:
 - **Service ownership.** A Genesis/exe function is hooked by exactly one owner. Shared hooks belong to a core service that offers subscriptions/filters (frame events → `hooks`, camera → `camera`, rendered world → `gfx`). A feature that needs a hooked function asks the owning service; if none exists, add the service to the core first.

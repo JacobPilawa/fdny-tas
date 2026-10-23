@@ -26,7 +26,7 @@ void OnToggle(cmd::Cvar& v) {
     textdraw::Show(g_panel, g_on != 0);
 }
 cmd::Cvar g_fdHudPlayer = {"fd_hud_player", "0",
-                           "1 = show player info in-game: position, velocity, XY speed, stance (standing / crouched / bugged)",
+                           "1 = show player info in-game: position, velocity, XY speed, stance (standing / crouched / bugged); 0 = off",
                            false, true, OnToggle, {0}};
 
 constexpr int kLines = 6, kLineLen = 96;

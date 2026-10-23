@@ -1,11 +1,27 @@
 #!/bin/sh
-# Architecture rules (core/CLAUDE.md, core/tools/arch_check.py) on every commit that
-# touches core/. Enable once per clone:  git config core.hooksPath .githooks
-if git diff --cached --name-only | grep -q '^core/'; then
-    PY="environment/local/tools/python/python.exe"
-    [ -x "$PY" ] || PY=python
+# On every commit that touches core/ (enable once per clone: git config core.hooksPath .githooks):
+#   - architecture rules (core/CLAUDE.md, core/tools/arch_check.py);
+#   - the key sheet (D41): core/tools/docgen.py reads the source (a registration it can't
+#     read stops the commit) and rewrites core/KEY_SHEET.md, which is added to the commit.
+#     It reads the working tree, like arch_check.
+# On a commit that touches dist/: dist/README.md must describe dist/FDNYCore.asi.
+PY="environment/local/tools/python/python.exe"
+[ -x "$PY" ] || PY=python
+staged=$(git diff --cached --name-only)
+if echo "$staged" | grep -q '^core/'; then
     if ! "$PY" -I core/tools/arch_check.py; then
         echo "pre-commit: arch_check failed -- fix the code (rules + reasons: core/CLAUDE.md, core/DECISIONS.md)"
+        exit 1
+    fi
+    if ! "$PY" -I core/tools/docgen.py sheet core/KEY_SHEET.md; then
+        echo "pre-commit: docgen failed -- see above (what it reads: core/tools/docgen.py)"
+        exit 1
+    fi
+    git add core/KEY_SHEET.md
+fi
+if echo "$staged" | grep -q '^dist/'; then
+    if ! "$PY" -I core/tools/docgen.py check-dist; then
+        echo "pre-commit: dist/ out of step -- rebuild with core/build.ps1 -Dist"
         exit 1
     fi
 fi

@@ -139,8 +139,8 @@ constexpr int kMaxWriters = 16;
 ConfigWriter g_writers[kMaxWriters];
 int g_nWriters = 0;
 
-Cvar g_fdVersion = {"fd_version", "", "FDNYCore version", true, false, nullptr, {0}};
-Cvar g_fdLogCommands = {"fd_log_commands", "1", "log every FDNYCore console command to FDNYCore.log (0/1)",
+Cvar g_fdVersion = {"fd_version", "", "this build's FDNYCore version", true, false, nullptr, {0}};
+Cvar g_fdLogCommands = {"fd_log_commands", "1", "1 = log every FDNYCore console command to FDNYCore.log; 0 = don't",
                         false, true, nullptr, {0}};
 
 void CmdWriteConfig(int, const char* const*) {
@@ -155,7 +155,8 @@ void OnHooksFrame(Cvar& v) {
     bool on = v.value[0] != '0';
     if (!hooks::SetEnabled("frame", on)) console::Print("fd_hooks_frame: frame hooks unavailable");
 }
-Cvar g_fdHooksFrame = {"fd_hooks_frame", "1", "frame hooks on/off (debugging; disables per-frame features)",
+Cvar g_fdHooksFrame = {"fd_hooks_frame", "1", "1 = per-frame hooks on; 0 = off, which stops every per-frame feature (HUDs, keys, pause): "
+                       "for debugging",
                        false, false, OnHooksFrame, {0}};
 
 } // namespace
@@ -360,8 +361,8 @@ void RegisterBuiltins() {
                     CmdExec);
     RegisterCommand("echo", "echo <text>: print text to the console", CmdEcho);
     RegisterCommand("toggle", "toggle <variable>: switch a 0/1 variable (for key binds)", CmdToggle);
-    RegisterCommand("cvarlist", "list FDNYCore variables", CmdCvarlist);
-    RegisterCommand("cmdlist", "list FDNYCore commands", CmdCmdlist);
+    RegisterCommand("cvarlist", "list every FDNYCore variable with its value and help", CmdCvarlist);
+    RegisterCommand("cmdlist", "list every FDNYCore command with its help", CmdCmdlist);
     RegisterCvar(&g_fdVersion);
     lstrcpynA(g_fdVersion.value, console::CoreVersion(), sizeof(g_fdVersion.value));
     RegisterCvar(&g_fdHooksFrame);
