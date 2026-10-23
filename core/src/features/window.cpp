@@ -1,4 +1,5 @@
 // Tests: tests/window_alttab.yaml tests/window_parity_reference.yaml
+// User: Window -- keeps the mouse cursor in the game window only while the game is focused (the alt-tab fix; off while alttabfix.asi is installed).
 // The game calls SetCursorPos(200, 200) every frame from
 // GameControls::PollFrame (0x00439347: push 200; push 200; call [SetCursorPos]),
 // even when it isn't the foreground window, so after alt-tab the mouse stays
@@ -12,6 +13,7 @@
 #include <windows.h>
 
 #include "addr.h"
+#include "binds.h"
 #include "cmd.h"
 #include "log.h"
 #include "modules.h"
@@ -87,6 +89,7 @@ bool ApplyEarlyPatch() {
 bool Init() {
     if (!g_patched) return false;  // ApplyEarlyPatch logged why
     cmd::RegisterCvar(&g_fdWindowCursor);
+    binds::DescribeKey("o", "free the mouse cursor from the game window (held)", "while fd_window_cursor is 1");  // CursorWarp
     return true;
 }
 

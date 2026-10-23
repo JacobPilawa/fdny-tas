@@ -839,3 +839,8 @@ Debug-only benchmarks in `src/bench.cpp` (`fd_bench_text`, `fd_bench_blit`, `fd_
   - DECISIONS D34-D37.
   - Suite s0190: see `core/evidence/freecam/suite_0190.md`.
 
+- 2026-10-23 it29: **key sheet** generated from the source on every build (owner: "built each time so we don't have something that can go stale"; D41, R9). No version bump: rides in the 0.19.0 pre-release.
+  - **`tools/docgen.py`:** reads the literals at every registration (variables, commands, practice-only, aliases, default binds, `DescribeKey`) and each file's `// User:` line; `build.ps1` writes `build/<Config>/README.md` every build and stops on anything it can't read. `-Dist` copies the Release `.asi` and its sheet to `dist/`, and every build checks they match. Hand-written notes moved to `dist/CHANGES.md`.
+  - **Code:** `binds::DescribeKey` for keys features read themselves (free camera W/S/A/D/E/Q/Shift/Ctrl/mouse, warp HUD B/Z/X, window O), shown by `bindlist`; `exec` registered so `cmdlist` shows it; `// User:` lines on every registering file; glitch's practice-only list as plain calls; `fd_profile` help no longer says "collision overlay".
+  - **Tests:** new `docs_registry` (the Debug build's own registry vs docgen, all 23 variables / 30 commands / 4 aliases / 8 binds / 10 feature keys / 10 modules identical); docgen's error cases checked on a scratch copy of the source; `keys_default`, `vars_binds_persist`, `console_basic`, `window_alttab` PASS; `core_loads` PASS on Release. `freecam` failed once (player y moved 0.9 units during the 4 s pause) and passed on rerun; this change doesn't touch the pause path.
+  - **Evidence:** `core/evidence/key_sheet/`.

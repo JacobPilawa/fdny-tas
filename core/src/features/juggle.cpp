@@ -1,4 +1,5 @@
 // Tests: tests/fire_juggle.yaml tests/keys_default.yaml
+// User: Fire juggling -- an arrow showing where a carried survivor lands if you pass out now.
 // juggle feature (owner request 2026-10-22, core/evidence/fire_juggle_overlay): the
 // fire-juggling helper. When the player passes out (fire or O2) while carrying a
 // survivor, Verb_Reset copies the "last safe spot" player.f_safe (+0x3400) into the

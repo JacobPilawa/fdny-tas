@@ -1,4 +1,5 @@
 // Tests: tests/glitch_records.yaml tests/glitch_parity_log.yaml tests/glitch_parity_fuzz.yaml tests/glitch_box_cost.yaml tests/text_panels.yaml tests/keys_default.yaml
+// User: Warp HUD -- shows what the player touches and whether it can warp them (the stale-impact warp), with a history of boxes.
 // hud_glitch record layer (backlog item 11a): a port of the code caves in
 // tools/collision_overlay/fdny_collision_overlay.py (GameSource._install).
 // The cave code below is emitted byte for byte like the Python Asm emitter
@@ -598,13 +599,19 @@ bool Init() {
     cmd::RegisterCommand("fd_warp_freeze", "freeze / unfreeze the warp HUD's boxes; logging continues (key Z)", CmdFreeze);
     cmd::RegisterCommand("fd_warp_clear", "clear the warp HUD's history and last warp (key X)", CmdClear);
     cmd::RegisterCvar(&g_fdHudGlitch);
-    static const char* const kPractice[] = {"fd_hud_warp", "fd_warp_hide", "fd_warp_freeze", "fd_warp_clear"};
-    for (const char* n : kPractice) cmd::SetPracticeOnly(n);
+    cmd::SetPracticeOnly("fd_hud_warp");
+    cmd::SetPracticeOnly("fd_warp_hide");
+    cmd::SetPracticeOnly("fd_warp_freeze");
+    cmd::SetPracticeOnly("fd_warp_clear");
     cmd::RegisterAlias("fd_hud_glitch", "fd_hud_warp");  // the names before 0.19
     cmd::RegisterAlias("fd_glitch_hide", "fd_warp_hide");
     cmd::RegisterAlias("fd_glitch_freeze", "fd_warp_freeze");
     cmd::RegisterAlias("fd_glitch_clear", "fd_warp_clear");
     binds::BindDefault("g", "toggle fd_hud_warp");  // D37
+    // Hotkeys() reads these itself (the clear's place in the frame, above).
+    binds::DescribeKey("b", "show / hide the warp HUD's boxes (fd_warp_hide)", "while fd_hud_warp is 1");
+    binds::DescribeKey("z", "freeze / unfreeze the warp HUD's boxes (fd_warp_freeze)", "while fd_hud_warp is 1");
+    binds::DescribeKey("x", "clear the warp HUD's history and last warp (fd_warp_clear)", "while fd_hud_warp is 1");
     hooks::OnFrameEnd(FrameEnd);
 #ifdef FDCORE_DEBUG
     testpipe::Register("glitch", [](const char*, char* resp, int cap) { Stats(resp, cap); });

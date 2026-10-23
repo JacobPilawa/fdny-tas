@@ -1,4 +1,5 @@
 // Tests: tests/bench/bench_text.yaml tests/bench/bench_blit.yaml tests/bench/bench_bmp.yaml
+// User: Benchmarks -- Debug build only: text-drawing benchmarks.
 // Debug-only text-drawing benchmark (in-frame text investigation, after item 13).
 //   fd_bench_text <calls> <chars> <every> <mode>
 // draws <calls> strings of <chars> characters with geEngine_Printf on every

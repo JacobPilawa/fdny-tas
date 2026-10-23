@@ -1,3 +1,4 @@
+// User: Startup -- optional startup changes.
 #include "patches.h"
 
 #include <windows.h>

@@ -1,4 +1,5 @@
 // Tests: tests/hud_player.yaml tests/text_panels.yaml tests/text_alpha.yaml tests/keys_default.yaml
+// User: Player HUD -- position, velocity, XY speed and stance on screen.
 #include "binds.h"
 #include "hud.h"
 

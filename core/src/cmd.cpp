@@ -1,3 +1,4 @@
+// User: Console -- FDNYCore's commands and variables, typed in the game's console (` key); changed settings are saved to FDNYCore.cfg, your own lines go in autoexec.cfg.
 #include "cmd.h"
 
 #include <windows.h>
@@ -6,6 +7,7 @@
 #include "console.h"
 #include "hooks.h"
 #include "log.h"
+#include "modules.h"
 
 namespace fdcore::cmd {
 namespace {
@@ -145,6 +147,10 @@ void CmdWriteConfig(int, const char* const*) {
     if (SaveConfig()) console::Print("wrote %s%s", console::GameDir(), kConfigName);
 }
 
+// Registered so cmdlist and the key sheet show it; Dispatch handles `exec` before
+// the command table, so this only runs if that ever changes.
+void CmdExec(int, const char* const*) { console::Print("usage: exec <file>  (FDNYCore .cfg next to the game exe)"); }
+
 void OnHooksFrame(Cvar& v) {
     bool on = v.value[0] != '0';
     if (!hooks::SetEnabled("frame", on)) console::Print("fd_hooks_frame: frame hooks unavailable");
@@ -212,6 +218,46 @@ bool IsPracticeOnly(const char* name) {
         if (IEq(g_practice[i], name)) return true;
     return false;
 }
+#ifdef FDCORE_DEBUG
+namespace {
+// fd_dbg_registry: what this build registered, one tab-separated line per item, for
+// tests/docs_registry.yaml to compare with core/tools/docgen.py's reading of the source.
+void CmdRegistry(int, const char* const*) {
+    static char buf[48 * 1024];
+    int o = 0;
+    const int cap = static_cast<int>(sizeof(buf)) - 600;
+    for (int i = 0; i < g_nCvars && o < cap; ++i) {
+        const Cvar* v = g_cvars[i];
+        o += wsprintfA(buf + o, "cvar\t%s\t%s\t%d\t%d\t%d\t%s\r\n", v->name, v->defaultValue, v->readOnly ? 1 : 0,
+                       v->archive ? 1 : 0, IsPracticeOnly(v->name) ? 1 : 0, v->help);
+    }
+    for (int i = 0; i < g_nCommands && o < cap; ++i)
+        o += wsprintfA(buf + o, "cmd\t%s\t%d\t%s\r\n", g_commands[i].name, IsPracticeOnly(g_commands[i].name) ? 1 : 0,
+                       g_commands[i].help);
+    for (int i = 0; i < g_nAliases && o < cap; ++i)
+        o += wsprintfA(buf + o, "alias\t%s\t%s\r\n", g_aliases[i].old, g_aliases[i].current);
+    const char *a, *b, *c;
+    for (int i = 0; binds::DefaultAt(i, &a, &b) && o < cap; ++i) o += wsprintfA(buf + o, "bind\t%s\t%s\r\n", a, b);
+    for (int i = 0; binds::DescribedAt(i, &a, &b, &c) && o < cap; ++i)
+        o += wsprintfA(buf + o, "key\t%s\t%s\t%s\r\n", a, b, c);
+    // A module that turned itself off (e.g. window, when alttabfix.asi owns its site) registered nothing.
+    for (int i = 0; i < modules::Count() && o < cap; ++i)
+        o += wsprintfA(buf + o, "module\t%s\t%d\r\n", modules::At(i)->name, modules::At(i)->enabled ? 1 : 0);
+    char path[MAX_PATH];
+    wsprintfA(path, "%sFDNYCore_registry.txt", console::GameDir());
+    HANDLE f = CreateFileA(path, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (f == INVALID_HANDLE_VALUE) {
+        console::Print("fd_dbg_registry: cannot write %s", path);
+        return;
+    }
+    DWORD wrote = 0;
+    WriteFile(f, buf, static_cast<DWORD>(o), &wrote, nullptr);
+    CloseHandle(f);
+    console::Print("fd_dbg_registry: wrote %s (%d bytes)", path, o);
+}
+} // namespace
+#endif
+
 int CvarCount() { return g_nCvars; }
 Cvar* CvarAt(int i) { return i >= 0 && i < g_nCvars ? g_cvars[i] : nullptr; }
 
@@ -309,6 +355,9 @@ void RegisterBuiltins() {
         InitializeCriticalSection(&g_qLock);
         g_qInit = true;
     }
+    RegisterCommand("exec", "exec <file>: run an FDNYCore .cfg next to the game exe (FDNYCore.cfg and autoexec.cfg run "
+                            "at startup); a file not found there goes to the game's own exec",
+                    CmdExec);
     RegisterCommand("echo", "echo <text>: print text to the console", CmdEcho);
     RegisterCommand("toggle", "toggle <variable>: switch a 0/1 variable (for key binds)", CmdToggle);
     RegisterCommand("cvarlist", "list FDNYCore variables", CmdCvarlist);
@@ -318,6 +367,11 @@ void RegisterBuiltins() {
     RegisterCvar(&g_fdHooksFrame);
     RegisterCvar(&g_fdLogCommands);
     RegisterCommand("fd_writeconfig", "write FDNYCore.cfg now (it is also written on every change)", CmdWriteConfig);
+#ifdef FDCORE_DEBUG
+    RegisterCommand("fd_dbg_registry", "(Debug test hook) write FDNYCore_registry.txt: every variable, command, "
+                                       "alias, default bind and described key",
+                    CmdRegistry);
+#endif
 }
 
 void QueueGameLine(const char* line) {

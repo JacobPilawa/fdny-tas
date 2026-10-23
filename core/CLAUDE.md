@@ -23,6 +23,7 @@ To add a feature, use the `new-feature` skill (`.claude/skills/new-feature/`).
 | R6 | Harness channels are Debug-only (`#ifdef FDCORE_DEBUG` around `testpipe::Register`). | Release build fails otherwise |
 | R7 | No dynamically initialised globals or exit-time destructors: there is no CRT, they never run. Globals must be constant-initialisable (`= {}`, `constexpr`). | `-Wglobal-constructors -Wexit-time-destructors -Werror` |
 | R8 | The draw order is gfx's: only gfx subscribes to the late frame step (`hooks::OnFrameEndLate`); everything else draws from a gfx layer (D40). | arch_check |
+| R9 | The key sheet is built from the source (D41). Each feature module has a `// User: <Title> -- <one sentence>` line. A feature that reads keys itself (not a bind) declares them with `binds::DescribeKey`. Registrations take string literals. | arch_check, `tools/docgen.py` (in `build.ps1`), `tests/docs_registry.yaml` |
 
 Not machine-checked, still rules:
 - **Service ownership.** A Genesis/exe function is hooked by exactly one owner. Shared hooks belong to a core service that offers subscriptions/filters (frame events → `hooks`, camera → `camera`, rendered world → `gfx`). A feature that needs a hooked function asks the owning service; if none exists, add the service to the core first.
@@ -69,9 +70,8 @@ Every drawing belongs to a gfx layer, run in this fixed order each frame (D40, `
 3. **Evidence** in `evidence/<topic>/`: logs, screenshots, measurements, plus a README for anything investigative (spikes: what was tried, numbers, verdict).
 4. **Docs:** `QUICKSTART.md` for anything user-visible (commands, variables, keys); `DECISIONS.md` for any non-obvious choice; a `PROGRESS.md` entry (`- <date> it<N>: **<version>** ...`).
 5. **Version:** bump `VERSION` (minor for features/architecture, patch for fixes).
-   - Rebuild.
-   - Copy `build\Release\FDNYCore.asi` to `dist\FDNYCore.asi` (repo root, tracked; owner 2026-10-22: the owner installs from GitHub).
-   - Update `dist\README.md`: version, commit, SHA-256 of the file.
+   - Rebuild with `.\build.ps1 -Dist`: it copies the Release `.asi` to `dist\` (repo root, tracked; owner 2026-10-22: the owner installs from GitHub) with `dist\README.md`, the key sheet generated for it (D41: version, SHA-256, keys, features, variables, commands). Never edit `dist\README.md` by hand; the build fails if it doesn't match the `.asi`.
+   - Add the release notes to `dist\CHANGES.md` (hand-written).
    - Only Release, and only on a version bump.
 6. **Commit:** one topic per commit; message via `-F` from a UTF-8 file without BOM, ending with the Co-Authored-By / Claude-Session lines; don't stage `research/research.db-*` side files.
 7. **Report to the owner** (end of every task):

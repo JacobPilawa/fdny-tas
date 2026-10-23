@@ -1,3 +1,4 @@
+// User: Keys -- bind any key to a console line (bind / unbind / bindlist); keys act only while the game has focus and the console is closed.
 #include "binds.h"
 
 #include <windows.h>
@@ -44,6 +45,17 @@ char g_binds[kVkCount][160];
 bool g_prevDown[kVkCount];
 bool g_isDefault[kVkCount];  // a feature's default key (BindDefault)
 char g_default[kVkCount][160];  // ... and its line: FDNYCore.cfg only records changes from it
+const char* g_defaultKey[kVkCount];  // ... and the name it was given, in BindDefault order
+int g_nDefaults = 0;
+
+struct Described {
+    const char* key;
+    const char* action;
+    const char* when;
+};
+constexpr int kMaxDescribed = 32;
+Described g_described[kMaxDescribed];
+int g_nDescribed = 0;
 
 // Name of a VK for display / FDNYCore.cfg; letters and digits are themselves.
 void VkName(int vk, char* out) {
@@ -138,6 +150,8 @@ void CmdBindList(int, const char* const*) {
             ++n;
         }
     console::Print("%d bind(s)", n);
+    for (int i = 0; i < g_nDescribed; ++i)
+        console::Print("%s: %s (%s; not a bind)", g_described[i].key, g_described[i].action, g_described[i].when);
 }
 
 bool OurWindowFocused() {
@@ -185,6 +199,28 @@ bool BindDefault(const char* key, const char* line) {
     lstrcpynA(g_binds[vk], line, sizeof(g_binds[vk]));
     lstrcpynA(g_default[vk], line, sizeof(g_default[vk]));
     g_isDefault[vk] = true;
+    g_defaultKey[g_nDefaults++] = key;
+    return true;
+}
+
+void DescribeKey(const char* key, const char* action, const char* when) {
+    if (g_nDescribed < kMaxDescribed) g_described[g_nDescribed++] = {key, action, when};
+}
+
+int DefaultCount() { return g_nDefaults; }
+
+bool DefaultAt(int i, const char** key, const char** line) {
+    if (i < 0 || i >= g_nDefaults) return false;
+    *key = g_defaultKey[i];
+    *line = g_default[ParseKey(g_defaultKey[i])];
+    return true;
+}
+
+int DescribedCount() { return g_nDescribed; }
+
+bool DescribedAt(int i, const char** key, const char** action, const char** when) {
+    if (i < 0 || i >= g_nDescribed) return false;
+    *key = g_described[i].key, *action = g_described[i].action, *when = g_described[i].when;
     return true;
 }
 

@@ -1,4 +1,5 @@
 // Tests: tests/tp_teleport.yaml tests/keys_default.yaml
+// User: Teleporter -- save a position and view, and teleport back to it (same map).
 #include "binds.h"
 #include "tp.h"
 

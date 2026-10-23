@@ -1,4 +1,5 @@
 // Tests: tests/triggers.yaml tests/keys_default.yaml
+// User: Trigger boxes -- draws the map's rescue zones and exits (and optionally every trigger) as boxes.
 // triggers feature (owner request 2026-10-22, core/evidence/trigger_boxes): draws every
 // RCS_BoundsTrigger of the loaded map as a 50% box -- blue = rescue/escape zone, red =
 // closed final exit, green = open final exit, grey = any other trigger (only with

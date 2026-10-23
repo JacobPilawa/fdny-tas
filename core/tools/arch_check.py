@@ -143,6 +143,18 @@ def main():
             if re.search(r"\bOnFrameEndLate\s*\(", l):
                 fail("R8 draw-order-is-gfx", f, i, "late-frame subscriber outside gfx: draw from gfx::OnLayer(...)")
 
+    # R9: the key sheet (dist/README.md, tools/docgen.py) is built from the source (D41). Every
+    # feature module says what it is for the player, and a feature that reads keys itself
+    # (not through a bind) declares them with binds::DescribeKey, so the sheet lists them.
+    for g, regs in sorted(modules.items()):
+        if len(regs) == 1 and not re.search(r"^// User: .+ -- .+$", regs[0][1], re.M):
+            fail("R9 sheet-from-source", regs[0][0], 1, 'missing "// User: <Title> -- <one sentence>" line')
+    for f in feat_files:
+        code = strip_comments(open(f, encoding="utf-8-sig").read())
+        if re.search(r"\bGetAsyncKeyState\s*\(", code) and not re.search(r"\bDescribeKey\s*\(", code):
+            fail("R9 sheet-from-source", f, 1, "reads keys itself (GetAsyncKeyState) but declares none with "
+                 "binds::DescribeKey: the key sheet would miss them")
+
     # Not here, enforced by the compiler instead (build.ps1 flags, -Werror):
     #   R6 Debug-only testpipe::Register: declared only in Debug, a stray call breaks Release.
     #   R7 no static constructors / exit-time destructors (no CRT runs them):

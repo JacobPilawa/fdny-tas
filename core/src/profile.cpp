@@ -1,3 +1,4 @@
+// User: Profiles -- practice (everything allowed) or run (practice-only settings refused, watermark always on).
 #include "profile.h"
 
 #include <windows.h>
@@ -101,7 +102,7 @@ void OnProfile(cmd::Cvar& v) {
 // Not archived itself: written last by WriteConfig, after the remembered set,
 // so loading FDNYCore.cfg restores both in the right order.
 cmd::Cvar g_fdProfile = {"fd_profile", "practice",
-                         "practice | run: run refuses practice-only settings (HUDs, collision overlay, teleporter)",
+                         "practice | run: run refuses practice-only settings (HUDs, trigger boxes, teleporter, pause)",
                          false, false, OnProfile, {0}};
 cmd::Cvar g_fdWatermark = {"fd_watermark", "1", "1 = show the FDNYCore watermark (always on in fd_profile run)",
                            false, true, nullptr, {0}};

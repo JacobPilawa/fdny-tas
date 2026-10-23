@@ -43,7 +43,11 @@ and don't work around them; if a rule blocks a good design, stop and ask the own
 ## 3. Code
 
 - Copy `core/templates/feature.cpp` to `core/src/features/<name>.cpp`:
-  - fill the `// Tests:` line and the header paragraph;
+  - fill the `// Tests:` line, the `// User: <Title> -- <one sentence>` line (the key sheet's
+    entry, R9) and the header paragraph;
+  - register variables, commands, practice-only names and default keys with string literals
+    (the key sheet reads them, D41); a key the feature reads itself (`GetAsyncKeyState`, not
+    a bind) gets a `binds::DescribeKey(key, action, when)`;
   - one `FDCORE_MODULE`, listing the required Ids;
   - pick a start `order` after the existing modules (see `QUICKSTART.md`);
   - startup patches before WinMain go in the `early` step, guarded with
@@ -68,8 +72,12 @@ and don't work around them; if a rule blocks a good design, stop and ask the own
 
 - Evidence: `core/evidence/<name>/` (logs, screenshots, numbers; a README for anything
   investigative).
-- `core/QUICKSTART.md`: commands, variables and keys in the feature tables; the
-  module-author sections if you added a service.
+- `core/QUICKSTART.md`: the feature's explanation in the feature tables; the module-author
+  sections if you added a service. The complete key / variable / command list is the
+  generated key sheet (`build/<Config>/README.md`): check it reads well, and fix the help
+  texts in the code, not the sheet.
+- On the version bump: `.\core\build.ps1 -Dist` (the `.asi` and its sheet to `dist/`), and
+  the release notes in `dist/CHANGES.md`.
 - `core/DECISIONS.md`: an entry for every non-obvious choice (what, why, rejected).
 - `core/PROGRESS.md`: `- <date> it<N>: **<version>** <what>; tests; evidence path.`
 - `core/VERSION`: bump minor for a feature, patch for a fix.

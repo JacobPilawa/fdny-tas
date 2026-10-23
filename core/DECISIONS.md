@@ -182,6 +182,13 @@ later session might "simplify" away; change one only with the owner's approval
     - It runs paused (`fd_pause`): unpaused, two shots of the same view differ by 13 (moving sky, clock).
   - **Rejected:** keeping the registration-order convention (silent when broken); a priority number per subscriber (more freedom than three meaningful moments need).
 
+- **D41 The player's key sheet is generated from the source on every build** (owner 2026-10-23: "built each time so we don't have something that can go stale").
+  - **What:** `tools/docgen.py` reads the string literals at the registration calls: variables, commands, practice-only, aliases, `BindDefault`, `DescribeKey`, and each file's `// User: <Title> -- <sentence>` line. `build.ps1` writes `build/<Config>/README.md` every build; `-Dist` copies it to `dist/README.md` with the Release `.asi`. Hand-written release notes are `dist/CHANGES.md`.
+  - **Rules (R9, arch_check):** a feature module has a `// User:` line; a feature that reads keys itself (`GetAsyncKeyState`) declares them with `binds::DescribeKey` (also shown by `bindlist`). docgen stops the build on a registration it can't read (arguments not literals, a `RegisterCvar(&x)` with no `cmd::Cvar x = {...}`, a registering file with no `// User:` line). `build.ps1` checks that `dist/README.md` names the SHA-256 of `dist/FDNYCore.asi`.
+  - **Checked against the build:** `tests/docs_registry.yaml` has the Debug build write what it registered (`fd_dbg_registry`) and compares it with docgen's reading, item by item, so a registration the scanner misses fails a test.
+  - **Values:** the variable's help text is its value list. Help texts say the values ("0-255", "practice | run", "1 = ..., 0 = ..."); no separate values field.
+  - **Rejected:** a hand-maintained table (goes stale; QUICKSTART's did); dumping the sheet from the running game (needs the game at build time, and the sheet must be built on every build).
+
 ## Process
 
 - **D21 Tests are never weakened or deleted to pass.** An environmental failure (slow VM frame rate, a race in a read) is rerun and reported with evidence, for example the previous version failing identically.

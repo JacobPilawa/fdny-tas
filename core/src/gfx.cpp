@@ -1,3 +1,4 @@
+// User: On-screen text -- size and opacity of every FDNYCore text panel.
 #include "gfx.h"
 
 #include <windows.h>

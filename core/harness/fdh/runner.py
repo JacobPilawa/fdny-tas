@@ -21,6 +21,7 @@ import os
 import re
 import shutil
 import struct
+import sys
 import time
 
 import yaml
@@ -342,6 +343,8 @@ class Run:
             if "absent" in arg:
                 self.record("assert_file", text is None or arg["absent"] not in text,
                             f"{arg['path']} does not contain {arg['absent']!r}")
+        elif kind == "assert_registry":
+            self.assert_registry(arg if isinstance(arg, dict) else {})
         elif kind == "assert_log_count":
             with open(self.g.core_log, encoding="utf-8", errors="replace") as fh:
                 n = fh.read().count(arg["contains"])
@@ -362,6 +365,49 @@ class Run:
             inputs.type_text("`")
         else:
             raise ValueError(f"unknown step {kind}")
+
+    def assert_registry(self, opt):
+        """D41: what the build registered (fd_dbg_registry's file) == what tools/docgen.py reads
+        from the source, per kind; Debug-only items included (this is the Debug build)."""
+        name = opt.get("file", "FDNYCore_registry.txt")
+        src = os.path.join(self.game_dir, name)
+        try:
+            with open(src, encoding="utf-8", errors="replace") as fh:
+                rows = [l.rstrip("\r\n").split("\t") for l in fh if l.strip()]
+        except OSError:
+            self.record("assert_registry", False, f"{name} missing (fd_dbg_registry not run?)")
+            return
+        shutil.copy2(src, os.path.join(self.out, name))
+        sys.path.insert(0, os.path.join(CORE_DIR, "tools"))
+        import docgen
+        reg = docgen.read_source()
+        # A module that disabled itself (window under alttabfix.asi) registers nothing: its
+        # items are expected only when it is enabled. Every module must be known to both.
+        mods = {r[1]: r[2] == "1" for r in rows if r[0] == "module"}
+        src_mods = {s["module"]: s["file"] for s in reg["sections"] if s["module"]}
+        self.record("assert_registry", set(src_mods) <= set(mods),
+                    f"modules: {len(mods)} in the build, {sorted(src_mods)} read from the source"
+                    + (f"; disabled in this run: {sorted(m for m, on in mods.items() if not on)}"
+                       if not all(mods.values()) else ""))
+        off = {f for m, f in src_mods.items() if not mods.get(m, True)}
+        for k in ("cvars", "commands", "aliases", "binds", "keys"):
+            reg[k] = [x for x in reg[k] if x["file"] not in off]
+        b = lambda x: "1" if x else "0"
+        want = {
+            "cvar": {(c["name"], c["default"], b(c["read_only"]), b(c["archive"]), b(c["practice"]), c["help"])
+                     for c in reg["cvars"]},
+            "cmd": {(c["name"], b(c["practice"]), c["help"]) for c in reg["commands"]},
+            "alias": {(a["old"], a["current"]) for a in reg["aliases"]},
+            "bind": {(x["key"], x["line"]) for x in reg["binds"]},
+            "key": {(k["key"], k["action"], k["when"]) for k in reg["keys"]},
+        }
+        for kind, expected in want.items():
+            got = {tuple(r[1:]) for r in rows if r[0] == kind}
+            only_build, only_src = sorted(got - expected), sorted(expected - got)
+            self.record("assert_registry", not only_build and not only_src,
+                        f"{kind}: {len(got)} in the build, {len(expected)} read from the source"
+                        + (f"; only in the build: {only_build}" if only_build else "")
+                        + (f"; only in the source: {only_src}" if only_src else ""))
 
     def read_core_log(self):
         try:

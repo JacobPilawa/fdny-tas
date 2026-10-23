@@ -13,8 +13,9 @@ cd C:\fdny-decomp\core
 .\build.ps1 -Config Release  # just one
 ```
 
-Output: `core\build\<Debug|Release>\FDNYCore.asi`. Zig is bundled; the build
-regenerates `src\gen\` from `addresses.json` and `VERSION`.
+Output: `core\build\<Debug|Release>\FDNYCore.asi` and `README.md` (the key sheet). Zig is
+bundled; the build regenerates `src\gen\` from `addresses.json` and `VERSION`.
+`.\build.ps1 -Dist` also copies the Release `.asi` and its sheet to `dist\` (version bumps).
 
 - **Release** is the one to play with.
 - **Debug** adds the test pipe (`\\.\pipe\FDNYCore`) and benchmark commands; the
@@ -53,20 +54,10 @@ Settings persist automatically: set something once and it's there next launch.
 
 ## 4. Key binds
 
-Every feature has a default letter key (owner, D37; no F keys):
-
-| Feature | Console | Key |
-|---|---|---|
-| Pause + free camera | `fd_pause_toggle` (`fd_pause 1`) | **P** (paused: W A S D, E up, Q down, Shift x4, Ctrl x0.25, mouse) |
-| Fire-juggling arrow | `toggle fd_juggle` | **J** |
-| Player HUD | `toggle fd_hud_player` | **H** |
-| Warp HUD | `toggle fd_hud_warp` | **G** |
-| ... show / hide its boxes | `fd_warp_hide` | **B** |
-| ... freeze its boxes | `fd_warp_freeze` | **Z** |
-| ... clear its history | `fd_warp_clear` | **X** |
-| Trigger boxes: off -> on -> on + x-ray (through walls) -> off | `fd_triggers_toggle` | **T** |
-| ... every trigger | `toggle fd_triggers_all` | **Y** |
-| Teleporter save / load | `fd_tp_save` / `fd_tp_load` | **K** / **L** |
+Every feature has a default letter key (owner, D37; no F keys). **The full list of keys,
+variables and commands is the key sheet**: `build\<Config>\README.md`, written by every
+build from the source (`tools\docgen.py`, D41), and `dist\README.md` for the released
+`.asi`. In the game, `bindlist` shows the binds and the keys features read themselves.
 
 No default key on purpose: the speedrun options (`fd_static_spawns`, `fd_rescuebot`),
 `fd_profile`, `fd_watermark`, `fd_fov` and the text settings (a stray press would change a
@@ -86,6 +77,8 @@ with the game focused and the console closed; backtick stays reserved for the
 console. Binds are saved with the config.
 
 ## 5. Features
+
+More detail than the key sheet's one-line help texts. The sheet is the complete, current list.
 
 ### Practice tools (refused while `fd_profile run`)
 

@@ -1,4 +1,5 @@
 // Tests: tests/speedrun_static_spawns.yaml tests/speedrun_rescuebot.yaml tests/speedrun_reference_deterministic.yaml
+// User: Speedrun options -- fixed victim spawns and the RescueBot switch (shown on the watermark; off while FDNYDeterministic.asi is installed).
 // speedrun module (backlog item 8): port of asi/FDNYDeterministic.
 //
 // Static victim spawns: VictimRescueEnt::SpawnAtSpot copies the RNG-chosen
