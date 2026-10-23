@@ -11,9 +11,7 @@
  *    script verb `finalexitloadmap <next>`, which stores the next map's name in the
  *    game session (GameSession+0x660, "pendingMap") on that exact frame and keeps it
  *    there. The load starts one frame later. The split fires when pendingMap changes
- *    to the next stage of the map being played. (The old script waited for mapName to
- *    change, which on a stage started from the menu only happens once the load has
- *    begun or finished: the late split.)
+ *    to the next stage of the map being played. 
  *    Fallback: if pendingMap already held that name (a stage retried after an earlier
  *    exit), the split fires when the in-game load starts (gameState 1 -> 2) with
  *    pendingMap = next stage.
@@ -62,7 +60,7 @@ startup
     vars.inLevel = false;     // playing since the last 3 -> 1, no menu since
     vars.stageSplit = false;  // this stage already split
     vars.levelDone = false;   // won: paused until the next level is playing
-    print("[FDNY] Rescue% auto splitter v2.1 loaded");
+    print("[FDNY] Rescue% auto splitter");
 }
 
 init
