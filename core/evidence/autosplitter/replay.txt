@@ -1,21 +1,25 @@
-﻿--- OLD (menu start) evidence\autosplitter\split_chain.log
-    44.1823  timer PAUSED
+--- OLD (menu start) core/evidence/autosplitter/split_chain.log
+    44.1990  timer PAUSED
     44.9151  start on oil_rig_a   [state 1, map 'oil_rig_A', pending 'oil_rig_A']
     44.9151  timer running
     77.2694  timer PAUSED
     77.7147  split stage oil_rig_a->oil_rig_b   [state 1, map 'oil_rig_B', pending 'oil_rig_B']
-   119.9180  timer running
+    77.7148  timer running
    120.0326  timer PAUSED
    120.6284  split stage oil_rig_b->oil_rig_c   [state 1, map 'oil_rig_C', pending 'oil_rig_C']
-   162.7172  timer running
+   120.6451  timer running
    162.8524  timer PAUSED
    163.2897  split stage oil_rig_c->oil_rig_d   [state 1, map 'oil_rig_D', pending 'oil_rig_D']
+   163.3064  timer running
+   204.2132  timer PAUSED
    204.9329  timer running
    237.2817  timer PAUSED
-   237.8230  split stage boat_a->boat_b   [state 1, map 'boat_b', pending 'boat_b']
-   279.8950  split boat_b won   [state 1, map 'boat_b', pending 'boat_b']
---- NEW (menu start) evidence\autosplitter\split_chain.log
-    44.1823  timer PAUSED
+   237.8230  timer running
+   279.8951  split boat_b won (end sound)   [state 1, map 'boat_b', pending 'boat_b']
+   279.8951  timer PAUSED
+   279.9118  timer running
+--- NEW (menu start) core/evidence/autosplitter/split_chain.log
+    44.1990  timer PAUSED
     44.9151  playing oil_rig_a   [state 1, map 'oil_rig_A', pending 'oil_rig_A']
     44.9151  timer running
     77.1611  split stage oil_rig_a->oil_rig_b (exit touched)   [state 1, map 'oil_rig_A', pending 'oil_rig_B']
@@ -37,165 +41,98 @@
    237.2817  timer PAUSED
    237.8230  playing boat_b   [state 1, map 'boat_b', pending 'boat_b']
    237.8230  timer running
-   279.8950  split boat_b won   [state 1, map 'boat_b', pending 'boat_b']
-   279.8950  timer PAUSED
---- OLD (console start) evidence\autosplitter\split_chain.log
-    44.1823  timer PAUSED
-    44.9151  start on oil_rig_a   [state 1, map 'oil_rig_A', pending 'oil_rig_A']
-    44.9151  timer running
-    77.1611  split stage oil_rig_a->oil_rig_b   [state 1, map 'oil_rig_B', pending 'oil_rig_A']
-    77.1611  timer PAUSED
-    77.1611  timer running
-    77.2694  timer PAUSED
-    77.7147  timer running
-   119.9180  split stage oil_rig_b->oil_rig_c   [state 1, map 'oil_rig_C', pending 'oil_rig_B']
-   119.9180  timer PAUSED
-   119.9180  timer running
-   120.0326  timer PAUSED
-   120.6284  timer running
-   162.7172  split stage oil_rig_c->oil_rig_d   [state 1, map 'oil_rig_D', pending 'oil_rig_C']
-   162.7172  timer PAUSED
-   162.7172  timer running
-   162.8524  timer PAUSED
-   163.2897  timer running
-   204.2132  timer PAUSED
-   204.9329  timer running
-   237.2817  timer PAUSED
-   237.8230  timer running
-   279.8950  split boat_b won   [state 1, map 'boat_b', pending 'boat_b']
-   279.8950  timer PAUSED
---- NEW (console start) evidence\autosplitter\split_chain.log
-    44.1823  timer PAUSED
-    44.9151  playing oil_rig_a   [state 1, map 'oil_rig_A', pending 'oil_rig_A']
-    44.9151  timer running
-    77.1611  split stage oil_rig_a->oil_rig_b (exit touched)   [state 1, map 'oil_rig_B', pending 'oil_rig_B']
-    77.2694  timer PAUSED
-    77.7147  playing oil_rig_b   [state 1, map 'oil_rig_B', pending 'oil_rig_B']
-    77.7147  timer running
-   119.9180  split stage oil_rig_b->oil_rig_c (exit touched)   [state 1, map 'oil_rig_C', pending 'oil_rig_C']
-   120.0326  timer PAUSED
-   120.6284  playing oil_rig_c   [state 1, map 'oil_rig_C', pending 'oil_rig_C']
-   120.6284  timer running
-   162.7172  split stage oil_rig_c->oil_rig_d (exit touched)   [state 1, map 'oil_rig_D', pending 'oil_rig_D']
-   162.8524  timer PAUSED
-   163.2897  playing oil_rig_d   [state 1, map 'oil_rig_D', pending 'oil_rig_D']
-   163.2897  timer running
-   204.2132  timer PAUSED
-   204.9329  playing boat_a   [state 1, map 'boat_a', pending 'boat_a']
-   204.9329  timer running
-   237.1545  split stage boat_a->boat_b (exit touched)   [state 1, map 'boat_b', pending 'boat_b']
-   237.2817  timer PAUSED
-   237.8230  playing boat_b   [state 1, map 'boat_b', pending 'boat_b']
-   237.8230  timer running
-   279.8950  split boat_b won   [state 1, map 'boat_b', pending 'boat_b']
-   279.8950  timer PAUSED
---- OLD (menu start) evidence\autosplitter\split_chain.log
-   204.2132  timer PAUSED
-   204.9329  start on boat_a   [state 1, map 'boat_a', pending 'boat_a']
-   204.9329  timer running
-   237.2817  timer PAUSED
-   237.8230  split stage boat_a->boat_b   [state 1, map 'boat_b', pending 'boat_b']
-   279.8950  split boat_b won   [state 1, map 'boat_b', pending 'boat_b']
---- NEW (menu start) evidence\autosplitter\split_chain.log
-   204.2132  timer PAUSED
-   204.9329  playing boat_a   [state 1, map 'boat_a', pending 'boat_a']
-   204.9329  timer running
-   237.1545  split stage boat_a->boat_b (exit touched)   [state 1, map 'boat_a', pending 'boat_b']
-   237.2817  timer PAUSED
-   237.8230  playing boat_b   [state 1, map 'boat_b', pending 'boat_b']
-   237.8230  timer running
-   279.8950  split boat_b won   [state 1, map 'boat_b', pending 'boat_b']
-   279.8950  timer PAUSED
---- OLD (menu start) evidence\autosplitter\split_subway.log
-    43.9260  timer PAUSED
+   279.8951  split boat_b won (end sound, 0 ms after the win flag)   [state 1, map 'boat_b', pending 'boat_b']
+   279.8951  timer PAUSED
+--- OLD (console start) core/evidence/autosplitter/split_subway.log
+    44.0066  timer PAUSED
     44.5520  start on subway_a   [state 1, map 'subway_a', pending 'subway_a']
     44.5520  timer running
+    76.8586  split stage subway_a->subway_b   [state 1, map 'subway_b', pending 'subway_a']
+    76.8586  timer PAUSED
+    76.8586  timer running
     76.9854  timer PAUSED
-    77.7193  split stage subway_a->subway_b   [state 1, map 'subway_b', pending 'subway_b']
-   135.2104  split subway_b won   [state 1, map 'subway_b', pending 'subway_b']
---- NEW (menu start) evidence\autosplitter\split_subway.log
-    43.9260  timer PAUSED
+    77.7193  timer running
+   135.2287  split subway_b won (end sound)   [state 1, map 'subway_b', pending 'subway_b']
+   135.2287  timer PAUSED
+--- NEW (console start) core/evidence/autosplitter/split_subway.log
+    44.0066  timer PAUSED
     44.5520  playing subway_a   [state 1, map 'subway_a', pending 'subway_a']
     44.5520  timer running
-    76.8586  split stage subway_a->subway_b (exit touched)   [state 1, map 'subway_a', pending 'subway_b']
+    76.8586  split stage subway_a->subway_b (exit touched)   [state 1, map 'subway_b', pending 'subway_b']
     76.9854  timer PAUSED
     77.7193  playing subway_b   [state 1, map 'subway_b', pending 'subway_b']
     77.7193  timer running
-   135.2104  split subway_b won   [state 1, map 'subway_b', pending 'subway_b']
-   135.2104  timer PAUSED
---- OLD (menu start) evidence\autosplitter\split_oilrigd.log
-    44.0366  timer PAUSED
+   135.2287  split subway_b won (end sound, 18 ms after the win flag)   [state 1, map 'subway_b', pending 'subway_b']
+   135.2287  timer PAUSED
+--- OLD (console start) core/evidence/autosplitter/split_oilrigd.log
+    44.1002  timer PAUSED
     44.4880  start on oil_rig_d   [state 1, map 'oil_rig_D', pending 'oil_rig_D']
     44.4880  timer running
-    84.7354  split oil_rig_d won   [state 1, map 'oil_rig_D', pending 'oil_rig_D']
-    84.7354  timer PAUSED
---- NEW (menu start) evidence\autosplitter\split_oilrigd.log
-    44.0366  timer PAUSED
+    84.7524  split oil_rig_d won (end sound)   [state 1, map 'oil_rig_D', pending 'oil_rig_D']
+    84.7524  timer PAUSED
+--- NEW (console start) core/evidence/autosplitter/split_oilrigd.log
+    44.1002  timer PAUSED
     44.4880  playing oil_rig_d   [state 1, map 'oil_rig_D', pending 'oil_rig_D']
     44.4880  timer running
-    84.7354  split oil_rig_d won   [state 1, map 'oil_rig_D', pending 'oil_rig_D']
-    84.7354  timer PAUSED
---- OLD (menu start) evidence\autosplitter\split_single.log
-    68.6651  start on dock_h   [state 1, map 'dock_h', pending 'bank']
-    68.6651  timer running
-    68.6657  timer PAUSED
+    84.7524  split oil_rig_d won (end sound, 17 ms after the win flag)   [state 1, map 'oil_rig_D', pending 'oil_rig_D']
+    84.7524  timer PAUSED
+--- OLD (console start) core/evidence/autosplitter/split_single.log
+    68.7025  timer PAUSED
+    69.2106  start on bank   [state 1, map 'bank', pending 'bank']
     69.2106  timer running
-   101.4621  split bank won   [state 1, map 'bank', pending 'bank']
+   101.4621  split bank won (end sound)   [state 1, map 'bank', pending 'bank']
    101.4621  timer PAUSED
---- NEW (menu start) evidence\autosplitter\split_single.log
-    68.6651  timer running
-    68.6657  timer PAUSED
+--- NEW (console start) core/evidence/autosplitter/split_single.log
+    68.7025  timer PAUSED
     69.2106  playing bank   [state 1, map 'bank', pending 'bank']
     69.2106  timer running
-   101.4621  split bank won   [state 1, map 'bank', pending 'bank']
+   101.4621  split bank won (end sound, 0 ms after the win flag)   [state 1, map 'bank', pending 'bank']
    101.4621  timer PAUSED
---- OLD (menu start) evidence\autosplitter\split_win_bar_r.log
-    45.6013  start on mbase   [state 1, map 'mbase', pending 'bar_r']
-    45.6013  timer running
-    45.6018  timer PAUSED
+--- OLD (console start) core/evidence/autosplitter/split_win_bar_r.log
+    45.6518  timer PAUSED
+    46.2179  start on bar_r   [state 1, map 'bar_r', pending 'bar_r']
     46.2179  timer running
-    86.1566  split bar_r won   [state 1, map 'bar_r', pending 'bar_r']
-    86.1566  timer PAUSED
---- NEW (menu start) evidence\autosplitter\split_win_bar_r.log
-    45.6013  timer running
-    45.6018  timer PAUSED
+    86.1885  split bar_r won (end sound)   [state 1, map 'bar_r', pending 'bar_r']
+    86.1885  timer PAUSED
+--- NEW (console start) core/evidence/autosplitter/split_win_bar_r.log
+    45.6518  timer PAUSED
     46.2179  playing bar_r   [state 1, map 'bar_r', pending 'bar_r']
     46.2179  timer running
-    86.1566  split bar_r won   [state 1, map 'bar_r', pending 'bar_r']
-    86.1566  timer PAUSED
---- OLD (menu start) evidence\autosplitter\split_win_gas_r.log
-    44.8319  timer PAUSED
+    86.1885  split bar_r won (end sound, 32 ms after the win flag)   [state 1, map 'bar_r', pending 'bar_r']
+    86.1885  timer PAUSED
+--- OLD (console start) core/evidence/autosplitter/split_win_gas_r.log
+    44.9106  timer PAUSED
     45.5119  start on gas_r   [state 1, map 'gas_r', pending 'gas_r']
     45.5119  timer running
-    85.3774  split gas_r won   [state 1, map 'gas_r', pending 'gas_r']
-    85.3774  timer PAUSED
---- NEW (menu start) evidence\autosplitter\split_win_gas_r.log
-    44.8319  timer PAUSED
+    85.4052  split gas_r won (end sound)   [state 1, map 'gas_r', pending 'gas_r']
+    85.4052  timer PAUSED
+--- NEW (console start) core/evidence/autosplitter/split_win_gas_r.log
+    44.9106  timer PAUSED
     45.5119  playing gas_r   [state 1, map 'gas_r', pending 'gas_r']
     45.5119  timer running
-    85.3774  split gas_r won   [state 1, map 'gas_r', pending 'gas_r']
-    85.3774  timer PAUSED
---- OLD (menu start) evidence\autosplitter\split_win_mbase.log
-    43.4534  timer PAUSED
+    85.4052  split gas_r won (end sound, 28 ms after the win flag)   [state 1, map 'gas_r', pending 'gas_r']
+    85.4052  timer PAUSED
+--- OLD (console start) core/evidence/autosplitter/split_win_mbase.log
+    43.5034  timer PAUSED
     44.1002  start on mbase   [state 1, map 'mbase', pending 'mbase']
     44.1002  timer running
-    83.9782  split mbase won   [state 1, map 'mbase', pending 'mbase']
-    83.9782  timer PAUSED
---- NEW (menu start) evidence\autosplitter\split_win_mbase.log
-    43.4534  timer PAUSED
+    83.9946  split mbase won (end sound)   [state 1, map 'mbase', pending 'mbase']
+    83.9946  timer PAUSED
+--- NEW (console start) core/evidence/autosplitter/split_win_mbase.log
+    43.5034  timer PAUSED
     44.1002  playing mbase   [state 1, map 'mbase', pending 'mbase']
     44.1002  timer running
-    83.9782  split mbase won   [state 1, map 'mbase', pending 'mbase']
-    83.9782  timer PAUSED
---- OLD (menu start) evidence\autosplitter\split_win_training.log
-    44.2847  timer PAUSED
+    83.9946  split mbase won (end sound, 16 ms after the win flag)   [state 1, map 'mbase', pending 'mbase']
+    83.9946  timer PAUSED
+--- OLD (console start) core/evidence/autosplitter/split_win_training.log
+    44.3015  timer PAUSED
     44.6397  start on training   [state 1, map 'training', pending 'training']
     44.6397  timer running
-    84.8652  split training won   [state 1, map 'training', pending 'training']
-    84.8652  timer PAUSED
---- NEW (menu start) evidence\autosplitter\split_win_training.log
-    44.2847  timer PAUSED
+    84.8824  split training won (end sound)   [state 1, map 'training', pending 'training']
+    84.8824  timer PAUSED
+--- NEW (console start) core/evidence/autosplitter/split_win_training.log
+    44.3015  timer PAUSED
     44.6397  playing training   [state 1, map 'training', pending 'training']
     44.6397  timer running
-    84.8652  split training won   [state 1, map 'training', pending 'training']
-    84.8652  timer PAUSED
+    84.8824  split training won (end sound, 17 ms after the win flag)   [state 1, map 'training', pending 'training']
+    84.8824  timer PAUSED

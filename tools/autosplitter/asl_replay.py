@@ -22,6 +22,10 @@ import sys
 LINE = re.compile(r"^\s*([\d.]+) clock=\S+ ASL (\w+): (.*) -> (.*)$")
 NEXT = {"oil_rig_a": "oil_rig_b", "oil_rig_b": "oil_rig_c", "oil_rig_c": "oil_rig_d",
         "boat_a": "boat_b", "subway_a": "subway_b"}
+# each level's end-sound slot (trace key), read only on its own map, as both scripts do
+END_SOUND = [("training", "snd_training"), ("bank", "snd_bank"), ("bar_r", "snd_bar"),
+             ("gas_r", "snd_gas"), ("mbase", "snd_mbase"), ("boat_b", "snd_boat"),
+             ("subway_b", "snd_subway"), ("oil_rig_d", "snd_oilrigD")]
 
 
 def parse(path):
@@ -35,14 +39,25 @@ def parse(path):
     return events
 
 
+TICK = 1 / 60  # LiveSplit's default refresh rate: the script runs every ~16.7 ms
+
+
 def ticks(events, menu_start):
-    """(time, old, cur) per change, values as the ASL would read them."""
+    """(time, old, cur) per change and per LiveSplit tick between changes (nothing changed:
+    old == cur), values as the ASL would read them."""
     cur = {"gameState": None, "mapName": None, "pendingMap": None, "missionResult": None}
     keymap = {"gameState": "gameState", "mapName": "mapName", "pendingMap": "pendingMap", "result": "missionResult"}
+    for _, key in END_SOUND:
+        cur[key], keymap[key] = None, key
     held_map = None
+    last_t = None
     for t, key, v in events:
         if key not in keymap:
             continue
+        while last_t is not None and last_t + TICK < t:
+            last_t += TICK
+            yield last_t, dict(cur), dict(cur)
+        last_t = t
         old = dict(cur)
         k = keymap[key]
         if menu_start and k == "mapName":
@@ -58,6 +73,11 @@ def ticks(events, menu_start):
 
 def low(s):
     return (s or "").lower().strip()
+
+
+def end_sound(m, old, cur):
+    """The map's end sound started (0 -> nonzero) this tick."""
+    return any(name in m and old[key] == 0 and cur[key] not in (0, None) for name, key in END_SOUND)
 
 
 class OldAsl:
@@ -82,10 +102,9 @@ class OldAsl:
                 if a in self.last_map and b in m:
                     self.has_split = True
                     out.append(f"split stage {a}->{b}")
-            # the end-sound flags are modelled by the mission result (same frame +1-2)
-            if old["missionResult"] == 0 and cur["missionResult"] == 1 and NEXT.get(m) is None:
+            if end_sound(m, old, cur):
                 self.has_split = True
-                out.append(f"split {m} won")
+                out.append(f"split {m} won (end sound)")
         loading = self.has_split or cur["gameState"] in (2, 3)
         return out, loading
 
@@ -95,6 +114,7 @@ class NewAsl:
 
     def __init__(self):
         self.level, self.in_level, self.stage_split, self.done = "", False, False, False
+        self.t, self.win_t = 0.0, None
 
     def tick(self, old, cur):
         out = []
@@ -112,9 +132,12 @@ class NewAsl:
               and pend == nxt):
             self.stage_split = True
             out.append(f"split stage {self.level}->{nxt} (load start)")
-        if cur["gameState"] == 1 and old["missionResult"] == 0 and cur["missionResult"] == 1:
+        if old["missionResult"] == 0 and cur["missionResult"] == 1:
+            self.win_t = self.t  # the game's win flag, for the end sound's lag
+        if cur["gameState"] == 1 and self.in_level and not self.done and end_sound(self.level, old, cur):
             self.done = True
-            out.append(f"split {self.level} won")
+            lag = f", {1000 * (self.t - self.win_t):.0f} ms after the win flag" if self.win_t is not None else ""
+            out.append(f"split {self.level} won (end sound{lag})")
         loading = self.done or cur["gameState"] in (2, 3)
         return out, loading
 
@@ -130,6 +153,7 @@ def main():
         for t, old, cur in ticks(events, menu):
             if t < t_from:
                 continue
+            asl.t = t
             out, loading = asl.tick(old, cur)
             for o in out:
                 print(f"  {t:9.4f}  {o}   [state {cur['gameState']}, map {cur['mapName']!r}, pending {cur['pendingMap']!r}]")

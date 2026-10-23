@@ -5,11 +5,13 @@ rig) split late: the timer ran through the load and split when the next stage wa
 Single-stage levels were fine. Owner lead: oil_rig_A's `S_Script01` runs
 `touch: tell player (finalexitloadmap oil_rig_b)`.
 
-**Verdict: rewritten** (`tools/autosplitter/FDNY_ILs.asl`, `FDNY_rescue%.asl`, v2):
+**Verdict: stage splits rewritten** (`tools/autosplitter/FDNY_ILs.asl`, `FDNY_rescue%.asl`,
+v2.1):
 - **Stage done:** the next map's name appearing in the game session (GameSession+0x660),
   on the exit-touch frame.
-- **Level won:** the mission result (PlayerRescueEnt+0x3438) turning to 1, on the win frame,
-  for every level.
+- **Level won:** the owner's v1 end-sound slots, kept. v2 had switched to the mission result
+  (PlayerRescueEnt+0x3438); the owner asked to keep the sound method if it is accurate, and
+  it is: 0-2 game frames after the win flag on every level (table below).
 
 ## How the game does it (read-only Ghidra, then live)
 
@@ -29,9 +31,17 @@ Single-stage levels were fine. Owner lead: oil_rig_A's `S_Script01` runs
 - **Winning a level:** `finalexit` (exit levels) or `UpdateZonesAndWin` (exit-less levels).
   The result +0x3438 goes 0 -> 1 on the win frame; the level's end sound follows one or two
   frames later.
-- **The old "end sound played" values:** sound handles in per-level slots. They also change
-  during unrelated levels: the bank slot moved mid-mission on bar, gas and military base.
-  The old script relied on its map-name guards.
+- **The "end sound played" values:** sound handles in per-level slots. They also change
+  during unrelated levels (the bank slot moved mid-mission on bar, gas and military base;
+  the oil rig D and subway slots fill at oil rig A's level start), so the scripts' map-name
+  guards are required. On its own map each slot stayed 0 from gameplay start to the win.
+
+| Level | Win flag -> end sound (game clock) |
+|---|---|
+| bank, boat B | same frame |
+| oil rig D, military base, training | 17 ms (1 frame) |
+| subway B | same game frame (probe saw it 18 ms later) |
+| gas station, bar | 28-32 ms (1-2 frames) |
 
 ## Why the old script split late
 
@@ -39,8 +49,12 @@ Single-stage levels were fine. Owner lead: oil_rig_A's `S_Script01` runs
 - A level started from the menu has `+0x688` at the menu's TLevelInfo, so on the first stage
   `mapName` only changes when the load starts. Then `gameState` is 2, and the old split needs
   `gameState == 1`.
-- So it split when stage B finished loading. It then also kept `hasSplit` set, which held
-  the timer paused through **the whole next stage**, until the next exit touch (replay below).
+- So it split when stage B finished loading. In Game Time (paused during the load) that is
+  the moment the load started: about 0.11 s after the touch on the VM.
+- **Correction (v2.1):** v2 also said the old script then held the timer paused through the
+  whole next stage. That was wrong: the replay only evaluated the script when a value
+  changed, so it missed the old script's flag reset on the next tick. With the replay ticking
+  at LiveSplit's 60 Hz, the old timer resumes one tick after the split.
 - From the console (`loadmap`) `+0x688` already points at the pending block, so `mapName`
   changes on the touch frame. That is why it isn't visible in every test.
 
@@ -62,7 +76,7 @@ can, and logs every change.
 | `split_subway.log` | subway A -> B the same way (FinalExit box); subway B won (F8): result 0 -> 1 |
 | `split_oilrigd.log` | oil rig D won (F8): result 0 -> 1 |
 | `split_single.log` | bank: result 0 -> 1 on the exit touch, then the sound slot |
-| `split_win_{bar_r,gas_r,mbase,training}.log` | result 0 -> 1 on the win frame, the sound slot 17-33 ms later |
+| `split_win_{bar_r,gas_r,mbase,training}.log` | result 0 -> 1 on the win frame, the sound slot 16-32 ms later |
 | `split_oilrig.log` | the first attempt: `runrescuebot` doesn't open the oil-rig exit (no claims), and the sound slots fill at level load |
 
 ## Replay: old vs new logic over the traces (`replay.txt`)
@@ -73,11 +87,13 @@ can, and logs every change.
 - The menu start of a staged level can't be reproduced on the VM: the harness career slot
   starts Training.
 
-| | Old (menu start) | New |
+| | Old (menu start) | New (v2.1) |
 |---|---|---|
-| oil rig A -> B | split at 77.71 (stage B loaded); timer then paused until 119.92 (all of stage B untimed) | split at 77.16 (touch); paused 77.27-77.71 (the load) only |
-| B -> C, C -> D, boat A -> B | the same late split + an untimed stage | on the touch, load-only pauses |
-| boat B / subway B / oil rig D / single levels | sound-slot split (1-2 frames after the win) | the win frame |
+| oil rig A -> B | split at 77.71 (stage B loaded; Game Time of the load start, 77.27) | split at 77.16 (touch); paused 77.27-77.71 (the load) |
+| B -> C, C -> D | the same late split | on the touch |
+| boat B / subway B / oil rig D / single levels | end-sound split | the same end-sound split, same tick |
+
+The replay ticks at 60 Hz between changes, like LiveSplit.
 
 ## Side finding: the harness career save
 

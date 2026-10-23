@@ -1914,7 +1914,9 @@ Evidence and live traces: `core/evidence/autosplitter/`. New splitters:
   results screen.
 
 **The autosplitter "end sound played" pointers** are per-level sound handle slots. They fill
-at level load and change during unrelated levels.
+at level load and change during unrelated levels. On their own map each stays 0 until the
+win and fills 0-2 game frames after the win flag (measured on all eight), so the splitters
+still use them, guarded by map name (v2.1, owner's method).
 
 **gameState writers:** LoadLevel (2), `MenuManager::TeardownToLoading` (1),
 `MenuManager::Activate` (0), RunFrame (3 -> 1). The writer of 3 is not found.
