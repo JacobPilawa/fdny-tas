@@ -22,18 +22,32 @@ To add a feature, use the `new-feature` skill (`.claude/skills/new-feature/`).
 | R5 | Only `gfx` calls the Genesis drawing/bitmap API. Features draw with `textdraw` panels (or `gfx` blocks). | arch_check |
 | R6 | Harness channels are Debug-only (`#ifdef FDCORE_DEBUG` around `testpipe::Register`). | Release build fails otherwise |
 | R7 | No dynamically initialised globals or exit-time destructors: there is no CRT, they never run. Globals must be constant-initialisable (`= {}`, `constexpr`). | `-Wglobal-constructors -Wexit-time-destructors -Werror` |
+| R8 | The draw order is gfx's: only gfx subscribes to the late frame step (`hooks::OnFrameEndLate`); everything else draws from a gfx layer (D40). | arch_check |
 
 Not machine-checked, still rules:
 - **Service ownership.** A Genesis/exe function is hooked by exactly one owner. Shared hooks belong to a core service that offers subscriptions/filters (frame events → `hooks`, camera → `camera`, rendered world → `gfx`). A feature that needs a hooked function asks the owning service; if none exists, add the service to the core first.
 - **Practice-only** variables/commands are declared by the feature (`cmd::SetPracticeOnly`). Anything that shows information the game doesn't, or moves the player, is practice-only. Speedrun-category options (static spawns, RescueBot) are not; they show on the watermark.
-- **Drawing order:** state updates in `hooks::OnFrameEnd`, drawing in `hooks::OnFrameEndLate` (textdraw does this for panels).
+- **Drawing order:** state updates in `hooks::OnFrameEnd`; drawing happens in a gfx layer (the table below, R8).
 - **Freestanding C++17:** no CRT, no STL, no exceptions/RTTI, no `<initializer_list>`; no 64-bit integer division (use doubles or `MulDiv`); large locals are `static` (no stack probes). Windows API via kernel32/user32/gdi32/bcrypt only.
 
-## Drawing: pick the block
+## Drawing: pick the block and the layer
+
+Every drawing belongs to a gfx layer, run in this fixed order each frame (D40, `gfx.h`):
+
+| Layer | When | Seen | For |
+|---|---|---|---|
+| `LAYER_WORLD` | right after the level geometry | hidden by walls and floors; the game's sprites, actors and HUD go over it | 3D things in the level: trigger boxes, markers, paths |
+| `LAYER_OVERLAY` | after everything the game draws | over walls | x-ray views |
+| `LAYER_HUD` | last | over everything | screen panels (textdraw does this) |
+
+- Anything depth-tested must be drawn in `LAYER_WORLD`. Later in the frame, the game's sprites and particles have written depth over whole screen rectangles, which cut holes in it (D39, `evidence/trigger_depth/`).
+- `tests/draw_layers.yaml` checks it. Changing the order is a DECISIONS entry plus that test.
 
 | Need | Use |
 |---|---|
-| A text panel | `textdraw::Create(...)`: `STYLE_TRANSLUCENT` (default; opaque fallback without a world) or `STYLE_OPAQUE` (always visible, e.g. the watermark). Own colours: `textdraw::SetPalette`. |
+| A text panel | `textdraw::Create(...)` (HUD layer): `STYLE_TRANSLUCENT` (default; opaque fallback without a world) or `STYLE_OPAQUE` (always visible, e.g. the watermark). Own colours: `textdraw::SetPalette`. |
+| Boxes in the level | `gfx::SubmitWorldBoxes(boxes, n, LAYER_WORLD or LAYER_OVERLAY)` from `OnFrameEnd`, every frame |
+| Your own drawing in a layer | `gfx::OnLayer(layer, fn)` (a new kind of drawing is a gfx block first, R5) |
 | Opaque image / rect | `gfx::Decal`, `gfx::SolidRect` |
 | Per-pixel alpha | `gfx::AlphaSurface` (256 px 4444 tiles, world-attached; colours are 4 bits per channel) |
 | Screen size | `gfx::ViewSize` (the camera rect, never the window) |

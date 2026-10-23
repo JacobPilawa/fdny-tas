@@ -198,7 +198,7 @@ void FrameEnd() {
     g_openExits = open;
     g_nBoxes = 0;
     if (!On(g_fdTriggers) || !gfx::WorldBoxesReady()) {
-        gfx::SubmitWorldBoxes(nullptr, 0, false);
+        // nothing submitted: nothing drawn (submissions last one frame)
         return;
     }
     const bool all = On(g_fdTriggersAll);
@@ -211,7 +211,7 @@ void FrameEnd() {
         b.rgb = t.kind == K_RESCUE ? kBlue : t.kind == K_EXIT ? (t.open ? kGreen : kRed) : kGrey;
         b.alpha = kAlpha, b.alphaInside = kAlphaInside;
     }
-    gfx::SubmitWorldBoxes(g_boxes, g_nBoxes, On(g_fdTriggersXray));
+    gfx::SubmitWorldBoxes(g_boxes, g_nBoxes, On(g_fdTriggersXray) ? gfx::LAYER_OVERLAY : gfx::LAYER_WORLD);
 }
 
 // Key T cycles (owner 2026-10-22): off -> boxes -> boxes + x-ray -> off.

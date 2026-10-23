@@ -91,7 +91,7 @@ console. Binds are saved with the config.
 
 | | |
 |---|---|
-| `fd_hud_player 1` (**H**) | top-left: position, velocity, XY speed, player state, screen state |
+| `fd_hud_player 1` (**H**) | top-left: position and velocity in right-justified x / y / z columns, XY speed, and stance: `standing`, `crouched` or `bugged` (crouchbug: standing with the crouched collision box, the warp HUD's rule) |
 | `fd_hud_warp 1` (**G**) | the **warp HUD**, top-right: what you're touching and whether it can warp you (warp prediction, last warp, history). Old name `fd_hud_glitch` still works |
 | `fd_warp_hide` (**B**) | show / hide the boxes (G on always shows them again) |
 | `fd_warp_freeze` (**Z**) | freeze the boxes; logging continues |
@@ -116,8 +116,8 @@ Fire-juggling arrow (`fd_juggle`):
 - **An arrow**: the game didn't, so the spot is frozen somewhere else.
   - The arrow points at where the survivor lands: the spot, 30 units to -X. It is relative to
     your view, so up = straight ahead, in 8 directions.
-  - Below it is the horizontal distance (`120u`), with ` ^` / ` v` when that point is more than
-    48 units above or below you.
+  - Above it are the frozen spot's coordinates (x y z); below it the horizontal distance
+    (`120u`), with ` ^` / ` v` when the landing point is more than 48 units above or below you.
 - **`o`**: the spot is frozen and the landing point is within 16 units.
 
 The overlay doesn't know *why* the spot froze: it only compares the spot with where you
@@ -157,7 +157,7 @@ console is closed. The boxes' full detail goes to `FDNYCore.log`.
 |---|---|
 | `fd_profile practice` | default; everything allowed |
 | `fd_profile run` | turns practice tools off and refuses them; remembers your practice values and restores them on `fd_profile practice` |
-| `fd_watermark 1` | bottom-left: core version, profile, every non-default setting, other `.asi` plugins. Always on in `run` |
+| `fd_watermark 1` | pinned to the bottom-left corner: core version, profile, every non-default setting, other `.asi` plugins. Always on in `run` |
 
 Put anything you want applied on a switch (binds, settings) in
 `profile_run.cfg` / `profile_practice.cfg`.
@@ -218,9 +218,6 @@ can still fail on a slow VM.
 
 ## 8. Known gaps
 
-- Player HUD says "crouched (3)" where the collision box says "Standing" for the
-  same state; research says 3 = standing (HUD label likely wrong, awaiting the
-  owner).
 - The practice-only list (above) is a default; the owner still needs to confirm it.
 - Teleporter: single slot, no stance.
 - In-frame text verified windowed through dgVoodoo only; real fullscreen and OBS
@@ -258,7 +255,7 @@ and everything else still compiles and runs.
 | Core service | What a module gets |
 |---|---|
 | `addr` | address table: verified addresses by Id (never raw addresses) |
-| `hooks` | `Create` (inline hook in a group), `OnFrameBegin` / `OnFrameEnd` / `OnLevelLoad`; `OnFrameEndLate` is for drawing |
+| `hooks` | `Create` (inline hook in a group), `OnFrameBegin` / `OnFrameEnd` / `OnLevelLoad` (`OnFrameEndLate` is gfx's only, R8) |
 | `cmd`, `console`, `binds` | variables, commands, config persistence (`RegisterConfigWriter`), `SetPracticeOnly` (refused in `fd_profile run`), console output; `binds::BindDefault(key, line)` for a feature's default key (the player's binds win) |
 | `camera` | view size; one FOV filter (`fov` uses it); a world-transform override (`SetWorldOverride`, `LastWorldXForm`: the free camera, applied at the world render) |
 | `pause` | `Set(on, why)` / `Active()`: skip the simulation step and pause the game clock (input blocked, ~60 fps cap); ends itself on leaving the level. `textdraw::HideWhilePaused` for view-relative panels |
@@ -290,7 +287,8 @@ At startup the log lists `modules: N registered (...)` and one
 | `gfx::Decal` | opaque bitmap (`geEngine_DrawBitmap`); works everywhere, drawn on top |
 | `gfx::AlphaSurface` | per-pixel alpha (256 px 4444 tiles on the rendered world, `geEngine_RenderPoly`); only changed tiles re-upload; `Draw` returns false without a world, so fall back to a Decal |
 | `gfx::SolidRect` | untextured opaque rectangle |
-| `gfx::SubmitWorldBoxes` | translucent world-space boxes (`WorldBox`: min/max, colour, alpha, alpha while the camera is inside), depth-tested or x-ray. Submit from `OnFrameEnd` (static array); gfx draws them in its late step, under the text panels. `LastWorldBoxStats` for tests |
+| `gfx::OnLayer(layer, fn)` | draw in a fixed layer of the frame: `LAYER_WORLD` (right after the level geometry, hidden by walls), `LAYER_OVERLAY` (after everything the game draws, over walls), `LAYER_HUD` (last; textdraw's panels). Order D40, checked by `tests/draw_layers.yaml` |
+| `gfx::SubmitWorldBoxes(boxes, n, layer)` | translucent world-space boxes (`WorldBox`: min/max, colour, alpha, alpha while the camera is inside) in `LAYER_WORLD` (walls hide them) or `LAYER_OVERLAY` (x-ray). Submit from `OnFrameEnd` every frame (static array; several features may submit). `LastWorldBoxStats` for tests |
 | `gfx::BeginDraw` / `World` / `ViewSize` | per-frame flush (once), the frame's world, render size |
 
 `textdraw` anchors: `TOP_LEFT`, `TOP_RIGHT`, `BOTTOM_LEFT`, and `CENTER` (centred horizontally; `dy` from the view's

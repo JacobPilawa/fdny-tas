@@ -120,6 +120,19 @@ class Run:
         elif kind == "screenshot":
             path, luma = capture.screenshot(self.g.client_rect(), os.path.join(self.out, f"{arg}.png"))
             self.samples[f"screenshot.{arg}.luma"] = round(luma, 1)
+        elif kind == "assert_screen_diff":
+            # {a, b, box: [x0, y0, x1, y1] (fractions of the shot, default all), min|max}: mean
+            # absolute RGB difference (0-255) between two screenshots of this run over the box
+            from PIL import Image, ImageChops, ImageStat
+            ia = Image.open(os.path.join(self.out, f"{arg['a']}.png")).convert("RGB")
+            ib = Image.open(os.path.join(self.out, f"{arg['b']}.png")).convert("RGB").resize(ia.size)
+            fx0, fy0, fx1, fy1 = arg.get("box", [0, 0, 1, 1])
+            w, h = ia.size
+            crop = (int(fx0 * w), int(fy0 * h), int(fx1 * w), int(fy1 * h))
+            d = sum(ImageStat.Stat(ImageChops.difference(ia.crop(crop), ib.crop(crop))).mean) / 3
+            ok = ("min" not in arg or d >= float(arg["min"])) and ("max" not in arg or d <= float(arg["max"]))
+            want = " and ".join(([f">= {arg['min']}"] if "min" in arg else []) + ([f"<= {arg['max']}"] if "max" in arg else []))
+            self.record(kind, ok, f"{arg['a']} vs {arg['b']} over {arg.get('box', 'all')}: mean diff {d:.2f}, want {want}")
         elif kind == "assert_screen_nonblack":
             path, luma = capture.screenshot(self.g.client_rect(), os.path.join(self.out, f"{arg}.png"))
             self.record("assert_screen_nonblack", luma > 8, f"{arg} mean luma {luma:.1f}")
@@ -512,8 +525,11 @@ class Run:
             bad = [(d, s) for d, s in zip(drawn, src[:7]) if abs(d - s) > 0.051]
             if bad:
                 fails.append(f"same-frame drawn != source: {bad}")
-            if f"({int(src[7])})" not in lines.get("state", ""):
-                fails.append(f"same-frame state {lines.get('state')!r} vs source {int(src[7])}")
+            # stance (owner 2026-10-23): crouched = state 4; bugged = crouchbug (not 4, box top < 55)
+            want = ("crouched" if int(src[7]) == 4 else
+                    "bugged" if len(src) > 10 and src[10] < 55 else "standing")
+            if lines.get("state", "").strip() != want:
+                fails.append(f"same-frame state {lines.get('state')!r} vs source state {int(src[7])} -> {want}")
         if opt.get("moving"):
             # mid-motion: only the same-frame link is meaningful (and must hold)
             if len(src) >= 7 and abs(src[6]) < 1.0:
@@ -543,14 +559,16 @@ class Run:
         direct_sp = (vel[0] ** 2 + vel[2] ** 2) ** 0.5
         if len(sp) != 1 or abs(sp[0] - direct_sp) > 0.06 + direct_sp * 0.1:
             fails.append(f"speed drawn {sp} vs memory {direct_sp:.2f}")
-        st = lines.get("state", "")
+        # stance from memory: move state + the collision box top (player.f_maxs y)
+        st = lines.get("state", "").strip()
         mstate = r.read("player.state")
-        if f"({mstate})" not in st:
-            fails.append(f"state drawn {st!r} vs memory move_state {mstate}")
-        gs = r.read("game.state")
-        want = "in level" if gs == 1 else ("loading" if gs in (2, 3) else None)
-        if want and lines.get("screen") != want:
-            fails.append(f"screen drawn {lines.get('screen')!r} vs game state {gs}")
+        pl = self.g.pm.read_uint(r.address("player.object"))
+        top = struct.unpack("<f", self.g.pm.read_bytes(pl + r.field("player.f_maxs") + 4, 4))[0]
+        want = "crouched" if mstate == 4 else ("bugged" if top < 55 else "standing")
+        if st != want:
+            fails.append(f"state drawn {st!r} vs memory move_state {mstate}, box top {top:.0f} -> {want}")
+        if "screen" in lines:  # removed (owner 2026-10-23)
+            fails.append(f"a screen line is still drawn: {lines['screen']!r}")
         self.samples.setdefault("hud", []).append(raw)
         self.record("assert_hud_matches", not fails,
                     f"HUD frame {hud_frame}: {lines}; mismatches: {fails or 'none'}")

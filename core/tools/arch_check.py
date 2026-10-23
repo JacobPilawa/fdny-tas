@@ -133,6 +133,16 @@ def main():
             if DRAW_IDS.search(l) and name not in DRAW_ALLOWED:
                 fail("R5 drawing-is-gfx", f, i, "Genesis drawing/bitmap API outside gfx: use gfx:: / textdraw::")
 
+    # R8: the draw order is gfx's (D40). Only gfx subscribes to the late frame step; everything
+    # else draws from a gfx layer (gfx::OnLayer / SubmitWorldBoxes / textdraw).
+    for f in core_files + feat_files:
+        if os.path.basename(f) in ("gfx.cpp", "hooks.cpp", "hooks.h"):
+            continue
+        code = strip_comments(open(f, encoding="utf-8-sig").read())
+        for i, l in enumerate(code.splitlines(), 1):
+            if re.search(r"\bOnFrameEndLate\s*\(", l):
+                fail("R8 draw-order-is-gfx", f, i, "late-frame subscriber outside gfx: draw from gfx::OnLayer(...)")
+
     # Not here, enforced by the compiler instead (build.ps1 flags, -Werror):
     #   R6 Debug-only testpipe::Register: declared only in Debug, a stray call breaks Release.
     #   R7 no static constructors / exit-time destructors (no CRT runs them):

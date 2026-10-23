@@ -7,6 +7,7 @@
 #include "camera.h"
 #include "hooks.h"
 #include "log.h"
+#include "testpipe.h"
 
 namespace fdcore::gfx {
 namespace {
@@ -63,7 +64,7 @@ void* g_camera = nullptr;     // the camera it was rendered with
 void* g_lastWorld = nullptr;  // last one seen (detach on Destroy outside a frame)
 bool g_flushed = false;
 
-void DrawBoxesAfterWorld();
+void RunWorldLayer();
 
 int __cdecl RenderWorldDetour(void* engine, void* world, void* camera, void* a4) {
     if (world) {
@@ -73,25 +74,41 @@ int __cdecl RenderWorldDetour(void* engine, void* world, void* camera, void* a4)
     }
     camera::BeforeWorldRender(camera);  // the free-camera override goes on here (D34)
     const int r = g_origRenderWorld(engine, world, camera, a4);
-    if (world) DrawBoxesAfterWorld();  // depth-tested world boxes, before what the game draws next (D39)
+    if (world) RunWorldLayer();  // before what the game draws next (D39, D40)
     return r;
 }
 
-// World boxes submitted this frame (drawn in DrawWorldBoxes, the late step).
-const WorldBox* g_boxList = nullptr;
-int g_boxCount = 0;
-bool g_boxXray = false;
-// Depth-tested boxes are drawn inside the NEXT frame's world render, right after
-// geEngine_RenderWorld returns (D39), from the list the feature submitted last frame end.
-const WorldBox* g_prevBoxList = nullptr;
-int g_prevBoxCount = 0;
-WorldBoxStats g_boxStats = {};
+// --- layers (D40) ---------------------------------------------------------------------
+constexpr int kMaxLayerSubs = 8;
+LayerFn g_layerSubs[3][kMaxLayerSubs];
+int g_nLayerSubs[3];
+// World boxes submitted this frame end, per layer. WORLD lists are drawn inside the NEXT
+// frame's world render (D39), so they move to g_worldPrev at the late step.
+struct BoxList {
+    const WorldBox* boxes;
+    int n;
+};
+BoxList g_boxSubs[2][kMaxLayerSubs];
+int g_nBoxSubs[2];
+BoxList g_worldPrev[kMaxLayerSubs];
+int g_nWorldPrev = 0;
+WorldBoxStats g_boxStats = {}, g_boxAcc = {};
+#ifdef FDCORE_DEBUG
+char g_order[32], g_lastOrder[32];
+void MarkLayer(const char* name) {
+    if (g_order[0]) lstrcatA(g_order, " ");
+    lstrcatA(g_order, name);
+}
+#endif
 
 void FrameBegin() {
     g_world = nullptr;
     g_camera = nullptr;
     g_flushed = false;
-    g_boxList = nullptr, g_boxCount = 0;
+    g_boxAcc = {};
+#ifdef FDCORE_DEBUG
+    g_order[0] = 0;
+#endif
 }
 
 // --- font ----------------------------------------------------------------------------
@@ -499,24 +516,43 @@ float Dot(float ax, float ay, float az, float bx, float by, float bz) { return a
 
 void DrawBoxes(const WorldBox* list, int n, bool xray);
 
-// Late step: x-ray boxes now (over everything, under the text panels); depth-tested boxes are
-// kept for the next world render.
-void DrawWorldBoxes() {
-    const WorldBox* list = g_boxList;
-    const int n = g_boxCount < kMaxBoxes ? g_boxCount : kMaxBoxes;
-    g_boxList = nullptr, g_boxCount = 0;
-    g_prevBoxList = g_boxXray ? nullptr : list, g_prevBoxCount = n;
-    if (g_boxXray) DrawBoxes(list, n, true);
+void RunSubs(Layer layer) {
+    for (int i = 0; i < g_nLayerSubs[layer]; ++i) g_layerSubs[layer][i]();
 }
 
-// Right after geEngine_RenderWorld: immediate polys with the projected z, tested against the
-// world's depth only. Drawn any later (D27's queued polys at the late step), things the game
-// draws after the world (screen-aligned sprites writing depth over large rectangles) cut
-// rectangular holes in the boxes (owner report 2026-10-23, oil_rig_A; evidence/trigger_depth).
-void DrawBoxesAfterWorld() {
-    if (!g_prevBoxList) return;
-    DrawBoxes(g_prevBoxList, g_prevBoxCount, false);
+// LAYER_WORLD, right after geEngine_RenderWorld: immediate polys with the projected z, tested
+// against the world's depth only. Drawn any later (D27's queued polys at the late step), things
+// the game draws after the world (screen-aligned sprites writing depth over large rectangles)
+// cut rectangular holes in the boxes (owner report 2026-10-23, oil_rig_A; evidence/trigger_depth).
+void RunWorldLayer() {
+#ifdef FDCORE_DEBUG
+    MarkLayer("world");
+#endif
+    for (int i = 0; i < g_nWorldPrev; ++i) DrawBoxes(g_worldPrev[i].boxes, g_worldPrev[i].n, false);
+    RunSubs(LAYER_WORLD);
     g_flushed = false;  // the frame's later immediate draws flush the game's queued polys again
+}
+
+// LAYER_OVERLAY then LAYER_HUD, after everything the game drew (one late-frame subscriber, so
+// the order is this code's, D40). This frame end's WORLD boxes move on to the next world render.
+void RunLateLayers() {
+#ifdef FDCORE_DEBUG
+    MarkLayer("overlay");
+#endif
+    for (int i = 0; i < g_nBoxSubs[LAYER_OVERLAY]; ++i)
+        DrawBoxes(g_boxSubs[LAYER_OVERLAY][i].boxes, g_boxSubs[LAYER_OVERLAY][i].n, true);
+    RunSubs(LAYER_OVERLAY);
+    g_nWorldPrev = g_nBoxSubs[LAYER_WORLD];
+    for (int i = 0; i < g_nWorldPrev; ++i) g_worldPrev[i] = g_boxSubs[LAYER_WORLD][i];
+    g_nBoxSubs[LAYER_WORLD] = g_nBoxSubs[LAYER_OVERLAY] = 0;
+    g_boxStats = g_boxAcc;
+#ifdef FDCORE_DEBUG
+    MarkLayer("hud");
+#endif
+    RunSubs(LAYER_HUD);
+#ifdef FDCORE_DEBUG
+    lstrcpynA(g_lastOrder, g_order, sizeof(g_lastOrder));
+#endif
 }
 
 void DrawBoxes(const WorldBox* list, int n, bool xray) {
@@ -601,17 +637,59 @@ void DrawBoxes(const WorldBox* list, int n, bool xray) {
         g_poly(engine, v, k, tile, flags);
         ++st.polys;
     }
-    g_boxStats = st;
+    g_boxAcc.boxes += st.boxes, g_boxAcc.faces += st.faces, g_boxAcc.polys += st.polys, g_boxAcc.inside += st.inside;
 }
 
 } // namespace
 
 bool WorldBoxesReady() { return g_boxOk; }
 
-void SubmitWorldBoxes(const WorldBox* boxes, int n, bool xray) {
-    g_boxList = boxes, g_boxCount = n, g_boxXray = xray;
-    if (n <= 0) g_boxStats = {};
+void SubmitWorldBoxes(const WorldBox* boxes, int n, Layer layer) {
+    if (!boxes || n <= 0 || layer == LAYER_HUD) return;
+    if (n > kMaxBoxes) n = kMaxBoxes;
+    if (g_nBoxSubs[layer] < kMaxLayerSubs) g_boxSubs[layer][g_nBoxSubs[layer]++] = {boxes, n};
 }
+
+void OnLayer(Layer layer, LayerFn fn) {
+    if (g_nLayerSubs[layer] < kMaxLayerSubs) g_layerSubs[layer][g_nLayerSubs[layer]++] = fn;
+}
+
+#ifdef FDCORE_DEBUG
+const char* LastLayerOrder() { return g_lastOrder; }
+
+namespace {
+// Test hook (tests/draw_layers.yaml): `fd_dbg_layer_box world|overlay|off x0 y0 z0 x1 y1 z1`
+// submits one magenta box in that layer every frame end.
+WorldBox g_testBox = {};
+int g_testLayer = -1;
+float ParseF(const char* s) {
+    float sign = 1, v = 0, sc = 0.1f;
+    if (*s == '-') sign = -1, ++s;
+    while (*s >= '0' && *s <= '9') v = v * 10 + static_cast<float>(*s++ - '0');
+    if (*s == '.')
+        for (++s; *s >= '0' && *s <= '9'; sc *= 0.1f) v += static_cast<float>(*s++ - '0') * sc;
+    return sign * v;
+}
+void CmdLayerBox(int argc, const char* const* argv) {
+    if (argc >= 2 && argv[1][0] == 'o' && argv[1][1] == 'f') {
+        g_testLayer = -1;
+        log::Info("gfx: test box off");
+        return;
+    }
+    if (argc < 8 || (argv[1][0] != 'w' && argv[1][0] != 'o')) {
+        log::Info("gfx: usage: fd_dbg_layer_box world|overlay|off x0 y0 z0 x1 y1 z1");
+        return;
+    }
+    for (int i = 0; i < 3; ++i) g_testBox.min[i] = ParseF(argv[2 + i]), g_testBox.max[i] = ParseF(argv[5 + i]);
+    g_testBox.rgb = 0xFF00FF, g_testBox.alpha = 0xC0, g_testBox.alphaInside = 0xC0;
+    g_testLayer = argv[1][0] == 'w' ? LAYER_WORLD : LAYER_OVERLAY;
+    log::Info("gfx: test box in layer %s", g_testLayer == LAYER_WORLD ? "world" : "overlay");
+}
+void SubmitTestBox() {
+    if (g_testLayer >= 0) SubmitWorldBoxes(&g_testBox, 1, static_cast<Layer>(g_testLayer));
+}
+}  // namespace
+#endif
 
 WorldBoxStats LastWorldBoxStats() { return g_boxStats; }
 
@@ -665,9 +743,26 @@ bool Init() {
             g_camXform = reinterpret_cast<CameraFn>(addr::ExportAddress(Id::genesis_camera_transform));
             g_camProject = reinterpret_cast<CameraFn>(addr::ExportAddress(Id::genesis_camera_project));
             g_boxOk = true;
-            hooks::OnFrameEndLate(DrawWorldBoxes);  // registered before textdraw's: boxes under the panels
         }
     }
+    hooks::OnFrameEndLate(RunLateLayers);  // the only late-frame subscriber: overlay, then HUD (D40)
+#ifdef FDCORE_DEBUG
+    cmd::RegisterCommand("fd_dbg_layer_box", "(Debug test hook) a magenta box in a draw layer: world|overlay|off x0 y0 z0 x1 y1 z1",
+                         CmdLayerBox);
+    hooks::OnFrameEnd(SubmitTestBox);
+    testpipe::Register("layers", [](const char*, char* resp, int cap) {
+        (void)cap;
+        const WorldBoxStats st = g_boxStats;
+        wsprintfA(resp, "order=%s boxes=%d polys=%d", g_lastOrder[0] ? "" : "none", st.boxes, st.polys);
+        if (g_lastOrder[0]) {  // "world overlay hud" -> order=world,overlay,hud
+            char o[32];
+            lstrcpynA(o, g_lastOrder, sizeof(o));
+            for (char* p = o; *p; ++p)
+                if (*p == ' ') *p = ',';
+            wsprintfA(resp, "order=%s boxes=%d polys=%d", o, st.boxes, st.polys);
+        }
+    });
+#endif
     log::Info("gfx: ready (decals%s%s)", g_alphaOk ? ", alpha surfaces, solid rects" : "",
               g_boxOk ? ", world boxes" : "");
     return true;

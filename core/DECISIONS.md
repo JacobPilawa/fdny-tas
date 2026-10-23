@@ -170,6 +170,18 @@ later session might "simplify" away; change one only with the owner's approval
     - Immediate polys don't write depth, so what the game draws later (actors, sprites, its HUD) goes over the boxes. The game's HUD is no longer tinted by a box you stand in (an old known gap).
   - **X-ray is unchanged:** late step, z 1.0, over everything and under the text panels.
 
+- **D40 Named draw layers, run by gfx in a fixed order: WORLD, OVERLAY, HUD** (owner 2026-10-23, after D39).
+  - **Why:** the order used to depend on registration order (gfx's late step "registered before textdraw's") and on which hook a drawing happened to use. D39 showed the cost: one wrong moment and boxes lose rectangles or show through walls.
+  - **The layers:**
+    - WORLD runs from gfx's RenderWorld detour;
+    - OVERLAY then HUD run from gfx's single late-frame subscriber;
+    - features subscribe with `gfx::OnLayer` or submit boxes with a layer. Several features can submit boxes in one frame.
+  - **Enforced:** R8 (arch_check: no `OnFrameEndLate` outside gfx) and `tests/draw_layers.yaml`.
+    - The test uses a Debug test box at the oil-rig wall corner: WORLD behind the wall changes the picture by 0.00, OVERLAY there by 129, WORLD in the open shows.
+    - The layer order comes from the `layers` pipe.
+    - It runs paused (`fd_pause`): unpaused, two shots of the same view differ by 13 (moving sky, clock).
+  - **Rejected:** keeping the registration-order convention (silent when broken); a priority number per subscriber (more freedom than three meaningful moments need).
+
 ## Process
 
 - **D21 Tests are never weakened or deleted to pass.** An environmental failure (slow VM frame rate, a race in a read) is rerun and reported with evidence, for example the previous version failing identically.

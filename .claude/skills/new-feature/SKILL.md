@@ -22,8 +22,12 @@ and don't work around them; if a rule blocks a good design, stop and ask the own
     (core `src/`, with subscriptions or filters, like `camera`).
   - **Practice-only?** It is if it shows information the game doesn't, or moves the
     player. Then `cmd::SetPracticeOnly`.
-  - **Drawing?** A `textdraw` panel: `STYLE_TRANSLUCENT` by default, `STYLE_OPAQUE` if
-    it must show in menus. Use `gfx` blocks only for non-text.
+  - **Drawing?** Pick the layer first (`core/CLAUDE.md`, "Drawing"; D40).
+    - `LAYER_WORLD` for 3D things walls should hide.
+    - `LAYER_OVERLAY` for x-ray views.
+    - Text panels are `LAYER_HUD` automatically: a `textdraw` panel, `STYLE_TRANSLUCENT` by
+      default, `STYLE_OPAQUE` if it must show in menus.
+    - Use `gfx` blocks only for non-text, and never `hooks::OnFrameEndLate` (R8).
 - Owner decisions that need asking (gameplay semantics, what's speedrun-legal): ask
   once, up front, with a recommendation.
 

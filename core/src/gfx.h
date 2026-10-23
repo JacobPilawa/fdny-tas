@@ -105,15 +105,34 @@ private:
 // --- SolidRect -------------------------------------------------------------------------
 bool SolidRect(int x, int y, int w, int h, uint32_t rgb);
 
+// --- Draw layers (D40) ---------------------------------------------------------------------
+// Everything FDNYCore draws belongs to one layer. gfx runs them in this order every frame
+// (the order is code here, not registration order):
+//   LAYER_WORLD    right after geEngine_RenderWorld: hidden by walls and floors (depth-tested
+//                  against the world only). The game's sprites, actors and HUD go over it.
+//                  3D things that live in the level (trigger boxes, markers, paths).
+//   LAYER_OVERLAY  after everything the game draws: over walls (x-ray views).
+//   LAYER_HUD      last: screen panels (textdraw), over everything.
+// Why WORLD can't be drawn later: the game's later draws write depth over whole screen
+// rectangles, which cut holes in anything depth-tested after them (D39, evidence/trigger_depth).
+// Update state in hooks::OnFrameEnd; draw from a layer (features use world boxes or textdraw;
+// a new kind of drawing is a gfx block first, R5).
+enum Layer : uint8_t { LAYER_WORLD, LAYER_OVERLAY, LAYER_HUD };
+using LayerFn = void (*)();
+void OnLayer(Layer layer, LayerFn fn);  // runs fn in that layer every frame, in registration order
+#ifdef FDCORE_DEBUG
+const char* LastLayerOrder();  // the layers that ran last frame, in order (tests/draw_layers.yaml)
+#endif
+
 // --- World boxes -------------------------------------------------------------------------
 // Translucent axis-aligned boxes in world space (trigger boxes, core/evidence/
 // trigger_boxes). Each face is transformed by the rendered camera, clipped to the near
 // plane and the view, and drawn as a polygon textured with a solid white 4444 tile of
 // the box's alpha, tinted by vertex colour. Faces are drawn far to near.
-//   depth-tested (xray false): queued polys with the projected depth, so walls hide them
-//   x-ray        (xray true):  immediate polys, drawn over everything
-// Submit from OnFrameEnd; gfx draws the list in its own late step, before the text
-// panels (a queued poly would otherwise land on top of them at EndFrame's flush).
+//   LAYER_WORLD:   projected depth, so walls hide them (drawn in the next frame's world render
+//                  from the list submitted at this frame end; boxes are static, the camera current)
+//   LAYER_OVERLAY: depth 1.0, over everything
+// Submit from OnFrameEnd, every frame; several features may submit in one frame.
 struct WorldBox {
     float min[3], max[3];
     uint32_t rgb;           // 0xRRGGBB
@@ -121,10 +140,11 @@ struct WorldBox {
     uint8_t alphaInside;    // used instead while the camera is inside the box
 };
 bool WorldBoxesReady();     // the camera / poly API resolved
-// The array must stay valid until the frame is drawn (the caller's static storage).
-void SubmitWorldBoxes(const WorldBox* boxes, int n, bool xray);
+// The array must stay valid until it is drawn: the next frame for LAYER_WORLD (the caller's
+// static storage). Not LAYER_HUD.
+void SubmitWorldBoxes(const WorldBox* boxes, int n, Layer layer);
 struct WorldBoxStats {
-    int boxes, faces, polys;  // last drawn frame: submitted boxes, faces in front of the camera, polys drawn
+    int boxes, faces, polys;  // last frame, both layers: boxes drawn, faces in front of the camera, polys drawn
     int inside;               // boxes containing the camera
 };
 WorldBoxStats LastWorldBoxStats();

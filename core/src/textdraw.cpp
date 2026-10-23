@@ -239,7 +239,7 @@ bool Init() {
     cmd::RegisterCvar(&g_fdTextFgAlpha);
     cmd::RegisterCommand("fd_textdraw", "list the on-screen text panels: shown, size, position, translucent/opaque",
                          CmdInfo);
-    hooks::OnFrameEndLate(Draw);  // after every module updated its panels
+    gfx::OnLayer(gfx::LAYER_HUD, Draw);  // last, over everything (D40)
 #ifdef FDCORE_DEBUG
     // Test hook: `textdraw <panel name>`: was it drawn on the last frame (or the one before:
     // the pipe thread may read mid-frame)?
