@@ -168,7 +168,28 @@ void RegisterCvar(Cvar* v) {
     g_cvars[g_nCvars++] = v;
 }
 
+namespace {
+struct Alias {
+    const char* old;
+    const char* current;
+};
+constexpr int kMaxAliases = 16;
+Alias g_aliases[kMaxAliases];
+int g_nAliases = 0;
+}  // namespace
+
+void RegisterAlias(const char* old, const char* current) {
+    if (g_nAliases < kMaxAliases) g_aliases[g_nAliases++] = {old, current};
+}
+
+const char* ResolveAlias(const char* name) {
+    for (int i = 0; i < g_nAliases; ++i)
+        if (IEq(g_aliases[i].old, name)) return g_aliases[i].current;
+    return name;
+}
+
 Cvar* FindCvar(const char* name) {
+    name = ResolveAlias(name);
     for (int i = 0; i < g_nCvars; ++i)
         if (IEq(g_cvars[i]->name, name)) return g_cvars[i];
     return nullptr;
@@ -251,6 +272,7 @@ bool Dispatch(const char* line) {
     const char* argv[kMaxArgs];
     int argc = Tokenize(line, buf, sizeof(buf), argv);
     if (argc == 0) return false;
+    argv[0] = ResolveAlias(argv[0]);
     if (IEq(argv[0], "exec")) {
         if (argc < 2) {
             console::Print("usage: exec <file>  (FDNYCore .cfg next to the game exe)");

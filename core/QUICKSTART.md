@@ -34,7 +34,7 @@ Files the core writes in the game folder:
 | File | What |
 |---|---|
 | `FDNYCore.cfg` | your settings, rewritten on every change; loaded at startup |
-| `FDNYCore.log` | log, including collision-overlay `glitch|` lines |
+| `FDNYCore.log` | log, including the warp HUD's `glitch|` lines |
 | `profile_practice.cfg` / `profile_run.cfg` | optional, yours: run on `fd_profile` switch |
 
 ## 3. The console
@@ -60,18 +60,17 @@ Every feature has a default letter key (owner, D37; no F keys):
 | Pause + free camera | `fd_pause_toggle` (`fd_pause 1`) | **P** (paused: W A S D, E up, Q down, Shift x4, Ctrl x0.25, mouse) |
 | Fire-juggling arrow | `toggle fd_juggle` | **J** |
 | Player HUD | `toggle fd_hud_player` | **H** |
-| Collision-warp HUD | `toggle fd_hud_glitch` | **G** |
-| ... show / hide its boxes | `fd_glitch_hide` | **B** |
-| ... freeze its boxes | `fd_glitch_freeze` | **Z** |
-| ... clear its history | `fd_glitch_clear` | **X** |
-| Trigger boxes | `fd_triggers_toggle` | **T** |
+| Warp HUD | `toggle fd_hud_warp` | **G** |
+| ... show / hide its boxes | `fd_warp_hide` | **B** |
+| ... freeze its boxes | `fd_warp_freeze` | **Z** |
+| ... clear its history | `fd_warp_clear` | **X** |
+| Trigger boxes: off -> on -> on + x-ray (through walls) -> off | `fd_triggers_toggle` | **T** |
 | ... every trigger | `toggle fd_triggers_all` | **Y** |
-| ... through walls | `toggle fd_triggers_xray` | **U** |
 | Teleporter save / load | `fd_tp_save` / `fd_tp_load` | **K** / **L** |
 
 No default key on purpose: the speedrun options (`fd_static_spawns`, `fd_rescuebot`),
 `fd_profile`, `fd_watermark`, `fd_fov` and the text settings (a stray press would change a
-run's setup). Free letters: F I M N R V. `toggle <variable>` switches any 0/1 variable.
+run's setup). Free letters: F I M N R U V. `toggle <variable>` switches any 0/1 variable.
 
 ```
 bind n "toggle fd_juggle"
@@ -93,15 +92,15 @@ console. Binds are saved with the config.
 | | |
 |---|---|
 | `fd_hud_player 1` (**H**) | top-left: position, velocity, XY speed, player state, screen state |
-| `fd_hud_glitch 1` (**G**) | top-right: collision-warp boxes (what you're touching, warp prediction) |
-| `fd_glitch_hide` (**B**) | show / hide the boxes (G on always shows them again) |
-| `fd_glitch_freeze` (**Z**) | freeze the boxes; logging continues |
-| `fd_glitch_clear` (**X**) | clear box history and the last warp (the note still reads "(F12)", the original overlay's text) |
+| `fd_hud_warp 1` (**G**) | the **warp HUD**, top-right: what you're touching and whether it can warp you (warp prediction, last warp, history). Old name `fd_hud_glitch` still works |
+| `fd_warp_hide` (**B**) | show / hide the boxes (G on always shows them again) |
+| `fd_warp_freeze` (**Z**) | freeze the boxes; logging continues |
+| `fd_warp_clear` (**X**) | clear box history and the last warp (the note still reads "(F12)", the original overlay's text) |
 | `fd_tp_save` (**K**) | save position + view (pitch/yaw) |
 | `fd_tp_load` (**L**) | teleport back to it |
 | `fd_triggers 1` / `fd_triggers_toggle` (**T**) | trigger boxes, 50%: **blue** rescue zone (drop-off for a carried victim), **red** final exit still closed, **green** exit open (every victim accounted for) |
 | `fd_triggers_all 1` (**Y**) | also every other trigger, grey: room zones, hints, doors, sounds |
-| `fd_triggers_xray 1` (**U**) | trigger boxes show through walls (default: walls hide them) |
+| `fd_triggers_xray 1` | trigger boxes show through walls (default: walls hide them); T's second press |
 | `fd_triggers_list` | the map's triggers in the console: class, open/shut, name, box corners |
 | `fd_juggle 1` (**J**) | fire-juggling arrow, 30 px below the screen centre, no background: where a carried survivor would land if you passed out now |
 | `fd_pause 1` / `fd_pause_toggle` (**P**) | pause the game and fly a free camera; P again resumes and the view snaps back to the player |
@@ -149,7 +148,7 @@ Teleporter rules: one slot, in memory only (gone on exit); only works on the map
 it was saved on ("saved on X, this is Y -- refused"); only inside a level.
 Velocity is zeroed on arrival. Crouch/stance is not saved.
 
-B / Z / X (the original overlay's F9 / F10 / F12) only act while `fd_hud_glitch` is on, the game is focused and the
+B / Z / X (the original overlay's F9 / F10 / F12) only act while the warp HUD (`fd_hud_warp`) is on, the game is focused and the
 console is closed. The boxes' full detail goes to `FDNYCore.log`.
 
 ### Profiles and watermark
@@ -182,7 +181,7 @@ Put anything you want applied on a switch (binds, settings) in
 | `fd_skip_intro 1` | skip the intro movies (next launch) |
 | `fd_log_commands 0/1` | log every console command (default 1) |
 | `fd_text_size <px>` | on-screen text height, 7–16 (default 9) |
-| `fd_text_alpha <0-255>` | background opacity of the player HUD and collision boxes (default 160; 255 = solid). The watermark is always opaque |
+| `fd_text_alpha <0-255>` | background opacity of the player HUD and warp HUD (default 160; 255 = solid). The watermark is always opaque |
 | `fd_text_fg_alpha <0-255>` | text opacity on the same panels (default 255 = solid text). No extra cost: those panels are blended either way |
 | `fd_textdraw` | list the on-screen text panels: shown/hidden, size, position, translucent/opaque (troubleshooting) |
 | `fd_version` | read-only core version |
@@ -192,7 +191,7 @@ Put anything you want applied on a switch (binds, settings) in
 ```
 fd_profile practice
 fd_hud_player 1
-fd_hud_glitch 1
+fd_hud_warp 1
 ```
 
 Load Training, walk into a wall, watch the top-right boxes; K to mark a spot,
@@ -229,7 +228,7 @@ can still fail on a slow VM.
 - Pause + free camera:
   - Sound while paused is untested (the VM has no audio check). The game's sound update
     is part of the paused step, so a looping sound may keep playing or hang until resume.
-  - The collision overlay's tick counter keeps counting paused frames; nothing it records
+  - The warp HUD's tick counter keeps counting paused frames; nothing it records
     moves then.
   - A key still held when you resume acts normally (only presses during the pause are
     dropped).

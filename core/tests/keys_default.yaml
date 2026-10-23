@@ -1,8 +1,9 @@
 name: keys_default
 # Owner request 2026-10-22 (D37): every feature has a default letter key, no F keys.
 # Presses each key in a level (game focused, console closed) and checks its effect:
-# J fd_juggle, H fd_hud_player, G fd_hud_glitch, then B / Z its hide / freeze hotkeys,
-# T trigger boxes, Y fd_triggers_all, U fd_triggers_xray, K / L teleporter save / load,
+# J fd_juggle, H fd_hud_player, G fd_hud_warp (the warp HUD), then B / Z its hide /
+# freeze hotkeys, T trigger boxes (off -> on -> on + x-ray -> off), Y fd_triggers_all,
+# K / L teleporter save / load,
 # P pause (free camera; tests/freecam.yaml covers it in full). Practice-only keys are
 # refused under fd_profile run. The `toggle <var>` builtin is what the toggle binds run.
 pre_files:
@@ -35,7 +36,7 @@ steps:
   # G: collision HUD, then its own hotkeys B (hide) and Z (freeze)
   - key: {key: g, hold: 0.1}
   - wait_s: 1
-  - assert_log: {contains: "console> fd_hud_glitch 1"}
+  - assert_log: {contains: "console> fd_hud_warp 1"}
   - assert_log: {contains: "glitch: hooks installed"}
   - key: {key: b, hold: 0.2}
   - wait_s: 0.3
@@ -55,28 +56,28 @@ steps:
   - assert_pipe_stat: {cmd: glitch_box, key: hidden, equals: 1}
   - key: {key: g, hold: 0.1}
   - wait_s: 0.5
-  - assert_log: {contains: "console> fd_hud_glitch 0"}
+  - assert_log: {contains: "console> fd_hud_warp 0"}
   - key: {key: g, hold: 0.1}
   - wait_s: 1
   - assert_pipe_stat: {cmd: glitch_box, key: hidden, equals: 0}
   - key: {key: g, hold: 0.1}
   - wait_s: 0.5
-  # T / Y / U: trigger boxes, all triggers, x-ray
+  # T cycles off -> on -> on + x-ray -> off; Y every trigger
   - key: {key: t, hold: 0.1}
   - wait_s: 0.5
   - assert_log: {contains: "bind: t -> fd_triggers_toggle"}
+  - assert_log: {contains: "console> trigger boxes: on"}
   - key: {key: y, hold: 0.1}
   - wait_s: 0.5
   - assert_log: {contains: "console> fd_triggers_all 1"}
-  - key: {key: u, hold: 0.1}
-  - wait_s: 0.5
-  - assert_log: {contains: "console> fd_triggers_xray 1"}
-  - screenshot: triggers_all_xray
-  - key: {key: y, hold: 0.1}
-  - key: {key: u, hold: 0.1}
   - key: {key: t, hold: 0.1}
   - wait_s: 0.5
-  - assert_log: {contains: "console> fd_triggers_xray 0"}
+  - assert_log: {contains: "console> trigger boxes: on, x-ray"}
+  - screenshot: triggers_all_xray
+  - key: {key: y, hold: 0.1}
+  - key: {key: t, hold: 0.1}
+  - wait_s: 0.5
+  - assert_log: {contains: "console> trigger boxes: off"}
   # K / L: teleporter save, walk away, load
   - key: {key: k, hold: 0.1}
   - wait_s: 0.5

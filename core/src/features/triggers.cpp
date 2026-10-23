@@ -214,9 +214,18 @@ void FrameEnd() {
     gfx::SubmitWorldBoxes(g_boxes, g_nBoxes, On(g_fdTriggersXray));
 }
 
+// Key T cycles (owner 2026-10-22): off -> boxes -> boxes + x-ray -> off.
 void CmdToggle(int, const char* const*) {
-    cmd::SetCvar(&g_fdTriggers, On(g_fdTriggers) ? "0" : "1");
-    console::Print("fd_triggers %s", g_fdTriggers.value);
+    if (!On(g_fdTriggers)) {
+        if (!cmd::SetCvar(&g_fdTriggers, "1")) return;  // refused (profile run): the gate printed why
+        cmd::SetCvar(&g_fdTriggersXray, "0");
+    } else if (!On(g_fdTriggersXray)) {
+        cmd::SetCvar(&g_fdTriggersXray, "1");
+    } else {
+        cmd::SetCvar(&g_fdTriggers, "0");
+        cmd::SetCvar(&g_fdTriggersXray, "0");
+    }
+    console::Print("trigger boxes: %s", !On(g_fdTriggers) ? "off" : On(g_fdTriggersXray) ? "on, x-ray" : "on");
 }
 
 // "-123" (wsprintf has no %f; whole units are enough for a listing)
@@ -240,14 +249,13 @@ bool Init() {
     cmd::RegisterCvar(&g_fdTriggers);
     cmd::RegisterCvar(&g_fdTriggersAll);
     cmd::RegisterCvar(&g_fdTriggersXray);
-    cmd::RegisterCommand("fd_triggers_toggle", "show / hide the trigger boxes (fd_triggers; default key T)", CmdToggle);
+    cmd::RegisterCommand("fd_triggers_toggle", "cycle the trigger boxes: off -> on -> on + x-ray -> off (key T)", CmdToggle);
     cmd::RegisterCommand("fd_triggers_list", "list the loaded map's triggers: class, open/shut, name, box", CmdList);
     cmd::SetPracticeOnly("fd_triggers");
     cmd::SetPracticeOnly("fd_triggers_toggle");
     cmd::SetPracticeOnly("fd_triggers_list");
     binds::BindDefault("t", "fd_triggers_toggle");
-    binds::BindDefault("y", "toggle fd_triggers_all");    // D37
-    binds::BindDefault("u", "toggle fd_triggers_xray");
+    binds::BindDefault("y", "toggle fd_triggers_all");  // D37; x-ray is T's second press
     hooks::OnFrameEnd(FrameEnd);
 #ifdef FDCORE_DEBUG
     testpipe::Register("triggers", [](const char*, char* resp, int cap) {

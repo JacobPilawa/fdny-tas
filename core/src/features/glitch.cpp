@@ -305,7 +305,7 @@ bool Install() {
     if (g_installed) return true;
     for (Site& s : g_sites) {
         if (!addr::Usable(s.id)) {
-            console::Print("fd_hud_glitch: unavailable (%s not verified)", addr::Name(s.id));
+            console::Print("fd_hud_warp: unavailable (%s not verified)", addr::Name(s.id));
             return false;
         }
         s.addr = addr::ExportAddress(s.id);
@@ -569,13 +569,14 @@ void OnToggle(cmd::Cvar& v) {
         // Turning the HUD on always shows it (owner 2026-10-22: a hide from B outlived G off/on,
         // so G alone looked dead).
         g_hidden = g_frozen = false;
-        if (!Install()) console::Print("fd_hud_glitch: hooks could not be installed (see FDNYCore.log)");
+        if (!Install()) console::Print("fd_hud_warp: hooks could not be installed (see FDNYCore.log)");
     } else {
         Uninstall();
     }
 }
-cmd::Cvar g_fdHudGlitch = {"fd_hud_glitch", "0",
-                           "1 = collision-warp HUD (installs collision hooks; practice only)", false, true,
+cmd::Cvar g_fdHudGlitch = {"fd_hud_warp", "0",
+                           "1 = warp HUD: what you touch and whether it can warp you (installs hooks; practice only)",
+                           false, true,
                            OnToggle, {0}};
 
 } // namespace
@@ -591,20 +592,26 @@ bool Init() {
     char env[8];
     g_boxDump = GetEnvironmentVariableA("FDNYCORE_TEST_GLITCHBOX", env, sizeof(env)) && env[0] == '1';
 #endif
-    cmd::RegisterCommand("fd_glitch_hide", "show / hide the hud_glitch boxes (key B)", CmdHide);
-    cmd::RegisterCommand("fd_glitch_freeze", "freeze / unfreeze the hud_glitch boxes; logging continues (key Z)", CmdFreeze);
-    cmd::RegisterCommand("fd_glitch_clear", "clear the hud_glitch history and last warp (key X)", CmdClear);
+    // Player-facing name: the warp HUD (owner 2026-10-22: "collision" / "glitch" / "warp" for one
+    // thing was confusing). The code, the glitch| log lines and the parity files keep "glitch".
+    cmd::RegisterCommand("fd_warp_hide", "show / hide the warp HUD's boxes (key B)", CmdHide);
+    cmd::RegisterCommand("fd_warp_freeze", "freeze / unfreeze the warp HUD's boxes; logging continues (key Z)", CmdFreeze);
+    cmd::RegisterCommand("fd_warp_clear", "clear the warp HUD's history and last warp (key X)", CmdClear);
     cmd::RegisterCvar(&g_fdHudGlitch);
-    static const char* const kPractice[] = {"fd_hud_glitch", "fd_glitch_hide", "fd_glitch_freeze", "fd_glitch_clear"};
+    static const char* const kPractice[] = {"fd_hud_warp", "fd_warp_hide", "fd_warp_freeze", "fd_warp_clear"};
     for (const char* n : kPractice) cmd::SetPracticeOnly(n);
-    binds::BindDefault("g", "toggle fd_hud_glitch");  // D37
+    cmd::RegisterAlias("fd_hud_glitch", "fd_hud_warp");  // the names before 0.19
+    cmd::RegisterAlias("fd_glitch_hide", "fd_warp_hide");
+    cmd::RegisterAlias("fd_glitch_freeze", "fd_warp_freeze");
+    cmd::RegisterAlias("fd_glitch_clear", "fd_warp_clear");
+    binds::BindDefault("g", "toggle fd_hud_warp");  // D37
     hooks::OnFrameEnd(FrameEnd);
 #ifdef FDCORE_DEBUG
     testpipe::Register("glitch", [](const char*, char* resp, int cap) { Stats(resp, cap); });
     testpipe::Register("glitch_box", [](const char*, char* resp, int cap) { BoxState(resp, cap); });
     testpipe::Register("glitch_replay", [](const char* path, char* resp, int cap) { ReplayFile(path, resp, cap); });
 #endif
-    log::Info("glitch: ready (fd_hud_glitch)");
+    log::Info("glitch: ready (fd_hud_warp: the warp HUD)");
     return true;
 }
 

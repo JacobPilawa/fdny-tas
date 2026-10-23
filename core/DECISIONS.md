@@ -130,7 +130,7 @@ later session might "simplify" away; change one only with the owner's approval
   - `fd_pause` is not archived: a session never starts paused. Practice-only, so `fd_profile run` refuses it and resets it to 0, which resumes.
 
 - **D37 Every feature has a default letter key; no F keys** (owner, 2026-10-22).
-  - **Map:** P pause; J juggle; H player HUD; G collision HUD with its B / Z / X (were F9 / F10 / F12); T / Y / U trigger boxes / all / x-ray; K / L teleporter save / load.
+  - **Map:** P pause; J juggle; H player HUD; G collision HUD with its B / Z / X (were F9 / F10 / F12); T trigger boxes (cycling x-ray, D38) / Y all; K / L teleporter save / load.
   - **Excluded letters:**
     - the game's keys (W A S D C, Shift, Ctrl, Space; GameControls::Construct);
     - the free camera's (W A S D E Q);
@@ -145,6 +145,16 @@ later session might "simplify" away; change one only with the owner's approval
     - Why: a later default change then reaches existing players, whose files hold only their own choices.
     - Old files with default lines clean themselves on the next save.
   - **Turning `fd_hud_glitch` on always shows the boxes** (it clears B's hide and Z's freeze). Owner: a B hide outlived G off/on, so G alone looked dead.
+
+- **D38 One player-facing name: the warp HUD** (owner 2026-10-22: "collision" in one place, "glitch" in another, and it is really about warping).
+  - **Renamed:** `fd_hud_warp`, `fd_warp_hide` / `fd_warp_freeze` / `fd_warp_clear`, and every doc and help text.
+  - **The old names stay as aliases** (`cmd::RegisterAlias`): old configs and habits keep working, and the config is written under the new name.
+  - **Unchanged on purpose:**
+    - the module and file names (`glitch*.cpp`);
+    - the `glitch|` log lines;
+    - the parity files and the test pipes.
+    The log and box text must stay byte-identical to the original Python overlay (glitch_parity_*), and the player never types those names.
+  - **Trigger boxes: T cycles off -> on -> on + x-ray -> off** (owner). The separate U key for x-ray is gone; `fd_triggers_xray` remains a variable.
 
 ## Process
 
