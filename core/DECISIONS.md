@@ -187,7 +187,8 @@ later session might "simplify" away; change one only with the owner's approval
   - **Rules (R9, arch_check):** a feature module has a `// User:` line; a feature that reads keys itself (`GetAsyncKeyState`) declares them with `binds::DescribeKey` (also shown by `bindlist`). docgen stops the build on a registration it can't read (arguments not literals, a `RegisterCvar(&x)` with no `cmd::Cvar x = {...}`, a registering file with no `// User:` line). `build.ps1` and the pre-commit hook (on a commit touching `dist/`) check that `dist/README.md` names the SHA-256 of `dist/FDNYCore.asi`.
   - **Checked against the build:** `tests/docs_registry.yaml` has the Debug build write what it registered (`fd_dbg_registry`) and compares it with docgen's reading, item by item, so a registration the scanner misses fails a test.
   - **Values:** the variable's help text is its value list. Help texts say the values ("0-255", "practice | run", "1 = ..., 0 = ..."); no separate values field.
-  - **Rejected:** a hand-maintained table (goes stale; QUICKSTART's did); dumping the sheet from the running game (needs the game at build time, and the sheet must be built on every build).
+  - **The sheet is the player documentation:** the hand-written player guide was removed (owner, 2026-10-23); module-author notes are `CLAUDE.md`'s "Core services".
+  - **Rejected:** a hand-maintained table (goes stale, as the old guide's did); dumping the sheet from the running game (needs the game at build time, and the sheet must be built on every build).
 
 ## Process
 

@@ -7,9 +7,31 @@ machine-checkable ones are enforced by `tools/arch_check.py` (run by `build.ps1`
 compiler flags; the reasons are in `DECISIONS.md`. Change a rule only with an
 owner-approved entry there.
 
-Read before working: `QUICKSTART.md` (what exists, how to use it, module-author
-sections), `DECISIONS.md` (why), the tail of `PROGRESS.md` (what happened last).
-To add a feature, use the `new-feature` skill (`.claude/skills/new-feature/`).
+Read before working: `KEY_SHEET.md` (every feature, key, variable and command; generated
+from the source, D41), the core services below, `DECISIONS.md` (why), the tail of
+`PROGRESS.md` (what happened last). To add a feature, use the `new-feature` skill
+(`.claude/skills/new-feature/`).
+
+## Core services
+
+The core (`src/`) is services only; every feature is a self-registering module in
+`src/features/` (`modules.h`). The core never names a feature, so a feature can be left
+out of the build (`.\build.ps1 -Without glitch`, or `-Without *` for the core alone).
+The log lists `modules: N registered (...)` and one `module <name>: enabled | disabled
+(reason)` line each.
+
+| Core service | What a module gets |
+|---|---|
+| `addr` | address table: verified addresses by Id (never raw addresses) |
+| `hooks` | `Create` (inline hook in a group), `OnFrameBegin` / `OnFrameEnd` / `OnLevelLoad` (`OnFrameEndLate` is gfx's only, R8) |
+| `cmd`, `console`, `binds` | variables, commands, config persistence (`RegisterConfigWriter`), `SetPracticeOnly` (refused in `fd_profile run`), console output; `binds::BindDefault(key, line)` for a feature's default key (the player's binds win), `binds::DescribeKey` for keys a feature reads itself |
+| `camera` | view size; one FOV filter (`fov` uses it); a world-transform override (`SetWorldOverride`, `LastWorldXForm`: the free camera) |
+| `pause` | `Set(on, why)` / `Active()`: skip the simulation step and pause the game clock; ends itself on leaving the level. `textdraw::HideWhilePaused` for view-relative panels |
+| `state` | the frame's player snapshot |
+| `gfx`, `textdraw` | in-frame drawing ("Drawing" below; `src/gfx.h`, `src/textdraw.h`) |
+| `profile` | run/practice gates + watermark (reads `SetPracticeOnly`) |
+| `testpipe` (Debug) | `Register("<name>", handler)` for harness requests |
+| `log`, `crashlog`, `patches`, `levelwatch` | logging, crash reports, the core's startup patches, level events |
 
 ## Architecture (enforced)
 
@@ -68,7 +90,7 @@ Every drawing belongs to a gfx layer, run in this fixed order each frame (D40, `
 2. **Tests:** a new or changed behaviour gets a test in `tests/` (named in the module's `// Tests:` line). Never weaken or delete a test to make it pass; a flaky or environmental failure is rerun and reported as such, with evidence (e.g. the same failure on the previous version). Run the affected tests, and the full suite (`python -I harness/run_test.py --suite`) before a version bump.
    - Known environmental: `glitch_box_cost` / `text_panels` frame-rate thresholds fail when the VM runs slow (~35 fps instead of ~57); `state_snapshot` can race when a fire spreads or a roaming bank victim moves between the two reads (0.16.1 and 0.17.0 alike).
 3. **Evidence** in `evidence/<topic>/`: logs, screenshots, measurements, plus a README for anything investigative (spikes: what was tried, numbers, verdict).
-4. **Docs:** `QUICKSTART.md` for anything user-visible (commands, variables, keys); `DECISIONS.md` for any non-obvious choice; a `PROGRESS.md` entry (`- <date> it<N>: **<version>** ...`).
+4. **Docs:** anything user-visible is described in the code: help texts, the `// User:` line, `binds::DescribeKey` (the key sheet is generated from them, D41; check `KEY_SHEET.md` reads well); `DECISIONS.md` for any non-obvious choice; a `PROGRESS.md` entry (`- <date> it<N>: **<version>** ...`).
 5. **Version:** bump `VERSION` (minor for features/architecture, patch for fixes).
    - Rebuild with `.\build.ps1 -Dist`: it copies the Release `.asi` to `dist\` (repo root, tracked; owner 2026-10-22: the owner installs from GitHub) with `dist\README.md`, the key sheet generated for it (D41: version, SHA-256, keys, features, variables, commands). Never edit `dist\README.md` by hand; the build fails if it doesn't match the `.asi`.
    - Add the release notes to `dist\CHANGES.md` (hand-written).

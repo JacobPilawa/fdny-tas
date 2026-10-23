@@ -14,7 +14,7 @@ and don't work around them; if a rule blocks a good design, stop and ask the own
 
 - Read `core/CLAUDE.md`, `core/DECISIONS.md` and the last few entries of `core/PROGRESS.md`.
 - **Check for something existing first** (owner rule). Look in `core/src/features/`, the
-  services in `core/src/`, the console commands (`QUICKSTART.md`), and the old tools
+  services in `core/src/`, the console commands (`core/KEY_SHEET.md`), and the old tools
   (`asi/`, `tools/`). Extend what's there instead of adding a parallel path.
 - Decide the shape:
   - **Feature or service?** A feature uses services. If it needs a hook another piece
@@ -49,7 +49,8 @@ and don't work around them; if a rule blocks a good design, stop and ask the own
     (the key sheet reads them, D41); a key the feature reads itself (`GetAsyncKeyState`, not
     a bind) gets a `binds::DescribeKey(key, action, when)`;
   - one `FDCORE_MODULE`, listing the required Ids;
-  - pick a start `order` after the existing modules (see `QUICKSTART.md`);
+  - pick a start `order` after the existing modules (the `FDCORE_MODULE` lines in
+    `core/src/features/`);
   - startup patches before WinMain go in the `early` step, guarded with
     `addr::EarlyCodeAddress`.
 - Globals constant-initialisable only (`= {}`, `constexpr`; R7). No STL, CRT or
@@ -72,10 +73,10 @@ and don't work around them; if a rule blocks a good design, stop and ask the own
 
 - Evidence: `core/evidence/<name>/` (logs, screenshots, numbers; a README for anything
   investigative).
-- `core/QUICKSTART.md`: the feature's explanation in the feature tables; the module-author
-  sections if you added a service. The complete key / variable / command list is the
-  generated key sheet (`build/<Config>/README.md`): check it reads well, and fix the help
-  texts in the code, not the sheet.
+- The player docs are the generated key sheet (`core/KEY_SHEET.md`, rewritten by every build
+  and the pre-commit hook): check your feature's lines read well, and fix the help texts
+  and `// User:` line in the code, never the sheet. A new service goes in `core/CLAUDE.md`'s
+  "Core services" table.
 - On the version bump: `.\core\build.ps1 -Dist` (the `.asi` and its sheet to `dist/`), and
   the release notes in `dist/CHANGES.md`.
 - `core/DECISIONS.md`: an entry for every non-obvious choice (what, why, rejected).
