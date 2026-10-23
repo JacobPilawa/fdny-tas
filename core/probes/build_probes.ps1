@@ -61,3 +61,12 @@ $out = Join-Path $outDir 'zz_pauseprobe.asi'
     (Join-Path $here 'pauseprobe.cpp') (Join-Path $core 'src\rt.cpp') @objs -lkernel32 -luser32 -lgdi32
 if ($LASTEXITCODE -ne 0) { throw "pauseprobe build failed" }
 "built probes\zz_pauseprobe.asi  $([math]::Round((Get-Item $out).Length / 1KB, 1)) KB"
+
+# zz_demoprobe.asi: demos / ghosts determinism spike (see demoprobe.cpp)
+$out = Join-Path $outDir 'zz_demoprobe.asi'
+& $zig c++ -target x86-windows-gnu -shared -std=c++17 -O2 -fno-rtti -fno-exceptions -fno-stack-protector -fno-builtin `
+    -fno-threadsafe-statics -nostdlib -Wall -Wextra -Wno-nullability-completeness -Wno-unused-command-line-argument `
+    -isystem $winInc '-Wl,--image-base,0x3E800000' '-Wl,--dynamicbase' -o $out `
+    (Join-Path $here 'demoprobe.cpp') (Join-Path $core 'src\rt.cpp') @objs -lkernel32 -luser32 -lgdi32
+if ($LASTEXITCODE -ne 0) { throw "demoprobe build failed" }
+"built probes\zz_demoprobe.asi  $([math]::Round((Get-Item $out).Length / 1KB, 1)) KB"

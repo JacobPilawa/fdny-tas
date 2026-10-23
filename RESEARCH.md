@@ -1921,3 +1921,46 @@ still use them, guarded by map name (v2.1, owner's method).
 **gameState writers:** LoadLevel (2), `MenuManager::TeardownToLoading` (1),
 `MenuManager::Activate` (0), RunFrame (3 -> 1). The writer of 3 is not found.
 
+
+### 2026-10-23 -- demos and ghosts spike (core/evidence/demos)
+
+**No demo facility exists** in `FDNYFirefighter.exe` or `Genesis.dll` (no demo / record /
+playback / timedemo / journal strings or code). Genesis3D 1.1's DirectPlay netcode is not
+imported.
+
+**Determinism, measured in-process** (Hourglass-style probe `core/probes/demoprobe.cpp`:
+feeds dt and `g_gameTimeMs`, the DirectInput `GetDeviceData` results and the MT19937 state
+back after a reload, compares every frame bit-exact):
+- **Player movement is deterministic** given dt + input: position, velocity, view, move
+  state and `mission.time_left` (+0x343C) bit-identical over ~1950 frames (32 s) on bank, in
+  every run. On real dt it diverges (frame ~1280, up to 35 u).
+- **The world is not yet.** Found and controlled: the load's real duration in game time,
+  victims' load-time RNG draws, and presentation code drawing from the gameplay RNG.
+  - `Rand_Float01` 0x00404AC0 inlines its own MT draw; ~860 draws per frame on bank, mostly
+    particles.
+  - `ParticleSystem::Emit`'s draw count depends on rendering, which shifts the shared
+    stream. With a presentation / gameplay RNG split, victims matched for 25 s.
+- **Still open:** fire spread diverges at load frame 3. It is gated on
+  `FireFx::GetExtents` (the visual size), whose keyframes the level script schedules
+  (`FireRescueEnt::HandleScriptCommand` -> `FUN_00447920` -> `FireFx::ScheduleSizeKeyframe`).
+  The script's timing in the first frames is not traced.
+
+**Offsets note:** from the player pointer the core uses (`[g_everGame]+0x30`), `+0x32FC` holds
+the ASCII bytes `"[Cou"` (constant). The countdown there is `+0x343C` (`mission.time_left`, as in
+addresses.json). The cycle-30s note "mission timer `+0x32fc`" is 0x140 lower, so it may use a
+different base for the same object. Not resolved.
+
+**Ghost assets:** the game ships `Data\Acts\firefighter.act` / `Fireman.act`; Genesis.dll
+exports `geActor_DefCreateFromFile`, `geActor_Create`, `geWorld_AddActor`, `geActor_SetPose`,
+`geActor_SetAlpha` and `geActor_SetBlendingType`. The last two are not imported by the
+game.
+
+**Verdicts:**
+
+| Feature | Verdict |
+|---|---|
+| Full demos | MODERATE-HARD, open-ended; not a rewrite (four hook points) |
+| Ghost (box) | EASY |
+| Ghost (firefighter model) | MODERATE |
+
+Ghosts need no determinism.

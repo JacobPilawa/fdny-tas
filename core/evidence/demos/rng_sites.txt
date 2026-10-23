@@ -1,0 +1,61 @@
+﻿== code referencing g_mtWordsRemaining 0x004FF370
+  0x00404935  MT19937_SGenRand+0x5
+  0x00404962  MT19937_Twist+0x2
+  0x0040498e  MT19937_Twist+0x2e
+  0x00404a72  MT19937_NextU32+0x2
+  0x00404ac3  Rand_PlusMinus1+0x3
+  0x00404b5e  Rand_Seed+0xe
+== code referencing g_mtNextPtr 0x005023EC
+  0x00404998  MT19937_Twist+0x38
+  0x00404a7e  MT19937_NextU32+0xe
+  0x00404a88  MT19937_NextU32+0x18
+  0x00404ad1  Rand_PlusMinus1+0x11
+  0x00404adb  Rand_PlusMinus1+0x1b
+== calls to MT19937_NextU32 0x00404a70: 1
+    1  Rand_Below
+== calls to Rand_PlusMinus1/Float01 0x00404ac0: 9
+    1  ROCSoundSystem::Play
+    3  Rand_FloatRange
+    1  StreamTube::BuildMesh
+    1  Tool_Hose::PostTick
+    1  VictimRescueEnt::AdvanceRoamTarget
+    2  WaterImpactFx::Draw
+== calls to Rand_Below 0x00404b30: 19
+    1  RescueBot::ArmChatterTimer
+    2  RescueBot::ArmRescueAttemptTimer
+    2  RescueBot::BeginRescue
+    2  RescueBot::Init
+    1  RescueBot::Think
+    1  Rescue_PickRandomRosterName
+    1  VictimRegistry::GetTypeRecord
+    1  VictimRescueEnt::AdvanceRoamTarget
+    2  VictimRescueEnt::DropAtPlayer
+    3  VictimRescueEnt::SetIdlePose
+    3  VictimRescueEnt::Spawn
+== calls to Rand_FloatRange 0x00498b30: 73
+    4  AshSim::ParticleSubTick
+    3  AshSim::RespawnParticle
+    2  AshSim::Think
+    2  BlinkLightEnt::RegisterClass
+    2  Camera::UpdateShake
+    4  Fire::EmitEmbers
+    5  FireFx::Init
+    1  FireRescueEnt::GotoPathPoint
+    8  FireRescueEnt::TrySpawnSpreadFire
+    8  HoseGfx::RebuildGeometry
+    1  Hotspot::AdvanceActiveFire
+    2  MenuWidget_ImageButton::Construct
+    4  MiscEmitterFXImpl::Update
+    7  ParticleSystem::Emit
+    1  PlayerRescueEnt::DoFootstep
+    1  PlayerRescueEnt::TakeFireDamage
+    3  SArray::AssertIndex
+    2  TChatterSet::PlayRandom
+    5  Tool_Extinguisher::PostTick
+    1  Tool_Goggles::Tick
+    1  VictimInstance::Construct
+    1  VictimRescueEnt::AdvanceRoamTarget
+    1  VictimRescueEnt::SpawnAtSpot
+    4  WindowFire::ScalarDeletingDtor
+== calls to Rand_Seed 0x00404b50: 1
+    1  WinMain
