@@ -611,12 +611,43 @@ class Run:
             placed.append((dst, backup))
         return placed
 
+    def snapshot_saves(self):
+        """The career saves (Saves/player*.rb). Winning a level writes progress into the
+        slot the setups use ("Hotrod Stein", at Training): every later test would then start
+        a different mission (2026-10-23: the autosplitter probes moved it on). Kept in
+        memory and put back after every test."""
+        saves = {}
+        d = os.path.join(self.game_dir, "Saves")
+        for name in (os.listdir(d) if os.path.isdir(d) else []):
+            with open(os.path.join(d, name), "rb") as fh:
+                saves[name] = fh.read()
+        return saves
+
+    def restore_saves(self, saves):
+        d = os.path.join(self.game_dir, "Saves")
+        changed = []
+        for name, data in saves.items():
+            p = os.path.join(d, name)
+            try:
+                with open(p, "rb") as fh:
+                    if fh.read() == data:
+                        continue
+            except OSError:
+                pass
+            with open(p, "wb") as fh:
+                fh.write(data)
+            changed.append(name)
+        if changed:
+            print(f"  (career saves the game rewrote, restored: {', '.join(changed)})")
+
     def execute(self):
         deploy_core(self.game_dir, self.core_config)
         placed = self.place_pre_files()
+        saves = self.snapshot_saves()
         try:
             return self._execute()
         finally:
+            self.restore_saves(saves)
             for dst, backup in placed:
                 try:
                     if os.path.exists(backup):
