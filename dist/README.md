@@ -9,7 +9,7 @@ other `.asi` plugins. Commands and keys: `core/QUICKSTART.md`.
 | Version | pre-release of 0.19.0: the version string still reads 0.18.1 |
 | Source | the commit that last changed this file (`git log -1 -- dist/FDNYCore.asi`) |
 | SHA-256 | `8b70c354b980a1e04b73cb46d21f161ab3d777722004adf519cd22748527129c` |
-| Size | 192,000 bytes |
+| Size | 192,512 bytes |
 
 **Contents:**
 - pause + free camera (`fd_pause`, key P);
