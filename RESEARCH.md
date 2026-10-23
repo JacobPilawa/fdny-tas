@@ -1886,3 +1886,36 @@ Key results:
 VERDICT: stuck is handled by PREVENTION (fail-safe collision + one headroom
 gate), not detection+recovery. No automatic rescue exists for a player stuck
 mid-play.
+
+### 2026-10-23 -- autosplitter: how staged levels and wins look in memory
+Owner report: the LiveSplit splitters split staged levels (boat, subway, oil rig) late.
+Evidence and live traces: `core/evidence/autosplitter/`. New splitters:
+`tools/autosplitter/` v2.
+
+**Stage exit.**
+- The exit trigger's `touch: tell player (finalexitloadmap <next>)` runs
+  `PlayerRescueEnt::Verb_FinalExitLoadMap` (0x450A70): the same strict victim gate as
+  `finalexit`, the .bsp existence check, then `GameSession::RequestLevelChange`
+  (0x0042A260).
+- RequestLevelChange writes `+0x68C = 1`, the next map's String at `+0x660`, the rrf at
+  `+0x668`, and copies the old level's info into `+0x664..+0x67C`.
+- The next RunFrame clears +0x68C and calls `LoadLevel(this+0x660)`. LoadLevel sets
+  `+0x688` (current level) to that embedded block, sets gameState `+0x6F0 = 2`, and later
+  `+0x6EC = 0`. gameState then goes 2 -> 3 -> 1.
+- No win, fade, sound or results screen on a stage exit.
+- Other RequestLevelChange callers: `ScriptTrigger::Verb_LoadMap` (rescue.rrf),
+  `Verb_LoadHoseMap` (hose.rrf).
+
+**Win.**
+- `Verb_FinalExit` / `UpdateZonesAndWin` set the mission result `PlayerRescueEnt+0x3438 = 1`
+  on the win frame.
+- `RescueHud::Update` then plays the win audio and fade, and
+  `GameSession::SetLevelResult` (0x4295B0) sets `+0x6EC` (1 win / 2 lose) for RunFrame's
+  results screen.
+
+**The autosplitter "end sound played" pointers** are per-level sound handle slots. They fill
+at level load and change during unrelated levels.
+
+**gameState writers:** LoadLevel (2), `MenuManager::TeardownToLoading` (1),
+`MenuManager::Activate` (0), RunFrame (3 -> 1). The writer of 3 is not found.
+
