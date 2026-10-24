@@ -132,12 +132,17 @@ CRITICAL_SECTION g_lock;  // the pipe thread reads g_text
 void FindMods() {
     HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, GetCurrentProcessId());
     if (snap == INVALID_HANDLE_VALUE) return;
+    // Skip ourselves by handle, not by name: releases are FDNYCore-<version>.asi.
+    // An inert second copy (core.cpp) is listed, which shows it's installed.
+    HMODULE self = nullptr;
+    GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                       reinterpret_cast<LPCSTR>(&FindMods), &self);
     MODULEENTRY32 me;
     me.dwSize = sizeof(me);
     int o = 0;
     for (BOOL ok = Module32First(snap, &me); ok; ok = Module32Next(snap, &me)) {
         const int len = lstrlenA(me.szModule);
-        if (len < 4 || lstrcmpiA(me.szModule + len - 4, ".asi") != 0 || lstrcmpiA(me.szModule, "FDNYCore.asi") == 0)
+        if (len < 4 || lstrcmpiA(me.szModule + len - 4, ".asi") != 0 || me.hModule == self)
             continue;
         if (o + len + 2 >= static_cast<int>(sizeof(g_mods))) break;
         if (o) g_mods[o++] = ' ';

@@ -4,7 +4,8 @@
 
 namespace fdcore::log {
 
-bool Open(const char* path);
+bool Open(const char* path);        // truncates
+bool OpenAppend(const char* path);  // keeps what's there (the inert second copy's line)
 void Close();
 void Info(const char* fmt, ...);
 void Warn(const char* fmt, ...);

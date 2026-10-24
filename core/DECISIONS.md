@@ -11,6 +11,11 @@ later session might "simplify" away; change one only with the owner's approval
 - **D2 No dynamically initialised globals (rule R7), enforced with `-Wglobal-constructors -Wexit-time-destructors`.** Nothing runs them. When this was enforced (0.16.1) it found two real cases:
   - `textdraw`'s panel array: benign, all-zero by luck;
   - `glitch_bsp`'s `ON_EPSILON = OnEpsilon()`: never initialised, so the BSP on-plane tolerance could be 0 instead of 0.1.
+- **D43 One core per process: a second FDNYCore*.asi stays inert** (owner 2026-10-24: "Do 1 and 2"). Releases are named `FDNYCore-<version>.asi`, so an update dropped beside an older copy loads two cores, and both would hook the same functions.
+  - **What:** the first copy's DllMain creates the named mapping `Local\FDNYCore.instance.<pid>` holding its path, and keeps it open. A later copy finds it, appends one WARN to `FDNYCore.log` ("... stays inert: another copy is already loaded (<path>)") and returns without patching, hooking or starting a thread. The first copy to load wins (alphabetical, ASI loader order), not the newest version.
+  - **Supporting changes:** the log is opened append-only with write sharing, so the inert copy's line isn't overwritten. The watermark skips the running core by module handle, not by the name `FDNYCore.asi`, and lists an inert copy among the other asi. The Debug address-override path is found the same way.
+  - **Test:** `tests/core_single_instance.yaml` (two renamed copies).
+  - **Rejected:** a per-process mutex (it can't carry the first copy's path); picking the newest version (both copies would have to load far enough to compare, and the loser has already run its DllMain); refusing to start at all (the player loses every feature for a packaging mistake).
 - **D3 MinHook (vendored) for every inline hook; one owner per hooked function.** Two MinHook hooks on one target in one instance aren't possible, and two owners would fight over semantics. Shared hooks live in a core service that offers subscriptions or filters (`hooks` frame events, `camera`, `gfx` world).
 
 ## Game access
