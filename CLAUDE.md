@@ -19,8 +19,8 @@ them separate.
 
 **The repo reaches the VM as a plain file copy** via the Packer file
 provisioner, not a clone. Since 2026-10-21 the VM copy is also a local git
-repo (PortableGit at `environment\local\tools\git`, not on PATH; branches
-`main` + `fdny-bxt`). Since 2026-10-22 it has a GitHub remote: `origin` =
+repo (PortableGit at `environment\local\tools\git`, not on PATH; base
+branch `main`, `fdny-bxt` retired 2026-10-24). Since 2026-10-22 it has a GitHub remote: `origin` =
 `git@github.com:RichardFranksComputer/fdny-tas.git` (private). The VM pushes with a
 write-enabled deploy key (`~/.ssh/fdny_decomp_deploy`, set by the repo-local
 `core.sshCommand`). **Push after every commit** (`git push`; both branches track
@@ -33,7 +33,7 @@ The GitHub CLI is at `environment\local\tools\gh\bin\gh.exe` (not on PATH; `get_
 it in with a fine-grained token scoped to this repo; never ask for or handle the token.
 `gh` shells out to git, so put `environment\local\tools\git\cmd` on PATH first. The token
 can't upload SSH keys (the 403 on `user/keys` at login is expected); git keeps the deploy key.
-One branch per feature or fix, merged through a PR; don't commit straight to `main` / `fdny-bxt`.
+One branch per feature or fix, cut from `main` and merged through a PR; don't commit straight to `main`.
 
 **FDNYCore (`core/`) has its own rules:** `core/CLAUDE.md` (loaded when
 working there), `core/DECISIONS.md`, and the `new-feature` skill
