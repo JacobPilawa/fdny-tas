@@ -1,6 +1,6 @@
 # Demos / ghosts spike: status and handoff
 
-**Paused 2026-10-23 at the owner's request** (pivot to other work). Last commit of this work:
+**Paused 2026-10-23, resumed 2026-10-24 (runs 8-13), paused again 2026-10-24.** Last commit of this work:
 `2a7f5bd` "Spike: demos (deterministic replay) and ghosts", plus this file and the
 `core/probes/re_*.py` helpers. Nothing in `core/src` changed: this is a spike (D22), and
 FDNYCore's behaviour and `dist/` are untouched.
@@ -20,7 +20,7 @@ design). This file is the "how to pick it up" layer.
 | Track | State | Verdict |
 |---|---|---|
 | Does Genesis / FDNY have demos? | **answered**: no | no code or strings in either binary; FDNY doesn't import Genesis's netcode |
-| Demos (deterministic input replay) | **researched + probed, open** | MODERATE-HARD, open-ended, not a rewrite. Player replays bit-exact; the world (fires, roaming victims) still diverges |
+| Demos (deterministic input replay) | **researched + probed, one source left** | **MODERATE** (was MODERATE-HARD, open-ended). With time + input + RNG fed, presentation RNG split, a fixed predecessor and a zero-filled heap, a 58 s bank replay was identical on every reliable measure in 2 of the last 3 playbacks; the third diverged at frame 106 in a spawned fire's list position (see 7B) |
 | Ghosts | **designed, not built** | EASY as a translucent box, MODERATE as the `firefighter.act` model. Needs no determinism. **Recommended next build.** |
 
 ## 3. What was researched
@@ -56,6 +56,8 @@ design). This file is the "how to pick it up" layer.
 | Input | both drains call `IDirectInputDevice8::GetDeviceData` (vtable +0x28, cbObjectData 20, flags 0), mouse then keyboard, once each per frame; both devices share the dinput8 vtable |
 | RNG | MT19937 `g_mtState` 0x00501A28 (624 words), words-left 0x004FF370, next-ptr 0x005023EC. `Rand_Float01` 0x00404AC0 (cdecl, no args, float in st0) **inlines the draw**; `MT19937_NextU32` 0x00404A70 only serves `Rand_Below` 0x00404B30. ~860 draws per frame on bank |
 | RNG consumers | presentation: `ParticleSystem::Emit`, `WaterImpactFx::Draw`, `HoseGfx::RebuildGeometry`, `AshSim::*`, `Fire::EmitEmbers`, `FireFx::Init`, `MiscEmitterFXImpl::Update`, `Camera::UpdateShake`, `ROCSoundSystem::Play`, `TChatterSet::PlayRandom`, `StreamTube::BuildMesh`, `PlayerRescueEnt::DoFootstep`, menu, roster names. Gameplay: `FireRescueEnt::TrySpawnSpreadFire`, `Hotspot::AdvanceActiveFire`, victim roam / idle / spawn, `RescueBot::*` |
+| Fire strength (2026-10-24) | `FireRescueEnt` vtbl 0x004E1780 slot 18 = 0x004483A0 (thiscall, 1 arg = the player): strength = max(abs(dx), abs(dy), abs(dz)) from the player to the fire (+0x7C..+0x84), then `SetFireStrength` 0x00448320 -> `TrySpawnSpreadFire`. Gated on `fire+0xB8` in 0..3, which is **never initialised** (only `inc` at 0x00448533): an original bug, the source of load-to-load fire variation. Spread delay scales with the small-fire counter `DAT_00502B90` (0 at every load) |
+| Script timing | `ScriptActor::Tick` 0x00470740: a `wait` (state 1) ends when `g_gameTimeMs >= actor+0x48`; one queued command per tick. Replays identically |
 | Fire spread gate | `TrySpawnSpreadFire` 0x00447A90: `FireFx::GetExtents(fire+0x12C).x > const` **and** `g_gameTimeMs >= fire+0x124`, then a roll vs strength `+0x128`. Extents come from size keyframes (`FireFx::UpdateSizeKeyframes` by `g_gameTimeMs`), scheduled by `FUN_00447920` (from `FireRescueEnt::HandleScriptCommand`, i.e. the level script) and by the spread stepper |
 | Entity list | `[0x00502AAC]+0x64` head node; node +0 entity, +4 next; entity +0x18 kind (2 victim, 6 fire), +0x4C position; victim +0x120 state |
 | Timer offsets | from `[g_everGame]+0x30`: `+0x343C` = mission time left (bit-exact in replays); `+0x32FC` = constant ASCII "[Cou". An older research note calls +0x32FC the timer, 0x140 lower (maybe a different base). Unresolved |
@@ -75,12 +77,15 @@ All standalone (not part of FDNYCore). Python is `environment\local\tools\python
 | `core/probes/demo_entdiff.py` | diff two entity dumps per frame by kind |
 | `core/probes/re_dis.py`, `re_callers.py`, `re_owners.py`, `re_dbq.py`, `re_sites.py` | small RE helpers used along the way (disassemble, find callers, name an address, query research.db, time-call sites) |
 
-**The probe (`demoprobe.cpp`), as of v7:**
+**The probe (`demoprobe.cpp`), as of v13:**
 - **Hooks (MinHook):**
   - `GameClock::Tick`: the frame boundary. Keys, mode machine, time injection, sampling and compare all happen here.
   - `IDirectInputDevice8::GetDeviceData`: found by creating a throwaway mouse device on the first Tick. It records or replays each call.
   - `Rand_Float01` and `MT19937_NextU32`: count draws per call site, and route presentation call sites to a private xorshift generator (the "split").
   - `GameSession::LoadLevel`: saves the RNG (record) or restores it (playback), starts virtual game time, and starts the per-slot histograms.
+  - v8-v10: `ScriptActor::ExecCommand`, `FUN_00447920` (size keyframes), `TrySpawnSpreadFire`, fire vtbl slot 18: the per-run timeline `zz_demoprobe_script_<run>.txt` (script commands, heat / spread lines with fire index and gate inputs).
+  - v11-v12: **zero-filled heap**: `operator_new` and `ntdll!RtlAllocateHeap` / `RtlReAllocateHeap` with `HEAP_ZERO_MEMORY`, from game start.
+  - v13: also feeds GameClock +0x50 / +0x54 on playback.
 - **Keys (F-keys, so the harness's console typing can't trigger them):**
   - F5 arms record from the next level start; F7 stops recording.
   - F6 plays back with time + input + RNG.
@@ -151,17 +156,26 @@ Build as an FDNYCore feature with the `new-feature` skill. Design in `README.md`
 
 ### B. Demos (research; pick up only if wanted)
 
-**The exact next step:** find what makes fire spread differ at load frame 3.
-- Instrument per load frame:
-  - `FireRescueEnt::HandleScriptCommand` 0x00449A80 calls: which fire, which command, the
-    `g_gameTimeMs` it passed to `FUN_00447920` 0x00447920;
-  - `ScriptEngine::ExecLine` 0x00470F10 / `ScriptTrigger` command execution.
-- Then find the script engine's wait / scheduling time source. It's suspected to be real
-  time, or tied to the message loop.
-- Also log each fire's extents.x per load frame, which the v7 census only sums.
+**The exact next step (2026-10-24):** the last source. In run 13 play 1, at frame 106, a spawned
+child fire is at a different position in the entity list (fire numbering shifts by one) while every
+gameplay RNG draw count is identical, so which fire receives which random number changes from there.
+- Hypothesis, unverified: entities take a free slot in the fixed 512-slot `EntityHandleTable`
+  (0x0049B9E0), and which slots are free depends on earlier lifetimes that the simulation doesn't decide.
+- Instrument `roc_SpawnEntity` 0x0049D4C0 / `EntityManager::FlushSpawnQueue` 0x0049C670: for each
+  spawn, log the slot / list position, and which slots were free.
+- Fix candidates: a deterministic slot pick, or a full handle-table reset at `LoadLevel`.
+- Tools: `demo_firediff.py` (heat / spread lines by slot), `demo_compare.py`, `demo_scriptdiff.py`.
 
-**Success criterion:** victim hash and entity count identical between two playbacks for a
-whole level. Then rerun with a run that carries a victim and hoses a fire.
+Done already (runs 8-13, `README.md` "Resumed"):
+- script timing: replays;
+- the small-fire counter: 0 at every load;
+- fire strength: distance to the player;
+- the uninitialised `fire+0xB8`: fixed by the zero-filled heap;
+- GameClock +0x50 / +0x54: fed back on playback;
+- the clock imports' thunks: no callers.
+
+**Success criterion:** victim hash and entity count identical between the recording and every
+playback for a whole level, several runs in a row (now: 2 of the last 3). Then rerun with a run that carries a victim and hoses a fire.
 
 **After that, productising** (FDNYCore services, not a probe):
 - a clock override service (extend `pause`, which already owns GameClock calls);

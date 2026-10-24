@@ -10,7 +10,7 @@ and shown as a transparent model while playing a level.
 | | Verdict | Why |
 |---|---|---|
 | Genesis / FDNY demo feature | **none exists** | no demo / record / playback / timedemo / journal strings or code in `FDNYFirefighter.exe` or `Genesis.dll`; the Genesis3D 1.1 source has DirectPlay netcode (`CSNetMgr.c`, `Netplay.c`) but no demo recorder, and FDNY imports neither |
-| **Demos** (input replay, Hourglass-style, in-process) | **MODERATE-HARD, open-ended; not a rewrite** | four hook points, no engine change. The **player** replays bit-exact. The **world** (fires, roaming victims) still diverges from the first load frames: 3 sources of non-determinism found and controlled in this spike, at least 1 left (level-script / fire start-up timing) |
+| **Demos** (input replay, Hourglass-style, in-process) | **MODERATE** since 2026-10-24 (was MODERATE-HARD, open-ended); not a rewrite. See "Resumed 2026-10-24" at the end | four hook points, no engine change. The **player** replays bit-exact. The **world** (fires, roaming victims) still diverges from the first load frames: 3 sources of non-determinism found and controlled in this spike, at least 1 left (level-script / fire start-up timing) |
 | **Ghosts** | **EASY (box) / MODERATE (firefighter model)**, no determinism needed | the player's position / view per frame is already read by the core's `state` service; translucent world boxes exist (`gfx::SubmitWorldBoxes`); the game ships `firefighter.act` and Genesis.dll exports `geActor_SetAlpha` / `geActor_SetBlendingType` (unused by the game) |
 
 **Recommendation:** build ghosts (box first, model second) as an FDNYCore practice feature. Keep
@@ -124,3 +124,37 @@ victims (carrying, hosing, the RescueBot) would desync. To get there:
 | `run1/` | v1: log, recording and playback 1 traces |
 | `run2/`, `run3/`, `run6/` | logs of the intermediate probe versions (`run6/` is 6b, the same-predecessor run; run 4, 5 and 6's logs are quoted above, not kept) |
 | `run7/` | final probe: log (load-frame census, RNG histograms), traces of the recording and two playbacks, entity dumps, `compare.txt` |
+
+## Resumed 2026-10-24: runs 8-13, the remaining world non-determinism
+
+Picked up at `STATUS.md` 7B (fire spread differed at load frame 3).
+
+| Run | Probe change | Found |
+|---|---|---|
+| 8 | script timeline: every `ScriptActor::ExecCommand` 0x00470150 and fire size-keyframe start (`FUN_00447920`) per slot | **the level script replays identically** (1130 commands, same slots, same relative times). `ScriptActor::Tick` 0x00470740 waits on `g_gameTimeMs` (actor +0x48), which is controlled |
+| 8b | the small-fire counter `DAT_00502B90` per load frame | it scales the spread delay (`TrySpawnSpreadFire` +0x4CA: delay / (const / counter)) but is 0 at every load: not the cause |
+| 9 | every `TrySpawnSpreadFire` call: fire index, gate inputs, call path | different **fires** attempt to spread at load frame 3 in each run, all via `SetFireStrength` (0x00448320) from the fire vtable slot 18 handler 0x004483A0 |
+| 10 | that handler: its argument and the vector it measures from | fire strength = Chebyshev distance from the **player** (`max(abs(dx), abs(dy), abs(dz))`, the arg is the PlayerRescueEnt) to the fire (+0x7C..+0x84): identical in every run |
+| 10b | the handler's gates | **`FireRescueEnt+0xB8` is uninitialised**: values like 0, 69, -980352690. The handler runs only for 0 <= +0xB8 < 4, and the only writer is `inc [esi+0xB8]` (0x00448533; `re_fieldwrites.py`). An original game bug: which fires take their first heat, and spread, depends on leftover heap bytes. It is random in the vanilla game too |
+| 11 | zero every `operator_new` block (0x004A5A84) | **play 1 identical to the recording on every reliable signal over 3466 frames (58 s)**: player, mission time, RNG draw counts and callers (gameplay and cosmetic), victims, entity count, entity dumps. Play 3 (after a diverged run, so different leftover heap) still differed in fire count |
+| 12 | zero-fill the whole heap: `HEAP_ZERO_MEMORY` in `ntdll!RtlAllocateHeap` / `RtlReAllocateHeap` (covers malloc and realloc growth) | the two playbacks now agree exactly with each other; both differ from the recording from frame 49 (one more fire) |
+| 13 | also feed GameClock +0x50 / +0x54 (1/dt and the next field; `RescueHud::Update` reads +0x54); spread log to 150 slots | **play 3 identical to the recording on every reliable signal over 3464 frames.** Play 1 identical until frame 101: at frame 106 the fire numbering shifts by one (a new fire is in a different list position), while every gameplay RNG draw count stays identical |
+
+Also checked: the exe's import thunks for `timeGetTime` / `GetTickCount` / QPC / `GetAsyncKeyState`
+have no callers (`re_thunkcallers.py`), so the time sources found in the first scan are complete.
+
+**Remaining (open):** in some runs a spawned child fire ends up at a different position in the
+entity list. Draw counts per site stay equal, but which fire gets which random number changes.
+Hypothesis, not verified: entities take a free slot in the fixed 512-slot `EntityHandleTable`
+(0x0049B9E0), and which slots are free depends on earlier, non-simulated lifetimes. Next step:
+log each spawn's list / handle position around frames 100-110, and how `EntityList` /
+`EntityHandleTable` pick a slot.
+
+**Verdict update:** full demos are **MODERATE** now, no longer open-ended. With time, input and
+RNG fed, presentation RNG split, a fixed predecessor and a zero-filled heap, a 58 s bank replay
+was bit-identical on every reliable measure in 2 of the last 3 identical-setting playbacks. One
+source is left, and it is identified to the spawn / list-order step.
+
+Files: `run13/` (log, traces, script timelines with the heat / spread lines, `compare.txt`,
+`firediff_*.txt`); probe helpers `demo_scriptdiff.py`, `demo_firediff.py`, `re_refs.py`,
+`re_fieldwrites.py`, `re_thunkcallers.py`.

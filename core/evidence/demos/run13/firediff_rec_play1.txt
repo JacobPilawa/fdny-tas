@@ -1,0 +1,123 @@
+﻿slot 0: 0 fire lines identical
+slot 1: 0 fire lines identical
+slot 2: 0 fire lines identical
+slot 3: 77 fire lines identical
+slot 4: 86 fire lines identical
+slot 5: 86 fire lines identical
+slot 6: 86 fire lines identical
+slot 7: 92 fire lines identical
+slot 8: 94 fire lines identical
+slot 9: 94 fire lines identical
+slot 10: 94 fire lines identical
+slot 11: 94 fire lines identical
+slot 12: 94 fire lines identical
+slot 13: 94 fire lines identical
+slot 14: 94 fire lines identical
+slot 15: 94 fire lines identical
+slot 16: 94 fire lines identical
+slot 17: 94 fire lines identical
+slot 18: 94 fire lines identical
+slot 19: 94 fire lines identical
+slot 20: 94 fire lines identical
+slot 21: 13 fire lines identical
+slot 22: 13 fire lines identical
+slot 23: 13 fire lines identical
+slot 24: 13 fire lines identical
+slot 25: 13 fire lines identical
+slot 26: 13 fire lines identical
+slot 27: 13 fire lines identical
+slot 28: 13 fire lines identical
+slot 29: 13 fire lines identical
+slot 30: 13 fire lines identical
+slot 31: 13 fire lines identical
+slot 32: 13 fire lines identical
+slot 33: 13 fire lines identical
+slot 34: 13 fire lines identical
+slot 35: 13 fire lines identical
+slot 36: 13 fire lines identical
+slot 37: 14 fire lines identical
+slot 38: 14 fire lines identical
+slot 39: 14 fire lines identical
+slot 40: 14 fire lines identical
+slot 41: 14 fire lines identical
+slot 42: 14 fire lines identical
+slot 43: 14 fire lines identical
+slot 44: 14 fire lines identical
+slot 45: 14 fire lines identical
+slot 46: 14 fire lines identical
+slot 47: 14 fire lines identical
+slot 48: 14 fire lines identical
+slot 49: 14 fire lines identical
+slot 50: 14 fire lines identical
+slot 51: 14 fire lines identical
+slot 52: 14 fire lines identical
+slot 53: 14 fire lines identical
+slot 54: 14 fire lines identical
+slot 55: 14 fire lines identical
+slot 56: 14 fire lines identical
+slot 57: 14 fire lines identical
+slot 58: 14 fire lines identical
+slot 59: 14 fire lines identical
+slot 60: 14 fire lines identical
+slot 61: 14 fire lines identical
+slot 62: 14 fire lines identical
+slot 63: 14 fire lines identical
+slot 64: 14 fire lines identical
+slot 65: 14 fire lines identical
+slot 66: 14 fire lines identical
+slot 67: 14 fire lines identical
+slot 68: 14 fire lines identical
+slot 69: 14 fire lines identical
+slot 70: 14 fire lines identical
+slot 71: 14 fire lines identical
+slot 72: 14 fire lines identical
+slot 73: 14 fire lines identical
+slot 74: 14 fire lines identical
+slot 75: 14 fire lines identical
+slot 76: 14 fire lines identical
+slot 77: 14 fire lines identical
+slot 78: 14 fire lines identical
+slot 79: 14 fire lines identical
+slot 80: 14 fire lines identical
+slot 81: 14 fire lines identical
+slot 82: 14 fire lines identical
+slot 83: 14 fire lines identical
+slot 84: 14 fire lines identical
+slot 85: 14 fire lines identical
+slot 86: 14 fire lines identical
+slot 87: 14 fire lines identical
+slot 88: 14 fire lines identical
+slot 89: 14 fire lines identical
+slot 90: 14 fire lines identical
+slot 91: 14 fire lines identical
+slot 92: 14 fire lines identical
+slot 93: 14 fire lines identical
+slot 94: 14 fire lines identical
+slot 95: 14 fire lines identical
+slot 96: 14 fire lines identical
+slot 97: 14 fire lines identical
+slot 98: 14 fire lines identical
+slot 99: 14 fire lines identical
+slot 100: 14 fire lines identical
+slot 101: 14 fire lines identical
+slot 102: 15 fire lines identical
+slot 103: 15 fire lines identical
+slot 104: 15 fire lines identical
+slot 105: 15 fire lines identical
+slot 106: DIFFER (15 vs 14 lines)
+  [7] A spread fire#75 str 452.000 s128 1.000 ext.x 0.000 timer-now due gate48 0 via 448393<448451
+      B spread fire#75 str 481.000 s128 1.000 ext.x 18.528 timer-now due gate48 0 via 448393<448451
+  [8] A spread fire#76 str 481.000 s128 1.000 ext.x 18.528 timer-now due gate48 0 via 448393<448451
+      B spread fire#76 str 697.000 s128 1.000 ext.x 16.617 timer-now due gate48 0 via 448393<448451
+  [9] A spread fire#77 str 697.000 s128 1.000 ext.x 16.617 timer-now due gate48 0 via 448393<448451
+      B spread fire#77 str 492.000 s128 1.000 ext.x 10.923 timer-now due gate48 0 via 448393<448451
+  [10] A spread fire#78 str 492.000 s128 1.000 ext.x 10.923 timer-now due gate48 0 via 448393<448451
+      B spread fire#78 str 577.000 s128 1.000 ext.x 26.660 timer-now due gate48 0 via 448393<448451
+  [11] A spread fire#79 str 577.000 s128 1.000 ext.x 26.660 timer-now due gate48 0 via 448393<448451
+      B spread fire#79 str 708.000 s128 1.000 ext.x 10.469 timer-now due gate48 0 via 448393<448451
+  [12] A spread fire#80 str 708.000 s128 1.000 ext.x 10.469 timer-now due gate48 0 via 448393<448451
+      B spread fire#80 str 541.000 s128 1.000 ext.x 13.810 timer-now due gate48 0 via 448393<448451
+  [13] A spread fire#81 str 541.000 s128 1.000 ext.x 13.810 timer-now due gate48 0 via 448393<448451
+      B spread fire#82 str 589.000 s128 1.000 ext.x 1.264 timer-now due gate48 0 via 448393<448451
+  [14] A spread fire#83 str 589.000 s128 1.000 ext.x 1.264 timer-now due gate48 0 via 448393<448451
+      B -
