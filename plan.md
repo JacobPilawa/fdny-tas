@@ -562,3 +562,12 @@ than being fully designed upfront"):
 None of these are scoped, and shouldn't be until Phase 3 and Phase 8
 have actually run against the real game and produced a concrete reason
 to build the next piece.
+
+## Host-side follow-ups (the VM copy has no `environment/packer/`)
+
+- **2026-10-24, GitHub CLI.** `get_gh.ps1` / `install_gh.ps1` (gh 2.102.0, SHA-256 checked) were
+  added and run on the VM, but the Packer template and `environment/packer/scripts/provision.ps1`
+  only exist in the host's copy of the repo. Add the two calls to `provision.ps1` there, after
+  git (`get_gh.ps1`, then `install_gh.ps1`), and upload the scripts in the `.pkr.hcl` file
+  block if it lists them by name, so a rebuilt VM includes gh. Login stays manual: the owner's
+  fine-grained token.

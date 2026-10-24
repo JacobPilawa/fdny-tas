@@ -28,6 +28,12 @@ origin). The owner reads and edits from another machine, so **`git pull` before
 starting work**. Never commit a file over 100 MB (GitHub rejects it), the game's
 binaries, or the Ghidra project's `.rep` (it contains the game's bytes).
 Enable the tracked hooks once per clone: `git config core.hooksPath .githooks`.
+The GitHub CLI is at `environment\local\tools\gh\bin\gh.exe` (not on PATH; `get_gh.ps1` /
+`install_gh.ps1`, pinned in `config.ps1`) for PRs, Actions runs and releases. The owner logs
+it in with a fine-grained token scoped to this repo; never ask for or handle the token.
+`gh` shells out to git, so put `environment\local\tools\git\cmd` on PATH first. The token
+can't upload SSH keys (the 403 on `user/keys` at login is expected); git keeps the deploy key.
+One branch per feature or fix, merged through a PR; don't commit straight to `main` / `fdny-bxt`.
 
 **FDNYCore (`core/`) has its own rules:** `core/CLAUDE.md` (loaded when
 working there), `core/DECISIONS.md`, and the `new-feature` skill

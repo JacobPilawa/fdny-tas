@@ -108,6 +108,18 @@ $GitAssetName     = "PortableGit-${GitVersion}-64-bit.7z.exe"
 $GitDownloadUrl   = "https://github.com/git-for-windows/git/releases/download/v2.55.0.windows.5/${GitAssetName}"
 $GitInstallDir    = Join-Path $ToolsDir 'git'
 
+# --- GitHub CLI (gh) ---
+# PRs (open / review / merge), Actions run results, releases. Portable zip, not on PATH
+# (like git): environment\local\tools\gh\bin\gh.exe. Pinned to a release at least two
+# weeks old when chosen (2026-10-24). Login is the owner's: a fine-grained token scoped to
+# this repo, `gh.exe auth login --with-token`; stored in the user profile, never the repo.
+$GhVersion          = '2.102.0'
+$GhAssetName        = "gh_${GhVersion}_windows_amd64.zip"
+$GhDownloadUrl      = "https://github.com/cli/cli/releases/download/v${GhVersion}/${GhAssetName}"
+$GhChecksumsUrl     = "https://github.com/cli/cli/releases/download/v${GhVersion}/gh_${GhVersion}_checksums.txt"
+$GhInstallDir       = Join-Path $ToolsDir 'gh'
+$GhExe              = Join-Path $GhInstallDir 'bin\gh.exe'
+
 # --- Ghidra project (written by environment/scripts/config_ghidra.ps1) ---
 
 $GhidraProjectDir  = Join-Path $ToolsDir 'ghidra_projects'
