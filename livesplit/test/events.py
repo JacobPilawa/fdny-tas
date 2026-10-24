@@ -5,6 +5,8 @@ Windows performance counter, seconds) and the game's own clock (ms, one tick per
   - gameState (0 menu, 2 loading, 3 level start, 1 playing) and the current map;
   - the mission result (PlayerRescueEnt+0x3438): 0 -> 1 is the frame the game declares
     the win (core/evidence/autosplitter);
+  - the level-change request byte (GameSession+0x68C): 0 -> 1 is the exit-touch frame
+    (GameSession::RequestLevelChange), 1 -> 0 the load start;
   - pendingMap and the victim counters, for reading the log.
 These are the game's own values, not the splitter's: a stage is done when its load
 starts (gameState 1 -> 2 with the next stage pending), a level when the result turns 1.
@@ -62,6 +64,12 @@ def main():
         except Exception:
             return None
 
+    def u8(off, *chain):
+        try:
+            return pm.read_bytes(deep(off, *chain), 1)[0]
+        except Exception:
+            return None
+
     def text(off, *chain):
         try:
             return pm.read_bytes(deep(off, *chain), 16).split(b"\0")[0].decode("latin-1")
@@ -72,6 +80,8 @@ def main():
         "gameState": lambda: i32(0x102AAC, 0x6F0),
         "map": lambda: text(0x102AAC, 0x688, 0x0, 0xC),
         "pendingMap": lambda: text(0x102AAC, 0x660, 0xC),
+        # GameSession+0x68C: set by RequestLevelChange (the exit touch), cleared at the load start
+        "levelChange": lambda: u8(0x102AAC, 0x68C),
         "result": lambda: i32(0x103A78, 0x30, 0x3438),
         "total": lambda: i32(0x103A78, 0x30, 0x3528),
         "delivered": lambda: i32(0x103A78, 0x30, 0x352C),

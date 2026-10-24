@@ -220,6 +220,12 @@ Hist g_recHist[kSlots], g_playHist[kSlots];
 Hist* g_hist;  // the array being filled, or null
 void* g_histOn;  // == g_hist, for HookNext (declared before Hist)
 int g_slot = -1;
+int CurrentSlot() { return g_slot; }
+extern HANDLE g_scriptLog;
+void CloseScriptLog() {
+    if (g_scriptLog != INVALID_HANDLE_VALUE) CloseHandle(g_scriptLog);
+    g_scriptLog = INVALID_HANDLE_VALUE;
+}
 
 void Count(uint32_t site) {
     if (!g_hist || g_slot < 0 || g_slot >= kSlots) return;
@@ -305,6 +311,177 @@ void OnLoadLevel();  // below
 void __fastcall HookLoadLevel(void* self, void* edx, void* arg) {
     OnLoadLevel();
     g_origLoadLevel(self, edx, arg);
+}
+
+// v8: the script timeline from LoadLevel on, one file per run (zz_demoprobe_script_<tag>.txt):
+// every ScriptActor::ExecCommand 0x00470150 (thiscall, 2 stack args, RET 8: the command
+// String, a flag) with the actor's name (+0x24), and every fire size-keyframe start
+// FUN_00447920 (thiscall, 4 stack args, RET 0x10: size x/y/z ints, duration), with the slot
+// (frame since LoadLevel) and g_gameTimeMs. Run 7: fire spread first differs at load frame 3,
+// and its gate reads the size keyframes the level script schedules.
+HANDLE g_scriptLog = INVALID_HANDLE_VALUE;
+int g_execDepth;
+
+// A game String: its 4 bytes point at a rep whose chars start at +0xC (the ASL paths read
+// names that way). Passed by value the stack slot holds the rep pointer itself.
+void StringText(uint32_t rep, char* out, int cap) {
+    out[0] = 0;
+    if (!rep) return;
+    int i = 0;
+    for (; i < cap - 1; ++i) {
+        const char c = Rd<char>(rep + 0xC + i);
+        if (!c) break;
+        out[i] = (c >= 32 && c < 127) ? c : '?';
+    }
+    out[i] = 0;
+}
+
+void ScriptLine(const char* fmt, ...) {
+    if (g_scriptLog == INVALID_HANDLE_VALUE) return;
+    char buf[600];
+    va_list ap;
+    va_start(ap, fmt);
+    int o = wvsprintfA(buf, fmt, ap);
+    va_end(ap);
+    buf[o++] = '\r', buf[o++] = '\n';
+    DWORD w;
+    WriteFile(g_scriptLog, buf, o, &w, nullptr);
+}
+
+int CurrentSlot();  // below
+
+constexpr uintptr_t kExecCommand = 0x00470150, kBeginSize = 0x00447920;
+using ExecFn = void(__fastcall*)(void* self, void* edx, uint32_t str, uint32_t flag);
+ExecFn g_origExec;
+void __fastcall HookExec(void* self, void* edx, uint32_t str, uint32_t flag) {
+    if (g_scriptLog != INVALID_HANDLE_VALUE) {
+        char name[48], cmd[200];
+        StringText(Rd<uint32_t>(reinterpret_cast<uintptr_t>(self) + 0x24), name, sizeof(name));
+        StringText(str, cmd, sizeof(cmd));
+        ScriptLine("%d %lu %d exec '%s' %s", CurrentSlot(), Rd<uint32_t>(0x00502AFC), g_execDepth, name, cmd);
+    }
+    ++g_execDepth;
+    g_origExec(self, edx, str, flag);
+    --g_execDepth;
+}
+
+using BeginSizeFn = char(__fastcall*)(void* self, void* edx, int x, int y, int z, uint32_t dur);
+BeginSizeFn g_origBeginSize;
+char __fastcall HookBeginSize(void* self, void* edx, int x, int y, int z, uint32_t dur) {
+    if (g_scriptLog != INVALID_HANDLE_VALUE) {
+        float d;
+        __builtin_memcpy(&d, &dur, 4);
+        const long ms = static_cast<long>(d * 1000.0f);
+        const uintptr_t e = reinterpret_cast<uintptr_t>(self);  // the fire entity (FireFx at +0x12C)
+        ScriptLine("%d %lu - size fire at %08lx %08lx %08lx: %d %d %d dur %ld ms", CurrentSlot(), Rd<uint32_t>(0x00502AFC),
+                   Rd<uint32_t>(e + 0x4C), Rd<uint32_t>(e + 0x50), Rd<uint32_t>(e + 0x54), x, y, z, ms);
+    }
+    return g_origBeginSize(self, edx, x, y, z, dur);
+}
+
+// v9: every FireRescueEnt::TrySpawnSpreadFire 0x00447A90 (thiscall, no args, plain RET) in the
+// first 20 slots, with the fire's index among the fires in the entity list, its gate inputs and
+// the call path. v8: script timeline identical, small-fire counter 0 at every load, yet a
+// different number of spread attempts at load frame 3.
+const char* F(uint32_t bits, char* b);  // below
+constexpr uintptr_t kTrySpread = 0x00447A90;
+using TrySpreadFn = void(__fastcall*)(void* self, void* edx);
+TrySpreadFn g_origTrySpread;
+
+int FireIndex(uintptr_t fire) {
+    const uintptr_t s = Rd<uintptr_t>(0x00502AAC);
+    uint32_t node = s ? Rd<uint32_t>(s + 0x64) : 0;
+    for (int guard = 0, i = 0; node && guard < 4096; ++guard) {
+        const uint32_t e = Rd<uint32_t>(node);
+        if (e && Rd<int32_t>(e + 0x18) == 6) {
+            if (e == fire) return i;
+            ++i;
+        }
+        node = Rd<uint32_t>(node + 4);
+    }
+    return -1;
+}
+
+__attribute__((noinline)) void __fastcall HookTrySpread(void* self, void* edx) {
+    if (g_scriptLog != INVALID_HANDLE_VALUE && CurrentSlot() >= 0 && CurrentSlot() <= 150)  /* v13 */ {
+        const uintptr_t f = reinterpret_cast<uintptr_t>(self);
+        const uint32_t now = Rd<uint32_t>(0x00502AFC);
+        const uint32_t* sp = static_cast<const uint32_t*>(__builtin_frame_address(0));
+        uint32_t c[2] = {static_cast<uint32_t>(reinterpret_cast<uintptr_t>(__builtin_return_address(0))), 0};
+        for (int i = 2; i < 96 && !c[1]; ++i)
+            if (sp[i] != c[0] && sp[i] > 0x00401005 && sp[i] < 0x004CC000 && Rd<uint8_t>(sp[i] - 5) == 0xE8) c[1] = sp[i];
+        char s1[24], s2[24], ex[24];
+        ScriptLine("%d %lu - spread fire#%d str %s s128 %s ext.x %s timer-now %ld gate48 %ld via %lx<%lx", CurrentSlot(),
+                   now, FireIndex(f), F(Rd<uint32_t>(f + 0x120), s1), F(Rd<uint32_t>(f + 0x128), s2),
+                   F(Rd<uint32_t>(f + 0x12C + 0x44), ex), static_cast<long>(Rd<uint32_t>(f + 0x124)) - static_cast<long>(now),
+                   Rd<int32_t>(Rd<uint32_t>(f + 0x48) + 4), c[0], c[1]);
+    }
+    g_origTrySpread(self, edx);
+}
+
+// v10: the virtual that reaches TrySpawnSpreadFire: FireRescueEnt vtable 0x004E1780 slot 18
+// (+0x48) = 0x004483A0 (thiscall, 1 stack arg, RET 4; arg->vtbl[3]() stored in 0x00502B94,
+// then SetFireStrength). v9: different fires get it in each run at load frame 3.
+constexpr uintptr_t kFireSlot18 = 0x004483A0;
+using Slot18Fn = void(__fastcall*)(void* self, void* edx, void* arg);
+Slot18Fn g_origSlot18;
+__attribute__((noinline)) void __fastcall HookSlot18(void* self, void* edx, void* arg) {
+    if (g_scriptLog != INVALID_HANDLE_VALUE && CurrentSlot() >= 0 && CurrentSlot() <= 20) {
+        const uint32_t* sp = static_cast<const uint32_t*>(__builtin_frame_address(0));
+        uint32_t c[4] = {static_cast<uint32_t>(reinterpret_cast<uintptr_t>(__builtin_return_address(0))), 0, 0, 0};
+        int n = 1;
+        for (int i = 2; i < 160 && n < 4; ++i)
+            if (sp[i] != c[n - 1] && sp[i] > 0x00401005 && sp[i] < 0x004CC000 && Rd<uint8_t>(sp[i] - 5) == 0xE8)
+                c[n++] = sp[i];
+        const uintptr_t a = reinterpret_cast<uintptr_t>(arg);
+        // the vector the strength is measured from: arg->vtbl[3]() (thiscall, no args), and the
+        // player's position, to see which it is
+        using VecFn = const float*(__fastcall*)(void* self, void* edx);
+        const float* v = a ? reinterpret_cast<VecFn>(Rd<uint32_t>(Rd<uint32_t>(a) + 0xC))(arg, nullptr) : nullptr;
+        const uintptr_t eg = Rd<uintptr_t>(0x00503A78), pl = eg ? Rd<uintptr_t>(eg + 0x30) : 0;
+        const uintptr_t fs = reinterpret_cast<uintptr_t>(self);
+        char v0[24], v1[24], v2[24], p0[24], p1[24], p2[24], f0[24], f1[24], f2[24];
+        ScriptLine("%d %lu - heat fire#%d m70 %ld b8 %ld at %s %s %s from %s %s %s player %s %s %s arg %08lx player %08lx vtbl %08lx "
+                   "via %lx<%lx<%lx<%lx",
+                   CurrentSlot(), Rd<uint32_t>(0x00502AFC), FireIndex(fs), Rd<int32_t>(fs + 0x70), Rd<int32_t>(fs + 0xB8),
+                   F(Rd<uint32_t>(fs + 0x7C), f0),
+                   F(Rd<uint32_t>(fs + 0x80), f1), F(Rd<uint32_t>(fs + 0x84), f2),
+                   F(v ? Bits(v[0]) : 0, v0), F(v ? Bits(v[1]) : 0, v1), F(v ? Bits(v[2]) : 0, v2),
+                   F(Rd<uint32_t>(pl + 0x4C), p0), F(Rd<uint32_t>(pl + 0x50), p1), F(Rd<uint32_t>(pl + 0x54), p2),
+                   static_cast<unsigned long>(a), static_cast<unsigned long>(pl), a ? Rd<uint32_t>(a) : 0, c[0], c[1],
+                   c[2], c[3]);
+    }
+    g_origSlot18(self, edx, arg);
+}
+
+// v11: zero every operator_new block (0x004A5A84: cdecl (size), loops on malloc, plain RET),
+// libTAS-style, from game start. v10: FireRescueEnt+0xB8 (a "heat taken" counter, only ever
+// incremented, gate 0..3 in the slot-18 handler) is never initialised: it holds whatever the
+// heap had, so which fires take heat / set strength / spread at load frame 3 varies per load.
+constexpr uintptr_t kOperatorNew = 0x004A5A84;
+using NewFn = void*(__cdecl*)(uint32_t n);
+NewFn g_origNew;
+uint32_t g_zeroed;  // blocks zeroed (logged)
+void* __cdecl HookNew(uint32_t n) {
+    void* p = g_origNew(n);
+    if (p) {
+        __builtin_memset(p, 0, n);
+        ++g_zeroed;
+    }
+    return p;
+}
+
+// v12: every heap allocation / reallocation in the process zero-filled (HEAP_ZERO_MEMORY in
+// ntdll!RtlAllocateHeap / RtlReAllocateHeap, under the CRT's malloc / realloc). v11 zeroed
+// operator_new only: play 3 (whose predecessor run had diverged, so other leftover heap) still
+// differed in the fire count; arrays grown by realloc (SArray, NameTree pools) were not covered.
+using RtlAllocFn = void*(WINAPI*)(void* heap, ULONG flags, SIZE_T n);
+using RtlReAllocFn = void*(WINAPI*)(void* heap, ULONG flags, void* p, SIZE_T n);
+RtlAllocFn g_origRtlAlloc;
+RtlReAllocFn g_origRtlReAlloc;
+void* WINAPI HookRtlAlloc(void* heap, ULONG flags, SIZE_T n) { return g_origRtlAlloc(heap, flags | 0x8, n); }
+void* WINAPI HookRtlReAlloc(void* heap, ULONG flags, void* p, SIZE_T n) {
+    return g_origRtlReAlloc(heap, flags | 0x8, p, n);
 }
 
 using GetDataFn = HRESULT(__stdcall*)(void* self, DWORD cb, void* data, DWORD* inout, DWORD flags);
@@ -486,6 +663,7 @@ void EndPlayback(const char* why) {
     Dump(name, g_play, g_frame);
     CompareHists();
     g_hist = nullptr, g_histOn = nullptr, g_split = false;
+    CloseScriptLog();
     g_mode = IDLE;
 }
 
@@ -513,6 +691,11 @@ void OnLoadLevel() {
         g_loadE0 = Rd<uint32_t>(kClock + 0x44), g_loadFrames = 0, g_loadSeen = true;
         g_hist = g_mode == ARM_REC ? g_recHist : g_playHist;
         g_histOn = g_hist;
+        char path[MAX_PATH];  // v8: the script timeline of this run
+        if (g_mode == ARM_REC) wsprintfA(path, "%szz_demoprobe_script_rec.txt", g_dir);
+        else wsprintfA(path, "%szz_demoprobe_script_play%d.txt", g_dir, g_playNo + 1);
+        if (g_scriptLog != INVALID_HANDLE_VALUE) CloseHandle(g_scriptLog);
+        g_scriptLog = CreateFileA(path, GENERIC_WRITE, FILE_SHARE_READ, nullptr, CREATE_ALWAYS, 0, nullptr);
         g_split = true, g_private = 0x9E3779B9u;  // same seed in both runs
         for (int i = 0; i < kSlots; ++i) g_hist[i].n = 0;
         g_slot = 0;
@@ -521,12 +704,12 @@ void OnLoadLevel() {
         Read(kMtState, g_recMt, kMtBytes);
         g_recMtLeft = Rd<int32_t>(kMtLeft), g_recMtNext = Rd<uint32_t>(kMtNext);
         g_rngAtLoad = true;
-        Log("LoadLevel: rng saved (left %ld)", g_recMtLeft);
+        Log("LoadLevel: rng saved (left %ld); small-fire counter DAT_00502B90 = %ld; blocks zeroed so far %lu", g_recMtLeft, Rd<int32_t>(0x00502B90), g_zeroed);
     } else if (g_mode == ARM_PLAY && g_playRng && g_rngAtLoad) {
         __builtin_memcpy(reinterpret_cast<void*>(kMtState), g_recMt, kMtBytes);
         *reinterpret_cast<int32_t*>(kMtLeft) = g_recMtLeft;
         *reinterpret_cast<uint32_t*>(kMtNext) = g_recMtNext;
-        Log("LoadLevel: rng restored (left %ld)", g_recMtLeft);
+        Log("LoadLevel: rng restored (left %ld); small-fire counter DAT_00502B90 = %ld", g_recMtLeft, Rd<int32_t>(0x00502B90));
     }
 }
 
@@ -621,6 +804,7 @@ void __fastcall HookTick(void* self, void* edx) {
             Log("record STOP (F7): %d frames, %d input bytes", g_recFrames, g_inLen);
             Dump("zz_demoprobe_rec.txt", g_rec, g_recFrames);
             g_recSlots = g_slot, g_hist = nullptr, g_histOn = nullptr, g_split = false;
+            CloseScriptLog();
             g_mode = IDLE;
         }
     }
@@ -668,8 +852,8 @@ void __fastcall HookTick(void* self, void* edx) {
             }
             char eb[24];
             Log("  load slot %d: state %d ents %d fires %d (timer due %d) sum ext.x %s sum timer-now %ld ms, "
-                "draws in prev slot %lu", g_slot, gstate, ents, fires, armed, F(Bits(ext), eb), timers,
-                g_slot > 0 && g_hist ? static_cast<unsigned long>(g_hist[g_slot - 1].n) : 0UL);
+                "draws in prev slot %lu, small-fire counter %ld", g_slot, gstate, ents, fires, armed, F(Bits(ext), eb), timers,
+                g_slot > 0 && g_hist ? static_cast<unsigned long>(g_hist[g_slot - 1].n) : 0UL, Rd<int32_t>(0x00502B90));
         }
         if (!(g_seenLoad && gstate == 1)) return;
         Log("level start after %d load frames (LoadLevel %s)", g_loadFrames, g_loadSeen ? "seen" : "NOT seen");
@@ -704,6 +888,7 @@ void __fastcall HookTick(void* self, void* edx) {
             Log("record STOP (%s): %d frames, %d input bytes", gstate != 1 ? "level left" : "full", g_recFrames, g_inLen);
             Dump("zz_demoprobe_rec.txt", g_rec, g_recFrames);
             g_recSlots = g_slot, g_hist = nullptr, g_histOn = nullptr, g_split = false;
+            CloseScriptLog();
             g_mode = IDLE;
             return;
         }
@@ -746,6 +931,7 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID) {
     char path[MAX_PATH];
     wsprintfA(path, "%szz_demoprobe.log", g_dir);
     g_log = CreateFileA(path, GENERIC_WRITE, FILE_SHARE_READ, nullptr, CREATE_ALWAYS, 0, nullptr);
+    g_scriptLog = INVALID_HANDLE_VALUE;  // no CRT: don't rely on a dynamic initializer
     Log("demoprobe loaded");
     if (MH_Initialize() != MH_OK && MH_Initialize() != MH_ERROR_ALREADY_INITIALIZED) return TRUE;
     if (MH_CreateHook(reinterpret_cast<void*>(kTick), reinterpret_cast<void*>(&HookTick),
@@ -767,8 +953,26 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID) {
         const char* name;
     } more[] = {{kFloat01, reinterpret_cast<void*>(&HookFloat01), reinterpret_cast<void**>(&g_origFloat01), "Rand_Float01"},
                 {kLoadLevel, reinterpret_cast<void*>(&HookLoadLevel), reinterpret_cast<void**>(&g_origLoadLevel),
-                 "GameSession::LoadLevel"}};
-    for (const auto& h : more) {
+                 "GameSession::LoadLevel"},
+                {kExecCommand, reinterpret_cast<void*>(&HookExec), reinterpret_cast<void**>(&g_origExec),
+                 "ScriptActor::ExecCommand"},
+                {kBeginSize, reinterpret_cast<void*>(&HookBeginSize), reinterpret_cast<void**>(&g_origBeginSize),
+                 "FireRescueEnt BeginSizeKeyframe"},
+                {kTrySpread, reinterpret_cast<void*>(&HookTrySpread), reinterpret_cast<void**>(&g_origTrySpread),
+                 "FireRescueEnt::TrySpawnSpreadFire"},
+                {kFireSlot18, reinterpret_cast<void*>(&HookSlot18), reinterpret_cast<void**>(&g_origSlot18),
+                 "FireRescueEnt vtbl slot 18"},
+                {kOperatorNew, reinterpret_cast<void*>(&HookNew), reinterpret_cast<void**>(&g_origNew),
+                 "operator_new (zero-fill)"}};
+    {  // v12: zero-filled heap, process-wide
+        HMODULE nt = GetModuleHandleA("ntdll.dll");
+        void* ra = nt ? reinterpret_cast<void*>(GetProcAddress(nt, "RtlAllocateHeap")) : nullptr;
+        void* rr = nt ? reinterpret_cast<void*>(GetProcAddress(nt, "RtlReAllocateHeap")) : nullptr;
+        const bool ok = ra && rr && !MH_CreateHook(ra, reinterpret_cast<void*>(&HookRtlAlloc), reinterpret_cast<void**>(&g_origRtlAlloc)) &&
+                        !MH_CreateHook(rr, reinterpret_cast<void*>(&HookRtlReAlloc), reinterpret_cast<void**>(&g_origRtlReAlloc)) &&
+                        !MH_EnableHook(ra) && !MH_EnableHook(rr);
+        Log(ok ? "hooked RtlAllocateHeap / RtlReAllocateHeap (zero-fill)" : "heap zero-fill hooks FAILED");
+    }    for (const auto& h : more) {
         if (MH_CreateHook(reinterpret_cast<void*>(h.at), h.hook, h.orig) || MH_EnableHook(reinterpret_cast<void*>(h.at)))
             Log("hook %s failed", h.name);
         else

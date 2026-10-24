@@ -1,0 +1,97 @@
+[
+  {
+    "check": "script loaded",
+    "pass": true,
+    "detail": "HOST loaded FDNY_ILs.asl, 30 segments, refresh 200 Hz"
+  },
+  {
+    "check": "no script errors",
+    "pass": true,
+    "detail": "none"
+  },
+  {
+    "check": "start count",
+    "pass": true,
+    "detail": "game: 2 run start(s); timer: 2 start(s)"
+  },
+  {
+    "check": "start 1",
+    "pass": true,
+    "detail": "gameplay began 52369.850; timer start 52369.866 (+0.016 s, allowed 0.1)"
+  },
+  {
+    "check": "start 2",
+    "pass": true,
+    "detail": "gameplay began 52414.441; timer start 52414.442 (+0.001 s, allowed 0.1)"
+  },
+  {
+    "check": "split count",
+    "pass": true,
+    "detail": "game: 3 stage end(s)/win(s) (case expects 3); timer: 3 split(s)"
+  },
+  {
+    "check": "split 1 (subway_a -> subway_b) before the load",
+    "pass": true,
+    "detail": "split 0.046 s before the load started (must be before)"
+  },
+  {
+    "check": "split 1 (subway_a -> subway_b) on the touch",
+    "pass": true,
+    "detail": "split +0.012 s after the exit touch (request byte 0 -> 1; allowed -0.02 to +0.05); the byte stayed set 0.058 s, until the load started"
+  },
+  {
+    "check": "split 1 (subway_a -> subway_b)",
+    "pass": true,
+    "detail": "split 0.046 s before the load started (allowed: any time before, or 0.05 s after)"
+  },
+  {
+    "check": "split 1 game time",
+    "pass": true,
+    "detail": "timer 26.4249 s, played 26.435 s over 1 interval(s) (tolerance 0.08)"
+  },
+  {
+    "check": "split 2 (subway_a -> subway_b) before the load",
+    "pass": true,
+    "detail": "split 0.015 s before the load started (must be before)"
+  },
+  {
+    "check": "split 2 (subway_a -> subway_b) on the touch",
+    "pass": true,
+    "detail": "split +0.003 s after the exit touch (request byte 0 -> 1; allowed -0.02 to +0.05); the byte stayed set 0.017 s, until the load started"
+  },
+  {
+    "check": "split 2 (subway_a -> subway_b)",
+    "pass": true,
+    "detail": "split 0.015 s before the load started (allowed: any time before, or 0.05 s after)"
+  },
+  {
+    "check": "split 2 game time",
+    "pass": true,
+    "detail": "timer 26.6154 s, played 26.614 s over 1 interval(s) (tolerance 0.08)"
+  },
+  {
+    "check": "split 3 (subway_b won)",
+    "pass": true,
+    "detail": "split 31 ms (game clock) after the win flag (allowed 0-70)"
+  },
+  {
+    "check": "split 3 game time",
+    "pass": true,
+    "detail": "timer 38.5299 s, played 38.491 s over 2 interval(s) (tolerance 0.10)"
+  },
+  {
+    "check": "reset count",
+    "pass": true,
+    "detail": "game: 2 menu visit(s) during a run; timer: 2 reset(s)"
+  },
+  {
+    "check": "reset 1",
+    "pass": true,
+    "detail": "menu at 52409.128; reset at 52409.142 (+0.014 s, allowed 0.5)"
+  },
+  {
+    "check": "reset 2",
+    "pass": true,
+    "detail": "menu at 52459.817; reset at 52459.821 (+0.004 s, allowed 0.5)"
+  }
+]

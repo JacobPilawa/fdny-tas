@@ -1890,7 +1890,7 @@ mid-play.
 ### 2026-10-23 -- autosplitter: how staged levels and wins look in memory
 Owner report: the LiveSplit splitters split staged levels (boat, subway, oil rig) late.
 Evidence and live traces: `core/evidence/autosplitter/`. New splitters:
-`live split/` (v2, then v2.1; known-good test in `live split/test/`).
+`livesplit/` (v2, then v2.1; known-good test in `livesplit/test/`).
 
 **Stage exit.**
 - The exit trigger's `touch: tell player (finalexitloadmap <next>)` runs
@@ -1964,3 +1964,32 @@ game.
 | Ghost (firefighter model) | MODERATE |
 
 Ghosts need no determinism.
+
+**2026-10-24 addendum (autosplitter v2.2):**
+- `GameSession+0x68C` is the level-change request byte: set only by RequestLevelChange,
+  cleared by RunFrame before LoadLevel.
+- Menu starts never write `pendingMap` (+0x660).
+- After an in-game load, `+0x688` points at the +0x660 block, so the current and pending
+  names are the same string until the next menu start.
+- The exit-touch frame can stall (2.5 s seen once) with the game clock frozen (cause not
+  traced).
+- `core/evidence/autosplitter/README.md`, "v2.2".
+
+### 2026-10-24 -- demos spike resumed: fire start-up non-determinism (core/evidence/demos, runs 8-13)
+
+- **Fire strength** is assigned by the fire vtable slot 18 handler 0x004483A0, which takes the
+  player as its argument: strength = Chebyshev distance (`max(abs(dx), abs(dy), abs(dz))`) from
+  the player to the fire (+0x7C..+0x84). It then calls `SetFireStrength` 0x00448320, which calls
+  `TrySpawnSpreadFire`. The spread delay scales with the small-fire counter `DAT_00502B90`.
+- **Original game bug:** the handler only runs while `FireRescueEnt+0xB8` is in 0..3, and
+  +0xB8 is never initialised (its only writer is `inc` at 0x00448533). Which fires take their
+  first heat, and so spread at load time, depends on leftover heap bytes, and varies per load
+  in the vanilla game.
+- **The level script replays identically** under controlled `g_gameTimeMs`: `ScriptActor::Tick`
+  0x00470740 waits on actor+0x48.
+- **With the heap zero-filled** (`HEAP_ZERO_MEMORY` in `RtlAllocateHeap` / `RtlReAllocateHeap`),
+  plus time, input and RNG fed back and the presentation RNG split, a 58 s bank replay was
+  identical on every reliable measure in 2 of the last 3 playbacks.
+- **Remaining:** a spawned child fire's position in the entity list (frame 106 in one
+  playback). Suspected: free-slot choice in the 512-slot `EntityHandleTable`.
+- **Demos verdict:** MODERATE.

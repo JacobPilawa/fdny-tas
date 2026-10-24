@@ -1,0 +1,27 @@
+﻿  [PASS] script loaded: HOST loaded FDNY_ILs.asl, 30 segments, refresh 200 Hz
+  [PASS] no script errors: none
+  [PASS] start count: game: 2 run start(s); timer: 2 start(s)
+  [PASS] start 1: gameplay began 51520.899; timer start 51520.910 (+0.012 s, allowed 0.1)
+  [PASS] start 2: gameplay began 51567.064; timer start 51567.066 (+0.002 s, allowed 0.1)
+  [PASS] split count: game: 5 stage end(s)/win(s) (case expects 5); timer: 5 split(s)
+  [PASS] split 1 (oil_rig_a -> oil_rig_b) before the load: split 0.018 s before the load started (must be before)
+  [PASS] split 1 (oil_rig_a -> oil_rig_b) on the touch: split +0.006 s after the exit touch (request byte 0 -> 1; allowed -0.02 to +0.05); the byte stayed set 0.025 s, until the load started
+  [PASS] split 1 (oil_rig_a -> oil_rig_b): split 0.018 s before the load started (allowed: any time before, or 0.05 s after)
+  [PASS] split 1 game time: timer 27.3552 s, played 27.359 s over 1 interval(s) (tolerance 0.08)
+  [PASS] split 2 (oil_rig_a -> oil_rig_b) before the load: split 0.024 s before the load started (must be before)
+  [PASS] split 2 (oil_rig_a -> oil_rig_b) on the touch: split +0.001 s after the exit touch (request byte 0 -> 1; allowed -0.02 to +0.05); the byte stayed set 0.025 s, until the load started
+  [PASS] split 2 (oil_rig_a -> oil_rig_b): split 0.024 s before the load started (allowed: any time before, or 0.05 s after)
+  [PASS] split 2 game time: timer 26.1007 s, played 26.102 s over 1 interval(s) (tolerance 0.08)
+  [PASS] split 3 (oil_rig_b -> oil_rig_c) before the load: split 0.104 s before the load started (must be before)
+  [PASS] split 3 (oil_rig_b -> oil_rig_c) on the touch: split +0.001 s after the exit touch (request byte 0 -> 1; allowed -0.02 to +0.05); the byte stayed set 0.105 s, until the load started
+  [PASS] split 3 (oil_rig_b -> oil_rig_c): split 0.104 s before the load started (allowed: any time before, or 0.05 s after)
+  [PASS] split 3 game time: timer 40.198 s, played 40.173 s over 2 interval(s) (tolerance 0.10)
+  [PASS] split 4 (oil_rig_c -> oil_rig_d) before the load: split 2.496 s before the load started (must be before)
+  [PASS] split 4 (oil_rig_c -> oil_rig_d) on the touch: split +0.004 s after the exit touch (request byte 0 -> 1; allowed -0.02 to +0.05); the byte stayed set 2.499 s, until the load started
+  [PASS] split 4 (oil_rig_c -> oil_rig_d): split 2.496 s before the load started (allowed: any time before, or 0.05 s after)
+  [FAIL] split 4 game time: timer 53.3783 s, played 53.247 s over 3 interval(s) (tolerance 0.12)
+  [PASS] split 5 (oil_rig_d won): split 62 ms (game clock) after the win flag (allowed 0-70)
+  [FAIL] split 5 game time: timer 65.2607 s, played 62.593 s over 4 interval(s) (tolerance 0.14)
+  [PASS] reset count: game: 2 menu visit(s) during a run; timer: 2 reset(s)
+  [PASS] reset 1: menu at 51560.503; reset at 51560.514 (+0.011 s, allowed 0.5)
+  [PASS] reset 2: menu at 51641.135; reset at 51641.137 (+0.003 s, allowed 0.5)

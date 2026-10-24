@@ -1,0 +1,107 @@
+demoprobe loaded
+hooked GameClock::Tick
+hooked MT19937_NextU32
+hooked RtlAllocateHeap / RtlReAllocateHeap (zero-fill)
+hooked Rand_Float01
+hooked GameSession::LoadLevel
+hooked ScriptActor::ExecCommand
+hooked FireRescueEnt BeginSizeKeyframe
+hooked FireRescueEnt::TrySpawnSpreadFire
+hooked FireRescueEnt vtbl slot 18
+hooked operator_new (zero-fill)
+dinput8: GetDeviceData hooked at 72f5d770
+armed RECORD: waiting for the next level start
+LoadLevel: rng saved (left 251); small-fire counter DAT_00502B90 = 0; blocks zeroed so far 18372
+  load slot 1: state 2 ents 0 fires 0 (timer due 0) sum ext.x 0.000 sum timer-now 0 ms, draws in prev slot 0, small-fire counter 0
+  load slot 2: state 2 ents 1 fires 0 (timer due 0) sum ext.x 0.000 sum timer-now 0 ms, draws in prev slot 0, small-fire counter 0
+  load slot 3: state 2 ents 192 fires 72 (timer due 72) sum ext.x 0.000 sum timer-now -3765024 ms, draws in prev slot 14, small-fire counter 0
+  load slot 4: state 2 ents 194 fires 77 (timer due 72) sum ext.x 9150.000 sum timer-now -3758902 ms, draws in prev slot 32, small-fire counter 5
+  load slot 5: state 2 ents 194 fires 77 (timer due 72) sum ext.x 9151.424 sum timer-now -3760134 ms, draws in prev slot 4, small-fire counter 5
+  load slot 6: state 1 ents 194 fires 77 (timer due 75) sum ext.x 9152.765 sum timer-now -3895577 ms, draws in prev slot 5, small-fire counter 5
+level start after 5 load frames (LoadLevel seen)
+record START at elapsed 52242 ms (rng left 251)
+record STOP (F7): 3464 frames, 91744 input bytes
+armed PLAYBACK: waiting for the next level start
+LoadLevel: rng restored (left 251); small-fire counter DAT_00502B90 = 0
+  load slot 1: state 2 ents 0 fires 0 (timer due 0) sum ext.x 0.000 sum timer-now 0 ms, draws in prev slot 0, small-fire counter 0
+  load slot 2: state 2 ents 1 fires 0 (timer due 0) sum ext.x 0.000 sum timer-now 0 ms, draws in prev slot 0, small-fire counter 0
+  load slot 3: state 2 ents 192 fires 72 (timer due 72) sum ext.x 0.000 sum timer-now -10391112 ms, draws in prev slot 14, small-fire counter 0
+  load slot 4: state 2 ents 194 fires 77 (timer due 72) sum ext.x 9150.000 sum timer-now -10384990 ms, draws in prev slot 32, small-fire counter 5
+  load slot 5: state 2 ents 194 fires 77 (timer due 72) sum ext.x 9151.424 sum timer-now -10386222 ms, draws in prev slot 4, small-fire counter 5
+  load slot 6: state 1 ents 194 fires 77 (timer due 76) sum ext.x 9152.765 sum timer-now -10565247 ms, draws in prev slot 5, small-fire counter 5
+level start after 5 load frames (LoadLevel seen)
+play 1 START at elapsed 146679 ms
+play 1: other entities (+0x70) first differs at frame 0 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 0/0)
+play 1: entity positions first differs at frame 0 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 0/0)
+play 1: entity count first differs at frame 101 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 0/0)
+play 1 END (end of recording): 3464/3464 frames, time fed, rng restored, frames differing 3464, first at 0, input-call mismatches 0
+play 1 frame 3463: rec pos (-429.131, 824.177) play (-429.131, 824.177) dist^2 0.000
+play 1: GAMEPLAY (main stream) draws identical for all 3470 slots
+play 1: COSMETIC (private stream) draws first differ at slot 234 (0 = inside LoadLevel, k = frame k after it), 9 site(s) [site:rec/play]: 44b3c0:3/0 44b3e1:3/0 44b491:1/0 44b4b2:1/0 480117:10/14 480128:10/14 480139:10/14 4801e4:10/14 4801fa:10/14
+armed PLAYBACK (real time): waiting for the next level start
+LoadLevel: rng restored (left 251); small-fire counter DAT_00502B90 = 0
+  load slot 1: state 2 ents 0 fires 0 (timer due 0) sum ext.x 0.000 sum timer-now 0 ms, draws in prev slot 0, small-fire counter 0
+  load slot 2: state 2 ents 1 fires 0 (timer due 0) sum ext.x 0.000 sum timer-now 0 ms, draws in prev slot 0, small-fire counter 0
+  load slot 3: state 2 ents 192 fires 72 (timer due 72) sum ext.x 0.000 sum timer-now -17991000 ms, draws in prev slot 14, small-fire counter 0
+  load slot 4: state 2 ents 194 fires 77 (timer due 72) sum ext.x 9150.000 sum timer-now -17984878 ms, draws in prev slot 32, small-fire counter 5
+  load slot 5: state 2 ents 194 fires 77 (timer due 72) sum ext.x 9151.424 sum timer-now -17986110 ms, draws in prev slot 4, small-fire counter 5
+  load slot 6: state 1 ents 194 fires 77 (timer due 73) sum ext.x 9152.765 sum timer-now -18056103 ms, draws in prev slot 5, small-fire counter 5
+level start after 5 load frames (LoadLevel seen)
+play 2 START at elapsed 250817 ms
+play 2: other entities (+0x70) first differs at frame 0 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 0/0)
+play 2: entity positions first differs at frame 0 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 0/0)
+play 2: rng draws first differs at frame 1 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 24/8)
+  rec  frame 0 draws: 498b35<447b09 498b35<447b95 498b35<447bbe 498b35<447d4d 498b35<447d7c 498b35<447da7 498b35<447f00 498b35<447f4b 498b35<447b09 498b35<447b95 498b35<447bbe 498b35<447d4d
+  play frame 0 draws: 498b35<447b09 498b35<447b95 498b35<447bbe 498b35<447d4d 498b35<447d7c 498b35<447da7 498b35<447f00 498b35<447f4b
+play 2: entity count first differs at frame 1 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 24/8)
+play 2: dt first differs at frame 2 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 8/0)
+play 2: victims first differs at frame 3 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 0/0)
+play 2: time left +0x343c first differs at frame 4 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 0/0)
+play 2: rng callers first differs at frame 332 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 8/2)
+  rec  frame 331 draws: 498b35<447b09 498b35<447b95 498b35<447bbe 498b35<447d4d 498b35<447d7c 498b35<447da7 498b35<447f00 498b35<447f4b
+  play frame 331 draws: 498b35<48d914 498b35<48d954
+play 2: player position first differs at frame 2293 (rec pos -697.000,1192.417 play -697.000,1192.737; draws 0/0)
+play 2: player velocity first differs at frame 2293 (rec pos -697.000,1192.417 play -697.000,1192.737; draws 0/0)
+play 2 END (end of recording): 3464/3464 frames, time real, rng restored, frames differing 3464, first at 0, input-call mismatches 0
+play 2 frame 3463: rec pos (-429.131, 824.177) play (-429.100, 825.166) dist^2 0.977
+play 2: GAMEPLAY (main stream) draws first differ at slot 6 (0 = inside LoadLevel, k = frame k after it), 8 site(s) [site:rec/play]: 447b09:3/1 447b95:3/1 447bbe:3/1 447d4d:3/1 447d7c:3/1 447da7:3/1 447f00:3/1 447f4b:3/1
+play 2: COSMETIC (private stream) draws first differ at slot 6 (0 = inside LoadLevel, k = frame k after it), 9 site(s) [site:rec/play]: 44b3c0:9/3 44b3e1:9/3 44b491:3/1 44b4b2:3/1 480117:144/140 480128:144/140 480139:144/140 4801e4:144/140 4801fa:144/140
+armed PLAYBACK: waiting for the next level start
+LoadLevel: rng restored (left 251); small-fire counter DAT_00502B90 = 0
+  load slot 1: state 2 ents 0 fires 0 (timer due 0) sum ext.x 0.000 sum timer-now 0 ms, draws in prev slot 0, small-fire counter 0
+  load slot 2: state 2 ents 1 fires 0 (timer due 0) sum ext.x 0.000 sum timer-now 0 ms, draws in prev slot 0, small-fire counter 0
+  load slot 3: state 2 ents 192 fires 72 (timer due 72) sum ext.x 0.000 sum timer-now -25507080 ms, draws in prev slot 14, small-fire counter 0
+  load slot 4: state 2 ents 194 fires 77 (timer due 72) sum ext.x 9150.000 sum timer-now -25500958 ms, draws in prev slot 32, small-fire counter 5
+  load slot 5: state 2 ents 194 fires 77 (timer due 72) sum ext.x 9151.424 sum timer-now -25502190 ms, draws in prev slot 4, small-fire counter 5
+  load slot 6: state 1 ents 194 fires 77 (timer due 73) sum ext.x 9152.765 sum timer-now -25569103 ms, draws in prev slot 5, small-fire counter 5
+level start after 5 load frames (LoadLevel seen)
+play 3 START at elapsed 355167 ms
+play 3: other entities (+0x70) first differs at frame 0 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 0/0)
+play 3: entity positions first differs at frame 0 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 0/0)
+play 3 END (end of recording): 3464/3464 frames, time fed, rng restored, frames differing 3464, first at 0, input-call mismatches 0
+play 3 frame 3463: rec pos (-429.131, 824.177) play (-429.131, 824.177) dist^2 0.000
+play 3: GAMEPLAY (main stream) draws identical for all 3470 slots
+play 3: COSMETIC (private stream) draws identical for all 3470 slots
+armed PLAYBACK (rng not restored): waiting for the next level start
+  load slot 1: state 2 ents 0 fires 0 (timer due 0) sum ext.x 0.000 sum timer-now 0 ms, draws in prev slot 0, small-fire counter 0
+  load slot 2: state 2 ents 1 fires 0 (timer due 0) sum ext.x 0.000 sum timer-now 0 ms, draws in prev slot 0, small-fire counter 0
+  load slot 3: state 2 ents 192 fires 72 (timer due 72) sum ext.x 0.000 sum timer-now -33018048 ms, draws in prev slot 14, small-fire counter 0
+  load slot 4: state 2 ents 194 fires 77 (timer due 72) sum ext.x 9150.000 sum timer-now -33013864 ms, draws in prev slot 32, small-fire counter 5
+  load slot 5: state 2 ents 194 fires 77 (timer due 72) sum ext.x 9151.870 sum timer-now -33015096 ms, draws in prev slot 4, small-fire counter 5
+  load slot 6: state 1 ents 194 fires 77 (timer due 76) sum ext.x 9153.629 sum timer-now -33142916 ms, draws in prev slot 5, small-fire counter 5
+level start after 5 load frames (LoadLevel seen)
+play 4 START at elapsed 460277 ms
+play 4: victims first differs at frame 0 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 0/0)
+play 4: other entities (+0x70) first differs at frame 0 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 0/0)
+play 4: entity positions first differs at frame 0 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 0/0)
+play 4: rng draws first differs at frame 1 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 24/32)
+  rec  frame 0 draws: 498b35<447b09 498b35<447b95 498b35<447bbe 498b35<447d4d 498b35<447d7c 498b35<447da7 498b35<447f00 498b35<447f4b 498b35<447b09 498b35<447b95 498b35<447bbe 498b35<447d4d
+  play frame 0 draws: 498b35<447b09 498b35<447b95 498b35<447bbe 498b35<447d4d 498b35<447d7c 498b35<447da7 498b35<447f00 498b35<447f4b 498b35<447b09 498b35<447b95 498b35<447bbe 498b35<447d4d
+play 4: entity count first differs at frame 1 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 24/32)
+play 4: rng callers first differs at frame 577 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 2/2)
+  rec  frame 576 draws: 498b35<48d914 498b35<48d954
+  play frame 576 draws: 498b35<45aed8 45aeeb<45b38a
+play 4 END (end of recording): 3464/3464 frames, time fed, rng not restored, frames differing 3464, first at 0, input-call mismatches 0
+play 4 frame 3463: rec pos (-429.131, 824.177) play (-429.131, 824.177) dist^2 0.000
+play 4: GAMEPLAY (main stream) draws first differ at slot 6 (0 = inside LoadLevel, k = frame k after it), 8 site(s) [site:rec/play]: 447b09:3/4 447b95:3/4 447bbe:3/4 447d4d:3/4 447d7c:3/4 447da7:3/4 447f00:3/4 447f4b:3/4
+play 4: COSMETIC (private stream) draws first differ at slot 6 (0 = inside LoadLevel, k = frame k after it), 9 site(s) [site:rec/play]: 44b3c0:9/12 44b3e1:9/12 44b491:3/4 44b4b2:3/4 480117:144/141 480128:144/141 480139:144/141 4801e4:144/141 4801fa:144/141

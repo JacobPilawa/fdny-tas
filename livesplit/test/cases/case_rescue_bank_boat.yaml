@@ -11,7 +11,7 @@ duration_s: 170
 pre_files:
   - {src: tests/data/game_cfg_dev.cfg, dst: FDNYFireFighter.cfg}
   - {src: null, dst: FDNYCore.cfg}
-  - {src: "../live split/test/saves/next_bank.rb", dst: Saves/player1.rb}
+  - {src: "../livesplit/test/saves/next_bank.rb", dst: Saves/player1.rb}
 record: false
 steps:
   - wait_s: 4
