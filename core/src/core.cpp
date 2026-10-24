@@ -34,6 +34,29 @@ namespace {
 
 HMODULE g_self = nullptr;
 char g_dir[MAX_PATH];
+bool g_inert = false;  // another copy of the core got here first
+
+// One core per process. Releases are named FDNYCore-<version>.asi, so an update
+// dropped beside the old file (or beside FDNYCore.asi) loads two cores, and both
+// would hook the same functions. The first copy to load creates a per-process
+// named mapping holding its path and keeps it for the process's life; a later copy
+// finds it and stays inert. DllMains run one at a time (loader lock), so there is
+// no race. False for the later copy, with the first copy's path in `first`.
+bool ClaimInstance(const char* self, char (&first)[MAX_PATH]) {
+    first[0] = 0;
+    char name[64];
+    wsprintfA(name, "Local\\FDNYCore.instance.%lu", GetCurrentProcessId());
+    HANDLE m = CreateFileMappingA(INVALID_HANDLE_VALUE, nullptr, PAGE_READWRITE, 0, MAX_PATH, name);
+    if (!m) return true;  // can't tell: run, as before the guard
+    const bool exists = GetLastError() == ERROR_ALREADY_EXISTS;
+    if (char* view = static_cast<char*>(MapViewOfFile(m, FILE_MAP_WRITE, 0, 0, MAX_PATH))) {
+        if (exists) lstrcpynA(first, view, MAX_PATH);
+        else lstrcpynA(view, self, MAX_PATH);
+        UnmapViewOfFile(view);
+    }
+    if (exists) CloseHandle(m);  // the first copy's handle keeps the mapping alive
+    return !exists;
+}
 
 // SHA-256 of a whole file as 64 lowercase hex chars. False on any failure.
 bool HashFile(const char* path, char (&hex)[65]) {
@@ -133,6 +156,17 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID reserved) {
             }
         char logPath[MAX_PATH];
         wsprintfA(logPath, "%sFDNYCore.log", g_dir);
+        char first[MAX_PATH];
+        if (!ClaimInstance(path, first)) {
+            g_inert = true;
+            if (fdcore::log::OpenAppend(logPath)) {
+                fdcore::log::Warn("FDNYCore %s at %s stays inert: another copy is already loaded (%s); "
+                                  "keep one FDNYCore*.asi in the game folder",
+                                  FDCORE_VERSION, path, first[0] ? first : "?");
+                fdcore::log::Close();
+            }
+            return TRUE;
+        }
         fdcore::log::Open(logPath);
         fdcore::log::Info("FDNYCore loaded from %s", path);
         fdcore::crashlog::Install();
@@ -145,7 +179,7 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID reserved) {
         HANDLE t = CreateThread(nullptr, 0, InitThread, nullptr, 0, nullptr);
         if (t) CloseHandle(t);
         else fdcore::log::Error("CreateThread failed (%lu)", GetLastError());
-    } else if (reason == DLL_PROCESS_DETACH && reserved) {
+    } else if (reason == DLL_PROCESS_DETACH && reserved && !g_inert) {
         fdcore::hooks::RaiseProcessExit();
     }
     return TRUE;

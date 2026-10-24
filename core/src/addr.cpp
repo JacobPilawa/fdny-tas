@@ -108,7 +108,10 @@ void Init(const char* exeSha256, const char* genesisSha256, uintptr_t exeBase,
     int count = kVersionCount;
 #ifdef FDCORE_DEBUG
     char path[MAX_PATH];
-    GetModuleFileNameA(GetModuleHandleA("FDNYCore.asi"), path, MAX_PATH);
+    HMODULE self = nullptr;  // by address: the file may be FDNYCore-<version>.asi
+    GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                       reinterpret_cast<LPCSTR>(&Init), &self);
+    GetModuleFileNameA(self, path, MAX_PATH);
     for (char* p = path + lstrlenA(path); p > path; --p)
         if (p[-1] == '\\') {
             lstrcpyA(p, "FDNYCore.addroverride.txt");

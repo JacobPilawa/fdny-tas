@@ -35,12 +35,22 @@ void Write(const char* level, const char* fmt, va_list ap) {
 } // namespace
 
 bool Open(const char* path) {
+    // Truncate, then write in append mode with write sharing, so an inert second
+    // copy of the core (core.cpp, ClaimInstance) can add its line without being
+    // overwritten by ours.
+    HANDLE t = CreateFileA(path, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr,
+                           CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (t != INVALID_HANDLE_VALUE) CloseHandle(t);
+    return OpenAppend(path);
+}
+
+bool OpenAppend(const char* path) {
     if (!g_lockInit) {
         InitializeCriticalSection(&g_lock);
         g_lockInit = true;
     }
-    g_file = CreateFileA(path, GENERIC_WRITE, FILE_SHARE_READ, nullptr, CREATE_ALWAYS,
-                         FILE_ATTRIBUTE_NORMAL, nullptr);
+    g_file = CreateFileA(path, FILE_APPEND_DATA | SYNCHRONIZE, FILE_SHARE_READ | FILE_SHARE_WRITE,
+                         nullptr, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
     return g_file != INVALID_HANDLE_VALUE;
 }
 
