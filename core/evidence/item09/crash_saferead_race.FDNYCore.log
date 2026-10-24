@@ -1,0 +1,39 @@
+[2026-10-21 06:59:00.634] [INFO] FDNYCore loaded from C:\fdny-decomp\FDNY SP 1.1\FDNYCore.asi
+[2026-10-21 06:59:00.694] [INFO] patches: console creation ungated at 00499370
+[2026-10-21 06:59:00.746] [WARN] window: cursor-warp site doesn't match (already patched by another mod, e.g. alttabfix.asi?); window module inactive
+[2026-10-21 06:59:00.779] [INFO] speedrun: victim-spawn hook at 0045d717 -> trampoline 024b0000
+[2026-10-21 06:59:00.829] [INFO] FDNYCore 0.9.0 (Debug) exe=C:\fdny-decomp\FDNY SP 1.1\FDNYFirefighter.exe sha256=4b3b4dc1cc0b05bcb42c8e27ac6f6ca72fe5f7064ca8122fda7d41e7f6d2fc3e base=00400000
+[2026-10-21 06:59:00.880] [INFO] Genesis.dll sha256=5014bb879706bfb5ae6cf9ce1de63dc3deebdcc5b8e1b41f247b284a336c4643 base=10000000
+[2026-10-21 06:59:00.939] [INFO] address table: version retail-1.1 selected
+[2026-10-21 06:59:00.971] [INFO] patch site patch.cursor_warp occupied by another mod; left alone
+[2026-10-21 06:59:01.013] [INFO] signatures: all OK (67/67, 1 patch site(s) occupied by other mods)
+[2026-10-21 06:59:01.037] [INFO] hooks: created genesis.begin_frame at 10025b70 (group frame)
+[2026-10-21 06:59:01.071] [INFO] hooks: created genesis.end_frame at 100260e0 (group frame)
+[2026-10-21 06:59:01.114] [INFO] hooks: created con.exec_line at 00470f10 (group console)
+[2026-10-21 06:59:01.161] [INFO] console: ready (game console; FDNYCore commands intercepted at ScriptEngine::ExecLine)
+[2026-10-21 06:59:01.204] [INFO] hooks: created genesis.camera_set_attributes at 10001350 (group fov)
+[2026-10-21 06:59:01.243] [INFO] fov: ready (geCamera_SetAttributes hooked)
+[2026-10-21 06:59:01.279] [INFO] speedrun: ready (static spawns available, rescuebot available)
+[2026-10-21 06:59:01.312] [INFO] state: snapshot ready (refreshed at frame end)
+[2026-10-21 06:59:01.346] [INFO] module levelwatch: enabled
+[2026-10-21 06:59:01.379] [INFO] testpipe: listening on \\.\pipe\FDNYCore (Debug build)
+[2026-10-21 06:59:01.413] [INFO] FDNYCore ready
+[2026-10-21 06:59:02.174] [INFO] levelwatch: map '' state -1
+[2026-10-21 06:59:04.578] [INFO] fov: camera 077566b8 game_fov=2.000000 stored=2.669333
+[2026-10-21 06:59:04.615] [INFO] console: game console present at 034677d8
+[2026-10-21 06:59:04.670] [INFO] config: startup (FDNYCore.cfg: none, autoexec.cfg: none)
+[2026-10-21 06:59:04.738] [INFO] levelwatch: map '' state 0
+[2026-10-21 06:59:11.040] [WARN] crashlog: exception c0000005 at 73673822 (FDNYCore.asi+3822); data 0700010b
+[2026-10-21 06:59:11.085] [WARN] crashlog: eax=0700010b ebx=00000002 ecx=00000000 edx=000000d3 esi=03466268 edi=0042cf70 ebp=0019f8f4 esp=0019f8dc
+[2026-10-21 06:59:11.134] [WARN] crashlog:   [esp+01c] 73674ad6 (FDNYCore.asi+4ad6)
+[2026-10-21 06:59:11.168] [WARN] crashlog:   [esp+038] 7367ad3f (FDNYCore.asi+ad3f)
+[2026-10-21 06:59:11.201] [WARN] crashlog:   [esp+280] 73678b32 (FDNYCore.asi+8b32)
+[2026-10-21 06:59:11.235] [WARN] crashlog:   [esp+28c] 0042cf96 (FDNYFirefighter.exe+2cf96)
+[2026-10-21 06:59:11.276] [WARN] crashlog:   [esp+298] 004949ac (FDNYFirefighter.exe+949ac)
+[2026-10-21 06:59:11.310] [WARN] crashlog:   [esp+2c8] 0043f660 (FDNYFirefighter.exe+3f660)
+[2026-10-21 06:59:11.342] [WARN] crashlog:   [esp+2d8] 004b75bb (FDNYFirefighter.exe+b75bb)
+[2026-10-21 06:59:11.376] [WARN] crashlog:   [esp+2ec] 0040120f (FDNYFirefighter.exe+120f)
+[2026-10-21 06:59:11.409] [WARN] crashlog:   [esp+2f8] 00401ddb (FDNYFirefighter.exe+1ddb)
+[2026-10-21 06:59:11.443] [WARN] crashlog:   [esp+304] 004d42c0 (FDNYFirefighter.exe+d42c0)
+[2026-10-21 06:59:11.476] [WARN] crashlog:   [esp+30c] 0042dbb2 (FDNYFirefighter.exe+2dbb2)
+[2026-10-21 06:59:11.509] [WARN] crashlog:   [esp+310] 0042cf70 (FDNYFirefighter.exe+2cf70)

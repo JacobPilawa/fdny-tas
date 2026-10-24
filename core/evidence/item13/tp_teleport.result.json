@@ -1,0 +1,108 @@
+{
+  "test": "tp_teleport",
+  "core": "Debug",
+  "pass": true,
+  "crash": null,
+  "assertions": [
+    {
+      "step": "focus",
+      "pass": true,
+      "detail": "game window foreground at launch"
+    },
+    {
+      "step": "core_ready",
+      "pass": true,
+      "detail": "ready line seen"
+    },
+    {
+      "step": "address_table_version",
+      "pass": true,
+      "detail": "retail-1.1"
+    },
+    {
+      "step": "assert_log",
+      "pass": true,
+      "detail": "contains 'tp: saved'"
+    },
+    {
+      "step": "assert_moved",
+      "pass": true,
+      "detail": "player moved 730.3 u (must be >= 100)"
+    },
+    {
+      "step": "assert_log",
+      "pass": true,
+      "detail": "contains 'tp: loaded'"
+    },
+    {
+      "step": "assert_same_pos",
+      "pass": true,
+      "detail": "player moved 0.0 u (must be <= 2)"
+    },
+    {
+      "step": "assert_mem",
+      "pass": true,
+      "detail": "player.pos_y=-225.76699829101562 expected -225.76699829101562 +/-2.0"
+    },
+    {
+      "step": "assert_mem",
+      "pass": true,
+      "detail": "player.yaw=-270.0 expected -270.0 +/-0.01"
+    },
+    {
+      "step": "assert_mem",
+      "pass": true,
+      "detail": "player.pitch=0.0 expected 0.0 +/-0.01"
+    },
+    {
+      "step": "assert_moved",
+      "pass": true,
+      "detail": "player moved 546.6 u (must be >= 50)"
+    },
+    {
+      "step": "assert_same_pos",
+      "pass": true,
+      "detail": "player moved 0.0 u (must be <= 2)"
+    },
+    {
+      "step": "assert_log",
+      "pass": true,
+      "detail": "contains 'console> fd_tp_load is practice-only (fd_profile is run)'"
+    },
+    {
+      "step": "assert_log",
+      "pass": true,
+      "detail": "contains 'fd_tp_load: saved on training, this is bank -- refused'"
+    },
+    {
+      "step": "assert_same_pos",
+      "pass": true,
+      "detail": "player moved 0.0 u (must be <= 1)"
+    },
+    {
+      "step": "no_crash",
+      "pass": true,
+      "detail": "no crash, hang or dialog"
+    },
+    {
+      "step": "log_errors",
+      "pass": true,
+      "detail": "0 ERROR line(s), limit 0"
+    }
+  ],
+  "samples": {
+    "module.exe": "0x400000",
+    "module.genesis": "0x10000000",
+    "x_saved": -1268.0,
+    "y_saved": -225.76699829101562,
+    "z_saved": 4692.0,
+    "yaw_saved": -270.0,
+    "pitch_saved": 0.0,
+    "screenshot.01_saved.luma": 102.2,
+    "screenshot.02_loaded.luma": 102.3,
+    "x_bank": -697.0,
+    "z_bank": 1196.0,
+    "screenshot.03_refused_on_bank.luma": 54.1
+  },
+  "video": "C:\\fdny-decomp\\core\\runs\\2026-10-21-140120-tp_teleport-core13\\run.mp4"
+}

@@ -1,0 +1,77 @@
+15:27:32 bank loaded; settling 8 s
+15:27:40 === I: liftables on bank
+15:27:40   liftable 0x8dc7220 kind=4 centre(+0xD0)=(180.0, 0.0, 84.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8db0be8 kind=4 centre(+0xD0)=(908.0, 27.0, 435.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8ddd1a8 kind=4 centre(+0xD0)=(1281.0, 5.0, -168.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8dc66b8 kind=4 centre(+0xD0)=(1324.0, 4.0, -142.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8ddf038 kind=4 centre(+0xD0)=(1193.0, 0.0, -435.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8dc8c38 kind=4 centre(+0xD0)=(-1497.0, -4.0, 261.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8dcdad0 kind=4 centre(+0xD0)=(-1446.0, -4.0, 332.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8dc5e70 kind=4 centre(+0xD0)=(1025.0, 73.0, -1626.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8dc1a10 kind=4 centre(+0xD0)=(891.0, 27.0, -2020.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8db0f08 kind=4 centre(+0xD0)=(891.0, 3.0, -1868.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8dca4c8 kind=4 centre(+0xD0)=(1148.0, 3.0, -2160.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8dcc210 kind=4 centre(+0xD0)=(-155.0, 72.0, -1627.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8dc6320 kind=4 centre(+0xD0)=(1029.0, 28.0, -2020.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8dc2888 kind=4 centre(+0xD0)=(265.0, 20.0, -1955.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8db0828 kind=4 centre(+0xD0)=(-582.0, 20.0, -1971.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8dc31e0 kind=4 centre(+0xD0)=(160.0, -4.0, -1974.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8dc5520 kind=4 centre(+0xD0)=(183.0, -4.0, -1837.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8dc21c0 kind=4 centre(+0xD0)=(-183.0, 20.0, -1970.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8dc2458 kind=4 centre(+0xD0)=(-185.0, 20.0, -1833.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8dca898 kind=4 centre(+0xD0)=(266.0, 20.0, -1819.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8dc8fc0 kind=4 centre(+0xD0)=(-582.0, 20.0, -1835.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8dc9258 kind=4 centre(+0xD0)=(-269.0, -4.0, -1826.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8dc98a8 kind=4 centre(+0xD0)=(-676.0, -4.0, -1976.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8dc6c48 kind=4 centre(+0xD0)=(-673.0, -4.0, -1854.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8dc6ee0 kind=4 centre(+0xD0)=(-483.0, -4.0, -1962.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8ddeb08 kind=4 centre(+0xD0)=(-90.0, -4.0, -1842.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8dc84d0 kind=4 centre(+0xD0)=(365.0, -4.0, -1835.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8dc87f0 kind=4 centre(+0xD0)=(908.0, 28.0, 542.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8ddb628 kind=4 centre(+0xD0)=(1045.0, 28.0, 544.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8ddb9d0 kind=4 centre(+0xD0)=(1044.0, 28.0, 439.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8ddae78 kind=4 centre(+0xD0)=(1028.0, 27.0, -1172.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8ddb268 kind=4 centre(+0xD0)=(688.0, 328.0, -744.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8dda750 kind=4 centre(+0xD0)=(684.0, 328.0, 476.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8dd9e90 kind=4 centre(+0xD0)=(-632.0, 0.0, -1207.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8dda128 kind=4 centre(+0xD0)=(-1211.0, 0.0, -1928.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8ddbd50 kind=4 centre(+0xD0)=(1012.0, 328.0, 252.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8ddbfe8 kind=4 centre(+0xD0)=(688.0, 64.0, 476.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8dd90b8 kind=4 centre(+0xD0)=(688.0, 72.0, -744.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8dd9350 kind=4 centre(+0xD0)=(976.0, 240.0, 464.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8dd96a0 kind=4 centre(+0xD0)=(-226.0, 47.0, 737.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8dd9a90 kind=4 centre(+0xD0)=(-1956.0, 336.0, -108.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8daf0c8 kind=4 centre(+0xD0)=(-629.0, 0.0, -1296.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8daf4b8 kind=4 centre(+0xD0)=(-2230.0, 240.0, -259.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8daf8a8 kind=4 centre(+0xD0)=(-1636.0, -57.0, -339.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8dafc98 kind=4 centre(+0xD0)=(-1190.0, 72.0, -1401.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8dade78 kind=4 centre(+0xD0)=(-680.0, 59.0, 752.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40   liftable 0x8dae250 kind=4 centre(+0xD0)=(-680.0, 59.0, 552.0) +0x4C=(0.0, 0.0, 0.0)
+15:27:40 fire 0x8de3e50 at (60.0, 212.0, -1200.0)
+15:27:45 I: liftable 0x8dc7220 centre (180.0, 0.0, 84.0); wrote snapshot (180.0, 150.0, 84.0)
+15:27:49 I: survivor at (150.0, -36.9, 84.0): -36.9 u relative to the liftable centre; liftable now (180.0, 0.0, 84.0)
+15:27:53 I: liftable 0x8db0be8 centre (908.0, 27.0, 435.0); wrote snapshot (908.0, 177.0, 435.0)
+15:27:58 I: survivor at (878.0, 217.1, 435.0): +190.1 u relative to the liftable centre; liftable now (908.0, 27.0, 435.0)
+15:28:01 I: liftable 0x8ddd1a8 centre (1281.0, 5.0, -168.0); wrote snapshot (1281.0, 155.0, -168.0)
+15:28:06 I: survivor at (1251.0, 47.1, -168.0): +42.1 u relative to the liftable centre; liftable now (1281.0, 5.0, -168.0)
+15:28:07 === J: MiscEmitterFXImpl (type 2) search
+15:28:07   bank: 4 MiscEmitterEnt, types {1: 2, 2: 2}
+15:28:07     type 2 emitter 0x8de20d8 impl=0x8de2168 pos=(0.0, 0.0, 0.0) enable(+0x45)=1
+15:28:07     type 2 emitter 0x8de2518 impl=0x8de25a8 pos=(0.0, 0.0, 0.0) enable(+0x45)=1
+15:28:07 J: fire 0x8de3be8 on bank
+15:28:11   J emitter 0x8de20d8 offset (0, 0, 0): player (0.0, -31.1, 0.0) burn 0.587 -> 0.437 = 0.100/s 
+15:28:14   J emitter 0x8de20d8 offset (0, -60, 0): player (0.0, -148.9, 0.0) burn 0.591 -> 0.441 = 0.099/s 
+15:28:16   J emitter 0x8de20d8 offset (100, 0, 0): player (100.0, -30.8, 0.0) burn 0.587 -> 0.437 = 0.100/s 
+15:28:19   J emitter 0x8de20d8 offset (-100, 0, 0): player (-100.0, -31.1, 0.0) burn 0.587 -> 0.437 = 0.100/s 
+15:28:21   J emitter 0x8de20d8 offset (0, 0, 100): player (0.0, -32.0, 100.0) burn 0.592 -> 0.442 = 0.100/s 
+15:28:23   J emitter 0x8de20d8 offset (0, 0, -100): player (0.0, -33.8, -100.0) burn 0.587 -> 0.437 = 0.100/s 
+15:28:26   J emitter 0x8de20d8 offset (0, 100, 0): player (0.0, -31.9, 0.0) burn 0.587 -> 0.437 = 0.100/s 
+15:28:28   J emitter 0x8de2518 offset (0, 0, 0): player (0.0, -30.8, 0.0) burn 0.587 -> 0.437 = 0.100/s 
+15:28:31   J emitter 0x8de2518 offset (0, -60, 0): player (0.0, -147.7, 0.0) burn 0.589 -> 0.439 = 0.100/s 
+15:28:33   J emitter 0x8de2518 offset (100, 0, 0): player (100.0, -30.8, 0.0) burn 0.589 -> 0.439 = 0.100/s 
+15:28:35   J emitter 0x8de2518 offset (-100, 0, 0): player (-100.0, -30.8, 0.0) burn 0.593 -> 0.443 = 0.100/s 
+15:28:38   J emitter 0x8de2518 offset (0, 0, 100): player (0.0, -30.8, 100.0) burn 0.588 -> 0.438 = 0.100/s 
+15:28:40   J emitter 0x8de2518 offset (0, 0, -100): player (0.0, -33.3, -100.0) burn 0.588 -> 0.438 = 0.100/s 
+15:28:43   J emitter 0x8de2518 offset (0, 100, 0): player (0.0, -31.9, 0.0) burn 0.588 -> 0.438 = 0.100/s 
+15:28:44 J control at spawn: burn 0.338
+15:28:44 DONE

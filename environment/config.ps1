@@ -157,6 +157,34 @@ $ZigAssetName   = "zig-x86_64-windows-$ZigVersion.zip"
 $ZigDownloadUrl = "https://ziglang.org/download/$ZigVersion/zig-x86_64-windows-$ZigVersion.zip"
 $ZigInstallDir  = Join-Path $ToolsDir 'zig'
 
+# --- Visual C++ 2015-2022 redistributable (x86) ---
+# alttabfix.asi (the original alt-tab fix, a parity baseline) links
+# MSVCP140/VCRUNTIME140; without the runtime the ASI loader shows "Unable to
+# load alttabfix.asi. Error: 126" at every launch (verified 2026-10-21).
+# VM-only: players of the original tool already need it; FDNYCore doesn't.
+
+$VcRedistAssetName   = 'vc_redist.x86.exe'
+$VcRedistDownloadUrl = 'https://aka.ms/vs/17/release/vc_redist.x86.exe'
+
+# --- VB-CABLE virtual audio device ---
+# The Hyper-V VM has no sound device, and the game hard-fails at startup
+# without one ("TSoundEngine::open(): Error opening sound engine", verified
+# 2026-10-21). A virtual audio cable gives FMOD an output endpoint without
+# modifying the game. VM-only; never a player dependency.
+
+$VbCableAssetName   = 'VBCABLE_Driver_Pack45.zip'
+$VbCableDownloadUrl = "https://download.vb-audio.com/Download_CABLE/$VbCableAssetName"
+$VbCableInstallDir  = Join-Path $ToolsDir 'vbcable'
+
+# --- ffmpeg ---
+# VM-only: core/harness records every test run with gdigrab; never a player dependency.
+# Pinned to a dated BtbN autobuild (not "latest"); static GPL win64 build, unpacks to one folder.
+
+$FfmpegAssetName   = 'ffmpeg-N-127021-ge0c94b2d1c-win64-gpl.zip'
+$FfmpegDownloadUrl = "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-09-30-13-08/$FfmpegAssetName"
+$FfmpegInstallDir  = Join-Path $ToolsDir 'ffmpeg'
+$FfmpegExe         = Join-Path $FfmpegInstallDir ([IO.Path]::GetFileNameWithoutExtension($FfmpegAssetName) + '\bin\ffmpeg.exe')
+
 # --- Python (tools\*.py: fdny_spawns.py, collision_overlay) ---
 # Full CPython (NOT the embeddable zip -- it has no tkinter), installed
 # per-directory and quietly under local\tools, no PATH/registry changes.
@@ -167,4 +195,4 @@ $PythonAssetName    = "python-$PythonVersion-amd64.exe"
 $PythonDownloadUrl  = "https://www.python.org/ftp/python/$PythonVersion/$PythonAssetName"
 $PythonInstallDir   = Join-Path $ToolsDir 'python'
 $PythonExe          = Join-Path $PythonInstallDir 'python.exe'
-$PythonPipPackages  = @('pymem')
+$PythonPipPackages  = @('pymem', 'mss', 'Pillow', 'pydirectinput', 'PyYAML')   # mss..PyYAML: core/harness (VM-only test harness)

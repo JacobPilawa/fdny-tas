@@ -1,0 +1,86 @@
+[2026-10-22 02:42:10.754] [INFO] FDNYCore loaded from C:\fdny-decomp\FDNY SP 1.1\FDNYCore.asi
+[2026-10-22 02:42:10.810] [INFO] patches: console creation ungated at 00499370
+[2026-10-22 02:42:10.849] [INFO] patches: intro movies skipped (fd_skip_intro)
+[2026-10-22 02:42:10.899] [WARN] window: cursor-warp site doesn't match (already patched by another mod, e.g. alttabfix.asi?); window module inactive
+[2026-10-22 02:42:10.932] [INFO] speedrun: victim-spawn hook at 0045d717 -> trampoline 03000000
+[2026-10-22 02:42:10.973] [INFO] FDNYCore 0.16.1 (Debug) exe=C:\fdny-decomp\FDNY SP 1.1\FDNYFirefighter.exe sha256=4b3b4dc1cc0b05bcb42c8e27ac6f6ca72fe5f7064ca8122fda7d41e7f6d2fc3e base=00400000
+[2026-10-22 02:42:11.015] [INFO] Genesis.dll sha256=5014bb879706bfb5ae6cf9ce1de63dc3deebdcc5b8e1b41f247b284a336c4643 base=10000000
+[2026-10-22 02:42:11.066] [INFO] address table: version retail-1.1 selected
+[2026-10-22 02:42:11.099] [INFO] patch site patch.cursor_warp occupied by another mod; left alone
+[2026-10-22 02:42:11.132] [INFO] signatures: all OK (120/120, 1 patch site(s) occupied by other mods)
+[2026-10-22 02:42:11.165] [INFO] hooks: created genesis.begin_frame at 10025b70 (group frame)
+[2026-10-22 02:42:11.224] [INFO] hooks: created genesis.end_frame at 100260e0 (group frame)
+[2026-10-22 02:42:11.269] [INFO] hooks: created con.exec_line at 00470f10 (group console)
+[2026-10-22 02:42:11.311] [INFO] console: ready (game console; FDNYCore commands intercepted at ScriptEngine::ExecLine)
+[2026-10-22 02:42:11.350] [INFO] hooks: created genesis.camera_set_attributes at 10001350 (group camera)
+[2026-10-22 02:42:11.399] [INFO] camera: ready (geCamera_SetAttributes hooked)
+[2026-10-22 02:42:11.438] [INFO] state: snapshot ready (refreshed at frame end)
+[2026-10-22 02:42:11.474] [INFO] hooks: created genesis.render_world at 10024950 (group gfx)
+[2026-10-22 02:42:11.511] [INFO] gfx: ready (decals, alpha surfaces, solid rects, world boxes)
+[2026-10-22 02:42:11.549] [INFO] textdraw: ready
+[2026-10-22 02:42:11.580] [INFO] profile: ready (fd_profile, fd_watermark); other asi: alttabfix FDNYFirefighterAmericanHeroFOVFix
+[2026-10-22 02:42:11.615] [INFO] modules: 9 registered (levelwatch fov window speedrun hud glitch tp triggers bench)
+[2026-10-22 02:42:11.640] [INFO] module levelwatch: enabled
+[2026-10-22 02:42:11.672] [INFO] fov: ready (filter on the camera service)
+[2026-10-22 02:42:11.707] [INFO] module fov: enabled
+[2026-10-22 02:42:11.739] [INFO] module window: disabled (init failed; see above)
+[2026-10-22 02:42:11.765] [INFO] speedrun: ready (static spawns available, rescuebot available)
+[2026-10-22 02:42:11.798] [INFO] module speedrun: enabled
+[2026-10-22 02:42:11.824] [INFO] hud: ready (fd_hud_player)
+[2026-10-22 02:42:11.856] [INFO] module hud: enabled
+[2026-10-22 02:42:11.882] [INFO] glitch: ready (fd_hud_glitch)
+[2026-10-22 02:42:11.914] [INFO] module glitch: enabled
+[2026-10-22 02:42:11.940] [INFO] tp: ready (fd_tp_save, fd_tp_load)
+[2026-10-22 02:42:11.974] [INFO] module tp: enabled
+[2026-10-22 02:42:12.006] [INFO] triggers: ready (fd_triggers, key T)
+[2026-10-22 02:42:12.041] [INFO] module triggers: enabled
+[2026-10-22 02:42:12.074] [INFO] module bench: enabled
+[2026-10-22 02:42:12.107] [INFO] testpipe: listening on \\.\pipe\FDNYCore (Debug build)
+[2026-10-22 02:42:12.145] [INFO] FDNYCore ready
+[2026-10-22 02:42:12.363] [INFO] gfx: world 03737b28
+[2026-10-22 02:42:12.394] [INFO] levelwatch: map '' state -1
+[2026-10-22 02:42:12.432] [INFO] gfx: font Consolas 9 px, cell 5x10
+[2026-10-22 02:42:12.462] [INFO] gfx: view 1366x768 (window; window client 1366x768)
+[2026-10-22 02:42:12.509] [INFO] textdraw: watermark: 383x18 at 8,690 (view 1366x768), opaque
+[2026-10-22 02:42:15.237] [INFO] fov: camera 06d4be28 game_fov=2.000000 stored=2.669333
+[2026-10-22 02:42:15.271] [INFO] console: game console present at 03397800
+[2026-10-22 02:42:15.307] [INFO] config: startup (FDNYCore.cfg: none, autoexec.cfg: none)
+[2026-10-22 02:42:15.369] [INFO] gfx: world 037bf008
+[2026-10-22 02:42:15.415] [INFO] levelwatch: map '' state 0
+[2026-10-22 02:42:15.463] [INFO] gfx: view 640x480 (camera; window client 640x480)
+[2026-10-22 02:42:31.941] [INFO] event: victim_spawn training #0 'victim1' (random spot kept)
+[2026-10-22 02:42:32.219] [INFO] event: victim_spawn training #1 'victim2' (random spot kept)
+[2026-10-22 02:42:32.440] [INFO] gfx: world 06d4cf38
+[2026-10-22 02:42:32.484] [INFO] levelwatch: map 'training' state 3
+[2026-10-22 02:42:32.512] [INFO] levelwatch: map 'training' state 1
+[2026-10-22 02:42:32.542] [INFO] event: level_load 'training'
+[2026-10-22 02:42:32.557] [INFO] triggers: map 'training': 25 trigger(s): 5 rescue, 0 exit (0 open), 20 other
+[2026-10-22 02:42:53.177] [INFO] cmd: fd_watermark 0
+[2026-10-22 02:42:54.672] [INFO] event: victim_spawn bank #0 'betty' (random spot kept)
+[2026-10-22 02:42:54.718] [INFO] event: victim_spawn bank #1 '<null>' (random spot kept)
+[2026-10-22 02:42:54.761] [INFO] event: victim_spawn bank #2 '<null>' (random spot kept)
+[2026-10-22 02:42:54.811] [INFO] event: victim_spawn bank #3 '<null>' (random spot kept)
+[2026-10-22 02:42:54.860] [INFO] event: victim_spawn bank #4 '<null>' (random spot kept)
+[2026-10-22 02:42:54.902] [INFO] event: victim_spawn bank #5 '<null>' (random spot kept)
+[2026-10-22 02:42:55.233] [INFO] levelwatch: map 'bank' state 3
+[2026-10-22 02:42:55.276] [INFO] levelwatch: map 'bank' state 1
+[2026-10-22 02:42:55.318] [INFO] event: level_load 'bank'
+[2026-10-22 02:42:55.388] [INFO] triggers: map 'bank': 14 trigger(s): 1 rescue, 1 exit (0 open), 12 other
+[2026-10-22 02:43:36.177] [INFO] cmd: fd_triggers 1
+[2026-10-22 02:43:38.145] [INFO] cmd: fd_triggers_xray 1
+[2026-10-22 02:43:39.833] [INFO] cmd: fd_triggers_list
+[2026-10-22 02:43:39.880] [INFO] console> triggers on 'bank': 14
+[2026-10-22 02:43:39.914] [INFO] console>  0 other       fgh              (-208 -60 -21)-(328 119 756)
+[2026-10-22 02:43:39.964] [INFO] console>  1 other       <null>           (673 -75 -2274)-(1360 136 -1601)
+[2026-10-22 02:43:40.005] [INFO] console>  2 other       <null>           (-935 -51 -2287)-(655 167 -1606)
+[2026-10-22 02:43:40.039] [INFO] console>  3 other       <null>           (-2524 -70 -2282)-(-1263 167 -1601)
+[2026-10-22 02:43:40.072] [INFO] console>  4 other       <null>           (659 -70 -1369)-(1391 167 219)
+[2026-10-22 02:43:40.105] [INFO] console>  5 other       <null>           (659 181 -1369)-(1391 418 219)
+[2026-10-22 02:43:40.138] [INFO] console>  6 other       <null>           (659 184 225)-(1391 421 776)
+[2026-10-22 02:43:40.189] [INFO] console>  7 other       <null>           (-1971 -80 -1373)-(659 429 773)
+[2026-10-22 02:43:40.222] [INFO] console>  8 other       <null>           (-2596 -80 -2366)-(1513 429 1709)
+[2026-10-22 02:43:40.256] [INFO] console>  9 other       <null>36         (-2347 184 -296)-(-1984 435 782)
+[2026-10-22 02:43:40.288] [INFO] console> 10 exit   shut <null>           (-848 -64 1245)-(-512 104 1477)
+[2026-10-22 02:43:40.323] [INFO] console> 11 rescue      g                (-1918 -64 -1555)-(-1726 136 -1407)
+[2026-10-22 02:43:40.355] [INFO] console> 12 other       edhr             (-1970 174 563)-(-1761 398 766)
+[2026-10-22 02:43:40.389] [INFO] console> 13 other       <null>           (-1023 -106 838)-(-319 68 1545)

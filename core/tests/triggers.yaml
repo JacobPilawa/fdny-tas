@@ -1,0 +1,90 @@
+name: triggers
+# Trigger-box overlay (core/evidence/trigger_boxes): the module finds every
+# RCS_BoundsTrigger of the loaded map from live memory and classifies it the way the
+# game does (Training: 25 triggers, 5 rescue zones, no exit; bank: 14, 1 rescue zone,
+# 1 final exit, closed at level start), draws them (polys > 0) when fd_triggers is on and
+# nothing when it is off; the default key T cycles off -> on -> on + x-ray -> off. The exit turns from red to green
+# when the game opens it (every victim claimed through `runrescuebot`). Screenshots of
+# each mode and colour.
+pre_files:
+  - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
+  - {src: null, dst: FDNYCore.cfg}
+setup: load_training
+record: false
+steps:
+  - assert_log: {contains: "module triggers: enabled"}
+  - assert_log: {contains: "gfx: ready (decals, alpha surfaces, solid rects, world boxes)"}
+  - assert_log: {contains: "triggers: map 'training': 25 trigger(s): 5 rescue, 0 exit (0 open), 20 other"}
+  - assert_pipe_stat: {cmd: triggers, key: n, equals: 25}
+  - assert_pipe_stat: {cmd: triggers, key: rescue, equals: 5}
+  - assert_pipe_stat: {cmd: triggers, key: exit, equals: 0}
+  # off by default: nothing submitted
+  - assert_pipe_stat: {cmd: triggers, key: boxes, equals: 0}
+  - console: "fd_watermark 0"
+  - screenshot: training_off
+  - key: {key: t, hold: 0.1}
+  - wait_s: 1
+  - assert_log: {contains: "bind: t -> fd_triggers_toggle"}
+  - assert_pipe_stat: {cmd: triggers, key: boxes, equals: 5}
+  - assert_pipe_stat: {cmd: triggers, key: polys, min: 1}
+  - screenshot: training_on
+  - console: "fd_triggers_all 1"
+  - wait_s: 1
+  - assert_pipe_stat: {cmd: triggers, key: boxes, equals: 25}
+  - screenshot: training_all
+  - console: "fd_triggers_all 0"
+  - console: "loadmap bank"
+  - wait_s: 40
+  - assert_log: {contains: "triggers: map 'bank': 14 trigger(s): 1 rescue, 1 exit (0 open), 12 other"}
+  - assert_pipe_stat: {cmd: triggers, key: exit, equals: 1}
+  - assert_pipe_stat: {cmd: triggers, key: open, equals: 0}
+  - assert_pipe_stat: {cmd: triggers, key: boxes, equals: 2}
+  - screenshot: bank_on
+  # the rescue zone ('g') is deep inside the bank, ahead of the spawn view: blue, through
+  # the walls with x-ray (the small box left of the door)
+  - console: "fd_triggers_xray 1"
+  - wait_s: 1
+  - screenshot: bank_rescue_xray
+  - console: "fd_triggers_xray 0"
+  # the final exit is just behind the spawn (z 1245..1477, spawn z 1196, facing -z): walk
+  # backwards into it -- the camera is inside a red box (drawn at 25%). Mouse turns are not
+  # repeatable enough to aim at it from outside.
+  - key: {key: s, hold: 0.5}
+  - wait_s: 1
+  - assert_pipe_stat: {cmd: triggers, key: inside, min: 1}
+  - assert_pipe_stat: {cmd: triggers, key: polys, min: 1}
+  - screenshot: bank_exit_closed
+  # every victim accounted for, the game's way: `runrescuebot` (the game's script verb)
+  # has the RescueBot claim one victim per call; when claimed covers all 6,
+  # PlayerRescueEnt::UpdateZonesAndWin calls BoundsTrigger_SetEnabled(1) on the exit
+  - repeat:
+      times: 6
+      steps:
+        - console: "runrescuebot"
+        - wait_s: 10
+  - assert_log: {contains: "triggers: exit '<null>' open"}
+  - assert_pipe_stat: {cmd: triggers, key: open, equals: 1}
+  - assert_pipe_stat: {cmd: triggers, key: inside, min: 1}
+  - screenshot: bank_exit_open
+  # out of the box again and a look back at it from outside (not asserted: aim varies)
+  - key: {key: w, hold: 1.0}
+  - repeat:
+      times: 5
+      steps:
+        - mouse_rel: [300, 0]
+        - wait_s: 0.7
+  - screenshot: bank_exit_open_outside
+  # T's second press: x-ray on, boxes still drawn; the third: off (owner 2026-10-22)
+  - key: {key: t, hold: 0.1}
+  - wait_s: 1
+  - assert_log: {contains: "console> trigger boxes: on, x-ray"}
+  - assert_pipe_stat: {cmd: triggers, key: boxes, min: 1}
+  - screenshot: bank_xray_by_key
+  - key: {key: t, hold: 0.1}
+  - wait_s: 1
+  - assert_log: {contains: "console> trigger boxes: off"}
+  - assert_pipe_stat: {cmd: triggers, key: boxes, equals: 0}
+  - screenshot: bank_off
+expect:
+  no_crash: true
+  log_errors: 0

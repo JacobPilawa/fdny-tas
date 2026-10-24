@@ -1,0 +1,14 @@
+name: core_loads
+# Item 1(a): the core loads, logs a version line with exe + Genesis hashes and
+# a ready line, and the game reaches its first screen without crashing.
+record: true
+steps:
+  - wait_s: 5
+  - assert_screen_nonblack: splash
+  - assert_log: {contains: "FDNYCore {core_version} ("}
+  - assert_log: {contains: "sha256=4b3b4dc1cc0b05bcb42c8e27ac6f6ca72fe5f7064ca8122fda7d41e7f6d2fc3e"}
+  - assert_log: {contains: "Genesis.dll sha256=5014bb879706bfb5ae6cf9ce1de63dc3deebdcc5b8e1b41f247b284a336c4643"}
+  - assert_log: {contains: "FDNYCore ready"}
+expect:
+  no_crash: true
+  log_errors: 0

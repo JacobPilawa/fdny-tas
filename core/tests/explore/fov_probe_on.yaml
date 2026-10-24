@@ -1,0 +1,9 @@
+name: explore_fov_probe_fix_on
+# Exploration: log geCamera_SetAttributes in/stored values WITH the old FOV fix.
+setup: load_training
+record: false
+steps:
+  - wait_s: 2
+  - screenshot: in_level
+expect:
+  no_crash: true

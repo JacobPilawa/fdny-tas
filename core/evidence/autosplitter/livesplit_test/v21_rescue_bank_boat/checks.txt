@@ -1,0 +1,12 @@
+﻿  [PASS] script loaded: HOST loaded FDNY_rescue%.asl, 30 segments, refresh 66.6666666666667 Hz
+  [PASS] no script errors: none
+  [PASS] start count: game: 1 run start(s); timer: 1 start(s)
+  [PASS] start 1: gameplay began 18994.714; timer start 18994.738 (+0.024 s, allowed 0.1)
+  [PASS] split count: game: 3 stage end(s)/win(s) (case expects 3); timer: 3 split(s)
+  [PASS] split 1 (bank won): split 0 ms (game clock) after the win flag (allowed 0-70)
+  [PASS] split 1 game time: timer 25.6201 s, played 25.635 s over 1 interval(s) (tolerance 0.08)
+  [PASS] split 2 (boat_a -> boat_b): split 0.017 s before the load started (allowed 0.5 s before to 0.05 s after)
+  [PASS] split 2 game time: timer 52.1848 s, played 52.196 s over 2 interval(s) (tolerance 0.10)
+  [PASS] split 3 (boat_b won): split 0 ms (game clock) after the win flag (allowed 0-70)
+  [PASS] split 3 game time: timer 66.2501 s, played 66.256 s over 3 interval(s) (tolerance 0.12)
+  [PASS] no reset: 2 menu visit(s) after the start, 0 reset(s)

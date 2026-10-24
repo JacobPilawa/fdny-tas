@@ -1,0 +1,55 @@
+[2026-10-21 06:30:34.966] [INFO] FDNYCore loaded from C:\fdny-decomp\FDNY SP 1.1\FDNYCore.asi
+[2026-10-21 06:30:35.049] [INFO] patches: console creation ungated at 00499370
+[2026-10-21 06:30:35.094] [WARN] window: cursor-warp site doesn't match (already patched by another mod, e.g. alttabfix.asi?); window module inactive
+[2026-10-21 06:30:35.125] [INFO] speedrun: victim-spawn hook at 0045d717 -> trampoline 00800000
+[2026-10-21 06:30:35.159] [INFO] FDNYCore 0.8.0 (Debug) exe=C:\fdny-decomp\FDNY SP 1.1\FDNYFirefighter.exe sha256=4b3b4dc1cc0b05bcb42c8e27ac6f6ca72fe5f7064ca8122fda7d41e7f6d2fc3e base=00400000
+[2026-10-21 06:30:35.200] [INFO] Genesis.dll sha256=5014bb879706bfb5ae6cf9ce1de63dc3deebdcc5b8e1b41f247b284a336c4643 base=10000000
+[2026-10-21 06:30:35.250] [INFO] address table: version retail-1.1 selected
+[2026-10-21 06:30:35.285] [INFO] patch site patch.cursor_warp occupied by another mod; left alone
+[2026-10-21 06:30:35.325] [INFO] signatures: all OK (56/56, 1 patch site(s) occupied by other mods)
+[2026-10-21 06:30:35.369] [INFO] hooks: created genesis.begin_frame at 10025b70 (group frame)
+[2026-10-21 06:30:35.404] [INFO] hooks: created genesis.end_frame at 100260e0 (group frame)
+[2026-10-21 06:30:35.451] [INFO] hooks: created con.exec_line at 00470f10 (group console)
+[2026-10-21 06:30:35.493] [INFO] console: ready (game console; FDNYCore commands intercepted at ScriptEngine::ExecLine)
+[2026-10-21 06:30:35.533] [INFO] hooks: created genesis.camera_set_attributes at 10001350 (group fov)
+[2026-10-21 06:30:35.569] [INFO] fov: ready (geCamera_SetAttributes hooked)
+[2026-10-21 06:30:35.607] [INFO] speedrun: ready (static spawns available, rescuebot available)
+[2026-10-21 06:30:35.637] [INFO] module levelwatch: enabled
+[2026-10-21 06:30:35.674] [INFO] testpipe: listening on \\.\pipe\FDNYCore (Debug build)
+[2026-10-21 06:30:35.703] [INFO] FDNYCore ready
+[2026-10-21 06:30:36.475] [INFO] levelwatch: map '' state -1
+[2026-10-21 06:30:38.891] [INFO] fov: camera 078166b8 game_fov=2.000000 stored=2.669333
+[2026-10-21 06:30:39.491] [INFO] console: game console present at 033977d8
+[2026-10-21 06:30:39.507] [INFO] console> exec C:\fdny-decomp\FDNY SP 1.1\FDNYCore.cfg
+[2026-10-21 06:30:39.535] [INFO] cmd: fd_rescuebot "0"
+[2026-10-21 06:30:39.556] [INFO] speedrun: rescuebot disabled (patched)
+[2026-10-21 06:30:39.585] [INFO] exec: C:\fdny-decomp\FDNY SP 1.1\FDNYCore.cfg (1 line(s))
+[2026-10-21 06:30:39.606] [INFO] config: startup (FDNYCore.cfg: loaded, autoexec.cfg: none)
+[2026-10-21 06:30:39.659] [INFO] levelwatch: map '' state 0
+[2026-10-21 06:30:54.510] [INFO] event: victim_spawn training #0 'victim1' (random spot kept)
+[2026-10-21 06:30:54.543] [INFO] event: victim_spawn training #1 'victim2' (random spot kept)
+[2026-10-21 06:30:54.751] [INFO] levelwatch: map 'training' state 3
+[2026-10-21 06:30:54.808] [INFO] levelwatch: map 'training' state 1
+[2026-10-21 06:30:54.837] [INFO] event: level_load 'training'
+[2026-10-21 06:31:15.672] [INFO] event: victim_spawn bank #0 'betty' (random spot kept)
+[2026-10-21 06:31:15.698] [INFO] event: victim_spawn bank #1 '<null>' (random spot kept)
+[2026-10-21 06:31:15.728] [INFO] event: victim_spawn bank #2 '<null>' (random spot kept)
+[2026-10-21 06:31:15.755] [INFO] event: victim_spawn bank #3 '<null>' (random spot kept)
+[2026-10-21 06:31:15.788] [INFO] event: victim_spawn bank #4 '<null>' (random spot kept)
+[2026-10-21 06:31:15.814] [INFO] event: victim_spawn bank #5 '<null>' (random spot kept)
+[2026-10-21 06:31:16.120] [INFO] levelwatch: map 'bank' state 3
+[2026-10-21 06:31:16.152] [INFO] levelwatch: map 'bank' state 1
+[2026-10-21 06:31:16.183] [INFO] event: level_load 'bank'
+[2026-10-21 06:31:57.281] [INFO] cmd: fd_rescuebot 1
+[2026-10-21 06:31:57.326] [INFO] speedrun: rescuebot as shipped (patched)
+[2026-10-21 06:31:58.774] [INFO] event: victim_spawn bank #0 'betty' (random spot kept)
+[2026-10-21 06:31:58.817] [INFO] event: victim_spawn bank #1 '<null>' (random spot kept)
+[2026-10-21 06:31:58.844] [INFO] event: victim_spawn bank #2 '<null>' (random spot kept)
+[2026-10-21 06:31:58.914] [INFO] event: victim_spawn bank #3 '<null>' (random spot kept)
+[2026-10-21 06:31:59.016] [INFO] event: victim_spawn bank #4 '<null>' (random spot kept)
+[2026-10-21 06:31:59.063] [INFO] event: victim_spawn bank #5 '<null>' (random spot kept)
+[2026-10-21 06:31:59.380] [INFO] levelwatch: map 'bank' state 3
+[2026-10-21 06:31:59.436] [INFO] levelwatch: map 'bank' state 1
+[2026-10-21 06:31:59.488] [INFO] event: level_load 'bank'
+[2026-10-21 06:32:40.396] [INFO] cmd: fd_rescuebot 0
+[2026-10-21 06:32:40.426] [INFO] speedrun: rescuebot disabled (patched)

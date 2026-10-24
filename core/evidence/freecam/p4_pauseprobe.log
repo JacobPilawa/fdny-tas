@@ -1,0 +1,272 @@
+pauseprobe loaded
+genesis 10000000 set 10001990 get 10001a40
+hook SetWorldSpaceXForm 10001990 [53 55 8b e9 56 8b da 57]: MH_OK
+hook TickSubsystems 00429520 [56 8b f1 8b 46 08 8d 4e]: MH_OK
+hook RenderFrame 00494670 [6a ff 68 c0 42 4d 00 64]: MH_OK
+f=600 setxform caller ret=1003ce86 cam=0398ae80 running=8 paused=0
+f=600 setxform caller ret=1003ced5 cam=0398ae80 running=8 paused=0
+f=600 setxform caller ret=1003b80c cam=0398ae80 running=8 paused=0
+f=600 setxform caller ret=1003b876 cam=0398ae80 running=8 paused=0
+f=600 setxform caller ret=0049217e cam=078efdb8 (render cam) running=599 paused=0
+f=600 setxform caller ret=1003ce86 cam=078efdb8 (render cam) running=599 paused=0
+f=600 setxform caller ret=1003ced5 cam=078efdb8 (render cam) running=599 paused=0
+f=600 setxform caller ret=1003b80c cam=078efdb8 (render cam) running=599 paused=0
+f=600 setxform caller ret=1003b876 cam=078efdb8 (render cam) running=599 paused=0
+f=1200 setxform caller ret=1003ce86 cam=0398ae80 running=8 paused=0
+f=1200 setxform caller ret=1003ced5 cam=0398ae80 running=8 paused=0
+f=1200 setxform caller ret=1003b80c cam=0398ae80 running=8 paused=0
+f=1200 setxform caller ret=1003b876 cam=0398ae80 running=8 paused=0
+f=1200 setxform caller ret=0049217e cam=078efdb8 running=940 paused=0
+f=1200 setxform caller ret=1003ce86 cam=078efdb8 running=940 paused=0
+f=1200 setxform caller ret=1003ced5 cam=078efdb8 running=940 paused=0
+f=1200 setxform caller ret=1003b80c cam=078efdb8 running=940 paused=0
+f=1200 setxform caller ret=1003b876 cam=078efdb8 running=940 paused=0
+f=1200 setxform caller ret=0049217e cam=0bb62028 (render cam) running=514 paused=0
+f=1200 setxform caller ret=1003ce86 cam=0bb62028 (render cam) running=255 paused=0
+f=1200 setxform caller ret=1003ced5 cam=0bb62028 (render cam) running=255 paused=0
+f=1200 setxform caller ret=1003b80c cam=0bb62028 (render cam) running=255 paused=0
+f=1200 setxform caller ret=1003b876 cam=0bb62028 (render cam) running=255 paused=0
+f=1200 setxform caller ret=1003f19d cam=0bb62028 (render cam) running=765 paused=0
+f=1200 setxform caller ret=1003f20c cam=0bb62028 (render cam) running=765 paused=0
+f=1800 setxform caller ret=1003ce86 cam=0398ae80 running=8 paused=0
+f=1800 setxform caller ret=1003ced5 cam=0398ae80 running=8 paused=0
+f=1800 setxform caller ret=1003b80c cam=0398ae80 running=8 paused=0
+f=1800 setxform caller ret=1003b876 cam=0398ae80 running=8 paused=0
+f=1800 setxform caller ret=0049217e cam=078efdb8 running=940 paused=0
+f=1800 setxform caller ret=1003ce86 cam=078efdb8 running=940 paused=0
+f=1800 setxform caller ret=1003ced5 cam=078efdb8 running=940 paused=0
+f=1800 setxform caller ret=1003b80c cam=078efdb8 running=940 paused=0
+f=1800 setxform caller ret=1003b876 cam=078efdb8 running=940 paused=0
+f=1800 setxform caller ret=0049217e cam=0bb62028 (render cam) running=1714 paused=0
+f=1800 setxform caller ret=1003ce86 cam=0bb62028 (render cam) running=855 paused=0
+f=1800 setxform caller ret=1003ced5 cam=0bb62028 (render cam) running=855 paused=0
+f=1800 setxform caller ret=1003b80c cam=0bb62028 (render cam) running=855 paused=0
+f=1800 setxform caller ret=1003b876 cam=0bb62028 (render cam) running=855 paused=0
+f=1800 setxform caller ret=1003f19d cam=0bb62028 (render cam) running=2565 paused=0
+f=1800 setxform caller ret=1003f20c cam=0bb62028 (render cam) running=2565 paused=0
+f=2400 setxform caller ret=1003ce86 cam=0398ae80 running=8 paused=0
+f=2400 setxform caller ret=1003ced5 cam=0398ae80 running=8 paused=0
+f=2400 setxform caller ret=1003b80c cam=0398ae80 running=8 paused=0
+f=2400 setxform caller ret=1003b876 cam=0398ae80 running=8 paused=0
+f=2400 setxform caller ret=0049217e cam=078efdb8 running=940 paused=0
+f=2400 setxform caller ret=1003ce86 cam=078efdb8 running=940 paused=0
+f=2400 setxform caller ret=1003ced5 cam=078efdb8 running=940 paused=0
+f=2400 setxform caller ret=1003b80c cam=078efdb8 running=940 paused=0
+f=2400 setxform caller ret=1003b876 cam=078efdb8 running=940 paused=0
+f=2400 setxform caller ret=0049217e cam=0bb62028 running=2575 paused=0
+f=2400 setxform caller ret=1003ce86 cam=0bb62028 running=1286 paused=0
+f=2400 setxform caller ret=1003ced5 cam=0bb62028 running=1286 paused=0
+f=2400 setxform caller ret=1003b80c cam=0bb62028 running=1286 paused=0
+f=2400 setxform caller ret=1003b876 cam=0bb62028 running=1286 paused=0
+f=2400 setxform caller ret=1003f19d cam=0bb62028 running=3858 paused=0
+f=2400 setxform caller ret=1003f20c cam=0bb62028 running=3858 paused=0
+f=3000 setxform caller ret=1003ce86 cam=0398ae80 running=8 paused=0
+f=3000 setxform caller ret=1003ced5 cam=0398ae80 running=8 paused=0
+f=3000 setxform caller ret=1003b80c cam=0398ae80 running=8 paused=0
+f=3000 setxform caller ret=1003b876 cam=0398ae80 running=8 paused=0
+f=3000 setxform caller ret=0049217e cam=078efdb8 running=940 paused=0
+f=3000 setxform caller ret=1003ce86 cam=078efdb8 running=940 paused=0
+f=3000 setxform caller ret=1003ced5 cam=078efdb8 running=940 paused=0
+f=3000 setxform caller ret=1003b80c cam=078efdb8 running=940 paused=0
+f=3000 setxform caller ret=1003b876 cam=078efdb8 running=940 paused=0
+f=3000 setxform caller ret=0049217e cam=0bb62028 running=2575 paused=0
+f=3000 setxform caller ret=1003ce86 cam=0bb62028 running=1286 paused=0
+f=3000 setxform caller ret=1003ced5 cam=0bb62028 running=1286 paused=0
+f=3000 setxform caller ret=1003b80c cam=0bb62028 running=1286 paused=0
+f=3000 setxform caller ret=1003b876 cam=0bb62028 running=1286 paused=0
+f=3000 setxform caller ret=1003f19d cam=0bb62028 running=3858 paused=0
+f=3000 setxform caller ret=1003f20c cam=0bb62028 running=3858 paused=0
+f=3600 setxform caller ret=1003ce86 cam=0398ae80 running=8 paused=0
+f=3600 setxform caller ret=1003ced5 cam=0398ae80 running=8 paused=0
+f=3600 setxform caller ret=1003b80c cam=0398ae80 running=8 paused=0
+f=3600 setxform caller ret=1003b876 cam=0398ae80 running=8 paused=0
+f=3600 setxform caller ret=0049217e cam=078efdb8 running=940 paused=0
+f=3600 setxform caller ret=1003ce86 cam=078efdb8 running=940 paused=0
+f=3600 setxform caller ret=1003ced5 cam=078efdb8 running=940 paused=0
+f=3600 setxform caller ret=1003b80c cam=078efdb8 running=940 paused=0
+f=3600 setxform caller ret=1003b876 cam=078efdb8 running=940 paused=0
+f=3600 setxform caller ret=0049217e cam=0bb62028 running=2575 paused=0
+f=3600 setxform caller ret=1003ce86 cam=0bb62028 running=1286 paused=0
+f=3600 setxform caller ret=1003ced5 cam=0bb62028 running=1286 paused=0
+f=3600 setxform caller ret=1003b80c cam=0bb62028 running=1286 paused=0
+f=3600 setxform caller ret=1003b876 cam=0bb62028 running=1286 paused=0
+f=3600 setxform caller ret=1003f19d cam=0bb62028 running=3858 paused=0
+f=3600 setxform caller ret=1003f20c cam=0bb62028 running=3858 paused=0
+f=4200 setxform caller ret=1003ce86 cam=0398ae80 running=8 paused=0
+f=4200 setxform caller ret=1003ced5 cam=0398ae80 running=8 paused=0
+f=4200 setxform caller ret=1003b80c cam=0398ae80 running=8 paused=0
+f=4200 setxform caller ret=1003b876 cam=0398ae80 running=8 paused=0
+f=4200 setxform caller ret=0049217e cam=078efdb8 running=940 paused=0
+f=4200 setxform caller ret=1003ce86 cam=078efdb8 running=940 paused=0
+f=4200 setxform caller ret=1003ced5 cam=078efdb8 running=940 paused=0
+f=4200 setxform caller ret=1003b80c cam=078efdb8 running=940 paused=0
+f=4200 setxform caller ret=1003b876 cam=078efdb8 running=940 paused=0
+f=4200 setxform caller ret=0049217e cam=0bb62028 running=2575 paused=0
+f=4200 setxform caller ret=1003ce86 cam=0bb62028 running=1286 paused=0
+f=4200 setxform caller ret=1003ced5 cam=0bb62028 running=1286 paused=0
+f=4200 setxform caller ret=1003b80c cam=0bb62028 running=1286 paused=0
+f=4200 setxform caller ret=1003b876 cam=0bb62028 running=1286 paused=0
+f=4200 setxform caller ret=1003f19d cam=0bb62028 running=3858 paused=0
+f=4200 setxform caller ret=1003f20c cam=0bb62028 running=3858 paused=0
+f=4532 PAUSE elapsed=67377 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=0
+f=4532 paused elapsed=67377 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=0
+f=4562 paused elapsed=67900 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=30
+f=4592 paused elapsed=68429 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=60
+f=4622 paused elapsed=68955 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=90
+f=4651 setxform caller ret=1003ce86 cam=0398ae80 running=8 paused=0
+f=4651 setxform caller ret=1003ced5 cam=0398ae80 running=8 paused=0
+f=4651 setxform caller ret=1003b80c cam=0398ae80 running=8 paused=0
+f=4651 setxform caller ret=1003b876 cam=0398ae80 running=8 paused=0
+f=4651 setxform caller ret=0049217e cam=078efdb8 running=940 paused=0
+f=4651 setxform caller ret=1003ce86 cam=078efdb8 running=940 paused=0
+f=4651 setxform caller ret=1003ced5 cam=078efdb8 running=940 paused=0
+f=4651 setxform caller ret=1003b80c cam=078efdb8 running=940 paused=0
+f=4651 setxform caller ret=1003b876 cam=078efdb8 running=940 paused=0
+f=4651 setxform caller ret=0049217e cam=0bb62028 running=2575 paused=0
+f=4651 setxform caller ret=1003ce86 cam=0bb62028 running=1286 paused=0
+f=4651 setxform caller ret=1003ced5 cam=0bb62028 running=1286 paused=0
+f=4651 setxform caller ret=1003b80c cam=0bb62028 running=1286 paused=0
+f=4651 setxform caller ret=1003b876 cam=0bb62028 running=1286 paused=0
+f=4651 setxform caller ret=1003f19d cam=0bb62028 running=3858 paused=0
+f=4651 setxform caller ret=1003f20c cam=0bb62028 running=3858 paused=0
+f=4652 paused elapsed=69482 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=120
+f=4682 paused elapsed=70011 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=150
+f=4712 paused elapsed=70534 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=180
+f=4742 paused elapsed=71057 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=210
+f=4772 paused elapsed=71580 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=240
+f=4800 setxform caller ret=1003ce86 cam=0398ae80 running=8 paused=0
+f=4800 setxform caller ret=1003ced5 cam=0398ae80 running=8 paused=0
+f=4800 setxform caller ret=1003b80c cam=0398ae80 running=8 paused=0
+f=4800 setxform caller ret=1003b876 cam=0398ae80 running=8 paused=0
+f=4800 setxform caller ret=0049217e cam=078efdb8 running=940 paused=0
+f=4800 setxform caller ret=1003ce86 cam=078efdb8 running=940 paused=0
+f=4800 setxform caller ret=1003ced5 cam=078efdb8 running=940 paused=0
+f=4800 setxform caller ret=1003b80c cam=078efdb8 running=940 paused=0
+f=4800 setxform caller ret=1003b876 cam=078efdb8 running=940 paused=0
+f=4800 setxform caller ret=0049217e cam=0bb62028 running=2575 paused=0
+f=4800 setxform caller ret=1003ce86 cam=0bb62028 running=1286 paused=0
+f=4800 setxform caller ret=1003ced5 cam=0bb62028 running=1286 paused=0
+f=4800 setxform caller ret=1003b80c cam=0bb62028 running=1286 paused=0
+f=4800 setxform caller ret=1003b876 cam=0bb62028 running=1286 paused=0
+f=4800 setxform caller ret=1003f19d cam=0bb62028 running=3858 paused=0
+f=4800 setxform caller ret=1003f20c cam=0bb62028 running=3858 paused=0
+f=4802 paused elapsed=72104 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=270
+f=4832 paused elapsed=72631 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=300
+f=4862 paused elapsed=73154 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=330
+f=4892 paused elapsed=73683 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=360
+f=4922 paused elapsed=74209 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=390
+f=4927 paused elapsed=74296 dt=0.017 mouse=(30 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=395
+f=4928 paused elapsed=74314 dt=0.017 mouse=(30 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=396
+f=4929 paused elapsed=74331 dt=0.017 mouse=(30 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=397
+f=4930 paused elapsed=74348 dt=0.017 mouse=(30 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=398
+f=4931 paused elapsed=74365 dt=0.017 mouse=(30 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=399
+f=4933 paused elapsed=74399 dt=0.017 mouse=(30 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=401
+f=4934 paused elapsed=74417 dt=0.017 mouse=(30 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=402
+f=4935 paused elapsed=74435 dt=0.017 mouse=(30 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=403
+f=4936 paused elapsed=74452 dt=0.017 mouse=(30 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=404
+f=4937 paused elapsed=74470 dt=0.017 mouse=(30 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=405
+f=4952 paused elapsed=74730 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=420
+f=4973 override 1
+f=4973 override set cam=0c857f90 ret=1 want y=170.2 readback y=170.2 (ptr 0c858060)
+f=4974 override set cam=0c857f90 ret=1 want y=170.2 readback y=170.2 (ptr 0c858060)
+f=4975 override set cam=0c857f90 ret=1 want y=170.2 readback y=170.2 (ptr 0c858060)
+f=4982 paused elapsed=75256 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=450
+f=5012 paused elapsed=75779 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=480
+f=5041 override 0
+f=5042 paused elapsed=76301 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=510
+f=5072 paused elapsed=76823 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=540
+f=5102 paused elapsed=77346 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=570
+f=5111 RESUME elapsed=77504 dt=0.017 mouse=(0 0) block=0 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=579
+f=5111 after elapsed=77504 dt=0.017 mouse=(0 0) block=0 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=579
+f=5112 after elapsed=77521 dt=0.017 mouse=(0 0) block=0 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=579
+f=5113 after elapsed=77539 dt=0.017 mouse=(0 0) block=0 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.2 1196.0) skipped=579
+f=5114 after elapsed=77557 dt=0.017 mouse=(0 0) block=0 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.3 1196.0) skipped=579
+f=5115 after elapsed=77575 dt=0.017 mouse=(0 0) block=0 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.3 1196.0) skipped=579
+f=5116 after elapsed=77593 dt=0.017 mouse=(0 0) block=0 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.3 1196.0) skipped=579
+f=5117 after elapsed=77610 dt=0.017 mouse=(0 0) block=0 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.4 1196.0) skipped=579
+f=5118 after elapsed=77627 dt=0.017 mouse=(0 0) block=0 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.4 1196.0) skipped=579
+f=5238 clock-pause mode 1
+f=5265 PAUSE elapsed=80188 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.5 1196.0) skipped=579
+f=5265 paused elapsed=80188 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.5 1196.0) skipped=579
+f=5295 paused elapsed=80188 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.5 1196.0) skipped=609
+f=5325 paused elapsed=80188 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.5 1196.0) skipped=639
+f=5355 paused elapsed=80188 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.5 1196.0) skipped=669
+f=5384 setxform caller ret=1003ce86 cam=0398ae80 running=8 paused=0
+f=5384 setxform caller ret=1003ced5 cam=0398ae80 running=8 paused=0
+f=5384 setxform caller ret=1003b80c cam=0398ae80 running=8 paused=0
+f=5384 setxform caller ret=1003b876 cam=0398ae80 running=8 paused=0
+f=5384 setxform caller ret=0049217e cam=078efdb8 running=940 paused=0
+f=5384 setxform caller ret=1003ce86 cam=078efdb8 running=940 paused=0
+f=5384 setxform caller ret=1003ced5 cam=078efdb8 running=940 paused=0
+f=5384 setxform caller ret=1003b80c cam=078efdb8 running=940 paused=0
+f=5384 setxform caller ret=1003b876 cam=078efdb8 running=940 paused=0
+f=5384 setxform caller ret=0049217e cam=0bb62028 running=2575 paused=0
+f=5384 setxform caller ret=1003ce86 cam=0bb62028 running=1286 paused=0
+f=5384 setxform caller ret=1003ced5 cam=0bb62028 running=1286 paused=0
+f=5384 setxform caller ret=1003b80c cam=0bb62028 running=1286 paused=0
+f=5384 setxform caller ret=1003b876 cam=0bb62028 running=1286 paused=0
+f=5384 setxform caller ret=1003f19d cam=0bb62028 running=3858 paused=0
+f=5384 setxform caller ret=1003f20c cam=0bb62028 running=3858 paused=0
+f=5385 paused elapsed=80188 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.5 1196.0) skipped=699
+f=5400 setxform caller ret=1003ce86 cam=0398ae80 running=8 paused=0
+f=5400 setxform caller ret=1003ced5 cam=0398ae80 running=8 paused=0
+f=5400 setxform caller ret=1003b80c cam=0398ae80 running=8 paused=0
+f=5400 setxform caller ret=1003b876 cam=0398ae80 running=8 paused=0
+f=5400 setxform caller ret=0049217e cam=078efdb8 running=940 paused=0
+f=5400 setxform caller ret=1003ce86 cam=078efdb8 running=940 paused=0
+f=5400 setxform caller ret=1003ced5 cam=078efdb8 running=940 paused=0
+f=5400 setxform caller ret=1003b80c cam=078efdb8 running=940 paused=0
+f=5400 setxform caller ret=1003b876 cam=078efdb8 running=940 paused=0
+f=5400 setxform caller ret=0049217e cam=0bb62028 running=2575 paused=0
+f=5400 setxform caller ret=1003ce86 cam=0bb62028 running=1286 paused=0
+f=5400 setxform caller ret=1003ced5 cam=0bb62028 running=1286 paused=0
+f=5400 setxform caller ret=1003b80c cam=0bb62028 running=1286 paused=0
+f=5400 setxform caller ret=1003b876 cam=0bb62028 running=1286 paused=0
+f=5400 setxform caller ret=1003f19d cam=0bb62028 running=3858 paused=0
+f=5400 setxform caller ret=1003f20c cam=0bb62028 running=3858 paused=0
+f=5415 paused elapsed=80188 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.5 1196.0) skipped=729
+f=5445 paused elapsed=80188 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.5 1196.0) skipped=759
+f=5475 paused elapsed=80188 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.5 1196.0) skipped=789
+f=5505 paused elapsed=80188 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.5 1196.0) skipped=819
+f=5535 paused elapsed=80188 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.5 1196.0) skipped=849
+f=5565 paused elapsed=80188 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.5 1196.0) skipped=879
+f=5595 paused elapsed=80188 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.5 1196.0) skipped=909
+f=5619 paused elapsed=80188 dt=0.017 mouse=(-30 10) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.5 1196.0) skipped=933
+f=5621 paused elapsed=80188 dt=0.017 mouse=(-30 10) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.5 1196.0) skipped=935
+f=5622 paused elapsed=80188 dt=0.017 mouse=(-30 10) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.5 1196.0) skipped=936
+f=5623 paused elapsed=80188 dt=0.017 mouse=(-30 10) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.5 1196.0) skipped=937
+f=5625 paused elapsed=80188 dt=0.017 mouse=(-30 10) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.5 1196.0) skipped=939
+f=5626 paused elapsed=80188 dt=0.017 mouse=(-30 10) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.5 1196.0) skipped=940
+f=5627 paused elapsed=80188 dt=0.017 mouse=(-30 10) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.5 1196.0) skipped=941
+f=5628 paused elapsed=80188 dt=0.017 mouse=(-30 10) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.5 1196.0) skipped=942
+f=5630 paused elapsed=80188 dt=0.017 mouse=(-30 10) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.5 1196.0) skipped=944
+f=5631 paused elapsed=80188 dt=0.017 mouse=(-30 10) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.5 1196.0) skipped=945
+f=5655 paused elapsed=80188 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.5 1196.0) skipped=969
+f=5664 override 1
+f=5685 paused elapsed=80188 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.5 1196.0) skipped=999
+f=5715 paused elapsed=80188 dt=0.017 mouse=(0 0) block=1 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.5 1196.0) skipped=1029
+f=5739 RESUME elapsed=80188 dt=0.017 mouse=(0 0) block=0 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.5 1196.0) skipped=1053
+f=5739 after elapsed=80188 dt=0.017 mouse=(0 0) block=0 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.5 1196.0) skipped=1053
+f=5740 after elapsed=80206 dt=0.017 mouse=(0 0) block=0 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.5 1196.0) skipped=1053
+f=5741 after elapsed=80223 dt=0.017 mouse=(0 0) block=0 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.5 1196.0) skipped=1053
+f=5742 after elapsed=80240 dt=0.017 mouse=(0 0) block=0 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.4 1196.0) skipped=1053
+f=5743 after elapsed=80258 dt=0.017 mouse=(0 0) block=0 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.4 1196.0) skipped=1053
+f=5744 after elapsed=80276 dt=0.017 mouse=(0 0) block=0 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.3 1196.0) skipped=1053
+f=5745 after elapsed=80294 dt=0.017 mouse=(0 0) block=0 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.3 1196.0) skipped=1053
+f=5746 after elapsed=80311 dt=0.017 mouse=(0 0) block=0 pos=(-697.0 -47.8 1196.0) viewcam=0c857f90 rendercam=0c857f90 cam=(-697.0 20.3 1196.0) skipped=1053
+f=6000 setxform caller ret=1003ce86 cam=0398ae80 running=8 paused=0
+f=6000 setxform caller ret=1003ced5 cam=0398ae80 running=8 paused=0
+f=6000 setxform caller ret=1003b80c cam=0398ae80 running=8 paused=0
+f=6000 setxform caller ret=1003b876 cam=0398ae80 running=8 paused=0
+f=6000 setxform caller ret=0049217e cam=078efdb8 running=940 paused=0
+f=6000 setxform caller ret=1003ce86 cam=078efdb8 running=940 paused=0
+f=6000 setxform caller ret=1003ced5 cam=078efdb8 running=940 paused=0
+f=6000 setxform caller ret=1003b80c cam=078efdb8 running=940 paused=0
+f=6000 setxform caller ret=1003b876 cam=078efdb8 running=940 paused=0
+f=6000 setxform caller ret=0049217e cam=0bb62028 running=2575 paused=0
+f=6000 setxform caller ret=1003ce86 cam=0bb62028 running=1286 paused=0
+f=6000 setxform caller ret=1003ced5 cam=0bb62028 running=1286 paused=0
+f=6000 setxform caller ret=1003b80c cam=0bb62028 running=1286 paused=0
+f=6000 setxform caller ret=1003b876 cam=0bb62028 running=1286 paused=0
+f=6000 setxform caller ret=1003f19d cam=0bb62028 running=3858 paused=0
+f=6000 setxform caller ret=1003f20c cam=0bb62028 running=3858 paused=0

@@ -1,0 +1,26 @@
+name: lsprobe_quit
+# Probe (not a case): how to leave a level for the menu, and what follows. oil_rig_a from
+# the menu, then Esc.
+pre_files:
+  - {src: tests/data/game_cfg_dev.cfg, dst: FDNYFireFighter.cfg}
+  - {src: null, dst: FDNYCore.cfg}
+  - {src: "../live split/test/saves/next_oil_rig_a.rb", dst: Saves/player1.rb}
+record: false
+steps:
+  - wait_s: 4
+  - click: [320, 240]
+  - wait_s: 3
+  - gclick: [97, 457]
+  - wait_s: 3
+  - gclick: [195, 165]
+  - wait_s: 3
+  - screenshot: briefing
+  - gclick: [568, 450]
+  - wait_s: 25
+  - screenshot: level
+  - focus: {}
+  - key: esc
+  - wait_s: 3
+  - screenshot: esc
+expect:
+  no_crash: true

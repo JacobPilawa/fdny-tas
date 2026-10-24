@@ -1,0 +1,44 @@
+﻿== C:\fdny-decomp\core\evidence\demos\run7\zz_demoprobe_play1.txt: 1950 frames (rec 1950)
+  dt           identical
+  elapsed_rel  identical
+  gstate       identical
+  mstate       identical
+  pos_x        identical
+  pos_y        identical
+  pos_z        identical
+  vel_x        identical
+  vel_y        identical
+  vel_z        identical
+  yaw          identical
+  pitch        identical
+  timer        identical
+  time_left    identical
+  mt_left      differs on  1831 frames, first     0, max |d| 616, d[first] -16, d[last frame] 1
+  mt_next      differs on  1831 frames, first     0, max |d| 2464, d[first] 64, d[last frame] -4
+  rng_draws    differs on   312 frames, first    13, max |d| 24, d[first] 8, d[last frame] 8
+  ent_n        differs on  1543 frames, first     0, max |d| 6, d[first] 2, d[last frame] -2
+  ent_hash     differs on  1950 frames, first     0, max |d| 4.14584e+09, d[first] 8.08334e+07, d[last frame] 2.99801e+09
+  vic_hash     differs on  1944 frames, first     6, max |d| 4.17434e+09, d[first] -3.41065e+09, d[last frame] -1.09208e+09
+  other_hash   differs on  1950 frames, first     0, max |d| 4.24235e+09, d[first] -1.78116e+08, d[last frame] 3.99914e+09
+== C:\fdny-decomp\core\evidence\demos\run7\zz_demoprobe_play3.txt: 1950 frames (rec 1950)
+  dt           identical
+  elapsed_rel  identical
+  gstate       identical
+  mstate       identical
+  pos_x        identical
+  pos_y        identical
+  pos_z        identical
+  vel_x        identical
+  vel_y        identical
+  vel_z        identical
+  yaw          identical
+  pitch        identical
+  timer        identical
+  time_left    identical
+  mt_left      differs on  1894 frames, first     0, max |d| 622, d[first] -8, d[last frame] -9
+  mt_next      differs on  1894 frames, first     0, max |d| 2488, d[first] 32, d[last frame] 36
+  rng_draws    differs on   330 frames, first     7, max |d| 16, d[first] 2, d[last frame] 0
+  ent_n        differs on  1495 frames, first     0, max |d| 8, d[first] 1, d[last frame] -1
+  ent_hash     differs on  1950 frames, first     0, max |d| 4.1812e+09, d[first] 1.34088e+09, d[last frame] 3.30878e+09
+  vic_hash     differs on  1944 frames, first     6, max |d| 4.21381e+09, d[first] -1.88048e+09, d[last frame] -4.16217e+09
+  other_hash   differs on  1950 frames, first     0, max |d| 4.12161e+09, d[first] -4.93583e+08, d[last frame] 2.82725e+09

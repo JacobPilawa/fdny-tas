@@ -1,0 +1,21 @@
+name: bench_blit_vis
+# In-frame text investigation: which GE_Rect order shows glyph 'A' from the engine font bitmap.
+pre_files:
+  - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
+  - {src: null, dst: FDNYCore.cfg}
+setup: load_training
+steps:
+  - console: "fd_watermark 0"
+  - console: "fd_bench_blit 40 8 14 520 0"
+  - wait_s: 2
+  - screenshot: oLRTB
+  - console: "fd_bench_blit 40 8 14 520 1"
+  - wait_s: 2
+  - screenshot: oLTRB
+  - console: "fd_bench_blit 4 400 14 0 0"
+  - wait_s: 2
+  - screenshot: wide
+  - console: "fd_bench_blit 0"
+expect:
+  no_crash: true
+  log_errors: 0

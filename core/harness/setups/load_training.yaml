@@ -1,0 +1,12 @@
+# Front end -> Training level via the "Hotrod Stein" career slot (at Training).
+# Clicks use the game cursor (gclick). Coordinates are 640x480 client pixels.
+steps:
+  - wait_s: 4
+  - click: [320, 240]       # splash: any LMB
+  - wait_s: 3
+  - gclick: [97, 457]       # main: "game"
+  - wait_s: 3
+  - gclick: [195, 165]      # career: Hotrod Stein (Training)
+  - wait_s: 3
+  - gclick: [568, 450]      # briefing: GO!
+  - wait_s: 20              # level load

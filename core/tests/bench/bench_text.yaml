@@ -1,0 +1,74 @@
+name: bench_text
+# In-frame text investigation: frame rate vs geEngine_Printf calls / characters /
+# spaces / update interval (Debug fd_bench_text). Not part of the regression suite.
+pre_files:
+  - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
+  - {src: null, dst: FDNYCore.cfg}
+setup: load_training
+record: true
+steps:
+  - console: "fd_watermark 0"
+  - console: "fd_bench_text 0"
+  - wait_s: 2
+  - sample_pipe: {cmd: stats, as: base_0}
+  - wait_s: 6
+  - sample_pipe: {cmd: stats, as: base_1}
+  - screenshot: base
+  - console: "fd_bench_text 31 65 1 0"
+  - wait_s: 2
+  - sample_pipe: {cmd: stats, as: l31x65_0}
+  - wait_s: 6
+  - sample_pipe: {cmd: stats, as: l31x65_1}
+  - screenshot: l31x65
+  - console: "fd_bench_text 31 65 1 1"
+  - wait_s: 2
+  - sample_pipe: {cmd: stats, as: h31x65_0}
+  - wait_s: 6
+  - sample_pipe: {cmd: stats, as: h31x65_1}
+  - screenshot: h31x65
+  - console: "fd_bench_text 31 65 1 2"
+  - wait_s: 2
+  - sample_pipe: {cmd: stats, as: s31x65_0}
+  - wait_s: 6
+  - sample_pipe: {cmd: stats, as: s31x65_1}
+  - screenshot: s31x65
+  - console: "fd_bench_text 4 500 1 0"
+  - wait_s: 2
+  - sample_pipe: {cmd: stats, as: l4x500_0}
+  - wait_s: 6
+  - sample_pipe: {cmd: stats, as: l4x500_1}
+  - screenshot: l4x500
+  - console: "fd_bench_text 2000 1 1 0"
+  - wait_s: 2
+  - sample_pipe: {cmd: stats, as: l2000x1_0}
+  - wait_s: 6
+  - sample_pipe: {cmd: stats, as: l2000x1_1}
+  - screenshot: l2000x1
+  - console: "fd_bench_text 31 65 5 0"
+  - wait_s: 2
+  - sample_pipe: {cmd: stats, as: l31x65e5_0}
+  - wait_s: 6
+  - sample_pipe: {cmd: stats, as: l31x65e5_1}
+  - screenshot: l31x65e5
+  - console: "fd_bench_text 1 65 1 0"
+  - wait_s: 2
+  - sample_pipe: {cmd: stats, as: l1x65_0}
+  - wait_s: 6
+  - sample_pipe: {cmd: stats, as: l1x65_1}
+  - screenshot: l1x65
+  - console: "fd_bench_text 8 65 1 0"
+  - wait_s: 2
+  - sample_pipe: {cmd: stats, as: l8x65_0}
+  - wait_s: 6
+  - sample_pipe: {cmd: stats, as: l8x65_1}
+  - screenshot: l8x65
+  - console: "fd_bench_text 31 65 2 0"
+  - wait_s: 2
+  - sample_pipe: {cmd: stats, as: l31x65e2_0}
+  - wait_s: 6
+  - sample_pipe: {cmd: stats, as: l31x65e2_1}
+  - screenshot: l31x65e2
+  - console: "fd_bench_text 0"
+expect:
+  no_crash: true
+  log_errors: 0

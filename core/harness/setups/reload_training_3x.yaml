@@ -1,0 +1,10 @@
+# Load Training three times (initial load + two console `loadmap training`
+# reloads, the game's own script verb) and sample victim positions each time.
+steps:
+  - sample_victims: run1
+  - console: "loadmap training"
+  - wait_s: 25
+  - sample_victims: run2
+  - console: "loadmap training"
+  - wait_s: 25
+  - sample_victims: run3

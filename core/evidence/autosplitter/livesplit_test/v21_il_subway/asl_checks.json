@@ -1,0 +1,57 @@
+[
+  {
+    "check": "script loaded",
+    "pass": true,
+    "detail": "HOST loaded FDNY_ILs.asl, 30 segments, refresh 66.6666666666667 Hz"
+  },
+  {
+    "check": "no script errors",
+    "pass": true,
+    "detail": "none"
+  },
+  {
+    "check": "start count",
+    "pass": true,
+    "detail": "game: 1 run start(s); timer: 1 start(s)"
+  },
+  {
+    "check": "start 1",
+    "pass": true,
+    "detail": "gameplay began 18916.075; timer start 18916.088 (+0.012 s, allowed 0.1)"
+  },
+  {
+    "check": "split count",
+    "pass": true,
+    "detail": "game: 2 stage end(s)/win(s) (case expects 2); timer: 2 split(s)"
+  },
+  {
+    "check": "split 1 (subway_a -> subway_b)",
+    "pass": true,
+    "detail": "split 0.110 s before the load started (allowed 0.5 s before to 0.05 s after)"
+  },
+  {
+    "check": "split 1 game time",
+    "pass": true,
+    "detail": "timer 26.4085 s, played 26.420 s over 1 interval(s) (tolerance 0.08)"
+  },
+  {
+    "check": "split 2 (subway_b won)",
+    "pass": true,
+    "detail": "split 30 ms (game clock) after the win flag (allowed 0-70)"
+  },
+  {
+    "check": "split 2 game time",
+    "pass": true,
+    "detail": "timer 37.669 s, played 37.643 s over 2 interval(s) (tolerance 0.10)"
+  },
+  {
+    "check": "reset count",
+    "pass": true,
+    "detail": "game: 1 menu visit(s) during a run; timer: 1 reset(s)"
+  },
+  {
+    "check": "reset 1",
+    "pass": true,
+    "detail": "menu at 18961.881; reset at 18961.892 (+0.011 s, allowed 0.5)"
+  }
+]

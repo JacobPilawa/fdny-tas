@@ -1,0 +1,37 @@
+name: hud_player
+# Item 10: fd_hud_player draws every field of the old Python player overlay
+# in-game (X/Y/Z position, player state, screen state, X/Y/Z velocity, XY
+# speed) through Genesis' geEngine_Printf, and each drawn value equals memory
+# within one frame: drawn == same-frame snapshot value (also while moving),
+# and drawn == direct memory once the player is at rest. Screenshots.
+pre_files:
+  - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
+  - {src: tests/data/fdcore_hud_player.cfg, dst: FDNYCore.cfg}
+setup: load_training
+record: true
+steps:
+  - assert_log: {contains: "hud: ready"}
+  - wait_s: 0.5
+  - assert_hud_matches: {}
+  - screenshot: hud_idle
+  # mid-motion: what is drawn equals that frame's values
+  - key_down: w
+  - wait_s: 0.6
+  - assert_hud_matches: {moving: true}
+  - screenshot: hud_moving
+  - assert_hud_matches: {moving: true}
+  - key_up: w
+  - key: {key: w, hold: 1.2}
+  - wait_s: 1.0
+  - assert_hud_matches: {}
+  - screenshot: hud_after_move
+  - key: {key: c, hold: 0.3}
+  - wait_s: 0.5
+  - assert_hud_matches: {}
+  - screenshot: hud_state_change
+  - console: "fd_hud_player 0"
+  - wait_s: 0.5
+  - screenshot: hud_off
+expect:
+  no_crash: true
+  log_errors: 0

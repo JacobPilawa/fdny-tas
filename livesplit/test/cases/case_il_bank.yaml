@@ -1,0 +1,34 @@
+name: ls_il_bank
+# IL splitter, single-stage level started from the menu: bank (career save whose next
+# mission is bank). events.py opens the exit 3 s into play; the player is then put in the
+# exit trigger, whose touch runs the map's `finalexit` (the win). After the results the
+# game returns to the menu: the IL splitter resets.
+asl: FDNY_ILs.asl
+splits: 1
+reset: true
+duration_s: 150
+pre_files:
+  - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
+  - {src: null, dst: FDNYCore.cfg}
+  - {src: "../live split/test/saves/next_bank.rb", dst: Saves/player1.rb}
+record: false
+steps:
+  - wait_s: 4
+  - click: [320, 240]       # splash: any LMB
+  - wait_s: 3
+  - gclick: [97, 457]       # main: "game"
+  - wait_s: 3
+  - gclick: [195, 165]      # career: Hotrod Stein (next: bank)
+  - wait_s: 3
+  - gclick: [568, 450]      # briefing: GO!
+  - wait_s: 25              # level load + the exit opening
+  - screenshot: bank_start
+  - console: "fd_dbg_setpos -680 0 1361 0"   # into the exit trigger
+  - wait_s: 3
+  - screenshot: bank_won
+  - wait_s: 10
+  - screenshot: after_win
+  - wait_s: 10
+  - screenshot: later
+expect:
+  no_crash: true

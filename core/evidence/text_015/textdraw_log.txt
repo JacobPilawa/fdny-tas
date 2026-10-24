@@ -1,0 +1,15 @@
+﻿[2026-10-21 22:25:57.302] [INFO] gfx: ready (decals, alpha surfaces, solid rects)
+[2026-10-21 22:25:57.334] [INFO] textdraw: ready (3 panel(s))
+[2026-10-21 22:25:57.980] [INFO] gfx: world 034c7b28
+[2026-10-21 22:25:58.035] [INFO] gfx: font Consolas 9 px, cell 5x10
+[2026-10-21 22:25:58.075] [INFO] gfx: view 1366x768 (window; window client 1366x768)
+[2026-10-21 22:25:58.123] [INFO] textdraw: watermark: 383x18 at 8,690 (view 1366x768), opaque
+[2026-10-21 22:26:01.664] [INFO] gfx: world 0354d008
+[2026-10-21 22:26:01.730] [INFO] gfx: view 640x480 (camera; window client 640x480)
+[2026-10-21 22:26:01.780] [INFO] textdraw: hud_player: 93x58 at 8,52 (view 640x480), translucent
+[2026-10-21 22:26:01.832] [INFO] textdraw: glitch: 333x238 at 295,12 (view 640x480), translucent
+[2026-10-21 22:26:18.270] [INFO] textdraw: hud_player: 98x58 at 8,52 (view 640x480), opaque
+[2026-10-21 22:26:18.627] [INFO] textdraw: glitch: 333x238 at 295,12 (view 640x480), opaque
+[2026-10-21 22:26:19.040] [INFO] gfx: world 06d0cfa0
+[2026-10-21 22:26:19.202] [INFO] textdraw: hud_player: 143x58 at 8,52 (view 640x480), translucent
+[2026-10-21 22:26:19.265] [INFO] textdraw: glitch: 333x238 at 295,12 (view 640x480), translucent

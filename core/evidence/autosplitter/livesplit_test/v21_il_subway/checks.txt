@@ -1,0 +1,11 @@
+﻿  [PASS] script loaded: HOST loaded FDNY_ILs.asl, 30 segments, refresh 66.6666666666667 Hz
+  [PASS] no script errors: none
+  [PASS] start count: game: 1 run start(s); timer: 1 start(s)
+  [PASS] start 1: gameplay began 18916.075; timer start 18916.088 (+0.012 s, allowed 0.1)
+  [PASS] split count: game: 2 stage end(s)/win(s) (case expects 2); timer: 2 split(s)
+  [PASS] split 1 (subway_a -> subway_b): split 0.110 s before the load started (allowed 0.5 s before to 0.05 s after)
+  [PASS] split 1 game time: timer 26.4085 s, played 26.420 s over 1 interval(s) (tolerance 0.08)
+  [PASS] split 2 (subway_b won): split 30 ms (game clock) after the win flag (allowed 0-70)
+  [PASS] split 2 game time: timer 37.669 s, played 37.643 s over 2 interval(s) (tolerance 0.10)
+  [PASS] reset count: game: 1 menu visit(s) during a run; timer: 1 reset(s)
+  [PASS] reset 1: menu at 18961.881; reset at 18961.892 (+0.011 s, allowed 0.5)

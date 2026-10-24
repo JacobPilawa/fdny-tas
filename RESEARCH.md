@@ -1886,3 +1886,81 @@ Key results:
 VERDICT: stuck is handled by PREVENTION (fail-safe collision + one headroom
 gate), not detection+recovery. No automatic rescue exists for a player stuck
 mid-play.
+
+### 2026-10-23 -- autosplitter: how staged levels and wins look in memory
+Owner report: the LiveSplit splitters split staged levels (boat, subway, oil rig) late.
+Evidence and live traces: `core/evidence/autosplitter/`. New splitters:
+`live split/` (v2, then v2.1; known-good test in `live split/test/`).
+
+**Stage exit.**
+- The exit trigger's `touch: tell player (finalexitloadmap <next>)` runs
+  `PlayerRescueEnt::Verb_FinalExitLoadMap` (0x450A70): the same strict victim gate as
+  `finalexit`, the .bsp existence check, then `GameSession::RequestLevelChange`
+  (0x0042A260).
+- RequestLevelChange writes `+0x68C = 1`, the next map's String at `+0x660`, the rrf at
+  `+0x668`, and copies the old level's info into `+0x664..+0x67C`.
+- The next RunFrame clears +0x68C and calls `LoadLevel(this+0x660)`. LoadLevel sets
+  `+0x688` (current level) to that embedded block, sets gameState `+0x6F0 = 2`, and later
+  `+0x6EC = 0`. gameState then goes 2 -> 3 -> 1.
+- No win, fade, sound or results screen on a stage exit.
+- Other RequestLevelChange callers: `ScriptTrigger::Verb_LoadMap` (rescue.rrf),
+  `Verb_LoadHoseMap` (hose.rrf).
+
+**Win.**
+- `Verb_FinalExit` / `UpdateZonesAndWin` set the mission result `PlayerRescueEnt+0x3438 = 1`
+  on the win frame.
+- `RescueHud::Update` then plays the win audio and fade, and
+  `GameSession::SetLevelResult` (0x4295B0) sets `+0x6EC` (1 win / 2 lose) for RunFrame's
+  results screen.
+
+**The autosplitter "end sound played" pointers** are per-level sound handle slots. They fill
+at level load and change during unrelated levels. On their own map each stays 0 until the
+win and fills 0-2 game frames after the win flag (measured on all eight), so the splitters
+still use them, guarded by map name (v2.1, owner's method).
+
+**gameState writers:** LoadLevel (2), `MenuManager::TeardownToLoading` (1),
+`MenuManager::Activate` (0), RunFrame (3 -> 1). The writer of 3 is not found.
+
+
+### 2026-10-23 -- demos and ghosts spike (core/evidence/demos)
+
+**No demo facility exists** in `FDNYFirefighter.exe` or `Genesis.dll` (no demo / record /
+playback / timedemo / journal strings or code). Genesis3D 1.1's DirectPlay netcode is not
+imported.
+
+**Determinism, measured in-process** (Hourglass-style probe `core/probes/demoprobe.cpp`:
+feeds dt and `g_gameTimeMs`, the DirectInput `GetDeviceData` results and the MT19937 state
+back after a reload, compares every frame bit-exact):
+- **Player movement is deterministic** given dt + input: position, velocity, view, move
+  state and `mission.time_left` (+0x343C) bit-identical over ~1950 frames (32 s) on bank, in
+  every run. On real dt it diverges (frame ~1280, up to 35 u).
+- **The world is not yet.** Found and controlled: the load's real duration in game time,
+  victims' load-time RNG draws, and presentation code drawing from the gameplay RNG.
+  - `Rand_Float01` 0x00404AC0 inlines its own MT draw; ~860 draws per frame on bank, mostly
+    particles.
+  - `ParticleSystem::Emit`'s draw count depends on rendering, which shifts the shared
+    stream. With a presentation / gameplay RNG split, victims matched for 25 s.
+- **Still open:** fire spread diverges at load frame 3. It is gated on
+  `FireFx::GetExtents` (the visual size), whose keyframes the level script schedules
+  (`FireRescueEnt::HandleScriptCommand` -> `FUN_00447920` -> `FireFx::ScheduleSizeKeyframe`).
+  The script's timing in the first frames is not traced.
+
+**Offsets note:** from the player pointer the core uses (`[g_everGame]+0x30`), `+0x32FC` holds
+the ASCII bytes `"[Cou"` (constant). The countdown there is `+0x343C` (`mission.time_left`, as in
+addresses.json). The cycle-30s note "mission timer `+0x32fc`" is 0x140 lower, so it may use a
+different base for the same object. Not resolved.
+
+**Ghost assets:** the game ships `Data\Acts\firefighter.act` / `Fireman.act`; Genesis.dll
+exports `geActor_DefCreateFromFile`, `geActor_Create`, `geWorld_AddActor`, `geActor_SetPose`,
+`geActor_SetAlpha` and `geActor_SetBlendingType`. The last two are not imported by the
+game.
+
+**Verdicts:**
+
+| Feature | Verdict |
+|---|---|
+| Full demos | MODERATE-HARD, open-ended; not a rewrite (four hook points) |
+| Ghost (box) | EASY |
+| Ghost (firefighter model) | MODERATE |
+
+Ghosts need no determinism.

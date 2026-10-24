@@ -1,0 +1,6 @@
+clean source reads: 23 cvars 30 commands
+caught: features/tp.cpp:127: help is not a string literal (kHelp)
+SetPracticeOnly("fd_tp_load"): no variable or command of that name
+caught: features/tp.cpp:131: BindDefault(...) with 3 argument(s), want 2
+caught: features/hud.cpp:113: RegisterCvar(&g_fdNope) but no `cmd::Cvar g_fdNope = {"name", ...}` found
+SetPracticeOnly("fd_hud_player"): no variable or command of that name

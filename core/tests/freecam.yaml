@@ -1,0 +1,162 @@
+name: freecam
+# fd_pause + free camera (core/evidence/freecam; D34). On bank with the RescueBot off,
+# standing near a fire (Debug test hook fd_dbg_setpos from the juggle module). Key P
+# (default bind fd_pause_toggle) pauses: the simulation step is skipped and the game
+# clock paused; the free camera starts at the game's camera pose. Proven through the Debug
+# pipe `freecam` (its rate / along / turn are measured game-side since `freecam reset`,
+# independent of the harness's key timing) and screenshots.
+pre_files:
+  - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
+  - {src: null, dst: FDNYCore.cfg}
+setup: load_training
+record: false
+steps:
+  - assert_log: {contains: "module freecam: enabled"}
+  - assert_log: {contains: "freecam: ready (fd_pause; key P)"}
+  - console: "fd_watermark 0"
+  - console: "fd_rescuebot 0"
+  - console: "loadmap bank"
+  - wait_s: 40
+  # near the bank's first fire (the spike's burning spot is 144, 250, -1324), facing it
+  - console: "fd_dbg_setpos 144 -47 -1000 180"
+  - wait_log: {contains: "juggle: setpos 144 -47 -1000 (+yaw): ok", since_console: true, timeout: 10}
+  - wait_s: 2
+  - console: "fd_juggle 1"
+  - focus: {}
+  - assert_pipe_stat: {cmd: freecam, key: paused, equals: 0}
+  # running: the snapshot is live, so "unchanged while paused" below means something: the
+  # clock, the mission timer, the roaming victim and the spreading fires all change
+  - sample_pipe: {cmd: freecam, as: run0}
+  - wait_s: 3
+  - assert_pipe_stat: {cmd: freecam, key: clock, min: 2500, since: run0}
+  - assert_pipe_stat: {cmd: freecam, key: time, max: -25, since: run0}
+  - assert_pipe_stat: {cmd: freecam, key: victims, changed: true, since: run0}
+  - assert_pipe_stat: {cmd: freecam, key: fire_c, changed: true, since: run0}
+  # the fire-juggling arrow (view-relative) is drawn while running ...
+  - assert_pipe_stat: {cmd: textdraw juggle, key: drawn, equals: 1}
+  - screenshot: running
+  # pause with the default key
+  - key: {key: p, hold: 0.1}
+  - wait_pipe: {cmd: freecam, key: paused, equals: 1, timeout: 3}
+  - assert_pipe_stat: {cmd: freecam, key: flying, equals: 1}
+  - assert_log: {contains: "freecam: flying from"}
+  # the free camera starts on the game's own camera: rebuilt rotation within 0.005
+  - assert_pipe_stat: {cmd: freecam, key: rebuild, max: 5}
+  - assert_pipe_stat: {cmd: freecam, key: gamecam_dist, max: 10}
+  - wait_s: 0.3
+  - sample_pipe: {cmd: freecam, as: p0}
+  - screenshot: paused
+  - wait_s: 4
+  # frozen: player, velocity, burn, O2, mission timer, game clock, victims, fires
+  - assert_pipe_stat: {cmd: freecam, key: px, equals: 0, since: p0}
+  - assert_pipe_stat: {cmd: freecam, key: py, equals: 0, since: p0}
+  - assert_pipe_stat: {cmd: freecam, key: pz, equals: 0, since: p0}
+  - assert_pipe_stat: {cmd: freecam, key: vx, equals: 0, since: p0}
+  - assert_pipe_stat: {cmd: freecam, key: vy, equals: 0, since: p0}
+  - assert_pipe_stat: {cmd: freecam, key: vz, equals: 0, since: p0}
+  - assert_pipe_stat: {cmd: freecam, key: burn, equals: 0, since: p0}
+  - assert_pipe_stat: {cmd: freecam, key: o2, equals: 0, since: p0}
+  - assert_pipe_stat: {cmd: freecam, key: time, equals: 0, since: p0}
+  - assert_pipe_stat: {cmd: freecam, key: clock, equals: 0, since: p0}
+  - assert_pipe_stat: {cmd: freecam, key: victims, equals: 0, since: p0}
+  - assert_pipe_stat: {cmd: freecam, key: fires, equals: 0, since: p0}
+  - assert_pipe_stat: {cmd: freecam, key: fire_c, equals: 0, since: p0}
+  - assert_pipe_stat: {cmd: freecam, key: fire_i, equals: 0, since: p0}
+  - assert_pipe_stat: {cmd: freecam, key: fire_m, equals: 0, since: p0}
+  - assert_pipe_stat: {cmd: freecam, key: frames, min: 100}
+  # ... and hidden while paused (D35), though still switched on
+  - assert_pipe_stat: {cmd: textdraw juggle, key: drawn, equals: 0}
+  - assert_pipe_stat: {cmd: textdraw juggle, key: visible, equals: 1}
+  # W for ~1 s: speed x key time along the view (rate within 1 %, direction within 0.1 %)
+  - pipe: "freecam reset"
+  - key: {key: w, hold: 1.0}
+  - wait_s: 0.3
+  - assert_pipe_stat: {cmd: freecam, key: rate, min: 3960, max: 4040}
+  - assert_pipe_stat: {cmd: freecam, key: along, min: 999}
+  - assert_pipe_stat: {cmd: freecam, key: keytime, min: 700, max: 1500}
+  - screenshot: flew_forward
+  # Shift x4, Ctrl x0.25
+  - pipe: "freecam reset"
+  - key_down: lshift
+  - key: {key: w, hold: 0.5}
+  - key_up: lshift
+  - wait_s: 0.3
+  - assert_pipe_stat: {cmd: freecam, key: rate, min: 15840, max: 16160}
+  - pipe: "freecam reset"
+  - key_down: lctrl
+  - key: {key: s, hold: 1.0}
+  - key_up: lctrl
+  - wait_s: 0.3
+  - assert_pipe_stat: {cmd: freecam, key: rate, min: 990, max: 1010}
+  - assert_pipe_stat: {cmd: freecam, key: along, max: -999}
+  # strafe and up: E straight up
+  - pipe: "freecam reset"
+  - key: {key: e, hold: 0.6}
+  - wait_s: 0.3
+  - assert_pipe_stat: {cmd: freecam, key: rate, min: 3960, max: 4040}
+  - screenshot: flew_up
+  # mouse: 200 counts right at 0.075 deg/count = 15 degrees, and to the RIGHT: yaw grows to
+  # the left (forward (sin, cos), right (-cos, sin)), so it falls by 15 (owner 2026-10-22:
+  # sensitivity halved; left and right were swapped)
+  - pipe: "freecam reset"
+  - sample_pipe: {cmd: freecam, as: before_turn}
+  - mouse_rel: [200, 0]
+  - wait_s: 0.5
+  - assert_pipe_stat: {cmd: freecam, key: turn, min: 145, max: 155}
+  - assert_pipe_stat: {cmd: freecam, key: yaw, min: -155, max: -145, since: before_turn}
+  - screenshot: turned
+  # the player never moved, the clock never ran
+  - assert_pipe_stat: {cmd: freecam, key: px, equals: 0, since: p0}
+  - assert_pipe_stat: {cmd: freecam, key: pz, equals: 0, since: p0}
+  - assert_pipe_stat: {cmd: freecam, key: clock, equals: 0, since: p0}
+  # keys pressed during the pause don't reach the game after it: W, jump (right button)
+  # and Esc (the in-game menu), all released before the resume
+  - key: {key: w, hold: 0.5}
+  - rclick: {}
+  - key: {key: esc, hold: 0.1}
+  - wait_s: 0.3
+  - screenshot: after_esc_paused
+  # resume with the key: the view is the player's again, the timer counts, a normal delta
+  - key: {key: p, hold: 0.1}
+  - wait_pipe: {cmd: freecam, key: paused, equals: 0, timeout: 3}
+  - assert_pipe_stat: {cmd: freecam, key: flying, equals: 0}
+  - assert_log: {contains: "freecam: camera back to the player"}
+  - wait_s: 0.5
+  - assert_pipe_stat: {cmd: freecam, key: resume_dt, min: 1, max: 50}
+  # back on the game's camera: the free camera flew ~1700 u; the game's own camera bobs a
+  # couple of units with the player standing still (run fc4: two pause starts 2 u apart in y)
+  - assert_pipe_stat: {cmd: freecam, key: gamecam_dist, max: 50}
+  - assert_pipe_stat: {cmd: freecam, key: px, equals: 0, since: p0}
+  - assert_pipe_stat: {cmd: freecam, key: pz, equals: 0, since: p0}
+  - sample_pipe: {cmd: freecam, as: r0}
+  - wait_s: 3
+  - assert_pipe_stat: {cmd: freecam, key: time, min: -40, max: -20, since: r0}
+  - assert_pipe_stat: {cmd: freecam, key: px, equals: 0, since: p0}
+  - assert_pipe_stat: {cmd: freecam, key: py, equals: 0, since: p0}
+  - assert_pipe_stat: {cmd: freecam, key: pz, equals: 0, since: p0}
+  - assert_mem: {name: game.state, equals: 1}
+  - assert_pipe_stat: {cmd: textdraw juggle, key: drawn, equals: 1}
+  - screenshot: resumed
+  # a level load ends a pause (and fd_pause goes back to 0)
+  - console: "fd_pause 1"
+  - wait_pipe: {cmd: freecam, key: paused, equals: 1, timeout: 3}
+  - console: "loadmap bank"
+  - wait_log: {contains: "pause: off (level change)", since_console: true, timeout: 60}
+  - wait_s: 40
+  - assert_pipe_stat: {cmd: freecam, key: paused, equals: 0}
+  - assert_pipe_stat: {cmd: freecam, key: flying, equals: 0}
+  - console: "fd_pause"
+  - assert_log: {contains: "fd_pause is \"0\""}
+  # practice-only: refused under fd_profile run
+  - console: "fd_profile run"
+  - wait_s: 1
+  - console: "fd_pause 1"
+  - wait_s: 1
+  - assert_pipe_stat: {cmd: freecam, key: paused, equals: 0}
+  - key: {key: p, hold: 0.1}
+  - wait_s: 1
+  - assert_pipe_stat: {cmd: freecam, key: paused, equals: 0}
+  - console: "fd_profile practice"
+expect:
+  no_crash: true
+  log_errors: 0

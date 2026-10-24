@@ -1,0 +1,197 @@
+# FDNYCore decisions
+
+Why things are the way they are. One entry per non-obvious choice: the decision,
+the reason, and what was rejected. Add an entry whenever you make a choice a
+later session might "simplify" away; change one only with the owner's approval
+(say so in the entry). Evidence paths are under `core/evidence/`.
+
+## Toolchain and runtime
+
+- **D1 Zig (clang) freestanding C++17, no CRT.** Owner: keep Zig, MSVC only if needed. One small `.asi` with no runtime dependency, like the earlier `asi/` plugins. Consequences: no STL or exceptions, no 64-bit integer division helpers, no stack probes, and **no static constructors or exit-time destructors** (D2).
+- **D2 No dynamically initialised globals (rule R7), enforced with `-Wglobal-constructors -Wexit-time-destructors`.** Nothing runs them. When this was enforced (0.16.1) it found two real cases:
+  - `textdraw`'s panel array: benign, all-zero by luck;
+  - `glitch_bsp`'s `ON_EPSILON = OnEpsilon()`: never initialised, so the BSP on-plane tolerance could be 0 instead of 0.1.
+- **D3 MinHook (vendored) for every inline hook; one owner per hooked function.** Two MinHook hooks on one target in one instance aren't possible, and two owners would fight over semantics. Shared hooks live in a core service that offers subscriptions or filters (`hooks` frame events, `camera`, `gfx` world).
+
+## Game access
+
+- **D4 Every address lives in `addresses.json`** (rule R4). It is versioned by exe + Genesis SHA-256, and every entry is signature-checked at startup. A bad signature disables only what needs that entry, and the game runs on. This replaced raw addresses so an unknown game version degrades instead of crashing.
+- **D5 Defer to other mods that own a patch site** (alttabfix, FOV fix, FDNYDeterministic). Owner: the old tools stay installed. The core detects an occupied site and leaves it alone rather than double-patching.
+- **D6 Ghidra work goes through subagents**, read-only; the primary session never calls GhidrAssist MCP. Project rule (memory: loop owns Ghidra writes).
+
+## Architecture
+
+- **D7 Core services + self-registering feature modules, in one binary** (0.16.0, owner chose "option A").
+  - **Rejected for now:** separate plugin DLLs ("option B": versioned C API, load-order waits, a runtime per DLL, a bigger test matrix). A is shaped to map onto B later: module descriptor = plugin entry, service headers = API.
+  - **Proof:** `build.ps1 -Without *` builds and runs the core alone.
+- **D8 Registry by COFF section (`.fdmod$a/$m/$z`), not a list or constructors.** A list in the core would make the core name features (R1). Constructors never run (D2). lld merges `$`-suffixed sections in name order, so the core walks pointers between its two markers (nulls skipped).
+- **D9 Practice-only is declared by the feature (`cmd::SetPracticeOnly`), enforced by `profile`.** Previously `profile` hard-coded feature names, a service knowing features. The classification itself is the agent's default and still **awaits owner confirmation**.
+- **D10 `camera` is a core service** owning `geCamera_SetAttributes`. `fov` is a filter on it, and `gfx` reads the view size from it. Before, `gfx` (a service) depended on `fov` (a feature).
+
+## Drawing
+
+- **D11 Text is GDI-rendered into one bitmap per panel, re-rendered only when it changes** (≥ `minFrames` apart). One blit or poly set per frame. Rejected:
+  - `geEngine_Printf`: one ~29 µs blit per character, max 40 strings × 80 chars; a full box ran at 12 fps;
+  - an external overlay window: no fullscreen or OBS capture, and a second UI thread.
+
+  Evidence: `text_cutover/`, PROGRESS "In-frame text investigation".
+- **D12 `geEngine_FlushPipeline` once before the frame's first immediate draw.** Without it, the cached 3D is drawn over the 2D inside EndFrame. This was the cause of the early "invisible bitmaps".
+- **D13 Placement from the camera rect, never the window client size** (0.14.1). With dgVoodoo scaling, the window is the desktop size and the render is smaller, so right- and bottom-anchored panels landed off-frame.
+- **D14 Translucency = `gfx::AlphaSurface`: 256-px 4444 tiles attached with `geWorld_AddBitmap`, drawn with `geEngine_RenderPoly`** (flags 1, z 1.0, −0.5 px offset). Spike: `alpha_spike/README.md`. Rejected or impossible:
+  - untextured vertex alpha: D3DDrv ignores it;
+  - engine-attached bitmaps: 2D decal handle only, crashes D3DDrv;
+  - textures over 256 px: crash;
+  - 32-bit ARGB: stored as 4444 anyway.
+
+  Without a world (menus) a translucent panel falls back to an opaque decal. Tiles are re-added when the world changes.
+- **D15 Text alpha is a parameter, not a separate method** (0.15.1). It costs the same, since the tile is blended either way. Strictly opaque drawing is the Decal (`STYLE_OPAQUE`).
+- **D16 The watermark stays opaque** (owner), so it shows in menus too.
+- **D17 Font: Consolas, non-antialiased, default 9 px (`fd_text_size`).**
+  - Non-antialiased so every text pixel is exactly its colour: alpha keys on the background colour.
+  - 9 px because the owner wanted smaller than 11.
+
+## Features
+
+- **D18 Teleporter writes position, view and zeroed motion at frame end; it does not use the game's Verb_Reset.** Verb_Reset drops held objects and the victim, resets health and zones, moves to an escape-mutated checkpoint, and SnapToFloor commits (0,1,0) without a floor. Owner: it only works on the map it was saved on. It has a single in-memory slot; stance is not saved.
+- **D19 Collision-overlay output goes to `FDNYCore.log` (`glitch|` lines), no extra files** (owner).
+- **D20 Speedrun options (static spawns, RescueBot off) re-implement FDNYDeterministic and stand down when it is installed** (D5). Replacing the standalone `.asi` is an open owner question.
+- **D24 Trigger boxes come from live memory every level; there is no BSP scan or coordinate file** (owner). Triggers are the entities whose vtable is `trigger.vtbl`. The set is rescanned on a map change and about once a second. The exits' open flag is read every frame. Spike: `trigger_boxes/README.md`.
+- **D25 Trigger classes are the game's own tests, not kind and not our own parsing rules:**
+  - Kind is 8 for every trigger: the constructor writes it, so it can't separate exits.
+  - Rescue zone = `trigger.escape`, the flag the game sets when a trigger binds `touch` → `tell player escape`.
+  - Exit = a `touch:` line containing `tell player finalexit` or `tell player (finalexitloadmap`. These are the two has-binding tests in `PlayerRescueEnt::UpdateZonesAndWin`, which match by substring.
+  - Open = `trigger.enabled`, set by `BoundsTrigger_SetEnabled(1)` when every victim is delivered.
+  - An exit is also an escape trigger, and exit wins.
+- **D26 World boxes are a `gfx` block (`SubmitWorldBoxes`), drawn in gfx's own late step before the text panels.**
+  - Only gfx may call RenderPoly (R5).
+  - A queued poly would land on top of the panels at EndFrame's flush. So gfx flushes the queued boxes itself, from an `OnFrameEndLate` subscriber registered before textdraw's.
+  - Faces are clipped to the near plane (2 u) and the view, and drawn far to near.
+  - One 64-px solid white 4444 tile per alpha level, tinted by vertex colour (the spike showed D3DDrv modulates textured polys).
+- **D27 Trigger boxes are depth-tested by default; `fd_triggers_xray 1` draws them over walls.**
+  - Depth-tested: queued polys (flags 0) with `geCamera_Project`'s z, so the world hides them.
+  - X-ray: immediate polys, which skip the z-test.
+  - Rejected: x-ray as the default. Big zones behind walls cover the view and hide the room you're in.
+- **D28 A box around the camera is drawn at 25% instead of 50%.** The spawn often stands inside large zones, which tinted the whole view (`spike/training_bank.png`).
+- **D29 Default key T (`fd_triggers_toggle`) through `binds::BindDefault`.**
+  - The default applies before `FDNYCore.cfg`, so the player's own binds win. An unbound default is saved as `unbind t`.
+  - The F-keys were rejected:
+    - F2–F4, F6–F8 and F11 are the game's developer keys (F11 crashes, F8 wins the level);
+    - F9, F10 and F12 are the collision overlay's;
+    - F5 / F6 are suggested for the teleporter.
+  - T isn't one of the game's controls (`GameControls::Construct`).
+- **D30 A world-attached tile that settles without a driver handle is re-added** (0.17.0, gfx: world boxes and `AlphaSurface`).
+  - The world can't be identified by its pointer alone: bank, loaded after Training, got Training's world address. The tiles looked attached but had no handle, so nothing was drawn and text panels would have stayed on the opaque fallback.
+  - The handle check after the settle frames is the signal. Log line: `gfx: world box tile without a handle; re-adding`.
+  - Rejected: re-attaching on `OnLevelLoad`. It races the first render of the new world, and the handle check also covers anything else that drops a texture.
+- **D31 textdraw gains `CENTER` and `STYLE_TEXT_ONLY`** (fd_juggle, owner: "no background, 30 px below centre").
+  - **`CENTER`:** the panel is centred horizontally (`dx` shifts it), and `dy` is measured from the view's vertical centre to the panel's top.
+  - **`STYLE_TEXT_ONLY`:** the same `AlphaSurface` path, with background slot 0 keyed to alpha 0. The font is non-antialiased (D17), so only glyph pixels stay; there's no fringe.
+  - **No world (menus):** it isn't drawn at all, rather than falling back to the opaque decal: a world-space hint has no meaning there, and a box would contradict "no background".
+  - Existing anchors and styles are unchanged.
+  - Rejected: a per-panel background-alpha parameter. It would be one more knob for no use beyond "none", and `fd_text_alpha` would have to be special-cased for it anyway.
+- **D32 fd_juggle observes the safe spot; it doesn't evaluate any conditions** (0.18.1, owner ruling; replaces the 0.18.0 gate).
+  - Rule: following = this frame's spot equals the player's position at the end of the previous frame (Think's write copies it, spike `fire_juggling/round2_frame_order.txt`); anything else is frozen and shows the arrow. Read at frame end. A new player object starts as following.
+  - **Why (owner):** a gate (flinch / burn >= 0.1 / O2 <= 0.5 / passed out) bakes our current understanding into the tool, so a condition we don't know about would show "-" while the spot was really frozen. Observing the write shows every cause, known or not, and players work out the conditions themselves.
+  - **Consequences, accepted:** a jump shows the arrow for its whole length and landings blip it for 1-2 frames (both are real: the game doesn't save then; the 0.18.0 gate hid airborne on purpose). Standing still, a spot frozen under your feet reads as "-".
+  - Transitions are logged with burn / O2 / flinch / state / on-ground as data, not as a verdict. A write to anywhere but the last position is logged and counted as "written elsewhere" (the respawn's checkpoint mirror is the known case).
+  - The arrow aims at **spot - 30 X** (where Verb_Reset puts the survivor), before the floor search. Direction is relative to the view yaw, with axes measured live (`fire_juggle_overlay/yaw_probe.log`).
+  - Rejected: "more than 5 u away" (a few frames late and wrong at the start of a freeze); the 0.18.0 gate (above).
+- **D33 Test hooks that move or burn the player are Debug-only commands in the feature** (`fd_dbg_setpos`, `fd_dbg_o2`, `fd_dbg_tofire`; R6).
+  - `fd_dbg_tofire` searches the fire nodes live, because fire nodes move along their paths: the spike's coordinates burnt only sometimes.
+  - The glyph check holds an O2 lock on clean ground and stands the player 30 u off the frozen spot, so every view direction has an exact expected answer.
+  - The harness's `assert_juggle` recomputes the arrow from its own memory reads, rather than trusting the pipe.
+
+- **D34 Pause = skip `GameSession::TickSubsystems` + `GameClock::Pause` (core service `pause`); the free camera is a world-transform override in `camera`, applied from gfx's `geEngine_RenderWorld` detour** (fd_pause; spike `freecam/README.md`).
+  - **Why this site:** RunFrame runs the clock tick, the input poll, TickSubsystems (every entity list, the spawn/callback queues, the sound update), then RenderFrame. Skipping the one call froze the player, victims, the mission timer and the clock while rendering went on (probe runs p2-p5).
+  - **The clock:** the game's own Pause/Resume on the active subtimer (as on alt-tab).
+    - It stops elapsed time and the render-side particle keyframes (`ParticleNode::AdvanceSpawn` reads `g_gameTimeMs`).
+    - The first frame after resume has a normal delta.
+    - Its 60 FPS Sleep cap is in the paused `ComputeFrameDelta`, so the service caps paused frames at ~60 fps itself.
+    - The game's alt-tab Resume would un-pause the subtimer, so it is paused again each paused frame.
+  - **Input:** `controls.block_input` is held while paused. It only gates the game's action queries; polling and the mouse sums go on. On resume it is released unless the console is open.
+    - Window-message keys bypass it: Esc while paused opened the in-game menu (freecam run fc5). So the service also hooks `GameSession::OnKey` (`session.on_key`, reached from WM_KEYDOWN after the console) and drops key-downs while paused.
+    - Key-ups pass, so the game's Esc latch still clears.
+    - The console and FDNYCore binds come before it, so they still work.
+  - **Hook state:** the hook is enabled only while paused (no cost otherwise; group toggle).
+  - **Ending a pause:** leaving the level (game state != 1, a level load) ends it.
+  - **Camera:** a transform set on the render camera at frame start reads back but is rewritten inside the render before the world is drawn (p2-p4). Set on the camera passed to `geEngine_RenderWorld` it shows (p5). gfx owns that hook, so it calls `camera::BeforeWorldRender` (core to core). Clearing the override hands the camera back to the game's per-frame set.
+  - **Known side effect:** the collision overlay's tick counter (`glitch.tick`, after TickSubsystems in RunFrame) still counts paused frames; nothing it records moves then.
+  - Rejected:
+    - dt = 0: per-frame logic and 1/dt;
+    - the game's own spectator mode (F7): it moves the player, needs Think, and changes the timer, burn and triggers;
+    - a camera set at RenderFrame entry (above).
+- **D35 View-relative panels hide while paused (`textdraw::HideWhilePaused`)**. An arrow relative to the player's view (fd_juggle) means nothing to a free camera. The panel declares it, and textdraw skips it while `pause::Active()`, so the pause feature never names another feature (R2).
+
+- **D36 fd_pause: default key P; free camera W/A/S/D + E/Q, Shift ×4 / Ctrl ×0.25, mouse from the game's own sums** (owner-agreed design, 2026-10-22).
+  - **Keys:** P is not a game control (GameControls::Construct binds W A S D C, 1-3, Ctrl, Shift, Space, arrows, LMB/RMB, and F2-F4/F6-F8/F11 only in dev mode) and not an FDNYCore default (T, F9/F10/F12; F5/F6 suggested for the teleporter). It is bound through `binds::BindDefault`, so the player's own binds win. E/Q (up/down) are free too. Shift and Ctrl are the game's USE / CROUCH, harmless while input is blocked.
+  - **Mouse:** `controls.mouse_x/y` are the game's per-frame DirectInput sums, still polled while paused. The Windows cursor is useless: the game re-centres it every frame. Default 0.075°/count (`fd_freecam_sens`; owner: 0.15 was twice too fast). Yaw grows to the left (the measured convention), so mouse right lowers it (owner: left and right were swapped at first).
+  - **Speed:** `fd_freecam_speed` 400 u/s (the run speed) × real frame time (QPC; the game clock is paused), capped at 0.1 s per frame; no acceleration.
+  - **Start pose:** the game's last camera transform. Genesis camera columns are right / up / back (the view is −column 2). The rebuild error against the game's matrix is checked by the test (0.000 in fc4).
+  - `fd_pause` is not archived: a session never starts paused. Practice-only, so `fd_profile run` refuses it and resets it to 0, which resumes.
+
+- **D37 Every feature has a default letter key; no F keys** (owner, 2026-10-22).
+  - **Map:** P pause; J juggle; H player HUD; G collision HUD with its B / Z / X (were F9 / F10 / F12); T trigger boxes (cycling x-ray, D38) / Y all; K / L teleporter save / load.
+  - **Excluded letters:**
+    - the game's keys (W A S D C, Shift, Ctrl, Space; GameControls::Construct);
+    - the free camera's (W A S D E Q);
+    - O (held to free the cursor).
+  - **Not bound, on purpose:** the speedrun options, profile, watermark, FOV and text settings. A stray press would change a run's setup.
+  - **Mechanism:** toggles run the new `toggle <var>` builtin through `binds::BindDefault`, so the player's binds win (D29) and the profile gate applies.
+  - **The collision HUD's three hotkeys stay edge-triggered inside its frame step** (only the key codes changed). The clear must keep its place between the frame's hotkeys and build() for the replay parity (the 0xF5 marker). Its note text "history cleared (F12)" is the original overlay's and stays identical.
+  - Supersedes the F-key part of D29 (F5/F6 are no longer suggested for the teleporter).
+  - **FDNYCore.cfg records only changes from the defaults** (owner 2026-10-22: every default bind was written out).
+    - A default key still on its default line is not written.
+    - A rebind is written as `bind`, and a removed default as `unbind`.
+    - Why: a later default change then reaches existing players, whose files hold only their own choices.
+    - Old files with default lines clean themselves on the next save.
+  - **Turning `fd_hud_glitch` on always shows the boxes** (it clears B's hide and Z's freeze). Owner: a B hide outlived G off/on, so G alone looked dead.
+
+- **D38 One player-facing name: the warp HUD** (owner 2026-10-22: "collision" in one place, "glitch" in another, and it is really about warping).
+  - **Renamed:** `fd_hud_warp`, `fd_warp_hide` / `fd_warp_freeze` / `fd_warp_clear`, and every doc and help text.
+  - **The old names stay as aliases** (`cmd::RegisterAlias`): old configs and habits keep working, and the config is written under the new name.
+  - **Unchanged on purpose:**
+    - the module and file names (`glitch*.cpp`);
+    - the `glitch|` log lines;
+    - the parity files and the test pipes.
+    The log and box text must stay byte-identical to the original Python overlay (glitch_parity_*), and the player never types those names.
+  - **Trigger boxes: T cycles off -> on -> on + x-ray -> off** (owner). The separate U key for x-ray is gone; `fd_triggers_xray` remains a variable.
+
+- **D39 Depth-tested world boxes are drawn right after `geEngine_RenderWorld`, as immediate polys with the projected z** (supersedes D26/D27's queued late-step polys for the depth-tested path; owner report 2026-10-23, oil_rig_A).
+  - **What was wrong:** drawn at the late step, the boxes lost large screen-aligned rectangles, even over open sky. The game draws more after the world (sprites, particles), and that writes depth over whole rectangles.
+  - **Evidence:**
+    - x-ray showed the true box;
+    - immediate + projected z at the late step lost the same rectangles;
+    - halving z filled most of them;
+    - drawn right after the world render, the holes went away, and the box was cut only where world geometry really is in front.
+    - `evidence/trigger_depth/`.
+  - **Mechanics:**
+    - gfx's RenderWorld detour (gfx already owns it) draws the list the feature submitted at the previous frame end. The boxes are static and the camera is this frame's, so the one-frame lag doesn't show.
+    - gfx flushes the game's queued polys first.
+    - Immediate polys don't write depth, so what the game draws later (actors, sprites, its HUD) goes over the boxes. The game's HUD is no longer tinted by a box you stand in (an old known gap).
+  - **X-ray is unchanged:** late step, z 1.0, over everything and under the text panels.
+
+- **D40 Named draw layers, run by gfx in a fixed order: WORLD, OVERLAY, HUD** (owner 2026-10-23, after D39).
+  - **Why:** the order used to depend on registration order (gfx's late step "registered before textdraw's") and on which hook a drawing happened to use. D39 showed the cost: one wrong moment and boxes lose rectangles or show through walls.
+  - **The layers:**
+    - WORLD runs from gfx's RenderWorld detour;
+    - OVERLAY then HUD run from gfx's single late-frame subscriber;
+    - features subscribe with `gfx::OnLayer` or submit boxes with a layer. Several features can submit boxes in one frame.
+  - **Enforced:** R8 (arch_check: no `OnFrameEndLate` outside gfx) and `tests/draw_layers.yaml`.
+    - The test uses a Debug test box at the oil-rig wall corner: WORLD behind the wall changes the picture by 0.00, OVERLAY there by 129, WORLD in the open shows.
+    - The layer order comes from the `layers` pipe.
+    - It runs paused (`fd_pause`): unpaused, two shots of the same view differ by 13 (moving sky, clock).
+  - **Rejected:** keeping the registration-order convention (silent when broken); a priority number per subscriber (more freedom than three meaningful moments need).
+
+- **D41 The player's key sheet is generated from the source on every build** (owner 2026-10-23: "built each time so we don't have something that can go stale").
+  - **What:** `tools/docgen.py` reads the string literals at the registration calls: variables, commands, practice-only, aliases, `BindDefault`, `DescribeKey`, and each file's `// User: <Title> -- <sentence>` line. `build.ps1` writes `build/<Config>/README.md` every build; `-Dist` copies it to `dist/README.md` with the Release `.asi`. Hand-written release notes are `dist/CHANGES.md`. The sheet for the current source is `core/KEY_SHEET.md` (tracked): every build and the pre-commit hook rewrite it, and the hook adds it to the commit, so GitHub always shows the source's sheet; `dist/README.md` stays the released `.asi`'s.
+  - **Rules (R9, arch_check):** a feature module has a `// User:` line; a feature that reads keys itself (`GetAsyncKeyState`) declares them with `binds::DescribeKey` (also shown by `bindlist`). docgen stops the build on a registration it can't read (arguments not literals, a `RegisterCvar(&x)` with no `cmd::Cvar x = {...}`, a registering file with no `// User:` line). `build.ps1` and the pre-commit hook (on a commit touching `dist/`) check that `dist/README.md` names the SHA-256 of `dist/FDNYCore.asi`.
+  - **Checked against the build:** `tests/docs_registry.yaml` has the Debug build write what it registered (`fd_dbg_registry`) and compares it with docgen's reading, item by item, so a registration the scanner misses fails a test.
+  - **Values:** the variable's help text is its value list. Help texts say the values ("0-255", "practice | run", "1 = ..., 0 = ..."); no separate values field.
+  - **The sheet is the player documentation:** the hand-written player guide was removed (owner, 2026-10-23); module-author notes are `CLAUDE.md`'s "Core services".
+  - **Rejected:** a hand-maintained table (goes stale, as the old guide's did); dumping the sheet from the running game (needs the game at build time, and the sheet must be built on every build).
+
+## Process
+
+- **D21 Tests are never weakened or deleted to pass.** An environmental failure (slow VM frame rate, a race in a read) is rerun and reported with evidence, for example the previous version failing identically.
+- **D22 Spikes don't touch working code:** standalone probes (`probes/`) and probe tests (`tests/probes/`, outside the suite).
+- **D23 Patterns live in the repo, enforced where possible** (this file, `CLAUDE.md`, `tools/arch_check.py`, the `new-feature` skill). Session memory is machine-local and doesn't transfer.

@@ -1,0 +1,106 @@
+name: probe_demo
+# Not in the suite: the demos / ghosts determinism spike (evidence/demos). Installs
+# zz_demoprobe.asi (probes/demoprobe.cpp). On bank (fire, victims, RescueBot on: it uses
+# the RNG), victims pinned with fd_static_spawns 1:
+#   1. F5 arms RECORD; loadmap bank; ~20 s of real play (walk, strafe, turn, jump, spray);
+#      F7 stops. The probe keeps every frame's dt, every GetDeviceData result and the RNG
+#      state at the first frame.
+#   2. F6: PLAYBACK with time + input + RNG, after a fresh loadmap bank. No harness input.
+#   3. F8: the same with the real dt (input + RNG only).
+#   4. F6 again: repeatability.
+#   5. F9: time + input, RNG not restored.
+# Each run is preceded by a fresh loadmap training, so every bank load has the same predecessor.
+# Each playback compares player position / velocity / view / move state, mission timer, dt
+# and the RNG cursor with the recording, frame by frame, bit-exact (zz_demoprobe.log).
+pre_files:
+  - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
+  - {src: null, dst: FDNYCore.cfg}
+  - {src: build/probes/zz_demoprobe.asi, dst: zz_demoprobe.asi}
+setup: load_training
+record: false
+steps:
+  - console: "fd_watermark 0"
+  - console: "fd_static_spawns 1"
+  # 1. record
+  - console: "loadmap training"   # every run starts from a fresh Training (same predecessor)
+  - wait_s: 25
+  - focus: {}
+  - key: {key: f5, hold: 0.1}
+  - console: "loadmap bank"
+  - wait_s: 40
+  - focus: {}
+  - screenshot: rec_start
+  - key_down: w
+  - wait_s: 2
+  - mouse_rel: [300, 0]
+  - wait_s: 1
+  - rclick: {}
+  - wait_s: 1.5
+  - key_up: w
+  - key_down: d
+  - wait_s: 1.2
+  - mouse_rel: [-450, 40]
+  - key_up: d
+  - key_down: w
+  - rclick: {}
+  - wait_s: 2
+  - lclick: {}
+  - wait_s: 0.5
+  - lclick: {}
+  - mouse_rel: [200, -60]
+  - wait_s: 2
+  - key_up: w
+  - key_down: a
+  - wait_s: 1
+  - rclick: {}
+  - wait_s: 1
+  - key_up: a
+  - key_down: s
+  - wait_s: 1.5
+  - key_up: s
+  - mouse_rel: [600, 0]
+  - key_down: w
+  - wait_s: 3
+  - rclick: {}
+  - wait_s: 2
+  - key_up: w
+  - screenshot: rec_end
+  - key: {key: f7, hold: 0.1}
+  - wait_s: 1
+  # 2. playback: time + input + RNG
+  - console: "loadmap training"
+  - wait_s: 25
+  - focus: {}
+  - key: {key: f6, hold: 0.1}
+  - console: "loadmap bank"
+  - wait_s: 75
+  - screenshot: play1_end
+  # 3. playback: input + RNG, real time
+  - focus: {}
+  - console: "loadmap training"
+  - wait_s: 25
+  - focus: {}
+  - key: {key: f8, hold: 0.1}
+  - console: "loadmap bank"
+  - wait_s: 75
+  - screenshot: play2_end
+  # 4. playback again: time + input + RNG
+  - focus: {}
+  - console: "loadmap training"
+  - wait_s: 25
+  - focus: {}
+  - key: {key: f6, hold: 0.1}
+  - console: "loadmap bank"
+  - wait_s: 75
+  - screenshot: play3_end
+  # 5. playback: time + input, RNG not restored
+  - focus: {}
+  - console: "loadmap training"
+  - wait_s: 25
+  - focus: {}
+  - key: {key: f9, hold: 0.1}
+  - console: "loadmap bank"
+  - wait_s: 75
+  - screenshot: play4_end
+expect:
+  no_crash: true

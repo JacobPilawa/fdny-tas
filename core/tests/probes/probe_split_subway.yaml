@@ -1,0 +1,23 @@
+name: probe_split_subway
+# Not in the suite: autosplitter spike. subway_a's exit (FinalExit box, the probe opens the
+# exit the game's way) -> subway_b, then subway_b won through the game's win routine (F8).
+pre_files:
+  - {src: tests/data/game_cfg_dev.cfg, dst: FDNYFireFighter.cfg}
+  - {src: null, dst: FDNYCore.cfg}
+setup: load_training
+record: false
+steps:
+  - console: "fd_watermark 0"
+  - console: "loadmap subway_a"
+  - wait_s: 30
+  - console: "fd_dbg_setpos 2215 -475 -5114 0"
+  - wait_s: 15
+  - console: "fd_dbg_setpos 2600 -540 -5420 0"
+  - wait_s: 40
+  - screenshot: subway_b
+  - focus: {}
+  - key: {key: f8, hold: 0.2}
+  - wait_s: 15
+  - screenshot: end
+expect:
+  no_crash: true

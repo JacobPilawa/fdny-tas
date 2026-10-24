@@ -1,0 +1,26 @@
+name: probe_owner_glitch
+# Not in the suite: owner report 2026-10-22 "can't get the collision overlay to work at
+# all". Their FDNYCore.cfg (tests/data/owner_cfg_20261022.cfg: fd_hud_glitch 1 at
+# startup, every default bind written out), Release core: does the collision HUD show in
+# Training when walking into a wall, and after G off / on?
+pre_files:
+  - {src: tests/data/game_cfg_dev.cfg, dst: FDNYFireFighter.cfg}  # skips the intro movies (the Release core has no test skip)
+  - {src: tests/data/owner_cfg_20261022.cfg, dst: FDNYCore.cfg}
+setup: load_training
+record: false
+steps:
+  - focus: {}
+  - wait_s: 2
+  - screenshot: start
+  - key: {key: w, hold: 2.5}
+  - wait_s: 0.5
+  - screenshot: wall
+  - key: {key: g, hold: 0.1}
+  - wait_s: 1
+  - screenshot: g_off
+  - key: {key: g, hold: 0.1}
+  - wait_s: 1
+  - key: {key: w, hold: 1.0}
+  - screenshot: g_on_again
+expect:
+  no_crash: true

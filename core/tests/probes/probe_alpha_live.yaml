@@ -1,0 +1,41 @@
+name: probe_alpha_live
+# Alpha spike, mode 9: the real-overlay shape (2x2 world-attached 4444 tiles, live text,
+# texel-centred) at upload intervals 3 and 1, then across a level change (loadmap bank).
+pre_files:
+  - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
+  - {src: null, dst: FDNYCore.cfg}
+  - {src: build/probes/zz_alphaprobe.asi, dst: zz_alphaprobe.asi}
+setup: load_training
+record: false
+steps:
+  - console: "fd_watermark 0"
+  - console: "fd_zzp_0"
+  - wait_s: 2
+  - sample_pipe: {cmd: stats, as: base_0}
+  - wait_s: 6
+  - sample_pipe: {cmd: stats, as: base_1}
+  - screenshot: base
+  - console: "fd_zzp_9_128_0_3"
+  - wait_s: 2
+  - sample_pipe: {cmd: stats, as: live3_0}
+  - wait_s: 6
+  - sample_pipe: {cmd: stats, as: live3_1}
+  - screenshot: live3_a
+  - wait_s: 1
+  - screenshot: live3_b
+  - console: "fd_zzp_9_128_0_1"
+  - wait_s: 2
+  - sample_pipe: {cmd: stats, as: live1_0}
+  - wait_s: 6
+  - sample_pipe: {cmd: stats, as: live1_1}
+  - screenshot: live1
+  - console: "fd_zzp_9_128_0_3"
+  - console: "loadmap bank"
+  - wait_s: 40
+  - sample_pipe: {cmd: stats, as: bank_0}
+  - wait_s: 6
+  - sample_pipe: {cmd: stats, as: bank_1}
+  - screenshot: bank
+expect:
+  no_crash: true
+  log_errors: 0

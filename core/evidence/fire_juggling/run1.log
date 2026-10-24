@@ -1,0 +1,17 @@
+14:31:14 bank loaded; settling 8 s
+14:31:22 start pos=(-697.0, -47.8, 1196.0) snap=(-697.0, -47.8, 1196.0) burn=0.000 flinch=00000000 state=3 ground=1 o2=1.00 carry=0x0 ckpt=(-697.0, 160.0, 1196.0)
+14:31:22 victims=6 fires=87
+14:31:22   victim 0x89f6f58 pos=(1192.0, -38.9, -772.0) state=4
+14:31:22   victim 0x89f73d0 pos=(-180.6, -38.9, -227.1) state=7
+14:31:22   victim 0x89f7848 pos=(735.0, -38.9, -2184.0) state=4
+14:31:22   victim 0x89f7c70 pos=(-2423.0, -38.9, -1914.0) state=4
+14:31:22   victim 0x89f80c8 pos=(1256.0, 217.1, -1312.0) state=4
+14:31:22   victim 0x89f8520 pos=(-2229.4, 217.1, 307.0) state=7
+14:31:22 burning fires (mode 4): 0
+14:31:22 === A: carry, stand, walk into fire, pass out
+14:31:22 picked up 0x89f6f58 at (1192.0, -38.9, -772.0)
+14:31:23   A settle t= 0.00 pos=(1192.0, -20.4, -772.0) snap=(1192.0, -18.9, -772.0) burn=0.000 flinch=00000000 state=3 ground=0 o2=1.00 carry=0x89f6f58 ckpt=(-697.0, 160.0, 1196.0)
+14:31:24   A settle t= 0.51 pos=(1192.0, -34.0, -772.0) snap=(1192.0, -34.0, -772.0) burn=0.000 flinch=00000000 state=3 ground=1 o2=1.00 carry=0x89f6f58 ckpt=(-697.0, 160.0, 1196.0)
+14:31:24   A settle t= 1.00 pos=(1192.0, -34.0, -772.0) snap=(1192.0, -34.0, -772.0) burn=0.000 flinch=00000000 state=3 ground=1 o2=1.00 carry=0x89f6f58 ckpt=(-697.0, 160.0, 1196.0)
+14:31:25 A: snapshot before the fire (1192.0, -34.0, -772.0) (player (1192.0, -34.0, -772.0))
+14:31:25 FAIL no fire burns the player

@@ -1,0 +1,11 @@
+  18973.7313 clock=0 HOST loaded FDNY_rescue%.asl, 30 segments, refresh 66.6666666666667 Hz
+  18994.7383 clock=2909 TIMER start game=None
+  18994.7383 clock=2909 TIMER running game=None
+  19020.3576 clock=28544 TIMER split 1 game=25.6201
+  19020.3669 clock=28544 TIMER paused game=25.6293
+  19038.7776 clock=36011 TIMER running game=25.6347
+  19065.3277 clock=62612 TIMER split 2 game=52.1848
+  19065.3526 clock=62612 TIMER paused game=52.2094
+  19065.9988 clock=63584 TIMER running game=52.2115
+  19080.0375 clock=77647 TIMER split 3 game=66.2501
+  19080.0517 clock=77647 TIMER paused game=66.2642

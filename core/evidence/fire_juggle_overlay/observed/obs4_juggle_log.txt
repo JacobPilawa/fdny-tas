@@ -1,0 +1,67 @@
+﻿[2026-10-22 20:33:44.297] [INFO] cmd: fd_dbg_setpos -697 -47 1196 0
+[2026-10-22 20:33:44.344] [INFO] juggle: setpos -697 -47 1196 (+yaw): ok
+[2026-10-22 20:33:44.438] [INFO] juggle: frozen (burn 0/1000, o2 100/100, flinch 0, state 3, ground 1)
+[2026-10-22 20:33:44.480] [INFO] juggle: following (burn 0/1000, o2 100/100, flinch 0, state 3, ground 1)
+[2026-10-22 20:33:44.573] [INFO] juggle: frozen (burn 0/1000, o2 100/100, flinch 0, state 3, ground 1)
+[2026-10-22 20:33:44.604] [INFO] juggle: following (burn 0/1000, o2 100/100, flinch 0, state 3, ground 1)
+[2026-10-22 20:33:47.496] [INFO] juggle: frozen (burn 0/1000, o2 100/100, flinch 0, state 3, ground 0)
+[2026-10-22 20:33:48.247] [INFO] juggle: following (burn 0/1000, o2 100/100, flinch 0, state 3, ground 0)
+[2026-10-22 20:33:48.291] [INFO] juggle: frozen (burn 0/1000, o2 100/100, flinch 0, state 3, ground 1)
+[2026-10-22 20:33:48.338] [INFO] juggle: following (burn 0/1000, o2 100/100, flinch 0, state 3, ground 1)
+[2026-10-22 20:33:48.414] [INFO] juggle: frozen (burn 0/1000, o2 100/100, flinch 0, state 3, ground 1)
+[2026-10-22 20:33:48.452] [INFO] juggle: following (burn 0/1000, o2 100/100, flinch 0, state 3, ground 1)
+[2026-10-22 20:33:48.530] [INFO] juggle: frozen (burn 0/1000, o2 100/100, flinch 0, state 3, ground 1)
+[2026-10-22 20:33:48.568] [INFO] juggle: following (burn 0/1000, o2 100/100, flinch 0, state 3, ground 1)
+[2026-10-22 20:33:51.994] [INFO] cmd: fd_dbg_setpos -697 -47 1196 0
+[2026-10-22 20:33:52.225] [INFO] juggle: setpos -697 -47 1196 (+yaw): ok
+[2026-10-22 20:33:52.304] [INFO] juggle: frozen (burn 0/1000, o2 100/100, flinch 0, state 3, ground 1)
+[2026-10-22 20:33:52.331] [INFO] juggle: following (burn 0/1000, o2 100/100, flinch 0, state 3, ground 1)
+[2026-10-22 20:33:52.404] [INFO] juggle: frozen (burn 0/1000, o2 100/100, flinch 0, state 3, ground 1)
+[2026-10-22 20:33:52.436] [INFO] juggle: following (burn 0/1000, o2 100/100, flinch 0, state 3, ground 1)
+[2026-10-22 20:33:55.916] [INFO] cmd: fd_dbg_setpos -697 -47 1196 0 0.1
+[2026-10-22 20:33:55.957] [INFO] juggle: setpos -697 -47 1196 (+yaw) (+o2): ok
+[2026-10-22 20:33:55.998] [INFO] juggle: frozen (burn 0/1000, o2 10/100, flinch 0, state 3, ground 1)
+[2026-10-22 20:33:59.413] [INFO] cmd: fd_dbg_setpos -667 -47 1196 0 0.1
+[2026-10-22 20:33:59.482] [INFO] juggle: setpos -667 -47 1196 (+yaw) (+o2): ok
+[2026-10-22 20:34:02.916] [INFO] cmd: fd_dbg_setpos -667 -47 1196 45 0.1
+[2026-10-22 20:34:02.955] [INFO] juggle: setpos -667 -47 1196 (+yaw) (+o2): ok
+[2026-10-22 20:34:06.427] [INFO] cmd: fd_dbg_setpos -667 -47 1196 90 0.1
+[2026-10-22 20:34:06.454] [INFO] juggle: setpos -667 -47 1196 (+yaw) (+o2): ok
+[2026-10-22 20:34:09.954] [INFO] cmd: fd_dbg_setpos -667 -47 1196 135 0.1
+[2026-10-22 20:34:09.986] [INFO] juggle: setpos -667 -47 1196 (+yaw) (+o2): ok
+[2026-10-22 20:34:13.511] [INFO] cmd: fd_dbg_setpos -667 -47 1196 180 0.1
+[2026-10-22 20:34:14.561] [INFO] juggle: setpos -667 -47 1196 (+yaw) (+o2): ok
+[2026-10-22 20:34:17.849] [INFO] cmd: fd_dbg_setpos -667 -47 1196 225 0.1
+[2026-10-22 20:34:17.881] [INFO] juggle: setpos -667 -47 1196 (+yaw) (+o2): ok
+[2026-10-22 20:34:21.430] [INFO] cmd: fd_dbg_setpos -667 -47 1196 270 0.1
+[2026-10-22 20:34:21.457] [INFO] juggle: setpos -667 -47 1196 (+yaw) (+o2): ok
+[2026-10-22 20:34:24.996] [INFO] cmd: fd_dbg_setpos -667 -47 1196 315 0.1
+[2026-10-22 20:34:25.274] [INFO] juggle: setpos -667 -47 1196 (+yaw) (+o2): ok
+[2026-10-22 20:34:26.877] [INFO] cmd: fd_dbg_o2 1
+[2026-10-22 20:34:26.916] [INFO] juggle: o2 100/100: ok
+[2026-10-22 20:34:26.957] [INFO] juggle: following (burn 0/1000, o2 100/100, flinch 0, state 3, ground 1)
+[2026-10-22 20:34:30.516] [INFO] cmd: fd_dbg_setpos -697 -47 1196 0
+[2026-10-22 20:34:31.841] [INFO] juggle: setpos -697 -47 1196 (+yaw): ok
+[2026-10-22 20:34:31.966] [INFO] juggle: frozen (burn 0/1000, o2 100/100, flinch 0, state 3, ground 1)
+[2026-10-22 20:34:32.001] [INFO] juggle: following (burn 0/1000, o2 100/100, flinch 0, state 3, ground 1)
+[2026-10-22 20:34:32.076] [INFO] juggle: frozen (burn 0/1000, o2 100/100, flinch 0, state 3, ground 1)
+[2026-10-22 20:34:32.111] [INFO] juggle: following (burn 0/1000, o2 100/100, flinch 0, state 3, ground 1)
+[2026-10-22 20:34:34.385] [INFO] cmd: fd_dbg_tofire 0.6
+[2026-10-22 20:34:35.093] [INFO] juggle: tofire: searching (target 600/1000)
+[2026-10-22 20:34:35.210] [INFO] juggle: frozen (burn 0/1000, o2 100/100, flinch 0, state 3, ground 0)
+[2026-10-22 20:34:35.348] [INFO] juggle: tofire: node 0 burns (burn 20/1000)
+[2026-10-22 20:34:36.979] [INFO] juggle: tofire: done (burn 611/1000, state 3), back where it started
+[2026-10-22 20:34:42.161] [INFO] juggle: following (burn 99/1000, o2 100/100, flinch 0, state 3, ground 1)
+[2026-10-22 20:34:47.351] [INFO] cmd: fd_dbg_tofire 2
+[2026-10-22 20:34:50.137] [INFO] juggle: tofire: searching (target 2000/1000)
+[2026-10-22 20:34:50.297] [INFO] juggle: frozen (burn 0/1000, o2 100/100, flinch 0, state 3, ground 0)
+[2026-10-22 20:34:50.466] [INFO] juggle: following (burn 12/1000, o2 100/100, flinch 10000, state 3, ground 0)
+[2026-10-22 20:34:50.559] [INFO] juggle: tofire: node 0 burns (burn 29/1000)
+[2026-10-22 20:34:50.594] [INFO] juggle: frozen (burn 29/1000, o2 100/100, flinch 10000, state 3, ground 1)
+[2026-10-22 20:34:52.344] [INFO] juggle: tofire: done (burn 1002/1000, state 6)
+[2026-10-22 20:34:56.358] [INFO] juggle: spot written elsewhere (144 237 -1324 -> -697 -48 1216; burn 0/1000, o2 100/100, flinch 0, state 3, ground 1)
+[2026-10-22 20:34:56.401] [INFO] juggle: following (burn 0/1000, o2 100/100, flinch 0, state 3, ground 1)
+[2026-10-22 20:34:56.475] [INFO] juggle: frozen (burn 0/1000, o2 100/100, flinch 0, state 3, ground 1)
+[2026-10-22 20:34:56.518] [INFO] juggle: following (burn 0/1000, o2 100/100, flinch 0, state 3, ground 1)
+[2026-10-22 20:34:56.594] [INFO] juggle: frozen (burn 0/1000, o2 100/100, flinch 0, state 3, ground 1)
+[2026-10-22 20:34:56.622] [INFO] juggle: following (burn 0/1000, o2 100/100, flinch 0, state 3, ground 1)

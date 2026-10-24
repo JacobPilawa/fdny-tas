@@ -1,0 +1,79 @@
+{
+  "test": "hooks_frame",
+  "core": "Debug",
+  "pass": false,
+  "crash": "harness exception: ScreenShotError(\"Region has zero or negative size: {'left': -32000, 'top': -32000, 'width': 0, 'height': 0}\")",
+  "assertions": [
+    {
+      "step": "focus",
+      "pass": true,
+      "detail": "game window foreground at launch"
+    },
+    {
+      "step": "core_ready",
+      "pass": true,
+      "detail": "ready line seen"
+    },
+    {
+      "step": "address_table_version",
+      "pass": true,
+      "detail": "retail-1.1"
+    },
+    {
+      "step": "assert_log",
+      "pass": true,
+      "detail": "contains 'hooks: created genesis.begin_frame'"
+    },
+    {
+      "step": "assert_log",
+      "pass": true,
+      "detail": "contains 'hooks: created genesis.end_frame'"
+    },
+    {
+      "step": "assert_log",
+      "pass": false,
+      "detail": "contains \"event: level_load 'training'\""
+    },
+    {
+      "step": "frame_hooks_once_per_frame",
+      "pass": false,
+      "detail": "5.0s: clock ticks=0 BeginFrame=0 EndFrame=0 frame_end events=0 (tolerance 2 for window-edge races)"
+    },
+    {
+      "step": "frame_hooks_once_per_frame",
+      "pass": false,
+      "detail": "5.0s: clock ticks=0 BeginFrame=0 EndFrame=0 frame_end events=0 (tolerance 2 for window-edge races)"
+    },
+    {
+      "step": "no_crash",
+      "pass": false,
+      "detail": "harness exception: ScreenShotError(\"Region has zero or negative size: {'left': -32000, 'top': -32000, 'width': 0, 'height': 0}\")"
+    },
+    {
+      "step": "log_errors",
+      "pass": true,
+      "detail": "0 ERROR line(s), limit 0"
+    }
+  ],
+  "samples": {
+    "module.exe": "0x400000",
+    "module.genesis": "0x10000000",
+    "frame_windows": [
+      {
+        "seconds": 5.0,
+        "clock_ticks": 0,
+        "begin": 0,
+        "end": 0,
+        "events": 0
+      },
+      {
+        "seconds": 5.0,
+        "clock_ticks": 0,
+        "begin": 0,
+        "end": 0,
+        "events": 0
+      }
+    ]
+  },
+  "video": "C:\\fdny-decomp\\core\\runs\\2026-10-21-074034-hooks_frame\\run.mp4"
+}

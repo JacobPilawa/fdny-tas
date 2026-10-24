@@ -1,0 +1,47 @@
+{
+  "test": "explore_console_verbs",
+  "core": "Debug",
+  "pass": true,
+  "crash": null,
+  "assertions": [
+    {
+      "step": "focus",
+      "pass": true,
+      "detail": "game window foreground at launch"
+    },
+    {
+      "step": "core_ready",
+      "pass": true,
+      "detail": "ready line seen"
+    },
+    {
+      "step": "address_table_version",
+      "pass": true,
+      "detail": "retail-1.1"
+    },
+    {
+      "step": "no_crash",
+      "pass": true,
+      "detail": "no crash, hang or dialog"
+    },
+    {
+      "step": "log_errors",
+      "pass": true,
+      "detail": "0 ERROR line(s), limit 0"
+    }
+  ],
+  "samples": {
+    "module.exe": "0x400000",
+    "module.genesis": "0x10000000",
+    "screenshot.01_in_level.luma": 101.9,
+    "state_in_level": 1,
+    "map_in_level": "training",
+    "con_ptr": 54623032,
+    "screenshot.02_console.luma": 63.3,
+    "con_state_open": 2,
+    "screenshot.03_listmaps.luma": 58.5,
+    "con_state_closed": 0,
+    "screenshot.04_closed.luma": 101.6
+  },
+  "video": "C:\\fdny-decomp\\core\\runs\\2026-10-21-020612-explore_console_verbs-dev\\run.mp4"
+}

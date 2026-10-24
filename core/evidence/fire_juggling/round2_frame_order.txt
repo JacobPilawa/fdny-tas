@@ -1,0 +1,82 @@
+# zz_juggleprobe per-frame event order (round 2, bank); FIRETOUCH runs collapsed (xN = touch callbacks of all fires).
+# THINK/DAMAGE/RESET/DROP show the player at function entry: pos, saved spot +0x3400, burn, flinch, state, ground, box top.
+# Header of the raw log:
+#   juggleprobe loaded
+#   hook 0 FRAME 0042aea0 [56 8b f1 8a 86 8c 06 00]: MH_OK
+#   hook 1 THINK 00452570 [6a ff 64 a1 00 00 00 00]: MH_OK
+#   hook 2 DAMAGE 00451640 [64 a1 00 00 00 00 6a ff]: MH_OK
+#   hook 3 FIRETOUCH 004483a0 [83 ec 10 56 8b f1 83 7e]: MH_OK
+#   hook 4 RESET 0044ff10 [64 a1 00 00 00 00 6a ff]: MH_OK
+#   hook 5 DROP 0045c1a0 [83 ec 18 55 56 8b f1 8b]: MH_OK
+#   hook 6 COOL 0044bc00 [d9 05 04 2b 50 00 d8 0d]: MH_OK
+#   hook 7 ADDHANDLER 00481a60 [83 ec 08 56 8b f1 8b 06]: MH_OK
+
+## damage episode starting at frame 1719
+1717 FIRETOUCHx50
+1718 FRAME[pos=144.0 226.4 -1324.0 snap=144.0 226.4 -1324.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | THINK[pos=144.0 226.4 -1324.0 snap=144.0 226.4 -1324.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | FIRETOUCHx101
+1719 FRAME[pos=60.0 242.0 -1200.0 snap=144.0 226.4 -1324.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | THINK[pos=60.0 242.0 -1200.0 snap=144.0 226.4 -1324.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | FIRETOUCHx101 | DAMAGE[pos=60.0 240.5 -1200.0 snap=60.0 242.0 -1200.0 burn=0.000 fl=00000000 st=3 gr=0 top=85.0]
+1720 FRAME[pos=60.0 240.5 -1200.0 snap=60.0 242.0 -1200.0 burn=0.008 fl=01000000 st=3 gr=0 top=85.0] | THINK[pos=60.0 240.5 -1200.0 snap=60.0 242.0 -1200.0 burn=0.008 fl=01000000 st=3 gr=0 top=85.0] | FIRETOUCHx105 | DAMAGE[pos=60.0 238.1 -1200.0 snap=60.0 242.0 -1200.0 burn=0.008 fl=00000000 st=3 gr=0 top=85.0]
+1721 FRAME[pos=60.0 238.1 -1200.0 snap=60.0 242.0 -1200.0 burn=0.019 fl=01000000 st=3 gr=0 top=85.0] | THINK[pos=60.0 238.1 -1200.0 snap=60.0 242.0 -1200.0 burn=0.019 fl=01000000 st=3 gr=0 top=85.0] | FIRETOUCHx105 | DAMAGE[pos=60.0 234.7 -1200.0 snap=60.0 242.0 -1200.0 burn=0.019 fl=00000000 st=3 gr=0 top=85.0]
+
+## damage episode starting at frame 1814
+1811 FRAME[pos=1192.0 -32.7 -772.0 snap=1192.0 -32.7 -772.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | THINK[pos=1192.0 -32.7 -772.0 snap=1192.0 -32.7 -772.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | FIRETOUCHx116
+1812 FRAME[pos=1192.0 -32.7 -772.0 snap=1192.0 -32.7 -772.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | THINK[pos=1192.0 -32.7 -772.0 snap=1192.0 -32.7 -772.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | FIRETOUCHx116
+1813 FRAME[pos=1192.0 -32.7 -772.0 snap=1192.0 -32.7 -772.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | THINK[pos=1192.0 -32.7 -772.0 snap=1192.0 -32.7 -772.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | FIRETOUCHx116
+1814 FRAME[pos=60.0 242.0 -1200.0 snap=1192.0 -32.7 -772.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | THINK[pos=60.0 242.0 -1200.0 snap=1192.0 -32.7 -772.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | FIRETOUCHx116 | DAMAGE[pos=60.0 240.5 -1200.0 snap=60.0 242.0 -1200.0 burn=0.000 fl=00000000 st=3 gr=0 top=85.0]
+1815 FRAME[pos=60.0 240.5 -1200.0 snap=60.0 242.0 -1200.0 burn=0.008 fl=01000000 st=3 gr=0 top=85.0] | THINK[pos=60.0 240.5 -1200.0 snap=60.0 242.0 -1200.0 burn=0.008 fl=01000000 st=3 gr=0 top=85.0] | FIRETOUCHx119 | DAMAGE[pos=60.0 238.1 -1200.0 snap=60.0 242.0 -1200.0 burn=0.008 fl=00000000 st=3 gr=0 top=85.0]
+1816 FRAME[pos=60.0 238.1 -1200.0 snap=60.0 242.0 -1200.0 burn=0.019 fl=01000000 st=3 gr=0 top=85.0] | THINK[pos=60.0 238.1 -1200.0 snap=60.0 242.0 -1200.0 burn=0.019 fl=01000000 st=3 gr=0 top=85.0] | FIRETOUCHx119 | DAMAGE[pos=60.0 234.7 -1200.0 snap=60.0 242.0 -1200.0 burn=0.019 fl=00000000 st=3 gr=0 top=85.0]
+
+## damage episode starting at frame 2220
+2217 FRAME[pos=-90.0 222.0 -1200.0 snap=-90.0 222.0 -1200.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | THINK[pos=-90.0 222.0 -1200.0 snap=-90.0 222.0 -1200.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | FIRETOUCHx99
+2218 FRAME[pos=-81.4 222.0 -1200.0 snap=-90.0 222.0 -1200.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | THINK[pos=-81.4 222.0 -1200.0 snap=-90.0 222.0 -1200.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | FIRETOUCHx99
+2219 FRAME[pos=-71.0 222.0 -1200.0 snap=-81.4 222.0 -1200.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | THINK[pos=-71.0 222.0 -1200.0 snap=-81.4 222.0 -1200.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | FIRETOUCHx99
+2220 FRAME[pos=-59.7 222.0 -1200.0 snap=-71.0 222.0 -1200.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | THINK[pos=-59.7 222.0 -1200.0 snap=-71.0 222.0 -1200.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | FIRETOUCHx98 | DAMAGE[pos=-39.3 222.0 -1200.0 snap=-59.7 222.0 -1200.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0]
+2221 FRAME[pos=-39.3 222.0 -1200.0 snap=-59.7 222.0 -1200.0 burn=0.004 fl=00000001 st=3 gr=1 top=85.0] | THINK[pos=-39.3 222.0 -1200.0 snap=-59.7 222.0 -1200.0 burn=0.004 fl=00000001 st=3 gr=1 top=85.0] | FIRETOUCHx98 | DAMAGE[pos=-28.0 222.0 -1200.0 snap=-59.7 222.0 -1200.0 burn=0.004 fl=00000000 st=3 gr=1 top=85.0]
+2222 FRAME[pos=-28.0 222.0 -1200.0 snap=-59.7 222.0 -1200.0 burn=0.009 fl=00000001 st=3 gr=1 top=85.0] | THINK[pos=-28.0 222.0 -1200.0 snap=-59.7 222.0 -1200.0 burn=0.009 fl=00000001 st=3 gr=1 top=85.0] | FIRETOUCHx98 | DAMAGE[pos=-16.9 222.0 -1200.0 snap=-59.7 222.0 -1200.0 burn=0.009 fl=00000000 st=3 gr=1 top=85.0] | DAMAGE[pos=-16.9 222.0 -1200.0 snap=-59.7 222.0 -1200.0 burn=0.017 fl=00000001 st=3 gr=1 top=85.0]
+
+## damage episode starting at frame 2277
+2274 FRAME[pos=-697.0 -47.8 1196.0 snap=-697.0 -47.8 1196.0 burn=0.008 fl=00000000 st=3 gr=1 top=85.0] | THINK[pos=-697.0 -47.8 1196.0 snap=-697.0 -47.8 1196.0 burn=0.008 fl=00000000 st=3 gr=1 top=85.0] | FIRETOUCHx100
+2275 FRAME[pos=-697.0 -47.8 1196.0 snap=-697.0 -47.8 1196.0 burn=0.005 fl=00000000 st=3 gr=1 top=85.0] | THINK[pos=-697.0 -47.8 1196.0 snap=-697.0 -47.8 1196.0 burn=0.005 fl=00000000 st=3 gr=1 top=85.0] | FIRETOUCHx99
+2276 FRAME[pos=-697.0 -47.8 1196.0 snap=-697.0 -47.8 1196.0 burn=0.002 fl=00000000 st=3 gr=1 top=85.0] | THINK[pos=-697.0 -47.8 1196.0 snap=-697.0 -47.8 1196.0 burn=0.002 fl=00000000 st=3 gr=1 top=85.0] | FIRETOUCHx98
+2277 FRAME[pos=30.0 237.1 -1200.0 snap=-697.0 -47.8 1196.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | THINK[pos=30.0 237.1 -1200.0 snap=-697.0 -47.8 1196.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | FIRETOUCHx98 | DAMAGE[pos=30.0 235.5 -1200.0 snap=30.0 237.1 -1200.0 burn=0.000 fl=00000000 st=3 gr=0 top=85.0]
+2278 FRAME[pos=30.0 235.5 -1200.0 snap=30.0 237.1 -1200.0 burn=0.010 fl=00000001 st=3 gr=0 top=85.0] | THINK[pos=30.0 235.5 -1200.0 snap=30.0 237.1 -1200.0 burn=0.010 fl=00000001 st=3 gr=0 top=85.0] | FIRETOUCHx103 | DAMAGE[pos=30.0 233.1 -1200.0 snap=30.0 237.1 -1200.0 burn=0.010 fl=00000000 st=3 gr=0 top=85.0]
+2279 FRAME[pos=30.0 233.1 -1200.0 snap=30.0 237.1 -1200.0 burn=0.022 fl=00000001 st=3 gr=0 top=85.0] | THINK[pos=30.0 233.1 -1200.0 snap=30.0 237.1 -1200.0 burn=0.022 fl=00000001 st=3 gr=0 top=85.0] | FIRETOUCHx103 | DAMAGE[pos=30.0 229.7 -1200.0 snap=30.0 237.1 -1200.0 burn=0.022 fl=00000000 st=3 gr=0 top=85.0]
+
+## damage episode starting at frame 2345
+2342 FRAME[pos=-81.7 222.0 -1200.0 snap=30.0 237.1 -1200.0 burn=0.454 fl=00000000 st=3 gr=1 top=85.0] | THINK[pos=-81.7 222.0 -1200.0 snap=30.0 237.1 -1200.0 burn=0.454 fl=00000000 st=3 gr=1 top=85.0] | FIRETOUCHx100
+2343 FRAME[pos=-71.7 222.0 -1200.0 snap=30.0 237.1 -1200.0 burn=0.451 fl=00000000 st=3 gr=1 top=85.0] | THINK[pos=-71.7 222.0 -1200.0 snap=30.0 237.1 -1200.0 burn=0.451 fl=00000000 st=3 gr=1 top=85.0] | FIRETOUCHx100
+2344 FRAME[pos=-60.8 222.0 -1200.0 snap=30.0 237.1 -1200.0 burn=0.448 fl=00000000 st=3 gr=1 top=85.0] | THINK[pos=-60.8 222.0 -1200.0 snap=30.0 237.1 -1200.0 burn=0.448 fl=00000000 st=3 gr=1 top=85.0] | FIRETOUCHx100
+2345 FRAME[pos=-49.4 222.0 -1200.0 snap=30.0 237.1 -1200.0 burn=0.444 fl=00000000 st=3 gr=1 top=85.0] | THINK[pos=-49.4 222.0 -1200.0 snap=30.0 237.1 -1200.0 burn=0.444 fl=00000000 st=3 gr=1 top=85.0] | FIRETOUCHx100 | DAMAGE[pos=-38.0 222.0 -1200.0 snap=30.0 237.1 -1200.0 burn=0.441 fl=00000000 st=3 gr=1 top=85.0]
+2346 FRAME[pos=-38.0 222.0 -1200.0 snap=30.0 237.1 -1200.0 burn=0.444 fl=00000001 st=3 gr=1 top=85.0] | THINK[pos=-38.0 222.0 -1200.0 snap=30.0 237.1 -1200.0 burn=0.444 fl=00000001 st=3 gr=1 top=85.0] | FIRETOUCHx100 | DAMAGE[pos=-27.3 222.0 -1200.0 snap=30.0 237.1 -1200.0 burn=0.444 fl=00000000 st=3 gr=1 top=85.0]
+2347 FRAME[pos=-27.3 222.0 -1200.0 snap=30.0 237.1 -1200.0 burn=0.449 fl=00000001 st=3 gr=1 top=85.0] | THINK[pos=-27.3 222.0 -1200.0 snap=30.0 237.1 -1200.0 burn=0.449 fl=00000001 st=3 gr=1 top=85.0] | FIRETOUCHx99 | DAMAGE[pos=-15.8 222.0 -1200.0 snap=30.0 237.1 -1200.0 burn=0.449 fl=00000000 st=3 gr=1 top=85.0]
+
+## damage episode starting at frame 2600
+2597 FRAME[pos=-697.0 -47.8 1196.0 snap=-697.0 -47.8 1196.0 burn=0.000 fl=00000000 st=4 gr=1 top=25.0] | THINK[pos=-697.0 -47.8 1196.0 snap=-697.0 -47.8 1196.0 burn=0.000 fl=00000000 st=4 gr=1 top=25.0] | FIRETOUCHx94
+2598 FRAME[pos=-697.0 -47.8 1196.0 snap=-697.0 -47.8 1196.0 burn=0.000 fl=00000000 st=4 gr=1 top=25.0] | THINK[pos=-697.0 -47.8 1196.0 snap=-697.0 -47.8 1196.0 burn=0.000 fl=00000000 st=4 gr=1 top=25.0] | FIRETOUCHx94
+2599 FRAME[pos=-697.0 -47.8 1196.0 snap=-697.0 -47.8 1196.0 burn=0.000 fl=00000000 st=4 gr=1 top=25.0] | THINK[pos=-697.0 -47.8 1196.0 snap=-697.0 -47.8 1196.0 burn=0.000 fl=00000000 st=4 gr=1 top=25.0] | FIRETOUCHx94
+2600 FRAME[pos=60.0 242.0 -1200.0 snap=-697.0 -47.8 1196.0 burn=0.000 fl=00000000 st=4 gr=1 top=25.0] | THINK[pos=60.0 242.0 -1200.0 snap=-697.0 -47.8 1196.0 burn=0.000 fl=00000000 st=4 gr=1 top=25.0] | FIRETOUCHx93 | DAMAGE[pos=60.0 240.4 -1200.0 snap=60.0 242.0 -1200.0 burn=0.000 fl=00000000 st=4 gr=0 top=25.0]
+2601 FRAME[pos=60.0 240.4 -1200.0 snap=60.0 242.0 -1200.0 burn=0.009 fl=01000000 st=4 gr=0 top=25.0] | THINK[pos=60.0 240.4 -1200.0 snap=60.0 242.0 -1200.0 burn=0.009 fl=01000000 st=4 gr=0 top=25.0] | FIRETOUCHx100 | DAMAGE[pos=60.0 237.5 -1200.0 snap=60.0 242.0 -1200.0 burn=0.009 fl=00000000 st=4 gr=0 top=25.0]
+2602 FRAME[pos=60.0 237.5 -1200.0 snap=60.0 242.0 -1200.0 burn=0.021 fl=01000000 st=4 gr=0 top=25.0] | THINK[pos=60.0 237.5 -1200.0 snap=60.0 242.0 -1200.0 burn=0.021 fl=01000000 st=4 gr=0 top=25.0] | FIRETOUCHx100 | DAMAGE[pos=60.0 234.6 -1200.0 snap=60.0 242.0 -1200.0 burn=0.021 fl=00000000 st=4 gr=0 top=25.0]
+
+## damage episode starting at frame 2928
+2925 FRAME[pos=-697.0 -47.8 1196.0 snap=-697.0 -47.8 1196.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | THINK[pos=-697.0 -47.8 1196.0 snap=-697.0 -47.8 1196.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | FIRETOUCHx82
+2926 FRAME[pos=-697.0 -47.8 1196.0 snap=-697.0 -47.8 1196.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | THINK[pos=-697.0 -47.8 1196.0 snap=-697.0 -47.8 1196.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | FIRETOUCHx82
+2927 FRAME[pos=-697.0 -47.8 1196.0 snap=-697.0 -47.8 1196.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | THINK[pos=-697.0 -47.8 1196.0 snap=-697.0 -47.8 1196.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | FIRETOUCHx82
+2928 FRAME[pos=60.0 242.0 -1200.0 snap=-697.0 -47.8 1196.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | THINK[pos=60.0 242.0 -1200.0 snap=-697.0 -47.8 1196.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | FIRETOUCHx82 | DAMAGE[pos=60.0 240.5 -1200.0 snap=60.0 242.0 -1200.0 burn=0.000 fl=00000000 st=3 gr=0 top=85.0]
+2929 FRAME[pos=60.0 240.5 -1200.0 snap=60.0 242.0 -1200.0 burn=0.008 fl=01000000 st=3 gr=0 top=85.0] | THINK[pos=60.0 240.5 -1200.0 snap=60.0 242.0 -1200.0 burn=0.008 fl=01000000 st=3 gr=0 top=85.0] | FIRETOUCHx100 | DAMAGE[pos=60.0 233.2 -1200.0 snap=60.0 242.0 -1200.0 burn=0.008 fl=00000000 st=3 gr=0 top=85.0]
+2930 FRAME[pos=60.0 233.2 -1200.0 snap=60.0 242.0 -1200.0 burn=0.034 fl=01000000 st=3 gr=0 top=85.0] | THINK[pos=60.0 233.2 -1200.0 snap=60.0 242.0 -1200.0 burn=0.034 fl=01000000 st=3 gr=0 top=85.0] | FIRETOUCHx100 | DAMAGE[pos=60.0 231.1 -1200.0 snap=60.0 242.0 -1200.0 burn=0.034 fl=00000000 st=3 gr=0 top=85.0]
+
+## damage episode starting at frame 3159
+3156 FRAME[pos=-697.0 -47.3 1196.0 snap=-697.0 -47.3 1196.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | THINK[pos=-697.0 -47.3 1196.0 snap=-697.0 -47.3 1196.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | FIRETOUCHx98
+3157 FRAME[pos=-697.0 -47.3 1196.0 snap=-697.0 -47.3 1196.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | THINK[pos=-697.0 -47.3 1196.0 snap=-697.0 -47.3 1196.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | FIRETOUCHx98
+3158 FRAME[pos=-697.0 -47.3 1196.0 snap=-697.0 -47.3 1196.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | THINK[pos=-697.0 -47.3 1196.0 snap=-697.0 -47.3 1196.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | FIRETOUCHx99
+3159 FRAME[pos=30.0 237.1 -1200.0 snap=-697.0 -47.3 1196.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | THINK[pos=30.0 237.1 -1200.0 snap=-697.0 -47.3 1196.0 burn=0.000 fl=00000000 st=3 gr=1 top=85.0] | FIRETOUCHx99 | DAMAGE[pos=30.0 235.5 -1200.0 snap=30.0 237.1 -1200.0 burn=0.000 fl=00000000 st=3 gr=0 top=85.0]
+3160 FRAME[pos=30.0 235.5 -1200.0 snap=30.0 237.1 -1200.0 burn=0.010 fl=01000000 st=3 gr=0 top=85.0] | THINK[pos=30.0 235.5 -1200.0 snap=30.0 237.1 -1200.0 burn=0.010 fl=01000000 st=3 gr=0 top=85.0] | FIRETOUCHx103 | DAMAGE[pos=30.0 230.2 -1200.0 snap=30.0 237.1 -1200.0 burn=0.010 fl=00000000 st=3 gr=0 top=85.0]
+3161 FRAME[pos=30.0 230.2 -1200.0 snap=30.0 237.1 -1200.0 burn=0.032 fl=01000000 st=3 gr=0 top=85.0] | THINK[pos=30.0 230.2 -1200.0 snap=30.0 237.1 -1200.0 burn=0.032 fl=01000000 st=3 gr=0 top=85.0] | FIRETOUCHx103 | DAMAGE[pos=30.0 228.3 -1200.0 snap=30.0 237.1 -1200.0 burn=0.032 fl=00000000 st=3 gr=0 top=85.0]
+
+## reset / drop frames
+2000 FRAME[pos=60.0 226.4 -1200.0 snap=60.0 242.0 -1200.0 burn=1.015 fl=01000000 st=6 gr=0 top=85.0] | THINK[pos=60.0 226.4 -1200.0 snap=60.0 242.0 -1200.0 burn=1.015 fl=01000000 st=6 gr=0 top=85.0] | RESET[pos=60.0 226.4 -1200.0 snap=60.0 242.0 -1200.0 burn=1.015 fl=01000000 st=6 gr=0 top=85.0] | DROP[pos=60.0 242.0 -1200.0 snap=60.0 242.0 -1200.0 burn=1.015 fl=01000000 st=6 gr=0 top=85.0] | FIRETOUCHx98
+2502 FRAME[pos=51.0 222.0 -1200.0 snap=30.0 237.1 -1200.0 burn=1.003 fl=00000001 st=6 gr=0 top=85.0] | THINK[pos=51.0 222.0 -1200.0 snap=30.0 237.1 -1200.0 burn=1.003 fl=00000001 st=6 gr=0 top=85.0] | RESET[pos=51.0 222.0 -1200.0 snap=30.0 237.1 -1200.0 burn=1.003 fl=00000001 st=6 gr=0 top=85.0] | DROP[pos=30.0 237.1 -1200.0 snap=30.0 237.1 -1200.0 burn=1.003 fl=00000001 st=6 gr=0 top=85.0] | FIRETOUCHx97
+2778 FRAME[pos=60.0 226.2 -1200.0 snap=60.0 242.0 -1200.0 burn=1.007 fl=01000000 st=6 gr=0 top=25.0] | THINK[pos=60.0 226.2 -1200.0 snap=60.0 242.0 -1200.0 burn=1.007 fl=01000000 st=6 gr=0 top=25.0] | RESET[pos=60.0 226.2 -1200.0 snap=60.0 242.0 -1200.0 burn=1.007 fl=01000000 st=6 gr=0 top=25.0] | DROP[pos=60.0 242.0 -1200.0 snap=60.0 242.0 -1200.0 burn=1.007 fl=01000000 st=6 gr=0 top=25.0] | FIRETOUCHx93
+3115 FRAME[pos=60.0 227.2 -1200.0 snap=60.0 242.0 -1200.0 burn=1.017 fl=01000000 st=6 gr=0 top=85.0] | THINK[pos=60.0 227.2 -1200.0 snap=60.0 242.0 -1200.0 burn=1.017 fl=01000000 st=6 gr=0 top=85.0] | RESET[pos=60.0 227.2 -1200.0 snap=60.0 242.0 -1200.0 burn=1.017 fl=01000000 st=6 gr=0 top=85.0] | DROP[pos=60.0 242.0 -1200.0 snap=60.0 242.0 -1200.0 burn=1.017 fl=01000000 st=6 gr=0 top=85.0] | FIRETOUCHx99
+3346 FRAME[pos=60.0 226.2 -1200.0 snap=-511.0 81.0 -578.0 burn=1.000 fl=01000000 st=6 gr=0 top=85.0] | THINK[pos=60.0 226.2 -1200.0 snap=-511.0 81.0 -578.0 burn=1.000 fl=01000000 st=6 gr=0 top=85.0] | RESET[pos=60.0 226.2 -1200.0 snap=-511.0 81.0 -578.0 burn=1.000 fl=01000000 st=6 gr=0 top=85.0] | DROP[pos=-511.0 81.0 -578.0 snap=-511.0 81.0 -578.0 burn=1.000 fl=01000000 st=6 gr=0 top=85.0] | FIRETOUCHx96

@@ -1,0 +1,86 @@
+demoprobe loaded
+hooked GameClock::Tick
+hooked MT19937_NextU32
+hooked Rand_Float01
+hooked GameSession::LoadLevel
+dinput8: GetDeviceData hooked at 72f5d770
+armed RECORD: waiting for the next level start
+LoadLevel: rng saved (left 40)
+level start after 5 load frames (LoadLevel seen)
+record START at elapsed 51885 ms (rng left 40)
+record STOP (F7): 1950 frames, 52380 input bytes
+armed PLAYBACK: waiting for the next level start
+LoadLevel: rng restored (left 40)
+level start after 5 load frames (LoadLevel seen)
+play 1 START at elapsed 144822 ms
+play 1: other entities (+0x70) first differs at frame 0 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 0/0)
+play 1: entity positions first differs at frame 0 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 0/0)
+play 1: rng draws first differs at frame 23 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 8/0)
+  rec  frame 22 draws: 498b35<447b09 498b35<447b95 498b35<447bbe 498b35<447d4d 498b35<447d7c 498b35<447da7 498b35<447f00 498b35<447f4b
+  play frame 22 draws: none
+play 1: rng callers first differs at frame 23 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 8/0)
+  rec  frame 22 draws: 498b35<447b09 498b35<447b95 498b35<447bbe 498b35<447d4d 498b35<447d7c 498b35<447da7 498b35<447f00 498b35<447f4b
+  play frame 22 draws: none
+play 1: entity count first differs at frame 23 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 8/0)
+play 1: victims first differs at frame 1517 (rec pos -495.304,821.375 play -495.304,821.375; draws 2/2)
+play 1 END (end of recording): 1950/1950 frames, time fed, rng restored, frames differing 1950, first at 0, input-call mismatches 0
+play 1 frame 1949: rec pos (-429.073, 825.583) play (-429.073, 825.583) dist^2 0.000
+play 1: GAMEPLAY (main stream) draws first differ at slot 3 (0 = inside LoadLevel, k = frame k after it), 8 site(s) [site:rec/play]: 447b09:4/3 447b95:4/3 447bbe:4/3 447d4d:4/3 447d7c:4/3 447da7:4/3 447f00:4/3 447f4b:4/3
+play 1: COSMETIC (private stream) draws first differ at slot 2 (0 = inside LoadLevel, k = frame k after it), 7 site(s) [site:rec/play]: 4800f2:11/34 480117:24/74 480128:24/74 480139:24/74 4801e4:24/74 4801fa:24/74 480225:11/34
+armed PLAYBACK (real time): waiting for the next level start
+LoadLevel: rng restored (left 40)
+level start after 5 load frames (LoadLevel seen)
+play 2 START at elapsed 249351 ms
+play 2: other entities (+0x70) first differs at frame 0 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 0/0)
+play 2: entity positions first differs at frame 0 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 0/0)
+play 2: rng draws first differs at frame 1 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 8/16)
+  rec  frame 0 draws: 498b35<447b09 498b35<447b95 498b35<447bbe 498b35<447d4d 498b35<447d7c 498b35<447da7 498b35<447f00 498b35<447f4b
+  play frame 0 draws: 498b35<447b09 498b35<447b95 498b35<447bbe 498b35<447d4d 498b35<447d7c 498b35<447da7 498b35<447f00 498b35<447f4b 498b35<447b09 498b35<447b95 498b35<447bbe 498b35<447d4d
+play 2: entity count first differs at frame 1 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 8/16)
+play 2: dt first differs at frame 2 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 8/0)
+play 2: time left +0x343c first differs at frame 3 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 0/0)
+play 2: victims first differs at frame 3 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 0/0)
+play 2: rng callers first differs at frame 23 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 8/0)
+  rec  frame 22 draws: 498b35<447b09 498b35<447b95 498b35<447bbe 498b35<447d4d 498b35<447d7c 498b35<447da7 498b35<447f00 498b35<447f4b
+  play frame 22 draws: none
+play 2: player position first differs at frame 1280 (rec pos -697.000,1187.410 play -697.000,1187.784; draws 0/0)
+play 2: player velocity first differs at frame 1280 (rec pos -697.000,1187.410 play -697.000,1187.784; draws 0/0)
+play 2 END (end of recording): 1950/1950 frames, time real, rng restored, frames differing 1950, first at 0, input-call mismatches 0
+play 2 frame 1949: rec pos (-429.073, 825.583) play (-429.288, 824.036) dist^2 2.441
+play 2: GAMEPLAY (main stream) draws first differ at slot 3 (0 = inside LoadLevel, k = frame k after it), 8 site(s) [site:rec/play]: 447b09:4/2 447b95:4/2 447bbe:4/2 447d4d:4/2 447d7c:4/2 447da7:4/2 447f00:4/2 447f4b:4/2
+play 2: COSMETIC (private stream) draws first differ at slot 2 (0 = inside LoadLevel, k = frame k after it), 7 site(s) [site:rec/play]: 4800f2:11/19 480117:24/42 480128:24/42 480139:24/42 4801e4:24/42 4801fa:24/42 480225:11/19
+armed PLAYBACK: waiting for the next level start
+LoadLevel: rng restored (left 40)
+level start after 5 load frames (LoadLevel seen)
+play 3 START at elapsed 353871 ms
+play 3: entity count first differs at frame 0 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 0/0)
+play 3: other entities (+0x70) first differs at frame 0 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 0/0)
+play 3: entity positions first differs at frame 0 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 0/0)
+play 3: victims first differs at frame 12 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 2/2)
+play 3: rng draws first differs at frame 13 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 2/0)
+  rec  frame 12 draws: 498b35<45aed8 45aeeb<4027d5
+  play frame 12 draws: none
+play 3: rng callers first differs at frame 90 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 8/0)
+  rec  frame 89 draws: 498b35<447b09 498b35<447b95 498b35<447bbe 498b35<447d4d 498b35<447d7c 498b35<447da7 498b35<447f00 498b35<447f4b
+  play frame 89 draws: none
+play 3 END (end of recording): 1950/1950 frames, time fed, rng restored, frames differing 1950, first at 0, input-call mismatches 0
+play 3 frame 1949: rec pos (-429.073, 825.583) play (-429.073, 825.583) dist^2 0.000
+play 3: GAMEPLAY (main stream) draws first differ at slot 3 (0 = inside LoadLevel, k = frame k after it), 8 site(s) [site:rec/play]: 447b09:4/3 447b95:4/3 447bbe:4/3 447d4d:4/3 447d7c:4/3 447da7:4/3 447f00:4/3 447f4b:4/3
+play 3: COSMETIC (private stream) draws first differ at slot 2 (0 = inside LoadLevel, k = frame k after it), 7 site(s) [site:rec/play]: 4800f2:11/29 480117:24/64 480128:24/64 480139:24/64 4801e4:24/64 4801fa:24/64 480225:11/29
+armed PLAYBACK (rng not restored): waiting for the next level start
+level start after 5 load frames (LoadLevel seen)
+play 4 START at elapsed 458466 ms
+play 4: victims first differs at frame 0 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 0/0)
+play 4: other entities (+0x70) first differs at frame 0 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 0/0)
+play 4: entity positions first differs at frame 0 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 0/0)
+play 4: rng draws first differs at frame 1 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 8/16)
+  rec  frame 0 draws: 498b35<447b09 498b35<447b95 498b35<447bbe 498b35<447d4d 498b35<447d7c 498b35<447da7 498b35<447f00 498b35<447f4b
+  play frame 0 draws: 498b35<447b09 498b35<447b95 498b35<447bbe 498b35<447d4d 498b35<447d7c 498b35<447da7 498b35<447f00 498b35<447f4b 498b35<447b09 498b35<447b95 498b35<447bbe 498b35<447d4d
+play 4: entity count first differs at frame 1 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 8/16)
+play 4: rng callers first differs at frame 90 (rec pos -697.000,1196.000 play -697.000,1196.000; draws 8/0)
+  rec  frame 89 draws: 498b35<447b09 498b35<447b95 498b35<447bbe 498b35<447d4d 498b35<447d7c 498b35<447da7 498b35<447f00 498b35<447f4b
+  play frame 89 draws: none
+play 4 END (end of recording): 1950/1950 frames, time fed, rng not restored, frames differing 1950, first at 0, input-call mismatches 0
+play 4 frame 1949: rec pos (-429.073, 825.583) play (-429.073, 825.583) dist^2 0.000
+play 4: GAMEPLAY (main stream) draws first differ at slot 3 (0 = inside LoadLevel, k = frame k after it), 9 site(s) [site:rec/play]: 447b09:4/2 447b95:4/2 447bbe:4/2 447d4d:4/2 447d7c:4/2 447da7:4/2 447f00:4/2 447f4b:4/2 48d96f:0/1
+play 4: COSMETIC (private stream) draws first differ at slot 2 (0 = inside LoadLevel, k = frame k after it), 7 site(s) [site:rec/play]: 4800f2:11/16 480117:24/34 480128:24/34 480139:24/34 4801e4:24/34 4801fa:24/34 480225:11/16

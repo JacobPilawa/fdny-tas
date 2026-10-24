@@ -17,10 +17,21 @@ granular Ghidra work; record findings there. `plan.md` is the
 infrastructure plan, `RESEARCH.md` is the domain understanding — keep
 them separate.
 
-**No git on the VM.** This repo reaches it as a plain file copy via the
-Packer file provisioner, not a clone — there's no push/pull. If you're
-running on the VM and edit `plan.md`/`RESEARCH.md`/`CLAUDE.md`, those
-edits stay on the VM until someone copies them back to the dev machine.
+**The repo reaches the VM as a plain file copy** via the Packer file
+provisioner, not a clone. Since 2026-10-21 the VM copy is also a local git
+repo (PortableGit at `environment\local\tools\git`, not on PATH; branches
+`main` + `fdny-bxt`). Since 2026-10-22 it has a GitHub remote: `origin` =
+`git@github.com:RichardFranksComputer/fdny-tas.git` (private). The VM pushes with a
+write-enabled deploy key (`~/.ssh/fdny_decomp_deploy`, set by the repo-local
+`core.sshCommand`). **Push after every commit** (`git push`; both branches track
+origin). The owner reads and edits from another machine, so **`git pull` before
+starting work**. Never commit a file over 100 MB (GitHub rejects it), the game's
+binaries, or the Ghidra project's `.rep` (it contains the game's bytes).
+Enable the tracked hooks once per clone: `git config core.hooksPath .githooks`.
+
+**FDNYCore (`core/`) has its own rules:** `core/CLAUDE.md` (loaded when
+working there), `core/DECISIONS.md`, and the `new-feature` skill
+(`.claude/skills/new-feature/`) for adding features.
 
 **You may install additional tools as work demands it** — follow the
 existing `get_<thing>.ps1`/`install_<thing>.ps1` convention in

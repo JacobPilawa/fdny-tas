@@ -1,0 +1,26 @@
+[2026-10-21 03:55:16.299] [INFO] FDNYCore loaded from C:\fdny-decomp\FDNY SP 1.1\FDNYCore.asi
+[2026-10-21 03:55:16.357] [INFO] patches: console creation ungated at 00499370
+[2026-10-21 03:55:16.406] [INFO] FDNYCore 0.5.0 (Debug) exe=C:\fdny-decomp\FDNY SP 1.1\FDNYFirefighter.exe sha256=4b3b4dc1cc0b05bcb42c8e27ac6f6ca72fe5f7064ca8122fda7d41e7f6d2fc3e base=00400000
+[2026-10-21 03:55:16.445] [INFO] Genesis.dll sha256=5014bb879706bfb5ae6cf9ce1de63dc3deebdcc5b8e1b41f247b284a336c4643 base=10000000
+[2026-10-21 03:55:16.490] [INFO] address table: version retail-1.1 selected
+[2026-10-21 03:55:16.531] [INFO] signatures: all OK (39/39)
+[2026-10-21 03:55:16.575] [INFO] hooks: created genesis.begin_frame at 10025b70 (group frame)
+[2026-10-21 03:55:16.606] [INFO] hooks: created genesis.end_frame at 100260e0 (group frame)
+[2026-10-21 03:55:16.642] [INFO] hooks: created con.exec_line at 00470f10 (group console)
+[2026-10-21 03:55:16.695] [INFO] console: ready (game console; FDNYCore commands intercepted at ScriptEngine::ExecLine)
+[2026-10-21 03:55:16.724] [INFO] module levelwatch: enabled
+[2026-10-21 03:55:16.756] [INFO] testpipe: listening on \\.\pipe\FDNYCore (Debug build)
+[2026-10-21 03:55:16.790] [INFO] FDNYCore ready
+[2026-10-21 03:55:17.701] [INFO] levelwatch: map '' state -1
+[2026-10-21 03:55:20.102] [INFO] console: game console present at 034b77d8
+[2026-10-21 03:55:20.164] [INFO] console> exec C:\fdny-decomp\FDNY SP 1.1\autoexec.cfg
+[2026-10-21 03:55:20.214] [INFO] cmd: echo autoexec-ran-777
+[2026-10-21 03:55:20.246] [INFO] console> autoexec-ran-777
+[2026-10-21 03:55:20.272] [INFO] cmd: bind f6 "echo autoexec-bind-ok"
+[2026-10-21 03:55:20.306] [INFO] console> f6 = "echo autoexec-bind-ok"
+[2026-10-21 03:55:20.331] [INFO] exec: C:\fdny-decomp\FDNY SP 1.1\autoexec.cfg (2 line(s))
+[2026-10-21 03:55:20.364] [INFO] config: startup (FDNYCore.cfg: none, autoexec.cfg: ran)
+[2026-10-21 03:55:20.459] [INFO] levelwatch: map '' state 0
+[2026-10-21 03:55:25.700] [INFO] bind: f6 -> echo autoexec-bind-ok
+[2026-10-21 03:55:25.729] [INFO] cmd: echo autoexec-bind-ok
+[2026-10-21 03:55:25.768] [INFO] console> autoexec-bind-ok

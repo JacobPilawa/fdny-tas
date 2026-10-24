@@ -1,0 +1,69 @@
+name: glitch_parity_log
+# Items 11b-11d: the collision log FDNYCore writes live, and the box text it
+# draws every frame, are IDENTICAL to what the original tools/collision_overlay
+# classes (Model / FrameAnalyzer / TextLog / GameSource._classify / MapFinder /
+# Bsp / Overlay.build) produce from the same raw record stream.
+# Training, then bank (roaming victims, fires = non-player writers), walking,
+# turning, crouching, two hook sessions (off/on), and the B / Z / X keys (the original's F9 / F10 / F12).
+pre_files:
+  - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
+  - {src: tests/data/fdcore_hud_glitch.cfg, dst: FDNYCore.cfg}
+  - {src: null, dst: FDNYCore.glitchrec}
+  - {src: null, dst: FDNYCore.glitchbox}
+env:
+  FDNYCORE_TEST_GLITCHBOX: "1"
+setup: load_training
+record: true
+steps:
+  - assert_log: {contains: "glitch: hooks installed"}
+  - key: {key: w, hold: 2.0}
+  - key: {key: c, hold: 0.3}
+  - key: {key: w, hold: 1.5}
+  - key: {key: c, hold: 0.3}
+  - screenshot: boxes_training
+  - console: "loadmap bank"
+  - wait_s: 40
+  - repeat:
+      times: 6
+      steps:
+        - key: {key: w, hold: 2.5}
+        - mouse_rel: [250, 0]
+        - key: {key: a, hold: 1.0}
+        - key: {key: w, hold: 1.5}
+        - mouse_rel: [-400, 0]
+        - key: {key: d, hold: 1.0}
+  - screenshot: boxes_bank
+  - console: "fd_hud_glitch 0"
+  - key: {key: w, hold: 1.0}
+  - console: "fd_hud_glitch 1"
+  - repeat:
+      times: 3
+      steps:
+        - key: {key: w, hold: 2.0}
+        - mouse_rel: [300, 0]
+  # B hides / shows (the old overlay's F9; letters since D37; the game still receives them)
+  - key: {key: b, hold: 0.2}
+  - assert_pipe_stat: {cmd: glitch_box, key: hidden, equals: 1}
+  - screenshot: boxes_hidden
+  - key: {key: b, hold: 0.2}
+  - assert_pipe_stat: {cmd: glitch_box, key: hidden, equals: 0}
+  # Z (was F10) freezes the drawn boxes (analysis and log continue)
+  - key: {key: z, hold: 0.2}
+  - sample_pipe: {cmd: glitch_box, as: frozen_at}
+  - key: {key: w, hold: 1.0}
+  - assert_pipe_stat: {cmd: glitch_box, key: shown_tick, equals: 0, since: frozen_at}
+  - assert_pipe_stat: {cmd: glitch_box, key: frozen, equals: 1}
+  - key: {key: z, hold: 0.2}
+  - key: {key: w, hold: 1.0}
+  - assert_pipe_stat: {cmd: glitch_box, key: shown_tick, min: 10, since: frozen_at}
+  # X (was F12) clears history + last warp (logged, and replayed from the 0xF5 marker)
+  - key: {key: x, hold: 0.2}
+  - assert_log: {contains: "history cleared (F12)"}
+  - sample_pipe: {cmd: glitch, as: glitch_stats}   # analysis cost per frame
+expect:
+  no_crash: true
+  log_errors: 0
+  glitch_parity: true
+  glitch_min_lines: 12
+  glitch_box: true
+  glitch_box_min_frames: 1000

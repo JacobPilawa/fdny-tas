@@ -1,0 +1,17 @@
+name: addr_unknown_exe
+# Item 2: an exe/Genesis pair that matches no table version (simulated with a
+# Debug-only override table whose hashes are wrong; the exe is never edited)
+# logs a warning, disables every module, and the game still runs normally.
+pre_files:
+  - {src: tests/data/addr_override_unknown.txt, dst: FDNYCore.addroverride.txt}
+setup: load_training
+record: true
+steps:
+  - assert_log: {contains: "address table: Debug override loaded"}
+  - assert_log: {contains: "[WARN] unknown exe/Genesis"}
+  - assert_log: {contains: "module levelwatch: disabled (unknown version)"}
+  - assert_mem: {name: game.state, equals: 1}
+  - assert_screen_nonblack: in_level
+expect:
+  no_crash: true
+  log_errors: 0
