@@ -1,6 +1,8 @@
 name: recorder
 # Player-update capture, repeated same-map attempts, opt-out and write failure.
 # The harness validates the JSONL files written by these stage attempts.
+# Recording is off by default (owner, "Set recorder default to off"): the test first checks
+# that nothing records, then opts in with fd_record 1. The rest is unchanged.
 pre_files:
   - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
   - {src: null, dst: FDNYCore.cfg}
@@ -10,6 +12,10 @@ setup: load_training
 record: true
 steps:
   - assert_log: {contains: "module recorder: enabled"}
+  - wait_s: 1
+  - assert_pipe_stat: {cmd: recorder, key: active, equals: 0}   # default off: nothing recorded
+  - assert_pipe_stat: {cmd: recorder, key: runs, equals: 0}
+  - console: "fd_record 1"
   - wait_s: 1
   - assert_pipe_stat: {cmd: recorder, key: active, equals: 1}
   - assert_pipe_stat: {cmd: recorder, key: samples, min: 10}
