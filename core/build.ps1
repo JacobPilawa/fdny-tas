@@ -23,6 +23,12 @@ if (-not (Test-Path $zig)) {
 }
 if (-not $zig) { throw "zig.exe not found -- run environment\scripts\get_zig.ps1 + install_zig.ps1" }
 $winInc = Join-Path (Split-Path -Parent $zig) 'lib\libc\include\any-windows-any'
+# The pinned Python (config.ps1) on the VM; elsewhere (the GitHub release workflow) any
+# Python 3 on PATH: arch_check / addrgen / docgen use the standard library only.
+if (-not (Test-Path $PythonExe)) {
+    $PythonExe = (Get-Command python -ErrorAction SilentlyContinue).Source
+    if (-not $PythonExe) { throw "Python not found: run environment\scripts\get_python.ps1 + install_python.ps1, or put python on PATH" }
+}
 
 # Architecture rules first (core/CLAUDE.md): a violation stops the build.
 & $PythonExe -I (Join-Path $here 'tools\arch_check.py')
