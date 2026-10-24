@@ -1,8 +1,8 @@
 # Builds FDNYCore.asi (Release) from source with the same toolchain as the VM, and
 # publishes it as a GitHub release tagged v<core/VERSION>.
-#   - push to main / fdny-bxt that changes core/VERSION, or a manual run:
+#   - push to main that changes core/VERSION, or a manual run on main:
 #     build, then release v<VERSION> unless that tag already exists (never overwritten);
-#   - push to any other branch (e.g. workflow-release): build only, uploaded as an
+#   - push to any other branch (a feature branch): build only, uploaded as an
 #     artifact, no tag or release.
 # The build is core/build.ps1: arch_check, the address table, -Werror, the key sheet.
 # Zig comes from environment/scripts/get_zig.ps1 + install_zig.ps1 (version pinned in
@@ -11,7 +11,7 @@ name: release
 
 on:
   push:
-    branches: [main, fdny-bxt, workflow-release]
+    branches: ['**']
     paths:
       - core/VERSION
       - .github/workflows/release.yml
@@ -97,7 +97,7 @@ jobs:
           path: release-out/
 
       - name: Release v${{ steps.version.outputs.version }}
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/fdny-bxt'
+        if: github.ref == 'refs/heads/main'
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}

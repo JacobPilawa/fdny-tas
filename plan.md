@@ -17,8 +17,8 @@ questions. This file (`plan.md`) is the infrastructure/build plan;
 The repo reaches a freshly built VM as a plain file copy via the Packer file
 provisioner (see `environment/packer/windows-server.pkr.hcl`), not a clone.
 Since 2026-10-21 the VM copy is a git repo (PortableGit), and since 2026-10-22
-it pushes to the private GitHub repo `RichardFranksComputer/fdny-tas` (branches
-`main`, `fdny-bxt`). That GitHub repo is now the source of truth: the VM pushes
+it pushes to the private GitHub repo `RichardFranksComputer/fdny-tas` (base
+branch `main`; `fdny-bxt` was retired on 2026-10-24, and work goes on feature branches off `main`). That GitHub repo is now the source of truth: the VM pushes
 after every commit, and the owner reads and edits from elsewhere and pushes back.
 See `CLAUDE.md`.
 

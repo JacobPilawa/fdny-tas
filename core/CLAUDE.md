@@ -95,7 +95,7 @@ Every drawing belongs to a gfx layer, run in this fixed order each frame (D40, `
 5. **Version:** bump `VERSION` (minor for features/architecture, patch for fixes).
    - Rebuild with `.\build.ps1 -Dist`: it copies the Release `.asi` to `dist\` (repo root, tracked; owner 2026-10-22: the owner installs from GitHub) with `dist\README.md`, the key sheet generated for it (D41: version, SHA-256, keys, features, variables, commands). Never edit `dist\README.md` by hand; the build fails if it doesn't match the `.asi`.
    - Add the release notes to `dist\CHANGES.md` (hand-written).
-   - Pushing the `core\VERSION` change to `main` / `fdny-bxt` runs `.github/workflows/release.yml`. It builds Release from source on a GitHub Windows runner (same zig, `build.ps1`) and publishes the GitHub release `v<VERSION>` with the `.asi`, its key sheet and SHA-256. An existing tag is never overwritten.
+   - Merging the `core\VERSION` change to `main` runs `.github/workflows/release.yml`. It builds Release from source on a GitHub Windows runner (same zig, `build.ps1`) and publishes the GitHub release `v<VERSION>` with the `.asi`, its key sheet and SHA-256. An existing tag is never overwritten.
    - Only Release, and only on a version bump.
 6. **Commit:** one topic per commit; message via `-F` from a UTF-8 file without BOM, ending with the Co-Authored-By / Claude-Session lines; don't stage `research/research.db-*` side files.
 7. **Report to the owner** (end of every task):
