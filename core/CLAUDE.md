@@ -7,7 +7,7 @@ machine-checkable ones are enforced by `tools/arch_check.py` (run by `build.ps1`
 compiler flags; the reasons are in `DECISIONS.md`. Change a rule only with an
 owner-approved entry there.
 
-Read before working: `KEY_SHEET.md` (every feature, key, variable and command; generated
+Read before working: the repository `README.md` (the key sheet: every feature, key, variable and command; generated
 from the source, D41), the core services below, `DECISIONS.md` (why), the tail of
 `PROGRESS.md` (what happened last). To add a feature, use the `new-feature` skill
 (`.claude/skills/new-feature/`).
@@ -91,7 +91,7 @@ Every drawing belongs to a gfx layer, run in this fixed order each frame (D40, `
 2. **Tests:** a new or changed behaviour gets a test in `tests/` (named in the module's `// Tests:` line). Never weaken or delete a test to make it pass; a flaky or environmental failure is rerun and reported as such, with evidence (e.g. the same failure on the previous version). Run the affected tests, and the full suite (`python -I harness/run_test.py --suite`) before a version bump.
    - Known environmental: `glitch_box_cost` / `text_panels` frame-rate thresholds fail when the VM runs slow (~35 fps instead of ~57); `state_snapshot` can race when a fire spreads or a roaming bank victim moves between the two reads (0.16.1 and 0.17.0 alike).
 3. **Evidence** in `evidence/<topic>/`: logs, screenshots, measurements, plus a README for anything investigative (spikes: what was tried, numbers, verdict).
-4. **Docs:** anything user-visible is described in the code: help texts, the `// User:` line, `binds::DescribeKey` (the key sheet is generated from them, D41; check `KEY_SHEET.md` reads well); `DECISIONS.md` for any non-obvious choice; a `PROGRESS.md` entry (`- <date> it<N>: **<version>** ...`).
+4. **Docs:** anything user-visible is described in the code: help texts, the `// User:` line, `binds::DescribeKey` (the key sheet is generated from them, D41; check the root `README.md` reads well); `DECISIONS.md` for any non-obvious choice; a `PROGRESS.md` entry (`- <date> it<N>: **<version>** ...`).
 5. **Version:** bump `VERSION` (minor for features/architecture, patch for fixes).
    - Rebuild with `.\build.ps1 -Dist`: it copies the Release `.asi` to `dist\` (repo root, tracked; owner 2026-10-22: the owner installs from GitHub) with `dist\README.md`, the key sheet generated for it (D41: version, SHA-256, keys, features, variables, commands). Never edit `dist\README.md` by hand; the build fails if it doesn't match the `.asi`.
    - Add the release notes to `dist\CHANGES.md` (hand-written).
