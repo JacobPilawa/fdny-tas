@@ -214,6 +214,15 @@ later session might "simplify" away; change one only with the owner's approval
 
 ## Process
 
+- **D46 Cost tests compare against a baseline in the same run, not a fixed frame rate** (owner 2026-10-24: "Do the tests need to be fps dependent? ... can they be redesigned?", then "implement").
+  - **Why:** the game is locked to the display's refresh rate: about 57 fps on the VM console, 34 on a 32 Hz remote display session. `glitch_box_cost` (>= 250 ticks in 6 s) and `text_panels` (>= 300 frames) passed or failed with the session, whatever the code did (`evidence/fps_independent_tests/history.txt`).
+  - **What:**
+    - feature on >= 0.9 x feature off, in 6 s windows back to back (`assert_sample_ratio`);
+    - CPU-only costs under a budget (the warp HUD's box build, `draw_us_avg` <= 1 ms);
+    - a floor of 60 frames per window (the game runs).
+  - **The HUD layer's own time:** it's recorded (Debug pipe `textdraw_cost`), not asserted. It includes `geEngine_FlushPipeline`, which can wait on the GPU, so it moves with the display too (about 2.5 ms per frame at 34 fps, with no frame-rate cost).
+  - **Limit:** under a refresh cap, a cost that fits in the frame's spare time doesn't show in the ratio; the regression these tests exist for (Printf boxes, ratio 0.24) is far beyond that.
+  - **Rejected:** keeping the absolute thresholds and pinning the session to the console (`tscon`), which disconnects the owner's viewer and stays fragile; lowering them to fit 34 fps (weaker, and the next display mode breaks them again).
 - **D21 Tests are never weakened or deleted to pass.** An environmental failure (slow VM frame rate, a race in a read) is rerun and reported with evidence, for example the previous version failing identically.
 - **D22 Spikes don't touch working code:** standalone probes (`probes/`) and probe tests (`tests/probes/`, outside the suite).
 - **D23 Patterns live in the repo, enforced where possible** (this file, `CLAUDE.md`, `tools/arch_check.py`, the `new-feature` skill). Session memory is machine-local and doesn't transfer.

@@ -18,4 +18,8 @@ Every other test passes, including the new `core_single_instance` and the rework
 `speedrun_static_spawns`. On the earlier `main` run, `state_snapshot` (known race) and
 `draw_layers` (one start-up hang, PASS on rerun) also failed; both pass here.
 
+**Follow-up (owner, 2026-10-24):** the two tests were redesigned so they no longer depend
+on the display's refresh rate (D46, `evidence/fps_independent_tests/`). Rerun on the same
+32 Hz display, both PASS, which makes the 0.19.0 suite 38/38.
+
 Files: `suite_0.19.0.txt` (this run), `suite_main_3c5aa54.txt` (the earlier `main` run).

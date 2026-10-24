@@ -89,7 +89,8 @@ Every drawing belongs to a gfx layer, run in this fixed order each frame (D40, `
 
 1. `.\build.ps1` builds both configs (arch_check + `-Werror` clean).
 2. **Tests:** a new or changed behaviour gets a test in `tests/` (named in the module's `// Tests:` line). Never weaken or delete a test to make it pass; a flaky or environmental failure is rerun and reported as such, with evidence (e.g. the same failure on the previous version). Run the affected tests, and the full suite (`python -I harness/run_test.py --suite`) before a version bump.
-   - Known environmental: `glitch_box_cost` / `text_panels` frame-rate thresholds fail when the VM runs slow (~35 fps instead of ~57); `state_snapshot` can race when a fire spreads or a roaming bank victim moves between the two reads (0.16.1 and 0.17.0 alike).
+   - The game runs at the display's refresh rate (about 57 fps on the VM console, 34 on a 32 Hz remote session), so a test never asserts an absolute frame rate: compare against a baseline in the same run (D46, `assert_sample_ratio`).
+   - Known environmental: `state_snapshot` can race when a fire spreads or a roaming bank victim moves between the two reads (0.16.1 and 0.17.0 alike).
 3. **Evidence** in `evidence/<topic>/`: logs, screenshots, measurements, plus a README for anything investigative (spikes: what was tried, numbers, verdict).
 4. **Docs:** anything user-visible is described in the code: help texts, the `// User:` line, `binds::DescribeKey` (the key sheet is generated from them, D41; check the root `README.md` reads well); `DECISIONS.md` for any non-obvious choice; a `PROGRESS.md` entry (`- <date> it<N>: **<version>** ...`).
 5. **Version:** bump `VERSION` (minor for features/architecture, patch for fixes).

@@ -103,7 +103,32 @@ void Fail(Panel& p, const char* what) {  // once per panel, not every frame
     log::Warn("textdraw: %s: %s (%dx%d)", p.name, what, p.canvas.Width(), p.canvas.Height());
 }
 
+#ifdef FDCORE_DEBUG
+// Debug pipe `textdraw_cost`: the time this layer takes per frame (every panel: render
+// on change, upload, blit), so tests check the cost itself, not the frame rate (D46).
+double g_costUs = 0, g_costMaxUs = 0;
+unsigned long g_costFrames = 0;
+#endif
+
+void DrawPanels();
+
 void Draw() {
+#ifdef FDCORE_DEBUG
+    LARGE_INTEGER fq, t0, t1;
+    QueryPerformanceFrequency(&fq);
+    QueryPerformanceCounter(&t0);
+    DrawPanels();
+    QueryPerformanceCounter(&t1);
+    const double us = static_cast<double>(t1.QuadPart - t0.QuadPart) * 1e6 / static_cast<double>(fq.QuadPart);
+    g_costUs += us;
+    if (us > g_costMaxUs) g_costMaxUs = us;
+    ++g_costFrames;
+#else
+    DrawPanels();
+#endif
+}
+
+void DrawPanels() {
     ++g_frame;
     if (!gfx::Ready() || !gfx::Engine()) return;
     if (const unsigned gen = gfx::FontGeneration(); gen != g_fontGen) g_fontGen = gen, DirtyAll();
@@ -255,6 +280,10 @@ bool Init() {
             return;
         }
         wsprintfA(resp, "found=0");
+    });
+    testpipe::Register("textdraw_cost", [](const char*, char* resp, int) {
+        wsprintfA(resp, "frames=%lu us_total=%lu us_max=%lu", g_costFrames, static_cast<unsigned long>(g_costUs),
+                  static_cast<unsigned long>(g_costMaxUs));
     });
 #endif
     log::Info("textdraw: ready");

@@ -285,6 +285,22 @@ class Run:
             # {cmd, as}: store a "k=v k=v" pipe reply as a dict
             reply = pipe.call(arg["cmd"])
             self.samples[arg["as"]] = dict(kv.split("=", 1) for kv in reply.split() if "=" in kv)
+        elif kind == "assert_sample_ratio":
+            # {num: [from, to, key], den: [from, to, key], min, max}: the change of a sampled
+            # numeric field between two sample_pipe labels, divided by another such change.
+            # Measures a cost per frame (us_total / frames over one window) or one window
+            # against another (frames shown / frames hidden), so the display's refresh rate
+            # cancels out (D46).
+            def delta(spec):
+                a, b, key = spec
+                return int(self.samples[b][key]) - int(self.samples[a][key])
+            n, d = delta(arg["num"]), delta(arg["den"])
+            ratio = n / d if d else float("inf")
+            ok = d > 0 and ("min" not in arg or ratio >= float(arg["min"])) and \
+                ("max" not in arg or ratio <= float(arg["max"]))
+            want = " and ".join(([f">= {arg['min']}"] if "min" in arg else []) + ([f"<= {arg['max']}"] if "max" in arg else []))
+            self.record(kind, ok, f"{arg['num'][2]} {arg['num'][0]}->{arg['num'][1]} {n:+d} / "
+                                  f"{arg['den'][2]} {arg['den'][0]}->{arg['den'][1]} {d:+d} = {ratio:.3f}, want {want}")
         elif kind == "glitch_replay_fuzz":
             # {seed, frames, sessions}: synthetic .glitchrec through the core's analysis offline
             import sys as _sys
