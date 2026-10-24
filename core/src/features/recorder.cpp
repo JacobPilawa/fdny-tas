@@ -32,7 +32,7 @@ Victim g_victims[kVictimCap];
 unsigned g_nVictims;
 
 void Changed(cmd::Cvar&) { g_changed = true; }
-cmd::Cvar g_enable = {"fd_record", "1", "1 = automatically record each stage attempt to JSONL; 0 = off", false, true, Changed, {0}};
+cmd::Cvar g_enable = {"fd_record", "0", "1 = automatically record each stage attempt to JSONL; 0 = off", false, true, Changed, {0}};
 cmd::Cvar g_victimEnable = {"fd_record_victims", "1", "1 = include victim tracks in new recordings; 0 = player only", false, true, Changed, {0}};
 cmd::Cvar g_directory = {"fd_record_directory", "Recordings", "output directory, absolute or relative to FDNYCore.asi; changes start a new recording", false, true, Changed, {0}};
 
