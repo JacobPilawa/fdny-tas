@@ -345,6 +345,8 @@ class Run:
                             f"{arg['path']} does not contain {arg['absent']!r}")
         elif kind == "assert_registry":
             self.assert_registry(arg if isinstance(arg, dict) else {})
+        elif kind == "assert_recordings":
+            self.assert_recordings(arg)
         elif kind == "assert_log_count":
             with open(self.g.core_log, encoding="utf-8", errors="replace") as fh:
                 n = fh.read().count(arg["contains"])
@@ -365,6 +367,68 @@ class Run:
             inputs.type_text("`")
         else:
             raise ValueError(f"unknown step {kind}")
+
+    def assert_recordings(self, opt):
+        """Validate this test's actual recorder output, identified by its startup log."""
+        def require(ok, message):
+            if not ok:
+                raise ValueError(message)
+
+        def vector(value):
+            return (isinstance(value, list) and len(value) == 3
+                    and all(isinstance(v, (int, float)) and math.isfinite(v) for v in value))
+
+        try:
+            with open(self.g.core_log, encoding="utf-8") as stream:
+                paths = list(dict.fromkeys(line.split("recorder: started ", 1)[1].strip()
+                             for line in stream if "recorder: started " in line))
+            runs, victim_samples = 0, 0
+            for path in paths:
+                with open(path, encoding="utf-8") as stream:
+                    rows = [json.loads(line) for line in stream if line.strip()]
+                require(bool(rows), f"{path}: empty recording")
+                header = rows[0]
+                require(header.get("type") == "start" and header.get("schema") == "fdny-trajectory-v1",
+                        f"{path}: invalid header")
+                if opt.get("stage") and header.get("stage") != opt["stage"]:
+                    continue
+                samples, last_time, lifetimes = 0, {}, {}
+                for row in rows[1:-1]:
+                    kind = row.get("type")
+                    require(kind in ("sample", "victim_sample", "victim_end"), f"{path}: unexpected record")
+                    track = "player" if kind == "sample" else row.get("id")
+                    require(isinstance(track, str) and bool(track), f"{path}: missing track ID")
+                    t = row.get("t_ms")
+                    require(isinstance(t, (int, float)) and math.isfinite(t) and t >= last_time.get(track, 0),
+                            f"{path}: invalid or out-of-order time")
+                    last_time[track] = t
+                    if kind == "victim_end":
+                        require(lifetimes.get(track) == "alive", f"{path}: invalid victim end")
+                        lifetimes[track] = "ended"
+                        continue
+                    require(vector(row.get("position")) and vector(row.get("body_forward")),
+                            f"{path}: invalid position or facing")
+                    lo, hi = row.get("bounds_min"), row.get("bounds_max")
+                    require(vector(lo) and vector(hi) and all(a < b for a, b in zip(lo, hi)),
+                            f"{path}: invalid collision bounds")
+                    if kind == "sample":
+                        require(row.get("n") == samples and vector(row.get("velocity")),
+                                f"{path}: invalid sample sequence or velocity")
+                        samples += 1
+                    else:
+                        require(lifetimes.get(track) != "ended", f"{path}: victim ID reused after destruction")
+                        lifetimes[track] = "alive"
+                        victim_samples += 1
+                require(rows[-1].get("type") == "end" and rows[-1].get("samples") == samples,
+                        f"{path}: invalid closing record")
+                require(samples >= opt.get("min_samples", 1), f"{path}: too few samples")
+                shutil.copy2(path, os.path.join(self.out, os.path.basename(path)))
+                runs += 1
+            require(runs >= opt.get("min_runs", 1), "too few completed recordings")
+            require(not opt.get("victims") or victim_samples > 0, "no victim samples")
+            self.record("assert_recordings", True, f"{runs} valid recordings, {victim_samples} victim samples")
+        except (OSError, ValueError, TypeError, KeyError, AttributeError) as error:
+            self.record("assert_recordings", False, str(error))
 
     def assert_registry(self, opt):
         """D41: what the build registered (fd_dbg_registry's file) == what tools/docgen.py reads

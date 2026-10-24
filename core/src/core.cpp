@@ -118,7 +118,7 @@ DWORD WINAPI InitThread(LPVOID) {
 
 } // namespace
 
-BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID) {
+BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID reserved) {
     if (reason == DLL_PROCESS_ATTACH) {
         g_self = inst;
         DisableThreadLibraryCalls(inst);
@@ -145,6 +145,8 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID) {
         HANDLE t = CreateThread(nullptr, 0, InitThread, nullptr, 0, nullptr);
         if (t) CloseHandle(t);
         else fdcore::log::Error("CreateThread failed (%lu)", GetLastError());
+    } else if (reason == DLL_PROCESS_DETACH && reserved) {
+        fdcore::hooks::RaiseProcessExit();
     }
     return TRUE;
 }

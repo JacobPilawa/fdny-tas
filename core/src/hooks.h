@@ -31,6 +31,11 @@ void OnLevelLoad(LevelFn fn);  // map entered (game state reaches 1 with a map n
 // Raised by the core itself (levelwatch) when it detects a level entry.
 void RaiseLevelLoad(const char* map);
 
+// Normal process termination, after game threads stop. Subscribers may flush
+// open files; never wait for threads or load modules under the loader lock.
+void OnProcessExit(FrameFn fn);
+void RaiseProcessExit();
+
 struct Counters {
     volatile long beginFrame;
     volatile long endFrame;
