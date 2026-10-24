@@ -40,6 +40,7 @@ your changes are saved (FDNYCore.cfg). **Practice**: refused while `fd_profile` 
 | **SHIFT** | free camera: 4x speed (held) | while fd_pause is 1 |
 | **CTRL** | free camera: 0.25x speed (held) | while fd_pause is 1 |
 | **MOUSE** | free camera: look (fd_freecam_sens) | while fd_pause is 1 |
+| **W** **A** **S** **D** **UPARROW** **LEFTARROW** **DOWNARROW** **RIGHTARROW** **C** **CTRL** **SPACE** **SHIFT** **MOUSE1** **MOUSE2** **1** **2** **3** | sample raw virtual keys into JSONL (no input changes) | while fd_record is 1 and the game has focus |
 
 ## Features
 
@@ -57,6 +58,7 @@ your changes are saved (FDNYCore.cfg). **Practice**: refused while `fd_profile` 
 - **Trigger boxes**: draws the map's rescue zones and exits (and optionally every trigger) as boxes. (variables `fd_triggers`, `fd_triggers_all`, `fd_triggers_xray`; commands `fd_triggers_toggle`, `fd_triggers_list`; keys T, Y)
 - **Fire juggling**: an arrow showing where a carried survivor lands if you pass out now. (variables `fd_juggle`; keys J)
 - **Pause and free camera**: freeze the game and fly a camera around; the view returns to the player on resume. (variables `fd_pause`, `fd_freecam_speed`, `fd_freecam_sens`; commands `fd_pause_toggle`; keys P, W S, A D, E Q, SHIFT, CTRL, MOUSE)
+- **Recorder**: automatically save player and victim trajectories as fdny-trajectory-v1 JSONL files in Recordings beside FDNYCore.asi. (variables `fd_record`, `fd_record_victims`, `fd_record_directory`; keys W A S D UPARROW LEFTARROW DOWNARROW RIGHTARROW C CTRL SPACE SHIFT MOUSE1 MOUSE2 1 2 3)
 
 ## Variables
 
@@ -88,6 +90,9 @@ when changed. **Practice**: refused while `fd_profile` is `run`.
 | `fd_pause` | `0` | 1 = freeze the game and fly a free camera (0 = resume, view back to the player) |  | yes | Pause and free camera |
 | `fd_freecam_speed` | `400` | free camera speed in units/s (400 = the run speed); Shift x4, Ctrl x0.25 | yes |  | Pause and free camera |
 | `fd_freecam_sens` | `0.075` | free camera mouse look in degrees per mouse count; higher = faster | yes |  | Pause and free camera |
+| `fd_record` | `0` | 1 = automatically record each stage attempt to JSONL; 0 = off | yes |  | Recorder |
+| `fd_record_victims` | `1` | 1 = include victim tracks in new recordings; 0 = player only | yes |  | Recorder |
+| `fd_record_directory` | `Recordings` | output directory, absolute or relative to FDNYCore.asi; changes start a new recording | yes |  | Recorder |
 
 ## Commands
 
