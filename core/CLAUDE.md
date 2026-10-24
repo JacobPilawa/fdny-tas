@@ -89,14 +89,14 @@ Every drawing belongs to a gfx layer, run in this fixed order each frame (D40, `
 
 1. `.\build.ps1` builds both configs (arch_check + `-Werror` clean).
 2. **Tests:** a new or changed behaviour gets a test in `tests/` (named in the module's `// Tests:` line). Never weaken or delete a test to make it pass; a flaky or environmental failure is rerun and reported as such, with evidence (e.g. the same failure on the previous version). Run the affected tests, and the full suite (`python -I harness/run_test.py --suite`) before a version bump.
-   - Known environmental: `glitch_box_cost` / `text_panels` frame-rate thresholds fail when the VM runs slow (~35 fps instead of ~57); `state_snapshot` can race when a fire spreads or a roaming bank victim moves between the two reads (0.16.1 and 0.17.0 alike).
+   - The game runs at the display's refresh rate (about 57 fps on the VM console, 34 on a 32 Hz remote session), so a test never asserts an absolute frame rate: compare against a baseline in the same run (D46, `assert_sample_ratio`).
+   - Known environmental: `state_snapshot` can race when a fire spreads or a roaming bank victim moves between the two reads (0.16.1 and 0.17.0 alike).
 3. **Evidence** in `evidence/<topic>/`: logs, screenshots, measurements, plus a README for anything investigative (spikes: what was tried, numbers, verdict).
 4. **Docs:** anything user-visible is described in the code: help texts, the `// User:` line, `binds::DescribeKey` (the key sheet is generated from them, D41; check the root `README.md` reads well); `DECISIONS.md` for any non-obvious choice; a `PROGRESS.md` entry (`- <date> it<N>: **<version>** ...`).
 5. **Version:** bump `VERSION` (minor for features/architecture, patch for fixes).
-   - Rebuild with `.\build.ps1 -Dist`: it copies the Release `.asi` to `dist\` (repo root, tracked; owner 2026-10-22: the owner installs from GitHub) with `dist\README.md`, the key sheet generated for it (D41: version, SHA-256, keys, features, variables, commands). Never edit `dist\README.md` by hand; the build fails if it doesn't match the `.asi`.
-   - Add the release notes to `dist\CHANGES.md` (hand-written).
-   - Merging the `core\VERSION` change to `main` runs `.github/workflows/release.yml`. It builds Release from source on a GitHub Windows runner (same zig, `build.ps1`) and publishes the GitHub release `v<VERSION>` with the `.asi`, its key sheet and SHA-256. An existing tag is never overwritten.
-   - Only Release, and only on a version bump.
+   - Add the release notes to the root `CHANGES.md` (hand-written), under `## <VERSION>`: the release workflow puts that section in the release's notes.
+   - Merging the `core\VERSION` change to `main` runs `.github/workflows/release.yml`. It builds Release from source on a GitHub Windows runner (same zig, `build.ps1`) and publishes the GitHub release `v<VERSION>`: `FDNYCore-<VERSION>.asi`, a zip with it and its key sheet (D41: version, SHA-256, keys, features, variables, commands), and the SHA-256. An existing tag is never overwritten.
+   - The GitHub release is the only download (D45): no `.asi` is committed to the repo.
 6. **Commit:** one topic per commit; message via `-F` from a UTF-8 file without BOM, ending with the Co-Authored-By / Claude-Session lines; don't stage `research/research.db-*` side files.
 7. **Report to the owner** (end of every task):
    - the outcome and version/commit, first sentence;

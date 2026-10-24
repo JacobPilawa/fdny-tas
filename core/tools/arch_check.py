@@ -143,7 +143,7 @@ def main():
             if re.search(r"\bOnFrameEndLate\s*\(", l):
                 fail("R8 draw-order-is-gfx", f, i, "late-frame subscriber outside gfx: draw from gfx::OnLayer(...)")
 
-    # R9: the key sheet (dist/README.md, tools/docgen.py) is built from the source (D41). Every
+    # R9: the key sheet (README.md, tools/docgen.py) is built from the source (D41). Every
     # feature module says what it is for the player, and a feature that reads keys itself
     # (not through a bind) declares them with binds::DescribeKey, so the sheet lists them.
     for g, regs in sorted(modules.items()):

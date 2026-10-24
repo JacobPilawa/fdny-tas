@@ -5,7 +5,6 @@
 #     read stops the commit) and rewrites the repository's README.md (the key sheet for the
 #     current source), which is added to the commit.
 #     It reads the working tree, like arch_check.
-# On a commit that touches dist/: dist/README.md must describe dist/FDNYCore.asi.
 PY="environment/local/tools/python/python.exe"
 [ -x "$PY" ] || PY=python
 staged=$(git diff --cached --name-only)
@@ -19,11 +18,5 @@ if echo "$staged" | grep -q '^core/'; then
         exit 1
     fi
     git add README.md
-fi
-if echo "$staged" | grep -q '^dist/'; then
-    if ! "$PY" -I core/tools/docgen.py check-dist; then
-        echo "pre-commit: dist/ out of step -- rebuild with core/build.ps1 -Dist"
-        exit 1
-    fi
 fi
 exit 0

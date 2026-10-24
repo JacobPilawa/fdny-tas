@@ -7,12 +7,11 @@
 # Freestanding like asi\build.ps1: no CRT, imports kernel32/user32/gdi32/bcrypt only
 # (gdi32: the hud_glitch box is rendered with GDI, item 11d).
 
-#   .\build.ps1 -Dist              # also copy the Release build to dist\ with its README (version bumps)
 # Every build writes build\<Config>\README.md: the key sheet (tools\docgen.py) for that source.
+# Releases are built by .github/workflows/release.yml from this script, not from a local build (D45).
 
 param([ValidateSet('Debug', 'Release', 'Both')] [string]$Config = 'Both',
-      [string[]]$Without = @(),
-      [switch]$Dist)
+      [string[]]$Without = @())
 
 $ErrorActionPreference = 'Stop'
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -112,14 +111,3 @@ if (-not $Without) {
     & $PythonExe -I (Join-Path $here 'tools\docgen.py') sheet (Join-Path $here '..\README.md')
     if ($LASTEXITCODE -ne 0) { throw "docgen failed: see above" }
 }
-
-# dist\ (core/CLAUDE.md "Done means"): the Release build and its sheet, always together.
-$distDir = Join-Path $here '..\dist'
-if ($Dist) {
-    if ($Without -or $configs -notcontains 'Release') { throw "-Dist needs the full Release build" }
-    Copy-Item (Join-Path $here 'build\Release\FDNYCore.asi') (Join-Path $distDir 'FDNYCore.asi') -Force
-    Copy-Item (Join-Path $here 'build\Release\README.md') (Join-Path $distDir 'README.md') -Force
-    "dist: FDNYCore.asi + README.md updated"
-}
-& $PythonExe -I (Join-Path $here 'tools\docgen.py') check-dist
-if ($LASTEXITCODE -ne 0) { throw "dist\README.md and dist\FDNYCore.asi are out of step: rebuild with -Dist" }

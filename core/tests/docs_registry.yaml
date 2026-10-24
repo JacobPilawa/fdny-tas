@@ -1,5 +1,5 @@
 name: docs_registry
-# D41: the key sheet (dist/README.md) is read from the source by tools/docgen.py. This
+# D41: the key sheet (README.md, and each release's) is read from the source by tools/docgen.py. This
 # checks that reading against what the Debug build really registered: every variable
 # (default, read-only, saved, practice-only, help), command, old name, default bind and
 # feature key (binds::DescribeKey), both ways. A registration docgen can't see fails here.
