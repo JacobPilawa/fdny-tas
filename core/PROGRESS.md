@@ -855,3 +855,4 @@ Debug-only benchmarks in `src/bench.cpp` (`fd_bench_text`, `fd_bench_blit`, `fd_
     trajectory viewer.
   - Test: `tests/recorder.yaml` checks live capture, restarts, opt-out, error recovery
     and JSONL validity through the existing harness. Evidence: `evidence/recorder/README.md`.
+- 2026-10-24: **fix (Debug core): `hooks_toggle` crash.** D40's Debug-only layer-order tracker `MarkLayer` appended to `g_order[32]` without a bound; with the frame hooks off, `FrameBegin` stopped resetting it while the RenderWorld detour kept appending, and the overflow corrupted the box lists (`DrawBoxes` read a list at 0x1). Bisected to 549b1fe (D40). Release unaffected. Bounded append; `hooks_toggle` PASS x3, `draw_layers` PASS. Evidence: `evidence/hooks_toggle_crash/`.

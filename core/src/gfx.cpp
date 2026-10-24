@@ -96,8 +96,13 @@ int g_nWorldPrev = 0;
 WorldBoxStats g_boxStats = {}, g_boxAcc = {};
 #ifdef FDCORE_DEBUG
 char g_order[32], g_lastOrder[32];
+// Bounded: FrameBegin resets g_order, but with the frame hooks off (fd_hooks_frame 0,
+// tests/hooks_toggle.yaml) only the RenderWorld detour runs, and an unbounded append grew
+// " world" past 32 bytes into the box-list globals next to it (DrawBoxes read a list at 0x1).
 void MarkLayer(const char* name) {
-    if (g_order[0]) lstrcatA(g_order, " ");
+    const int used = lstrlenA(g_order), need = lstrlenA(name) + (used ? 1 : 0);
+    if (used + need >= static_cast<int>(sizeof(g_order))) return;
+    if (used) lstrcatA(g_order, " ");
     lstrcatA(g_order, name);
 }
 #endif
