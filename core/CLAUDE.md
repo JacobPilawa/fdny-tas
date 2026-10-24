@@ -28,6 +28,7 @@ The log lists `modules: N registered (...)` and one `module <name>: enabled | di
 | `camera` | view size; one FOV filter (`fov` uses it); a world-transform override (`SetWorldOverride`, `LastWorldXForm`: the free camera) |
 | `pause` | `Set(on, why)` / `Active()`: skip the simulation step and pause the game clock; ends itself on leaving the level. `textdraw::HideWhilePaused` for view-relative panels |
 | `state` | the frame's player snapshot |
+| `entities` | lazy Player/Victim initialization, update and destruction observers; original calls, last-error and FP state preserved |
 | `gfx`, `textdraw` | in-frame drawing ("Drawing" below; `src/gfx.h`, `src/textdraw.h`) |
 | `profile` | run/practice gates + watermark (reads `SetPracticeOnly`) |
 | `testpipe` (Debug) | `Register("<name>", handler)` for harness requests |

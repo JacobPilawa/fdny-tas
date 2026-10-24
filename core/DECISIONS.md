@@ -15,6 +15,15 @@ later session might "simplify" away; change one only with the owner's approval
 
 ## Game access
 
+- **D42 Trajectory recording consumes shared entity lifecycle observations.** The
+  `entities` service owns Player initialization/update and Victim spawn/update/
+  destruction through `hooks`; the recorder owns JSONL files and settings.
+  This preserves Player-update sampling and victim identities without duplicating
+  hooks or changing the frame snapshot service. `fdny-trajectory-v1` retains
+  wall-clock time, raw fields/keys and measured bounds. Passive recording is
+  available in both profiles. Default output is `Recordings` beside the ASI.
+  A standalone `FDNYRecorder.asi` disables this feature to prevent duplicate capture.
+
 - **D4 Every address lives in `addresses.json`** (rule R4). It is versioned by exe + Genesis SHA-256, and every entry is signature-checked at startup. A bad signature disables only what needs that entry, and the game runs on. This replaced raw addresses so an unknown game version degrades instead of crashing.
 - **D5 Defer to other mods that own a patch site** (alttabfix, FOV fix, FDNYDeterministic). Owner: the old tools stay installed. The core detects an occupied site and leaves it alone rather than double-patching.
 - **D6 Ghidra work goes through subagents**, read-only; the primary session never calls GhidrAssist MCP. Project rule (memory: loop owns Ghidra writes).

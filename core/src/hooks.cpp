@@ -44,6 +44,8 @@ FrameFn g_beginSubs[kMaxSubs];
 int g_nBeginSubs = 0;
 LevelFn g_levelSubs[kMaxSubs];
 int g_nLevelSubs = 0;
+FrameFn g_exitSubs[kMaxSubs];
+int g_nExitSubs = 0;
 
 int __cdecl BeginFrameDetour(void* engine, void* camera, int clear) {
     InterlockedIncrement(&g_stats.beginFrame);
@@ -168,6 +170,14 @@ void RaiseLevelLoad(const char* map) {
 }
 
 const Counters& Stats() { return g_stats; }
+
+void OnProcessExit(FrameFn fn) {
+    if (g_nExitSubs < kMaxSubs) g_exitSubs[g_nExitSubs++] = fn;
+}
+
+void RaiseProcessExit() {
+    for (int i = 0; i < g_nExitSubs; ++i) g_exitSubs[i]();
+}
 
 void* CurrentEngine() { return g_engine; }
 

@@ -1864,6 +1864,116 @@
           },
           "ghidra": "Genesis.dll export @geBitmap_SetColorKey@16 (RVA 0x1B770); fastcall: ECX=bitmap, EDX=HaveColorKey; stack (ColorKey in the bitmap's format, Smart); D3DDrv's decal Blt uses DDBLT_KEYSRC, so a bitmap without a colour key never shows",
           "note": "hud_glitch box bitmap (item 11d)"
+        },
+        "entity.f_forward": {
+          "module": "field",
+          "rva": "0x40",
+          "chain": [],
+          "type": "f32",
+          "sig": null,
+          "ghidra": "FDNY Recorder 1.1 entity field; preserved by the recorder port.",
+          "note": "Three body forward floats; player and victim recorder."
+        },
+        "player.f_tool_slot": {
+          "module": "field",
+          "rva": "0x357c",
+          "chain": [],
+          "type": "u32",
+          "sig": null,
+          "ghidra": "FDNY Recorder 1.1 entity field; preserved by the recorder port.",
+          "note": "Raw equipped tool slot; recorder."
+        },
+        "victim.def_name": {
+          "module": "field",
+          "rva": "0x10",
+          "chain": [],
+          "type": "ptr",
+          "sig": null,
+          "ghidra": "FDNY Recorder 1.1 entity field; preserved by the recorder port.",
+          "note": "Name pointer in victim definition; recorder."
+        },
+        "player.initialize": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x4d550",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x4d550",
+            "bytes": "55 8B EC 83 E4 F8 6A FF 68 DB FD 4C 00 64 A1 00",
+            "ref": "First 16 bytes of the callback."
+          },
+          "ghidra": "FDNY Recorder 1.1 lifecycle callback.",
+          "note": "Player stage initialization, no stack arguments; entities observers."
+        },
+        "player.root_update": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x4fe20",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x4fe20",
+            "bytes": "83 EC 68 56 8B F1 8B 86 28 35 00 00 85 C0 7D 05",
+            "ref": "First 16 bytes of the callback."
+          },
+          "ghidra": "FDNY Recorder 1.1 lifecycle callback.",
+          "note": "Player root update, no stack arguments; entities observers."
+        },
+        "victim.spawn": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x5d5b0",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x5d5b0",
+            "bytes": "6A FF 68 8E 10 4D 00 64 A1 00 00 00 00 50 64 89",
+            "ref": "First 16 bytes of the callback."
+          },
+          "ghidra": "FDNY Recorder 1.1 lifecycle callback.",
+          "note": "Victim SpawnAtSpot, no stack arguments; entities observers."
+        },
+        "victim.root_update": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x59990",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x59990",
+            "bytes": "8A 41 10 84 C0 75 0B 81 C1 D4 00 00 00 E9 9E 6D",
+            "ref": "First 16 bytes of the callback."
+          },
+          "ghidra": "FDNY Recorder 1.1 lifecycle callback.",
+          "note": "Victim root update, no stack arguments; entities observers."
+        },
+        "victim.destroy": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x5df60",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x5df60",
+            "bytes": "56 8B F1 E8 68 FC FF FF F6 44 24 08 01 74 09 56",
+            "ref": "First 16 bytes of the callback."
+          },
+          "ghidra": "FDNY Recorder 1.1 lifecycle callback.",
+          "note": "Victim scalar deleting destructor, one unsigned stack argument; entities observers."
+        },
+        "victim.vtable": {
+          "module": "exe",
+          "rva": "0xE25B8",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x5df60",
+            "bytes": "56 8B F1 E8 68 FC FF FF F6 44 24 08 01 74 09 56",
+            "ref": "First 16 bytes of the callback."
+          },
+          "ghidra": "Existing recorder primary Victim vtable identity check.",
+          "note": "Compare live victim vptr before player-driven sampling."
         }
       },
       "classify": {
