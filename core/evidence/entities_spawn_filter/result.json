@@ -1,0 +1,142 @@
+{
+  "test": "speedrun_static_spawns",
+  "core": "Debug",
+  "pass": true,
+  "crash": null,
+  "assertions": [
+    {
+      "step": "focus",
+      "pass": true,
+      "detail": "game window foreground at launch"
+    },
+    {
+      "step": "core_ready",
+      "pass": true,
+      "detail": "ready line seen"
+    },
+    {
+      "step": "address_table_version",
+      "pass": true,
+      "detail": "retail-1.1"
+    },
+    {
+      "step": "assert_log",
+      "pass": true,
+      "detail": "contains 'entities: victim-spot filter at'"
+    },
+    {
+      "step": "assert_log",
+      "pass": true,
+      "detail": "contains 'speedrun: static spawns use the entities victim-spot filter'"
+    },
+    {
+      "step": "assert_log",
+      "pass": true,
+      "detail": "contains 'module recorder: enabled'"
+    },
+    {
+      "step": "assert_log",
+      "pass": true,
+      "detail": "contains 'pinned to spot 0'"
+    },
+    {
+      "step": "sample_victims",
+      "pass": true,
+      "detail": "run1: 2 victim(s)"
+    },
+    {
+      "step": "sample_victims",
+      "pass": true,
+      "detail": "run2: 2 victim(s)"
+    },
+    {
+      "step": "sample_victims",
+      "pass": true,
+      "detail": "run3: 2 victim(s)"
+    },
+    {
+      "step": "assert_victims_equal",
+      "pass": true,
+      "detail": "['run1', 'run2', 'run3']: positions identical (+/-0.5 u): [[['victim1', 1104.0, -230.9, -4976.0, 1104.0, -4976.0], ['victim2', 1656.0, -230.9, -4968.0, 1656.0, -4968.0]], [['victim1', 1104.0, -230.9, -4976.0, 1104.0, -4976.0], ['victim2', 1656.0, -230.9, -4968.0, 1656.0, -4968.0]], [['victim1', 1104.0, -230.9, -4976.0, 1104.0, -4976.0], ['victim2', 1656.0, -230.9, -4968.0, 1656.0, -4968.0]]]"
+    },
+    {
+      "step": "assert_victims_at_spot0",
+      "pass": true,
+      "detail": "run1: every victim at its spot 0 (x,z; y is floor-snapped): [['victim1', 1104.0, -230.9, -4976.0, 1104.0, -4976.0], ['victim2', 1656.0, -230.9, -4968.0, 1656.0, -4968.0]]"
+    },
+    {
+      "step": "assert_victims_at_spot0",
+      "pass": true,
+      "detail": "run3: every victim at its spot 0 (x,z; y is floor-snapped): [['victim1', 1104.0, -230.9, -4976.0, 1104.0, -4976.0], ['victim2', 1656.0, -230.9, -4968.0, 1656.0, -4968.0]]"
+    },
+    {
+      "step": "no_crash",
+      "pass": true,
+      "detail": "no crash, hang or dialog"
+    },
+    {
+      "step": "log_errors",
+      "pass": true,
+      "detail": "0 ERROR line(s), limit 0"
+    }
+  ],
+  "samples": {
+    "module.exe": "0x400000",
+    "module.genesis": "0x10000000",
+    "victims.run1": [
+      [
+        "victim1",
+        1104.0,
+        -230.9,
+        -4976.0,
+        1104.0,
+        -4976.0
+      ],
+      [
+        "victim2",
+        1656.0,
+        -230.9,
+        -4968.0,
+        1656.0,
+        -4968.0
+      ]
+    ],
+    "victims.run2": [
+      [
+        "victim1",
+        1104.0,
+        -230.9,
+        -4976.0,
+        1104.0,
+        -4976.0
+      ],
+      [
+        "victim2",
+        1656.0,
+        -230.9,
+        -4968.0,
+        1656.0,
+        -4968.0
+      ]
+    ],
+    "victims.run3": [
+      [
+        "victim1",
+        1104.0,
+        -230.9,
+        -4976.0,
+        1104.0,
+        -4976.0
+      ],
+      [
+        "victim2",
+        1656.0,
+        -230.9,
+        -4968.0,
+        1656.0,
+        -4968.0
+      ]
+    ]
+  },
+  "video": "C:\\fdny-decomp\\core\\runs\\2026-10-24-203651-speedrun_static_spawns\\run.mp4"
+}

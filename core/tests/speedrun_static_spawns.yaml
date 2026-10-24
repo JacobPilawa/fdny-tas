@@ -10,8 +10,12 @@ pre_files:
   - {src: tests/data/fdcore_static_spawns.cfg, dst: FDNYCore.cfg}
 setup: load_training
 record: true
+# SpawnAtSpot has one owner, the entities service: its spot filter (speedrun) and its
+# victim observers (recorder, on the function's entry) run together here.
 steps:
-  - assert_log: {contains: "speedrun: victim-spawn hook at"}
+  - assert_log: {contains: "entities: victim-spot filter at"}
+  - assert_log: {contains: "speedrun: static spawns use the entities victim-spot filter"}
+  - assert_log: {contains: "module recorder: enabled"}
   - assert_log: {contains: "pinned to spot 0"}
   - run_setup: reload_training_3x
   - assert_victims_equal: {runs: [run1, run2, run3], tolerance: 0.5}
