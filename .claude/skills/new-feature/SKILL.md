@@ -14,7 +14,7 @@ and don't work around them; if a rule blocks a good design, stop and ask the own
 
 - Read `core/CLAUDE.md`, `core/DECISIONS.md` and the last few entries of `core/PROGRESS.md`.
 - **Check for something existing first** (owner rule). Look in `core/src/features/`, the
-  services in `core/src/`, the console commands (`core/KEY_SHEET.md`), and the old tools
+  services in `core/src/`, the console commands (the repository `README.md`, the key sheet), and the old tools
   (`asi/`, `tools/`). Extend what's there instead of adding a parallel path.
 - Decide the shape:
   - **Feature or service?** A feature uses services. If it needs a hook another piece
@@ -73,7 +73,7 @@ and don't work around them; if a rule blocks a good design, stop and ask the own
 
 - Evidence: `core/evidence/<name>/` (logs, screenshots, numbers; a README for anything
   investigative).
-- The player docs are the generated key sheet (`core/KEY_SHEET.md`, rewritten by every build
+- The player docs are the generated key sheet (the repository `README.md`, rewritten by every build
   and the pre-commit hook): check your feature's lines read well, and fix the help texts
   and `// User:` line in the code, never the sheet. A new service goes in `core/CLAUDE.md`'s
   "Core services" table.
