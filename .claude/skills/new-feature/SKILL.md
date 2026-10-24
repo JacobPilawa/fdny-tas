@@ -77,8 +77,8 @@ and don't work around them; if a rule blocks a good design, stop and ask the own
   and the pre-commit hook): check your feature's lines read well, and fix the help texts
   and `// User:` line in the code, never the sheet. A new service goes in `core/CLAUDE.md`'s
   "Core services" table.
-- On the version bump: `.\core\build.ps1 -Dist` (the `.asi` and its sheet to `dist/`), and
-  the release notes in `dist/CHANGES.md`.
+- On the version bump: the release notes under `## <version>` in the root `CHANGES.md`.
+  Merging the bump to `main` publishes the GitHub release (built by the workflow, D45).
 - `core/DECISIONS.md`: an entry for every non-obvious choice (what, why, rejected).
 - `core/PROGRESS.md`: `- <date> it<N>: **<version>** <what>; tests; evidence path.`
 - `core/VERSION`: bump minor for a feature, patch for a fix.
