@@ -1,4 +1,4 @@
-# live split: FDNY Firefighter autosplitters and their test
+# livesplit: FDNY Firefighter autosplitters and their test
 
 | File | Run type | Reset |
 |---|---|---|
@@ -9,6 +9,25 @@
 
 **Install:** in LiveSplit, Edit Layout -> + -> Control -> Scriptable Auto Splitter, and pick
 the file. Both need "Game Time" comparison for the load removal.
+
+**Check which file LiveSplit really loads.** The speedrun package's layouts point at
+`...\Speedrunning\Autosplitters\FDNY_ILs.asl`, the v1 file (and the IL layout's timer is on
+"Current Timing Method", i.e. Real Time). With v1 a stage splits only after the next stage has
+loaded, and on Real Time the timer runs through every load. These print
+`[FDNY] IL auto splitter v2.2` / `[FDNY] Rescue% auto splitter v2.2` when loaded (DebugView).
+
+## v2.2 (2026-10-24): stage split on the exit touch, whatever was played before
+
+| | v2.1 | v2.2 |
+|---|---|---|
+| Stage done | `pendingMap` (GameSession+0x660) **changed** to the next stage. pendingMap is only written by in-game level changes, so after a menu visit it can already hold that name (e.g. a RESTART, or subway A after an earlier A -> B): then nothing changes on the touch and the split fell back to the load start, about a frame late | the **level-change request byte** (GameSession+0x68C) goes 0 -> 1 with `pendingMap` = the next stage. Its only setter is `GameSession::RequestLevelChange` (the exit's `finalexitloadmap`); `RunFrame` clears it when the load starts. Set on every exit touch, whatever was played before. Fallback kept: the load start |
+| Load removal | gameState 2 / 3, after a win | also while the request byte is set: from the exit touch until the load starts the game is in one frozen frame (its clock does not move); measured 0.01-0.15 s, once **2.5 s** (cause not traced): v2.1 counted that in Game Time |
+| Poll rate | 15 ms (LiveSplit default) | 5 ms (`refreshRate = 200`): the byte can be set for as little as 12 ms |
+
+Also measured: after an in-game load, `mapName`'s level pointer (+0x688) points at the same
+session block as `pendingMap`, so on a stage loaded in-game (oil rig B/C/D, boat B, subway B)
+both names change together on the exit touch; on a stage started from the menu, `mapName`
+changes at the load start. Neither affects the splits.
 
 ## v2.1 (2026-10-23): what changed and why
 
@@ -28,7 +47,7 @@ checks every timer event against what the game itself did. No agent is involved:
 command, PASS or FAIL per case.
 
 ```
-cd "live split\test"
+cd livesplit\test
 .\build_host.ps1                                 # once (and after a LiveSplit update)
 python -I run_asl_tests.py                       # every case
 python -I run_asl_tests.py case_il_oilrig        # one case
@@ -59,8 +78,9 @@ python -I run_asl_tests.py --asl <file.asl>      # every case with another split
 | Case | Splitter | What happens | Expected |
 |---|---|---|---|
 | `case_il_bank` | IL | bank from the menu, won at the exit, results | start, 1 split, reset |
-| `case_il_oilrig` | IL | oil rig from the menu: A -> B; Esc, RESTART (back to A: the menu, then A again); A -> B, B -> C, C -> D; D won; results | 2 starts, 5 splits (the second A -> B on the fallback), 2 resets |
+| `case_il_oilrig` | IL | oil rig from the menu: A -> B; Esc, RESTART (back to A: the menu, then A again); A -> B, B -> C, C -> D; D won; results | 2 starts, 5 splits, 2 resets |
 | `case_il_subway` | IL | subway from the menu: A -> B; B won; results | start, 2 splits, reset |
+| `case_il_subway_restart` | IL | the order case: subway A -> B; Esc, RESTART; A -> B again with `subway_b` already pending; B won; results | 2 starts, 3 splits (both A -> B on the touch), 2 resets |
 | `case_rescue_bank_boat` | rescue% | the same save as bank: bank won, results, go!, boat A -> B, boat B won, results | start, 3 splits, no reset, paused between missions |
 
 **The checks** (`check.py`):
@@ -68,15 +88,24 @@ python -I run_asl_tests.py --asl <file.asl>      # every case with another split
 | Check | Passes when |
 |---|---|
 | start | the timer starts within 0.1 s of the first gameplay frame (gameState 3 -> 1); IL: again after each menu visit |
-| stage split | at most 0.5 s before that stage's load starts (the exit touch), or at most 0.05 s after it (the fallback) |
+| stage split | on the exit touch (the request byte 0 -> 1, within 0.05 s) and before the load starts |
 | win split | 0 to 70 ms of game clock (0-3 frames) after the game's win flag |
 | split count | one split per stage end and win, and the number the case expects |
-| Game Time | at every split, equal to the time actually played since the start (from each 3 -> 1 to that stage's load start or win), within 0.06 s + 0.02 s per stage |
+| Game Time | at every split, equal to the time actually played since the start (from each 3 -> 1 to that stage's exit touch or win), within 0.06 s + 0.02 s per stage |
 | reset | IL: within 0.5 s of each menu visit during a run (a reset changes no time); rescue%: never |
 | script errors | none |
 
-**Results (2026-10-23, VM):** v2.1 passes all four cases. The splits are on the exit touch
-or within 2 frames of the win, and Game Time is within 0.03 s of the time played.
+**Results (2026-10-24, VM):** v2.2 passes all five cases at 200 Hz. Every stage split is 1-12
+ms after the exit touch and before the load (also both restarted stages, and a 12 ms request
+pulse), wins within 2 frames of the win flag, and Game Time within 0.04 s of the time played.
+- v2.1 on `case_il_subway_restart`: both A -> B split 6 ms **after** the load started (the
+  fallback): fails "before the load".
+- A v2.2 build without the touch pause, on a run where the oil rig C exit froze the game for
+  2.5 s: the stall went into Game Time (oil rig D won at 65.26 s, played 62.59 s): fails Game
+  Time. Evidence: `core/evidence/autosplitter/livesplit_test/v22_*`, `v21_il_subway_restart`,
+  `v22pre_il_oilrig_stall`.
+
+**v2.1 (2026-10-23):** passed the four cases then.
 
 Run as a control, the original v1 IL splitter fails `case_il_oilrig`:
 - **Late stage splits.** The menu-started A -> B and the restarted A -> B split 0.49 s and
@@ -107,7 +136,8 @@ All paths are module-relative LiveSplit paths (exe base 0x400000):
 |---|---|---|
 | `gameState` | `0x102AAC, 0x6F0` | 0 menu, 2 loading, 3 level start, 1 playing |
 | `mapName` | `0x102AAC, 0x688, 0x0, 0xC` | the current level's map name |
-| `pendingMap` | `0x102AAC, 0x660, 0xC` | the map the last in-game level change went to |
+| `pendingMap` | `0x102AAC, 0x660, 0xC` | the map the last in-game level change went to (not written by menu starts) |
+| `levelChange` | `0x102AAC, 0x68C` | byte: 1 from an in-game level change request (the exit touch) until the load starts |
 | `*LevelEndSoundPlayed` | `0x103A78, 0x8, 0x0, <slot>, 0x0` | a level's end sound: 0 until it plays (slots: bank 0x158, bar 0xFC, gas 0xF0, mbase 0xC8, training 0x104, boat 0xBC, oil rig D 0xC4, subway 0x144). Sound handles: they change during other levels, so each is read only on its own map |
 
 ## Offline replay
@@ -116,7 +146,7 @@ All paths are module-relative LiveSplit paths (exe base 0x400000):
 (`core/probes/splitprobe.py`), ticking at LiveSplit's 15 ms:
 
 ```
-python -I "live split/asl_replay.py" core/evidence/autosplitter/split_chain.log --menu-start --from 44.19
+python -I livesplit/asl_replay.py core/evidence/autosplitter/split_chain.log --menu-start --from 44.19
 ```
 
 It is a model of the .asl files, not the files themselves. Change both together. The

@@ -20,7 +20,7 @@ $refs = @(
     "System.Windows.Forms.dll", "System.Drawing.dll", "Microsoft.CSharp.dll", "System.Core.dll"
 ) | ForEach-Object { "/r:`"$_`"" }
 $out = Join-Path $Local "AslHost.exe"
-# the paths have spaces ("live split", "FDNY SP 1.1"): quote each argument for csc
+# the paths have spaces ("FDNY SP 1.1"): quote each argument for csc
 & $Csc /nologo /target:exe /platform:x86 "/out:`"$out`"" @refs "`"$(Join-Path $PSScriptRoot 'AslHost.cs')`""
 if ($LASTEXITCODE) { throw "csc failed ($LASTEXITCODE)" }
 Write-Host "built $(Join-Path $Local 'AslHost.exe')"

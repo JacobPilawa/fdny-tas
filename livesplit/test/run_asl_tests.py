@@ -13,7 +13,7 @@ python -I run_asl_tests.py [case names or paths ...] [--asl-dir DIR] [--asl FILE
 
 Needs: the VM setup (the game, Python with pymem, the Debug FDNYCore build) and
 AslHost.exe (build_host.ps1). Each case's `asl:` names the splitter file in --asl-dir
-(default: this folder's parent, `live split/`); --asl runs every case with one file
+(default: this folder's parent, `livesplit/`); --asl runs every case with one file
 instead (e.g. an older splitter, to see what the cases catch).
 """
 import argparse

@@ -5,12 +5,15 @@ game's frame clock (ms).
 What the game did -> what the timer must do:
   - gameplay starts (gameState 3 -> 1), first time -> the timer starts, at that tick;
   - a stage ends: its in-game load starts (gameState 1 -> 2) with the next stage pending
-    -> one split, on the exit touch, which is before the load starts (at most 0.5 s);
+    -> one split, on the exit touch, which is before the load starts;
+    v2.2: the touch is the level-change request byte going 0 -> 1, and the split must be
+    on it (within TOUCH_LAG) and before the load starts, also when the next stage's name
+    was already pending;
   - a level is won: the mission result goes 0 -> 1 -> one split, 0 to 3 frames later
     (the end sound follows the win flag by 0-2 frames);
   - the menu (gameState -> 0) -> IL: a reset; rescue%: no reset;
   - Game Time at each split = the time spent playing so far: from each 3 -> 1 to that
-    level's or stage's end (its load start, its win, or the menu).
+    level's or stage's end (its exit touch, its load start, its win, or the menu).
     Loads, results screens and menus are not counted.
 
 python -I check.py <events.log> <host.log> [--reset yes|no] [--splits N]
@@ -23,8 +26,8 @@ import sys
 NEXT = {"oil_rig_a": "oil_rig_b", "oil_rig_b": "oil_rig_c", "oil_rig_c": "oil_rig_d",
         "boat_a": "boat_b", "subway_a": "subway_b"}
 LINE = re.compile(r"^\s*([\d.]+) clock=(\S+) (.*)$")
-STAGE_BEFORE_LOAD = 0.5  # s: a stage split must come at most this long before its load starts
 STAGE_AFTER_LOAD = 0.05  # s: or, the fallback (a retried stage), on the tick that sees the load start
+TOUCH_LAG = 0.05         # s: a stage split must follow the exit touch (request byte 0 -> 1) within this
 WIN_FRAMES_MS = 70       # game-clock ms: up to 3 frames at ~43+ fps after the win flag
 START_LAG = 0.1          # s: the timer start must follow the first gameplay frame within this
 RESET_LAG = 0.5          # s: a reset clears the timer and changes no time; seen 0.16 s
@@ -49,6 +52,7 @@ def game_truth(events):
     """Expected timer events and the play intervals, from the game's own values."""
     gs, mp, pend, playing = None, None, None, None  # playing: the map at the last 3 -> 1
     expected, intervals, play_start, menu = [], [], None, []
+    touch = None  # the last level-change request (byte 0 -> 1), until its load starts
     for t, clock, msg in events:
         m = re.match(r"GAME (\w+): (.*) -> (.*)$", msg)
         if not m:
@@ -65,7 +69,9 @@ def game_truth(events):
                 # the current map's name can already have changed (a stage loaded by an
                 # earlier exit: it changes on the touch frame), so use the map played
                 if new == 2 and NEXT.get(playing) == lo(pend):
-                    expected.append({"kind": "stage", "t": t, "clock": clock, "map": playing, "next": lo(pend)})
+                    expected.append({"kind": "stage", "t": t, "clock": clock, "map": playing, "next": lo(pend),
+                                     "touch": touch})
+                touch = None
             if new == 0:
                 menu.append(t)
             gs = new
@@ -73,6 +79,14 @@ def game_truth(events):
             mp = new
         elif key == "pendingMap":
             pend = new
+        elif key == "levelChange":
+            if not old and new:
+                touch = t
+                # v2.2: the timer pauses from the touch (the game clock is frozen until the
+                # load starts; one stall measured 2.5 s): the play interval ends here
+                if play_start is not None and gs == 1:
+                    intervals.append((play_start, t))
+                    play_start = None
         elif key == "result":
             if old == 0 and new == 1 and gs == 1:
                 if play_start is not None:
@@ -150,10 +164,22 @@ def check(events_path, host_path, reset, n_splits):
             continue
         if e["kind"] == "stage":
             dt = e["t"] - s["t"]
-            ok = -STAGE_AFTER_LOAD <= dt <= STAGE_BEFORE_LOAD
+            # no upper bound: the touch frame can stall for seconds (2.5 s seen) before the
+            # load starts; "on the touch" below is the precise check
+            ok = dt >= -STAGE_AFTER_LOAD
             when = f"{dt:.3f} s before" if dt >= 0 else f"{-dt:.3f} s after"
-            detail = (f"split {when} the load started (allowed {STAGE_BEFORE_LOAD} s before to "
-                      f"{STAGE_AFTER_LOAD} s after)")
+            detail = f"split {when} the load started (allowed: any time before, or {STAGE_AFTER_LOAD} s after)"
+            # v2.2: on the touch means before the load, every time (the load-start fallback is
+            # only a safety net; v2.1 used it for a stage whose name was already pending)
+            rec(f"split {i + 1} ({label}) before the load", dt > 0,
+                f"split {when} the load started (must be before)")
+            if e.get("touch") is not None:
+                dtouch = s["t"] - e["touch"]
+                rec(f"split {i + 1} ({label}) on the touch", -0.02 <= dtouch <= TOUCH_LAG,
+                    f"split {dtouch:+.3f} s after the exit touch (request byte 0 -> 1; allowed -0.02 to "
+                    f"+{TOUCH_LAG}); the byte stayed set {e['t'] - e['touch']:.3f} s, until the load started")
+            else:
+                rec(f"split {i + 1} ({label}) on the touch", False, "no request byte 0 -> 1 seen before this load")
         else:
             dc = None if s["clock"] is None or e["clock"] is None else s["clock"] - e["clock"]
             ok = dc is not None and 0 <= dc <= WIN_FRAMES_MS

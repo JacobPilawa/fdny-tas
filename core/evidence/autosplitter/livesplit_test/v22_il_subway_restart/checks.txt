@@ -1,0 +1,19 @@
+﻿  [PASS] script loaded: HOST loaded FDNY_ILs.asl, 30 segments, refresh 200 Hz
+  [PASS] no script errors: none
+  [PASS] start count: game: 2 run start(s); timer: 2 start(s)
+  [PASS] start 1: gameplay began 52369.850; timer start 52369.866 (+0.016 s, allowed 0.1)
+  [PASS] start 2: gameplay began 52414.441; timer start 52414.442 (+0.001 s, allowed 0.1)
+  [PASS] split count: game: 3 stage end(s)/win(s) (case expects 3); timer: 3 split(s)
+  [PASS] split 1 (subway_a -> subway_b) before the load: split 0.046 s before the load started (must be before)
+  [PASS] split 1 (subway_a -> subway_b) on the touch: split +0.012 s after the exit touch (request byte 0 -> 1; allowed -0.02 to +0.05); the byte stayed set 0.058 s, until the load started
+  [PASS] split 1 (subway_a -> subway_b): split 0.046 s before the load started (allowed: any time before, or 0.05 s after)
+  [PASS] split 1 game time: timer 26.4249 s, played 26.435 s over 1 interval(s) (tolerance 0.08)
+  [PASS] split 2 (subway_a -> subway_b) before the load: split 0.015 s before the load started (must be before)
+  [PASS] split 2 (subway_a -> subway_b) on the touch: split +0.003 s after the exit touch (request byte 0 -> 1; allowed -0.02 to +0.05); the byte stayed set 0.017 s, until the load started
+  [PASS] split 2 (subway_a -> subway_b): split 0.015 s before the load started (allowed: any time before, or 0.05 s after)
+  [PASS] split 2 game time: timer 26.6154 s, played 26.614 s over 1 interval(s) (tolerance 0.08)
+  [PASS] split 3 (subway_b won): split 31 ms (game clock) after the win flag (allowed 0-70)
+  [PASS] split 3 game time: timer 38.5299 s, played 38.491 s over 2 interval(s) (tolerance 0.10)
+  [PASS] reset count: game: 2 menu visit(s) during a run; timer: 2 reset(s)
+  [PASS] reset 1: menu at 52409.128; reset at 52409.142 (+0.014 s, allowed 0.5)
+  [PASS] reset 2: menu at 52459.817; reset at 52459.821 (+0.004 s, allowed 0.5)

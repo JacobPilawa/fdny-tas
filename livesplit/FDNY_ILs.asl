@@ -1,19 +1,23 @@
 /*
  * ==============================================================================
- * FDNY FIREFIGHTER - IL AUTO SPLITTER (ALL RESCUE MAPS)            v2.1, 2026-10-23
+ * FDNY FIREFIGHTER - IL AUTO SPLITTER (ALL RESCUE MAPS)            v2.2, 2026-10-24
  * ==============================================================================
  * Resets any time gameState is 0 (game in menu). INTENDED FOR IL RUNS ONLY.
  *
  * How it detects things (verified live on the game, core/evidence/autosplitter/):
  *
  *  STAGE DONE (oil rig A/B/C, boat A, subway A): touching the stage exit runs the
- *    script verb `finalexitloadmap <next>`, which stores the next map's name in the
- *    game session (GameSession+0x660, "pendingMap") on that exact frame and keeps it
- *    there. The load starts one frame later. The split fires when pendingMap changes
- *    to the next stage of the map being played. 
- *    Fallback: if pendingMap already held that name (a stage retried after an earlier
- *    exit), the split fires when the in-game load starts (gameState 1 -> 2) with
- *    pendingMap = next stage.
+ *    script verb `finalexitloadmap <next>` -> GameSession::RequestLevelChange, which on
+ *    that exact frame sets the level-change request byte (GameSession+0x68C, its only
+ *    setter) and writes the next map's name (GameSession+0x660, "pendingMap"). The byte
+ *    is cleared when the load starts. The split fires when the byte goes 0 -> 1 with
+ *    pendingMap = the next stage of the map being played: on the touch, whatever was
+ *    played before (v2.1 waited for pendingMap to CHANGE, so a stage whose name was
+ *    already there from an earlier exit split late, at the load start).
+ *    Fallback (a poll that misses the byte): the in-game load starts (gameState 1 -> 2)
+ *    with pendingMap = next stage.
+ *    pendingMap is only written by in-game level changes: a level started from the
+ *    menu leaves the old name there, which is why it is only read with the byte.
  *
  *  LEVEL WON (every map, including the last stage of boat / subway / oil rig): the
  *    level's end sound starts (its slot goes 0 -> nonzero), the v1 method, unchanged.
@@ -22,7 +26,9 @@
  *    own map the slot stays 0 until the win. The slots do change during other levels,
  *    so each is only read on its own map.
  *
- *  LOADS: gameState 2 = loading, 3 = level start; gameplay resumes at 3 -> 1. After a
+ *  LOADS: the exit touch until the load starts (the request byte set: the game clock is
+ *    frozen), gameState 2 = loading, 3 = level start; gameplay
+ *    resumes at 3 -> 1. After a
  *    win the timer stays paused until the next level is playing.
  * ==============================================================================
  */
@@ -32,6 +38,7 @@ state("FDNYFirefighter")
     int gameState : 0x00102AAC, 0x6F0;
     string16 mapName : 0x00102AAC, 0x688, 0x0, 0xC;
     string16 pendingMap : 0x00102AAC, 0x660, 0xC;     // next map of the last in-game level change
+    byte levelChange : 0x00102AAC, 0x68C;             // 1 from an in-game level change request (exit touch) to the load start
     int totalVictims : 0x00103A78, 0x30, 0x3528;
     int rescuedVictims : 0x00103A78, 0x30, 0x352C;
 
@@ -50,6 +57,9 @@ state("FDNYFirefighter")
 
 startup
 {
+    // Poll every 5 ms: the level-change request byte is set for as little as 13 ms (one frame,
+    // on a stage started from the menu), which LiveSplit's default 15 ms can step over.
+    refreshRate = 200;
     // the stage that follows each staged map (finalexitloadmap targets in the .bsp scripts)
     vars.nextStage = new Dictionary<string, string> {
         { "oil_rig_a", "oil_rig_b" }, { "oil_rig_b", "oil_rig_c" }, { "oil_rig_c", "oil_rig_d" },
@@ -59,7 +69,7 @@ startup
     vars.inLevel = false;     // playing since the last 3 -> 1, no menu since
     vars.stageSplit = false;  // this stage already split
     vars.levelDone = false;   // won: paused until the next level is playing
-    print("[FDNY] IL auto splitter");
+    print("[FDNY] IL auto splitter v2.2");
 }
 
 init
@@ -74,7 +84,6 @@ update
 {
     vars.map = (current.mapName ?? "").ToLower().Trim();
     vars.pending = (current.pendingMap ?? "").ToLower().Trim();
-    vars.oldPending = (old.pendingMap ?? "").ToLower().Trim();
 
     // gameplay (re)starts: a level or stage finished loading
     if (old.gameState == 3 && current.gameState == 1)
@@ -105,14 +114,14 @@ split
     string next;
     bool staged = vars.nextStage.TryGetValue((string)vars.levelMap, out next);
 
-    // stage exit touched: pendingMap became the next stage
-    if (staged && !vars.stageSplit && vars.pending == next && vars.pending != vars.oldPending)
+    // stage exit touched: a level change to the next stage was just requested
+    if (staged && !vars.stageSplit && old.levelChange == 0 && current.levelChange != 0 && vars.pending == next)
     {
         print(String.Format("[FDNY SPLIT] stage '{0}' -> '{1}' (exit touched)", vars.levelMap, next));
         vars.stageSplit = true;
         return true;
     }
-    // fallback: the in-game load of the next stage starts (pendingMap already held its name)
+    // fallback: the in-game load of the next stage starts (a poll missed the request byte)
     if (staged && !vars.stageSplit && vars.inLevel && old.gameState == 1 && current.gameState == 2 &&
         vars.pending == next)
     {
@@ -142,7 +151,9 @@ split
 
 isLoading
 {
-    return vars.levelDone || current.gameState == 2 || current.gameState == 3;
+    // the exit touch until the load starts: one game frame (the game clock does not move),
+    // up to 2.5 s of real time measured (cause not traced)
+    return vars.levelDone || current.levelChange != 0 || current.gameState == 2 || current.gameState == 3;
 }
 
 reset

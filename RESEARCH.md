@@ -1890,7 +1890,7 @@ mid-play.
 ### 2026-10-23 -- autosplitter: how staged levels and wins look in memory
 Owner report: the LiveSplit splitters split staged levels (boat, subway, oil rig) late.
 Evidence and live traces: `core/evidence/autosplitter/`. New splitters:
-`live split/` (v2, then v2.1; known-good test in `live split/test/`).
+`livesplit/` (v2, then v2.1; known-good test in `livesplit/test/`).
 
 **Stage exit.**
 - The exit trigger's `touch: tell player (finalexitloadmap <next>)` runs
@@ -1964,3 +1964,13 @@ game.
 | Ghost (firefighter model) | MODERATE |
 
 Ghosts need no determinism.
+
+**2026-10-24 addendum (autosplitter v2.2):**
+- `GameSession+0x68C` is the level-change request byte: set only by RequestLevelChange,
+  cleared by RunFrame before LoadLevel.
+- Menu starts never write `pendingMap` (+0x660).
+- After an in-game load, `+0x688` points at the +0x660 block, so the current and pending
+  names are the same string until the next menu start.
+- The exit-touch frame can stall (2.5 s seen once) with the game clock frozen (cause not
+  traced).
+- `core/evidence/autosplitter/README.md`, "v2.2".

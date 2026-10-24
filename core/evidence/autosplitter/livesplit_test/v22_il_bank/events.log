@@ -1,0 +1,17 @@
+  52049.7107 clock=None attached
+  52065.7839 clock=0 GAME gameState: 0 -> 2
+  52065.7839 clock=0 GAME map: None -> 'bank'
+  52065.8760 clock=89 GAME result: None -> 0
+  52065.8760 clock=89 GAME total: None -> -1
+  52065.8761 clock=89 GAME delivered: None -> 0
+  52065.8781 clock=89 GAME total: -1 -> 6
+  52065.9167 clock=89 GAME total: 6 -> -1
+  52066.1475 clock=530 GAME total: -1 -> 6
+  52066.1819 clock=566 GAME gameState: 2 -> 3
+  52066.4588 clock=1020 GAME gameState: 3 -> 1
+  52069.4608 clock=4014 INPUT delivered := total (6) on bank
+  52069.4627 clock=4014 GAME delivered: 0 -> 6
+  52093.2240 clock=27796 GAME result: 0 -> 1
+  52099.2869 clock=16615 GAME gameState: 1 -> 0
+  52116.9430 clock=None game exited
+  52116.9438 clock=None done

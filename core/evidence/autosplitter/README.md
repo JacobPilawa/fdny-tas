@@ -5,8 +5,8 @@ rig) split late: the timer ran through the load and split when the next stage wa
 Single-stage levels were fine. Owner lead: oil_rig_A's `S_Script01` runs
 `touch: tell player (finalexitloadmap oil_rig_b)`.
 
-**Verdict: stage splits rewritten** (`live split/FDNY_ILs.asl`, `FDNY_rescue%.asl`, v2.1;
-checked by the known-good test in `live split/test/`, results below):
+**Verdict: stage splits rewritten** (`livesplit/FDNY_ILs.asl`, `FDNY_rescue%.asl`, v2.1;
+checked by the known-good test in `livesplit/test/`, results below):
 - **Stage done:** the next map's name appearing in the game session (GameSession+0x660),
   on the exit-touch frame.
 - **Level won:** the owner's v1 end-sound slots, kept. v2 had switched to the mission result
@@ -83,7 +83,7 @@ can, and logs every change.
 
 ## Replay: old vs new logic over the traces (`replay.txt`)
 
-`live split/asl_replay.py` runs a model of both scripts' logic tick by tick.
+`livesplit/asl_replay.py` runs a model of both scripts' logic tick by tick.
 - `--menu-start` models the first stage started from the menu. The traces' levels came from
   the console; the model holds `mapName` until the load starts, as the code above does.
 - At the time the menu start of a staged level couldn't be reproduced on the VM (the
@@ -99,10 +99,10 @@ The replay ticks at 15 ms between changes, like LiveSplit's ASL default.
 
 ## Known-good test: the real .asl files in the real game (`livesplit_test/`)
 
-`live split/test/` (how it works: `live split/README.md`). LiveSplit's own ASL engine runs
+`livesplit/test/` (how it works: `livesplit/README.md`). LiveSplit's own ASL engine runs
 the .asl beside scripted runs in the game, and `check.py` compares each timer event with
 the game's own values. The menu starts use test career saves whose next mission is the
-level (`live split/test/saves/`).
+level (`livesplit/test/saves/`).
 
 | Run | Splitter | Result |
 |---|---|---|
@@ -124,3 +124,33 @@ Stein", at Training). After these probes `load_training` started other missions.
 - The harness now snapshots `Saves\` before every test and restores it after (it prints
   which files the game rewrote).
 - No committed test result ran on the moved save.
+
+## v2.2 (2026-10-24): the level-change request byte
+
+Owner, 2026-10-24: a detection that depends on which levels were played before isn't good
+enough. Cases: from the menu, `pendingMap` keeps the last in-game target (oil rig C to
+subway A: still `oil_rig_c`), so a stage whose next name is already there (a RESTART, or
+subway A after an earlier A -> B) changes nothing on its exit touch.
+
+**The byte.** `GameSession+0x68C` (`re_flag68c.py` lists every access in the exe):
+- set to 1 only by `GameSession::RequestLevelChange` (0x0042A269);
+- cleared by `GameSession::RunFrame` (0x0042AEB4) right before it calls `LoadLevel`;
+- zeroed by `GameSession::Init`.
+
+So it goes 0 -> 1 on every exit touch, whatever was played before, and `pendingMap` read
+with it is always the fresh target. It stays set 0.012-0.152 s in the runs, and once 2.499 s.
+That time is the rest of the touch frame: the game clock does not move (oil rig C, clock
+104217 throughout the 2.5 s).
+
+**mapName.** After an in-game load, `mapName`'s pointer (+0x688) points at the session's own
++0x660 block, so on a stage loaded in-game both names change together on the touch (owner's
+observation, confirmed in `livesplit_test/v22pre_il_oilrig_stall/events.log`). On a stage
+started from the menu, `mapName` changes at the load start.
+
+**v2.2:**
+- splits on the byte's 0 -> 1 with `pendingMap` = next stage;
+- pauses while the byte is set;
+- polls at 200 Hz.
+
+Test results: `livesplit/README.md` "Results"; logs in `livesplit_test/v22_*`, the v2.1
+control `v21_il_subway_restart`, and the stall run `v22pre_il_oilrig_stall`.
