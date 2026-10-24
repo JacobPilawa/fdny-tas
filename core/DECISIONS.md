@@ -29,6 +29,11 @@ later session might "simplify" away; change one only with the owner's approval
   available in both profiles. Default output is `Recordings` beside the ASI.
   A standalone `FDNYRecorder.asi` disables this feature to prevent duplicate capture.
 
+- **D44 `entities` owns all of SpawnAtSpot, including the spot filter** (owner 2026-10-24: "Do 1 and 2"). Speedrun used to patch 0x0045D717 inside the function whose entry `entities` hooks (D3: one owner per function).
+  - **What:** `entities::FilterVictimSpot(fn)` installs the trampoline before the floor snap and holds one filter. It must be called from a module's early step, since the patch goes in at DllMain, before any level exists. Speedrun calls it and keeps its own defer check for FDNYDeterministic / FDNYVictimSpawns (D5).
+  - **One filter, not a list:** two features moving the same victim would need an ordering rule. A second request fails, like camera's FOV filter.
+  - **Rejected:** routing the pin through the entry hook's spawn observer. That runs after SpawnAtSpot returns, so after the floor snap, and the moved victim would float or sink.
+
 - **D4 Every address lives in `addresses.json`** (rule R4). It is versioned by exe + Genesis SHA-256, and every entry is signature-checked at startup. A bad signature disables only what needs that entry, and the game runs on. This replaced raw addresses so an unknown game version degrades instead of crashing.
 - **D5 Defer to other mods that own a patch site** (alttabfix, FOV fix, FDNYDeterministic). Owner: the old tools stay installed. The core detects an occupied site and leaves it alone rather than double-patching.
 - **D6 Ghidra work goes through subagents**, read-only; the primary session never calls GhidrAssist MCP. Project rule (memory: loop owns Ghidra writes).

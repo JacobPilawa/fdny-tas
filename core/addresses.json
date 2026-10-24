@@ -854,7 +854,7 @@
             "ref": "first 16 bytes of the function at 0x0045d717"
           },
           "ghidra": "VictimRescueEnt::SpawnAtSpot 0x0045D5B0: 0x0045D717 mov ecx,ebp; call ModelEntity::SnapToFloor 0x0049DA00 (EBP = victim this, spot coords already copied to +0x4C..+0x54); resume 0x0045D71E. Same site asi/FDNYDeterministic hooks (verified live 2026-10-21)",
-          "note": "7 bytes replaced by jmp trampoline + 2 NOP (speedrun module, DllMain)"
+          "note": "7 bytes replaced by jmp trampoline + 2 NOP (entities spot filter, installed from speedrun's early step)"
         },
         "game.snap_to_floor": {
           "module": "exe",
@@ -868,7 +868,7 @@
             "ref": "first 16 bytes of the function at 0x0049da00"
           },
           "ghidra": "ModelEntity::SnapToFloor 0x0049DA00 (thiscall ECX=entity)",
-          "note": "called from the spawn trampoline"
+          "note": "called from the entities spot-filter trampoline"
         },
         "patch.rescuebot_trystart": {
           "module": "exe",
@@ -1932,7 +1932,7 @@
             "ref": "First 16 bytes of the callback."
           },
           "ghidra": "FDNY Recorder 1.1 lifecycle callback.",
-          "note": "Victim SpawnAtSpot, no stack arguments; entities observers."
+          "note": "Victim SpawnAtSpot, no stack arguments; entities observers (the same service owns the spot filter inside it, patch.victim_spawn)."
         },
         "victim.root_update": {
           "module": "exe",

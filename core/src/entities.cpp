@@ -56,7 +56,62 @@ uintptr_t __fastcall VictimDestroy(void* p, void* edx, unsigned flags) {
     Notify(g_victims, g_nVictims, 2, p);
     return g_victimDestroy(p, edx, flags);
 }
+
+// Spot filter: SpawnAtSpot has copied the spot to the victim and, at
+// patch_victim_spawn, does `mov ecx,ebp; call SnapToFloor` (EBP = victim). Those
+// 7 bytes become a jmp to a trampoline that calls the filter, then runs them.
+EntityFn g_spotFilter = nullptr;
+uint8_t* g_spotTramp = nullptr;
+
+extern "C" void __cdecl FdcoreVictimSpot(void* victim) { g_spotFilter(victim); }
 } // namespace
+
+bool FilterVictimSpot(EntityFn filter) {
+    if (g_spotFilter || !filter) return false;
+    uintptr_t site = addr::EarlyCodeAddress(addr::Id::patch_victim_spawn);
+    uintptr_t snap = addr::EarlyCodeAddress(addr::Id::game_snap_to_floor);
+    if (!site || !snap) {
+        log::Warn("entities: victim-spawn site doesn't match (already hooked by another mod, e.g. "
+                  "FDNYDeterministic.asi?); no spot filter");
+        return false;
+    }
+    g_spotTramp = static_cast<uint8_t*>(VirtualAlloc(nullptr, 0x40, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE));
+    if (!g_spotTramp) return false;
+    g_spotFilter = filter;  // before the patch makes the trampoline reachable
+    uint8_t* t = g_spotTramp;
+    int k = 0;
+    auto put4 = [&](uint32_t v) {
+        for (int i = 0; i < 4; ++i) t[k++] = static_cast<uint8_t>(v >> (8 * i));
+    };
+    t[k++] = 0x9C;  // pushfd
+    t[k++] = 0x60;  // pushad
+    t[k++] = 0x55;  // push ebp (victim this)
+    t[k++] = 0xE8;  // call FdcoreVictimSpot
+    put4(reinterpret_cast<uintptr_t>(&FdcoreVictimSpot) - (reinterpret_cast<uintptr_t>(t) + k + 4));
+    t[k++] = 0x83, t[k++] = 0xC4, t[k++] = 0x04;  // add esp,4 (cdecl)
+    t[k++] = 0x61;                                // popad
+    t[k++] = 0x9D;                                // popfd
+    t[k++] = 0x8B, t[k++] = 0xCD;                 // mov ecx,ebp   (displaced)
+    t[k++] = 0xE8;                                // call SnapToFloor (displaced)
+    put4(snap - (reinterpret_cast<uintptr_t>(t) + k + 4));
+    t[k++] = 0xE9;  // jmp back after the 7 displaced bytes
+    put4(site + 7 - (reinterpret_cast<uintptr_t>(t) + k + 4));
+
+    uint8_t patch[7] = {0xE9, 0, 0, 0, 0, 0x90, 0x90};
+    uint32_t rel = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(g_spotTramp) - (site + 5));
+    for (int i = 0; i < 4; ++i) patch[1 + i] = static_cast<uint8_t>(rel >> (8 * i));
+    DWORD old = 0;
+    if (!VirtualProtect(reinterpret_cast<void*>(site), 7, PAGE_EXECUTE_READWRITE, &old)) {
+        g_spotFilter = nullptr;
+        return false;
+    }
+    for (int i = 0; i < 7; ++i) reinterpret_cast<volatile uint8_t*>(site)[i] = patch[i];
+    VirtualProtect(reinterpret_cast<void*>(site), 7, old, &old);
+    FlushInstructionCache(GetCurrentProcess(), reinterpret_cast<void*>(site), 7);
+    log::Info("entities: victim-spot filter at %08lx -> trampoline %08lx", static_cast<unsigned long>(site),
+              reinterpret_cast<unsigned long>(g_spotTramp));
+    return true;
+}
 
 bool ObservePlayer(EntityFn initialized, EntityFn updated) {
     if (g_nPlayers == kMaxListeners) return false;

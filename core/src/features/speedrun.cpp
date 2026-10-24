@@ -3,10 +3,10 @@
 // speedrun module (backlog item 8): port of asi/FDNYDeterministic.
 //
 // Static victim spawns: VictimRescueEnt::SpawnAtSpot copies the RNG-chosen
-// spot into the victim (+0x4C..+0x54), then at 0x0045D717 calls SnapToFloor
-// (mov ecx,ebp; call). A trampoline there (installed in DllMain, before any
-// level exists) lets us substitute the configured spot first; the game then
-// floor-snaps it. The RNG stream is untouched; facing follows the RNG pick.
+// spot into the victim (+0x4C..+0x54), then floor-snaps it. The entities
+// service's spot filter (installed in our early step, before any level exists)
+// lets us substitute the configured spot in between; the game then floor-snaps
+// it. The RNG stream is untouched; facing follows the RNG pick.
 // Victim ordinals reset after a >2 s gap between spawns (every (re)load).
 //
 // RescueBot: TryStartRescue first byte 6A -> C3 (no claims) and the ctor's
@@ -19,6 +19,7 @@
 #include "addr.h"
 #include "cmd.h"
 #include "console.h"
+#include "entities.h"
 #include "log.h"
 #include "modules.h"
 
@@ -28,7 +29,6 @@ namespace {
 using addr::Id;
 
 bool g_hooked = false;
-uint8_t* g_tramp = nullptr;
 const char* g_deferTo = nullptr;  // an installed plugin this module replaces
 
 // --- variables -----------------------------------------------------------------
@@ -145,7 +145,8 @@ DWORD g_lastTick = 0;
 int g_ordinal = 0;
 char g_map[24];
 
-extern "C" void __cdecl FdcoreOnVictimSpawn(char* victim) {
+void OnVictimSpot(void* entity) {
+    char* victim = static_cast<char*>(entity);
     DWORD now = GetTickCount();
     if (now - g_lastTick > 2000) {  // a quiet gap = a new (re)load
         g_ordinal = 0;
@@ -222,46 +223,10 @@ bool ApplyEarlyPatch(const char* gameDir) {
             return false;
         }
     }
-    uintptr_t site = addr::EarlyCodeAddress(Id::patch_victim_spawn);
-    uintptr_t snap = addr::EarlyCodeAddress(Id::game_snap_to_floor);
-    if (!site || !snap) {
-        log::Warn("speedrun: victim-spawn site doesn't match (already hooked by another mod, e.g. "
-                  "FDNYDeterministic.asi?); static spawns inactive");
-        return false;
-    }
-    g_tramp = static_cast<uint8_t*>(VirtualAlloc(nullptr, 0x40, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE));
-    if (!g_tramp) return false;
-    uint8_t* t = g_tramp;
-    int k = 0;
-    auto put4 = [&](uint32_t v) {
-        for (int i = 0; i < 4; ++i) t[k++] = static_cast<uint8_t>(v >> (8 * i));
-    };
-    t[k++] = 0x9C;  // pushfd
-    t[k++] = 0x60;  // pushad
-    t[k++] = 0x55;  // push ebp (victim this)
-    t[k++] = 0xE8;  // call FdcoreOnVictimSpawn
-    put4(reinterpret_cast<uintptr_t>(&FdcoreOnVictimSpawn) - (reinterpret_cast<uintptr_t>(t) + k + 4));
-    t[k++] = 0x83, t[k++] = 0xC4, t[k++] = 0x04;  // add esp,4 (cdecl)
-    t[k++] = 0x61;                                // popad
-    t[k++] = 0x9D;                                // popfd
-    t[k++] = 0x8B, t[k++] = 0xCD;                 // mov ecx,ebp   (displaced)
-    t[k++] = 0xE8;                                // call SnapToFloor (displaced)
-    put4(snap - (reinterpret_cast<uintptr_t>(t) + k + 4));
-    t[k++] = 0xE9;  // jmp back after the 7 displaced bytes
-    put4(site + 7 - (reinterpret_cast<uintptr_t>(t) + k + 4));
-
-    uint8_t patch[7] = {0xE9, 0, 0, 0, 0, 0x90, 0x90};
-    uint32_t rel = static_cast<uint32_t>(reinterpret_cast<uintptr_t>(g_tramp) - (site + 5));
-    for (int i = 0; i < 4; ++i) patch[1 + i] = static_cast<uint8_t>(rel >> (8 * i));
-    DWORD old = 0;
-    if (!VirtualProtect(reinterpret_cast<void*>(site), 7, PAGE_EXECUTE_READWRITE, &old)) return false;
-    for (int i = 0; i < 7; ++i) reinterpret_cast<volatile uint8_t*>(site)[i] = patch[i];
-    VirtualProtect(reinterpret_cast<void*>(site), 7, old, &old);
-    FlushInstructionCache(GetCurrentProcess(), reinterpret_cast<void*>(site), 7);
-    g_hooked = true;
-    log::Info("speedrun: victim-spawn hook at %08lx -> trampoline %08lx", static_cast<unsigned long>(site),
-              reinterpret_cast<unsigned long>(g_tramp));
-    return true;
+    g_hooked = entities::FilterVictimSpot(OnVictimSpot);
+    if (!g_hooked) log::Warn("speedrun: no victim-spot filter (see the entities line); static spawns inactive");
+    else log::Info("speedrun: static spawns use the entities victim-spot filter");
+    return g_hooked;
 }
 
 bool Init() {
