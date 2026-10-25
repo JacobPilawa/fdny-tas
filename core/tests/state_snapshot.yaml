@@ -4,6 +4,10 @@ name: state_snapshot
 # reads. Compared while the player is idle (exact for static fields; the
 # mission timer counts down, so +/-0.5 s), in Training and in bank (6
 # victims, 84 FireRescueEnt fires, RescueBot shipped ON).
+# Each comparison runs with the simulation paused (Debug pipe `pause on`, the pause
+# service): the snapshot is still taken every frame, but nothing moves between it and
+# the harness's reads. Before, a fire spreading or a roaming bank victim moving between
+# the two reads failed the test (suite review, 2026-10-24). The fields compared are the same.
 pre_files:
   - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
   - {src: null, dst: FDNYCore.cfg}
@@ -13,16 +17,35 @@ record: true
 steps:
   - assert_log: {contains: "state: snapshot ready"}
   - wait_s: 1
+  - pipe: "pause on"
+  - wait_pipe: {cmd: pause, key: active, equals: 1, timeout: 3}
+  - wait_s: 0.3
   - assert_snapshot_matches: {}
+  - pipe: "pause off"
+  - wait_pipe: {cmd: pause, key: active, equals: 0, timeout: 3}
   - key: {key: w, hold: 1.5}
   - wait_s: 1.5
+  - pipe: "pause on"
+  - wait_pipe: {cmd: pause, key: active, equals: 1, timeout: 3}
+  - wait_s: 0.3
   - assert_snapshot_matches: {}
+  - pipe: "pause off"
+  - wait_pipe: {cmd: pause, key: active, equals: 0, timeout: 3}
   - console: "loadmap bank"
   - wait_s: 40
   - assert_mem: {name: game.map_name, equals: bank}
+  - pipe: "pause on"
+  - wait_pipe: {cmd: pause, key: active, equals: 1, timeout: 3}
+  - wait_s: 0.3
   - assert_snapshot_matches: {}
+  - pipe: "pause off"
+  - wait_pipe: {cmd: pause, key: active, equals: 0, timeout: 3}
   - wait_s: 2
+  - pipe: "pause on"
+  - wait_pipe: {cmd: pause, key: active, equals: 1, timeout: 3}
+  - wait_s: 0.3
   - assert_snapshot_matches: {}
+  - pipe: "pause off"
 expect:
   no_crash: true
   log_errors: 0
