@@ -14,8 +14,7 @@ steps:
   - assert_log: {contains: "world override available"}
   - console: "fd_watermark 0"
   - console: "fd_rescuebot 0"
-  - console: "loadmap bank"
-  - wait_s: 40
+  - loadmap: bank
   - assert_pipe_stat: {cmd: pause, key: active, equals: 0}
   - assert_pipe_stat: {cmd: pause, key: hook, equals: 0}
   - assert_pipe_stat: {cmd: camera_override, key: have_last, equals: 1}

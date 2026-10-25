@@ -26,7 +26,7 @@ import time
 
 import yaml
 
-from . import addrtable, capture, game, inputs, pipe
+from . import addrtable, capture, game, inputs, pipe, session
 
 CORE_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", ".."))
 RUNS_DIR = os.path.join(CORE_DIR, "runs")
@@ -51,9 +51,11 @@ def deploy_core(game_dir, config):
 
 
 class Run:
-    def __init__(self, test_path, game_dir, core_config, tag=""):
+    def __init__(self, test_path, game_dir, core_config, tag="", session=None):
         with open(test_path, encoding="utf-8") as f:
             self.test = yaml.safe_load(f)
+        self.session = session  # fdh.session.Session: a running game shared with other tests
+        self.log_from = 0       # in a session: where this test's part of FDNYCore.log starts
         self.test_path, self.tag = test_path, tag
         self.game_dir = game_dir
         # A test may name the build it needs (`core: Release`: what players get); `--core none`
@@ -367,15 +369,17 @@ class Run:
         elif kind == "assert_recordings":
             self.assert_recordings(arg)
         elif kind == "assert_log_count":
-            with open(self.g.core_log, encoding="utf-8", errors="replace") as fh:
-                n = fh.read().count(arg["contains"])
+            n = self.read_core_log().count(arg["contains"])
             self.record("assert_log_count", n == int(arg["equals"]),
                         f"{arg['contains']!r} occurs {n} time(s), expected {arg['equals']}")
         elif kind == "assert_log":
-            with open(self.g.core_log, encoding="utf-8", errors="replace") as f:
-                text = f.read()
+            text = self.read_core_log()
             needle = arg["contains"].replace("{core_version}", core_version())
             self.record("assert_log", needle in text, f"contains {needle!r}")
+        elif kind == "loadmap":
+            # {loadmap: bank}: load a map and wait until it's in play (replaces console + wait_s 40)
+            crash = self.load_map(str(arg))
+            self.record("loadmap", crash is None, crash or f"{arg} loaded")
         elif kind == "console":
             self.console_log_text = self.read_core_log()  # for wait_log {since_console}
             inputs.type_text("`")  # backtick opens the game console in typing mode (R3b)
@@ -398,9 +402,8 @@ class Run:
                     and all(isinstance(v, (int, float)) and math.isfinite(v) for v in value))
 
         try:
-            with open(self.g.core_log, encoding="utf-8") as stream:
-                paths = list(dict.fromkeys(line.split("recorder: started ", 1)[1].strip()
-                             for line in stream if "recorder: started " in line))
+            paths = list(dict.fromkeys(line.split("recorder: started ", 1)[1].strip()
+                         for line in self.read_core_log().splitlines() if "recorder: started " in line))
             runs, victim_samples = 0, 0
             for path in paths:
                 with open(path, encoding="utf-8") as stream:
@@ -492,12 +495,20 @@ class Run:
                         + (f"; only in the build: {only_build}" if only_build else "")
                         + (f"; only in the source: {only_src}" if only_src else ""))
 
-    def read_core_log(self):
+    def read_full_log(self):
         try:
             with open(self.g.core_log, encoding="utf-8", errors="replace") as f:
                 return f.read()
         except OSError:
             return ""
+
+    def read_core_log(self):
+        """FDNYCore.log as this test sees it. In a shared session: the session's startup, then
+        only this test's lines, so an assertion can't pass on another test's output."""
+        text = self.read_full_log()
+        if self.session and self.log_from:
+            return text[:self.session.startup_end] + text[self.log_from:]
+        return text
 
     def assert_frame_hooks(self, seconds, tolerance):
         """Independent frame count: g_gameClock's published elapsed-ms changes
@@ -716,19 +727,106 @@ class Run:
         return self.record("assert_mem", ok, f"{name}={val!r} in [{a.get('min')}, {a.get('max')}]")
 
     # --- lifecycle ---------------------------------------------------------
-    def steps_with_setup(self):
-        steps = []
+    def setup_steps(self):
         setup = self.test.get("setup")
-        if setup:
-            with open(os.path.join(SETUPS_DIR, f"{setup}.yaml"), encoding="utf-8") as f:
-                steps += yaml.safe_load(f)["steps"]
-        return steps + self.test.get("steps", [])
+        if not setup:
+            return []
+        with open(os.path.join(SETUPS_DIR, f"{setup}.yaml"), encoding="utf-8") as f:
+            return yaml.safe_load(f)["steps"]
 
-    def place_pre_files(self):
+    def steps_with_setup(self):
+        return self.setup_steps() + self.test.get("steps", [])
+
+    def run_steps(self, steps):
+        for s in steps:
+            crash = self.g.check_crash()
+            if crash:
+                return crash
+            self.step(s)
+        return self.g.check_crash()
+
+    def launch(self):
+        """Start the game (the only place a test launches it) and attach. Returns a crash or None."""
+        self.g.launch(self.test.get("env"))
+        crash = self.g.wait_window()
+        if not crash:
+            # Screenshots/video grab the screen region, and input goes to the
+            # foreground window: the game must be on top.
+            time.sleep(1.0)
+            focused = inputs.focus(self.g.hwnd)
+            self.record("focus", focused, "game window foreground at launch")
+            if not focused:
+                # Every later step would type/click into another window: stop here.
+                return "harness: could not focus the game window (Windows foreground lock)"
+        if not crash and self.core_config:
+            crash = self.g.wait_ready()
+            self.record("core_ready", crash is None, crash or "ready line seen")
+        if crash:
+            return crash
+        bases = self.g.attach()
+        self.samples["module.exe"] = hex(bases.get("exe", 0))
+        self.samples["module.genesis"] = hex(bases.get("genesis", 0))
+        exe_sha = game.sha256(self.g.exe)
+        gen_sha = game.sha256(os.path.join(self.game_dir, "Genesis.dll"))
+        vname, version = addrtable.select_version(addrtable.load(), exe_sha, gen_sha)
+        self.record("address_table_version", version is not None, vname or "no matching exe+Genesis hash")
+        if version:
+            self.resolver = addrtable.Resolver(self.g.pm, version, bases)
+            self.resolver_version = version
+        return None
+
+    def join_session(self, first=False):
+        """Start this test in the session's running game: the core reset to its defaults, the
+        test's FDNYCore.cfg (as fdtest_core.cfg) exec'd, Training reloaded. The session's first
+        test starts in the level its setup just loaded (defaults already), so it reloads only
+        to apply a cfg. From here on the test sees only its own FDNYCore.log lines (plus the
+        session's startup)."""
+        if not inputs.focus(self.g.hwnd):
+            return "harness: could not focus the game window (Windows foreground lock)"
+        self.log_from = len(self.read_full_log())
+        has_cfg = any(f["dst"].lower() == "fdnycore.cfg" and f.get("src") for f in self.test.get("pre_files", []))
+        if first and not has_cfg:
+            return None
+        if not first:
+            with open(os.path.join(self.game_dir, session.RESET_CFG), "w", encoding="utf-8", newline="\r\n") as f:
+                f.write("\n".join(session.reset_lines(CORE_DIR)) + "\n")
+            self.step({"console": f"exec {session.RESET_CFG}"})
+        if has_cfg:
+            self.step({"console": f"exec {session.TEST_CFG}"})
+        t0 = time.time()
+        crash = self.load_map("training")
+        if not crash:
+            self.record("session", True, f"reset, cfg applied, Training reloaded in {time.time() - t0:.1f} s")
+        return crash
+
+    def load_map(self, name):
+        """`loadmap <name>`, then wait for the core's level_load event for it (not a fixed time),
+        plus 3 s for victims to spawn and the first frames to settle."""
+        event = f"event: level_load '{name}'"
+        loads = self.read_full_log().count(event)
+        self.step({"console": f"loadmap {name}"})
+        t0 = time.time()
+        while self.read_full_log().count(event) <= loads:
+            crash = self.g.check_crash()
+            if crash:
+                return crash
+            if time.time() - t0 > 90:
+                return f"harness: {name} didn't load within 90 s"
+            time.sleep(0.5)
+        time.sleep(3.0)
+        return None
+
+    def place_pre_files(self, shared=False):
         """pre_files: [{src: <path rel. to core/>, dst: <name in game dir>}] copied
-        before launch and removed after the run (e.g. Debug address-table overrides)."""
+        before launch and removed after the run (e.g. Debug address-table overrides).
+        shared: in a session, only the files this test reads while it runs; the load-time
+        ones belong to the session, and FDNYCore.cfg is exec'd as fdtest_core.cfg."""
         placed = []
         for f in self.test.get("pre_files", []):
+            if shared and session.is_load_time(f["dst"]):
+                continue
+            if shared and f["dst"].lower() == "fdnycore.cfg":
+                f = {"dst": session.TEST_CFG, "src": f.get("src")}
             dst = os.path.join(self.game_dir, f["dst"])
             backup = dst + ".fdh-backup"
             if os.path.exists(dst):  # a real game file: restore it afterwards
@@ -770,8 +868,14 @@ class Run:
             print(f"  (career saves the game rewrote, restored: {', '.join(changed)})")
 
     def execute(self):
-        deploy_core(self.game_dir, self.core_config)
-        placed = self.place_pre_files()
+        s = self.session
+        if s and not s.alive:  # first test of a session (or after a crash): set up its launch
+            s.close()
+            deploy_core(self.game_dir, self.core_config)
+            s.place(self.game_dir, self.test.get("pre_files", []), CORE_DIR)
+        elif not s:
+            deploy_core(self.game_dir, self.core_config)
+        placed = self.place_pre_files(shared=bool(s))
         saves = self.snapshot_saves()
         try:
             return self._execute()
@@ -790,45 +894,34 @@ class Run:
         expect = self.test.get("expect", {})
         crash = None
         rec = None
-        print(f"== {self.test['name']} (core={self.core_config}) -> {self.out}")
+        s = self.session
+        print(f"== {self.test['name']} (core={self.core_config}"
+              + (", shared session" if s and s.alive else ", new session" if s else "") + f") -> {self.out}")
         try:
-            self.g.launch(self.test.get("env"))
-            crash = self.g.wait_window()
+            if s and s.alive:
+                self.g, self.resolver, self.resolver_version = s.g, s.resolver, s.version
+                steps = self.test.get("steps", [])
+                crash = self.join_session()
+            elif s:
+                # A new session: launch, its setup (shared by every test in it), then start
+                # this test like every later one (reset, its cfg, Training reloaded).
+                steps = self.test.get("steps", [])
+                crash = self.launch() or self.run_steps(self.setup_steps())
+                if not crash:
+                    s.g, s.resolver, s.version = self.g, self.resolver, self.resolver_version
+                    s.startup_end = len(self.read_full_log())
+                    crash = self.join_session(first=True)
+            else:
+                steps = self.steps_with_setup()
+                crash = self.launch()
             if not crash:
-                # Screenshots/video grab the screen region, and input goes to the
-                # foreground window: the game must be on top.
-                time.sleep(1.0)
-                focused = inputs.focus(self.g.hwnd)
-                self.record("focus", focused, "game window foreground at launch")
-                if not focused:
-                    # Every later step would type/click into another window: stop here.
-                    crash = "harness: could not focus the game window (Windows foreground lock)"
-            if not crash and self.core_config:
-                crash = self.g.wait_ready()
-                self.record("core_ready", crash is None, crash or "ready line seen")
-            if not crash:
-                bases = self.g.attach()
-                self.samples["module.exe"] = hex(bases.get("exe", 0))
-                self.samples["module.genesis"] = hex(bases.get("genesis", 0))
-                exe_sha = game.sha256(self.g.exe)
-                gen_sha = game.sha256(os.path.join(self.game_dir, "Genesis.dll"))
-                vname, version = addrtable.select_version(addrtable.load(), exe_sha, gen_sha)
-                self.record("address_table_version", version is not None, vname or "no matching exe+Genesis hash")
-                if version:
-                    self.resolver = addrtable.Resolver(self.g.pm, version, bases)
-                    self.resolver_version = version
                 if self.test.get("record", True):
                     rec = capture.Recorder(os.path.join(self.out, "run.mp4"), self.g.client_rect())
                     err = rec.start()
                     if err:
                         self.record("record", False, err)
                         rec = None
-                for s in self.steps_with_setup():
-                    crash = self.g.check_crash()
-                    if crash:
-                        break
-                    self.step(s)
-                crash = crash or self.g.check_crash()
+                crash = self.run_steps(steps)
         except Exception as e:  # harness bug or unreadable memory: fail the run, keep evidence
             crash = crash or f"harness exception: {e!r}"
         finally:
@@ -839,7 +932,10 @@ class Run:
                     capture.screenshot(self.g.client_rect(), os.path.join(self.out, "final.png"))
             except Exception:
                 pass
-            self.g.kill()
+            if not s:
+                self.g.kill()
+            elif crash:
+                s.close()  # the next test of this session starts a new one
 
         if expect.get("no_crash", True):
             self.record("no_crash", crash is None, crash or "no crash, hang or dialog")
@@ -913,9 +1009,9 @@ class Run:
                     f"lines {r['kinds']}; mismatches: {r['mismatches'][:3] or 'none'}")
 
     def collect_log(self):
-        try:
-            shutil.copy2(self.g.core_log, os.path.join(self.out, "FDNYCore.log"))
-            with open(self.g.core_log, encoding="utf-8", errors="replace") as f:
-                return [l for l in f if re.search(r"\] \[ERROR\] ", l)]
-        except OSError:
+        if not os.path.exists(self.g.core_log):
             return ["FDNYCore.log missing"]
+        text = self.read_core_log()  # this test's part, in a shared session
+        with open(os.path.join(self.out, "FDNYCore.log"), "w", encoding="utf-8") as f:
+            f.write(text)
+        return [l for l in text.splitlines() if re.search(r"\] \[ERROR\] ", l)]

@@ -13,15 +13,13 @@ pre_files:
 setup: load_training
 record: true
 steps:
-  - console: "loadmap bank"
-  - wait_s: 40
+  - loadmap: bank
   - assert_mem: {name: game.map_name, equals: bank}
   - assert_mem: {name: rescuebot.enabled, equals: 0}
   - assert_mem: {name: rescuebot.claimed, equals: 0}
   - screenshot: bank_bot_off
   - console: "fd_rescuebot 1"
-  - console: "loadmap bank"
-  - wait_s: 40
+  - loadmap: bank
   - assert_mem: {name: rescuebot.enabled, equals: 1}
   - console: "fd_rescuebot 0"
   - wait_s: 0.5

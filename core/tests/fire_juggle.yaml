@@ -16,8 +16,7 @@ steps:
   - assert_log: {contains: "juggle: ready (fd_juggle)"}
   - console: "fd_watermark 0"
   - console: "fd_rescuebot 0"
-  - console: "loadmap bank"
-  - wait_s: 40
+  - loadmap: bank
   # off by default
   - assert_pipe_stat: {cmd: juggle, key: enabled, equals: 0}
   - console: "fd_juggle 1"

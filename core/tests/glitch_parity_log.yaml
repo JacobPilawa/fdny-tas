@@ -21,8 +21,7 @@ steps:
   - key: {key: w, hold: 1.5}
   - key: {key: c, hold: 0.3}
   - screenshot: boxes_training
-  - console: "loadmap bank"
-  - wait_s: 40
+  - loadmap: bank
   - repeat:
       times: 6
       steps:

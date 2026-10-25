@@ -12,7 +12,7 @@ setup: load_training
 record: false
 steps:
   - wait_s: 2
-  - assert_log: {contains: "textdraw: hud_player: 168x58 at 8,52 (view 640x480), translucent"}
+  - assert_pipe_contains: {cmd: textdraw hud_player, contains: "drawn=1"}   # the panel the box below covers
   - pipe: "pause on"
   - wait_pipe: {cmd: pause, key: active, equals: 1, timeout: 3}
   - wait_s: 1

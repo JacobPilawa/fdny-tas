@@ -214,6 +214,15 @@ later session might "simplify" away; change one only with the owner's approval
 
 ## Process
 
+- **D48 Game tests share sessions; launch and exit only when a session can't be reused** (owner 2026-10-25).
+  - **What:**
+    - `harness/fdh/session.py` groups tests by what's fixed at launch: the build, the game cfg, files read at load (.asi, the address override, autoexec.cfg), env switches, a restart, and the Training setup. One game runs per group.
+    - Before each later test, the core is reset to the defaults docgen reads from the source, the test's `FDNYCore.cfg` is exec'd, and Training is reloaded.
+    - In a session a test sees only its own `FDNYCore.log` lines plus the session's startup, so an assertion can't pass on another test's output.
+    - `own_session: true` opts a test out.
+  - **The `loadmap: <map>` step** waits for the core's `level_load` event instead of a fixed 25–45 s.
+  - **Measured, 2026-10-25 (34 tests):** 15 launches instead of 34. The suite took 1577 s, against about 2900 s before. A reload in a session takes about 4 s, against about 40 s for a launch and load.
+  - **Rejected:** a core reset command. The harness resets through the console, and a default key re-bound to its default line isn't written to `FDNYCore.cfg`.
 - **D47 Unit tests: core logic built for the host, run without the game** (owner 2026-10-24: "go 1-5", item 1 of the suite review).
   - **What:**
     - `core/unit/run.ps1` builds `core/build/unit/fdcore_unit.exe`, an x86 host program, from chosen core sources with `-DFDCORE_UNIT`. `stubs.cpp` stands in for `log`.

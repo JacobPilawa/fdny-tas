@@ -4,6 +4,8 @@ name: core_release
 # (it has the test pipe); this one has no pipe, so it checks the log, memory and the screen.
 # Added by the suite review (2026-10-24): nothing tested Release before it shipped.
 core: Release
+# fd_skip_intro must be in FDNYCore.cfg at launch (the core reads it in DllMain): own launch.
+own_session: true
 pre_files:
   - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
   # The harness's intro-skip switch is Debug-only; a Release player skips the movies with

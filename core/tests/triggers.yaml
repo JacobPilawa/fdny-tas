@@ -33,8 +33,7 @@ steps:
   - assert_pipe_stat: {cmd: triggers, key: boxes, equals: 25}
   - screenshot: training_all
   - console: "fd_triggers_all 0"
-  - console: "loadmap bank"
-  - wait_s: 40
+  - loadmap: bank
   - assert_log: {contains: "triggers: map 'bank': 14 trigger(s): 1 rescue, 1 exit (0 open), 12 other"}
   - assert_pipe_stat: {cmd: triggers, key: exit, equals: 1}
   - assert_pipe_stat: {cmd: triggers, key: open, equals: 0}

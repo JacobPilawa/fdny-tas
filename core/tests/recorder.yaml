@@ -22,8 +22,7 @@ steps:
   - sample_pipe: {cmd: recorder, as: before}
   - key: {key: w, hold: 0.5}
   - assert_pipe_stat: {cmd: recorder, key: samples, min: 1, since: before}
-  - console: "loadmap training"
-  - wait_s: 30
+  - loadmap: training
   - assert_pipe_stat: {cmd: recorder, key: runs, min: 1, since: before}
   - assert_pipe_stat: {cmd: recorder, key: active, equals: 1}
   - console: "fd_record 0"
