@@ -54,8 +54,11 @@ class Run:
     def __init__(self, test_path, game_dir, core_config, tag=""):
         with open(test_path, encoding="utf-8") as f:
             self.test = yaml.safe_load(f)
+        self.test_path, self.tag = test_path, tag
         self.game_dir = game_dir
-        self.core_config = core_config
+        # A test may name the build it needs (`core: Release`: what players get); `--core none`
+        # (a baseline run) still removes the core.
+        self.core_config = self.test.get("core", core_config) if core_config is not None else None
         stamp = datetime.datetime.now().strftime("%Y-%m-%d-%H%M%S")
         suffix = f"-{tag}" if tag else ""
         self.out = os.path.join(RUNS_DIR, f"{stamp}-{self.test['name']}{suffix}")
@@ -850,9 +853,30 @@ class Run:
         result = {"test": self.test["name"], "core": self.core_config, "pass": passed,
                   "crash": crash, "assertions": self.results, "samples": self.samples,
                   "video": os.path.join(self.out, "run.mp4") if rec else None}
+        if expect.get("baseline_equivalent") and self.core_config:
+            result = self.check_baseline(result)
+            passed = result["pass"]
         with open(os.path.join(self.out, "result.json"), "w", encoding="utf-8") as f:
             json.dump(result, f, indent=2)
         print(f"== {'PASS' if passed else 'FAIL'} {self.test['name']}")
+        return result
+
+    def check_baseline(self, result):
+        """Item 1(c) "behaves the same", asserted (suite review item 3): this run (with the
+        core) against two runs of the same test with the core removed, back to back on the same
+        display, by harness/compare_runs.py's checks (state, module bases, autosplitter chains,
+        frame rate, lap positions, log errors)."""
+        import sys as _sys
+        _sys.path.insert(0, os.path.join(CORE_DIR, "harness"))
+        import compare_runs
+        bases = [Run(self.test_path, self.game_dir, None, f"{self.tag}-base{i}").execute() for i in (1, 2)]
+        ok, checks = compare_runs.compare(bases[0], bases[1], result)
+        failed = [f"{c['check']}: {c['detail']}" for c in checks if not c["pass"]]
+        self.record("baseline_equivalent", ok,
+                    f"{len(checks) - len(failed)}/{len(checks)} checks vs 2 runs without the core"
+                    + (f"; failed: {failed}" if failed else ""))
+        self.samples["baseline_checks"] = checks
+        result["pass"] = all(r["pass"] for r in self.results)
         return result
 
     def check_glitch_parity(self, expect):

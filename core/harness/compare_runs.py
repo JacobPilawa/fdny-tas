@@ -39,8 +39,10 @@ def laps(r):
     return list(zip(s.get("lap_x", []), s.get("lap_y", []), s.get("lap_z", [])))
 
 
-def main():
-    a, b, c = (load(p) for p in sys.argv[1:4])
+def compare(a, b, c):
+    """a, b: result dicts of two runs without the core; c: the run with it.
+    Returns (all passed, [{check, pass, detail}]). Also used by the harness
+    (expect: baseline_equivalent), so the suite asserts it."""
     checks = []
 
     def check(name, ok, detail):
@@ -96,7 +98,12 @@ def main():
     check("7 core_log_errors", bool(logs) and all(x["pass"] for x in logs),
           logs[0]["detail"] if logs else "core run has no log_errors assertion")
 
-    ok = all(x["pass"] for x in checks)
+    return all(x["pass"] for x in checks), checks
+
+
+def main():
+    a, b, c = (load(p) for p in sys.argv[1:4])
+    ok, checks = compare(a, b, c)
     out = {"pass": ok, "checks": checks, "runs": sys.argv[1:4]}
     target = sys.argv[3] if os.path.isdir(sys.argv[3]) else os.path.dirname(sys.argv[3])
     with open(os.path.join(target, "equivalence.json"), "w", encoding="utf-8") as f:
