@@ -1,8 +1,11 @@
 name: baseline_route
-# Item 1(c) "behaves the same": a scripted ~2-minute route in Training, run
-# once with the core removed (--core none) and once with it (--core Release),
-# then compared by harness/compare_runs.py. On its own it asserts only that
-# the run completes in-level without a crash.
+# Item 1(c) "behaves the same": a scripted ~2-minute route in Training, run with the
+# Release core (what players get), then twice more with the core removed, back to back on
+# the same display; harness/compare_runs.py's checks must all pass (state at every lap,
+# module bases, the 12 autosplitter chains, median frame rate within 10%, lap positions
+# within the baselines' own spread, no ERROR lines). Before the suite review (2026-10-24)
+# the suite only ran the core run and asserted it finished; the comparison was by hand.
+core: Release
 pre_files:
   # Same conditions as the item-1 baselines (base_a/base_b): ImADeveloper on,
   # which also skips the intro movies (they can stall on the VM) -- applies to
@@ -47,3 +50,4 @@ steps:
 expect:
   no_crash: true
   log_errors: 0
+  baseline_equivalent: true
