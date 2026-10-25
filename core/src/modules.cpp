@@ -1,3 +1,4 @@
+// Tests: tests/core_loads.yaml tests/docs_registry.yaml
 #include "modules.h"
 
 #include <windows.h>

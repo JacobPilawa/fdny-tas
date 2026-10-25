@@ -1,0 +1,76 @@
+{
+  "test": "text_alpha",
+  "core": "Debug",
+  "pass": true,
+  "crash": null,
+  "assertions": [
+    {
+      "step": "focus",
+      "pass": true,
+      "detail": "game window foreground at launch"
+    },
+    {
+      "step": "core_ready",
+      "pass": true,
+      "detail": "ready line seen"
+    },
+    {
+      "step": "address_table_version",
+      "pass": true,
+      "detail": "retail-1.1"
+    },
+    {
+      "step": "assert_log",
+      "pass": true,
+      "detail": "contains 'textdraw: hud_player: 168x58 at 8,52 (view 640x480), translucent'"
+    },
+    {
+      "step": "wait_pipe",
+      "pass": true,
+      "detail": "pause.active = 1 after 0.00 s, want 1"
+    },
+    {
+      "step": "assert_log",
+      "pass": true,
+      "detail": "contains 'fd_text_fg_alpha 96'"
+    },
+    {
+      "step": "assert_screen_diff",
+      "pass": true,
+      "detail": "fg255 vs fg96 over [0.0125, 0.1083, 0.275, 0.2292]: mean diff 4.45, want >= 2"
+    },
+    {
+      "step": "assert_screen_diff",
+      "pass": true,
+      "detail": "fg255 vs fg255_again over [0.0125, 0.1083, 0.275, 0.2292]: mean diff 0.00, want <= 0.5"
+    },
+    {
+      "step": "no_crash",
+      "pass": true,
+      "detail": "no crash, hang or dialog"
+    },
+    {
+      "step": "log_errors",
+      "pass": true,
+      "detail": "0 ERROR line(s), limit 0"
+    }
+  ],
+  "samples": {
+    "module.exe": "0x400000",
+    "module.genesis": "0x10000000",
+    "pipe": [
+      [
+        "pause on",
+        "active=0 frames=0 clockpaused=0 block=0 hook=0"
+      ],
+      [
+        "pause off",
+        "active=1 frames=525 clockpaused=1 block=1 hook=1"
+      ]
+    ],
+    "screenshot.fg255.luma": 83.3,
+    "screenshot.fg96.luma": 83.1,
+    "screenshot.fg255_again.luma": 83.3
+  },
+  "video": null
+}

@@ -1,3 +1,4 @@
+// Tests: tests/profile_run.yaml tests/core_single_instance.yaml
 // User: Profiles -- practice (everything allowed) or run (practice-only settings refused, watermark always on).
 #include "profile.h"
 

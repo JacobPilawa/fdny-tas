@@ -1,3 +1,4 @@
+// Tests: tests/hooks_frame.yaml
 // Debug-only harness channel: \\.\pipe\FDNYCore, one request line -> one
 // response line. Compiled out of Release (the whole file is #ifdef'd).
 #ifdef FDCORE_DEBUG

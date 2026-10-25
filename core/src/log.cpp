@@ -1,3 +1,4 @@
+// Tests: tests/core_loads.yaml tests/core_single_instance.yaml
 #include "log.h"
 
 #include <windows.h>

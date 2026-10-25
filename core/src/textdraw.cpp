@@ -1,3 +1,4 @@
+// Tests: tests/text_panels.yaml tests/text_alpha.yaml tests/glitch_box_cost.yaml
 // User: On-screen text -- size and opacity of every FDNYCore text panel.
 #include "textdraw.h"
 

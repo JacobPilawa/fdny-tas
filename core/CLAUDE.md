@@ -40,7 +40,7 @@ The log lists `modules: N registered (...)` and one `module <name>: enabled | di
 |---|---|---|
 | R1 | Core files (`src/*`) never include a feature header. The core never names a feature. | arch_check |
 | R2 | A feature includes core headers and its own group's headers only (`glitch_*` = group `glitch`). Features talk to each other only through core services. | arch_check |
-| R3 | Each feature group has exactly one `FDCORE_MODULE(...)`, in a file whose `// Tests:` line names existing tests. | arch_check |
+| R3 | Each feature group has exactly one `FDCORE_MODULE(...)`, in a file whose `// Tests:` line names existing tests. Every core source (`src/*.cpp`) has a `// Tests:` line too (game-driven `tests/*.yaml` or `unit/` files). | arch_check |
 | R4 | No game addresses or module-base+RVA in code: every address/offset is an `addresses.json` entry, used by `addr::Id`. Exceptions need `// arch-allow: R4 <why>` on the line. | arch_check |
 | R5 | Only `gfx` calls the Genesis drawing/bitmap API. Features draw with `textdraw` panels (or `gfx` blocks). | arch_check |
 | R6 | Harness channels are Debug-only (`#ifdef FDCORE_DEBUG` around `testpipe::Register`). | Release build fails otherwise |

@@ -114,6 +114,19 @@ def main():
             if not os.path.exists(os.path.join(CORE, t.rstrip(","))):
                 fail("R3 module-names-tests", f, 1, f"named test {t} does not exist")
 
+    # R3 for the core too (suite review 2026-10-24): every core source names the tests that
+    # cover it (game-driven tests/*.yaml or core/unit files), so a service with no test shows.
+    for f in core_files:
+        if not f.endswith(".cpp"):
+            continue
+        m = re.search(r"^// Tests: (.+)$", open(f, encoding="utf-8-sig").read(), re.M)
+        if not m:
+            fail("R3 service-names-tests", f, 1, 'missing "// Tests: tests/<name>.yaml ..." line')
+            continue
+        for t in m.group(1).split():
+            if not os.path.exists(os.path.join(CORE, t.rstrip(","))):
+                fail("R3 service-names-tests", f, 1, f"named test {t} does not exist")
+
     # R4 / R5 on code (comments and strings removed). A line may carry an explicit,
     # reasoned exception: "// arch-allow: R4 <why>" (reviewed like any other code).
     for f in core_files + feat_files:

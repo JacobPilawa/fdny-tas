@@ -29,6 +29,7 @@ class ArchCheck(unittest.TestCase):
         shutil.copytree(os.path.join(CORE, "src"), os.path.join(self.root, "src"),
                         ignore=shutil.ignore_patterns("gen"))
         shutil.copytree(os.path.join(CORE, "tests"), os.path.join(self.root, "tests"))
+        shutil.copytree(HERE, os.path.join(self.root, "unit"), ignore=shutil.ignore_patterns("__pycache__"))
         src = os.path.join(self.root, "src")
         for k, v in {"CORE": self.root, "SRC": src, "FEAT": os.path.join(src, "features"),
                      "TESTS": os.path.join(self.root, "tests")}.items():
@@ -67,6 +68,17 @@ class ArchCheck(unittest.TestCase):
 
     def test_r3_named_test_missing(self):
         self.write("features/probe.cpp", FEATURE.format(body="").replace("core_loads", "no_such_test"))
+        self.assertEqual(self.rules(), (1, ["R3"]))
+
+    def test_r3_service_names_no_tests(self):
+        p = os.path.join(CORE, "src", "log.cpp")
+        text = open(p, encoding="utf-8").read()
+        self.write("log.cpp", "\n".join(l for l in text.splitlines() if not l.startswith("// Tests:")) + "\n")
+        self.assertEqual(self.rules(), (1, ["R3"]))
+
+    def test_r3_service_names_missing_test(self):
+        p = os.path.join(CORE, "src", "log.cpp")
+        self.write("log.cpp", open(p, encoding="utf-8").read().replace("tests/core_loads.yaml", "tests/gone.yaml", 1))
         self.assertEqual(self.rules(), (1, ["R3"]))
 
     def test_r4_raw_address(self):

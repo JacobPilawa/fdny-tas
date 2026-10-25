@@ -1,3 +1,4 @@
+// Tests: tests/keys_default.yaml tests/vars_binds_persist.yaml tests/autoexec.yaml tests/docs_registry.yaml
 // User: Keys -- bind any key to a console line (bind / unbind / bindlist); keys act only while the game has focus and the console is closed.
 #include "binds.h"
 

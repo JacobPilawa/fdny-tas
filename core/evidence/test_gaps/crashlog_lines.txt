@@ -1,0 +1,16 @@
+﻿[2026-10-25 16:48:22.125] [INFO] crashlog: test fault (fd_dbg_fault)
+[2026-10-25 16:48:22.164] [WARN] crashlog: exception c0000005 at 763844ba (KERNEL32.DLL+144ba); data 00000010
+[2026-10-25 16:48:22.205] [WARN] crashlog: eax=00000010 ebx=00000000 ecx=00000013 edx=00000000 esi=00001000 edi=03367d44 ebp=0019f50c esp=0019f4dc
+[2026-10-25 16:48:22.239] [WARN] crashlog:   [esp+01c] 7203ef48 (FDNYCore.asi+ef48)
+[2026-10-25 16:48:22.272] [WARN] crashlog:   [esp+024] 76392f40 (KERNEL32.DLL+22f40)
+[2026-10-25 16:48:22.313] [WARN] crashlog:   [esp+034] 7203962a (FDNYCore.asi+962a)
+[2026-10-25 16:48:22.355] [WARN] crashlog:   [esp+048] 72038202 (FDNYCore.asi+8202)
+[2026-10-25 16:48:22.385] [WARN] crashlog:   [esp+054] 720381e1 (FDNYCore.asi+81e1)
+[2026-10-25 16:48:22.421] [WARN] crashlog:   [esp+068] 7203723d (FDNYCore.asi+723d)
+[2026-10-25 16:48:22.452] [WARN] crashlog:   [esp+07c] 76f14de6 (ntdll.dll+44de6)
+[2026-10-25 16:48:22.489] [WARN] crashlog:   [esp+080] 76f161e9 (ntdll.dll+461e9)
+[2026-10-25 16:48:22.519] [WARN] crashlog:   [esp+09c] 76f1d95c (ntdll.dll+4d95c)
+[2026-10-25 16:48:22.555] [WARN] crashlog:   [esp+0bc] 10010011 (Genesis.dll+10011)
+[2026-10-25 16:48:22.586] [WARN] crashlog:   [esp+0c0] 76f1d9d8 (ntdll.dll+4d9d8)
+[2026-10-25 16:48:22.622] [WARN] crashlog:   [esp+198] 76f4c210 (ntdll.dll+7c210)
+[2026-10-25 16:48:22.652] [INFO] crashlog: test fault handled, game continues (IsBadReadPtr=1)

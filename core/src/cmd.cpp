@@ -1,3 +1,4 @@
+// Tests: tests/console_basic.yaml tests/vars_binds_persist.yaml tests/autoexec.yaml tests/profile_run.yaml tests/docs_registry.yaml
 // User: Console -- FDNYCore's commands and variables, typed in the game's console (` key); changed settings are saved to FDNYCore.cfg, your own lines go in autoexec.cfg.
 #include "cmd.h"
 
@@ -5,6 +6,7 @@
 
 #include "binds.h"
 #include "console.h"
+#include "crashlog.h"
 #include "hooks.h"
 #include "log.h"
 #include "modules.h"
@@ -372,6 +374,8 @@ void RegisterBuiltins() {
     RegisterCommand("fd_dbg_registry", "(Debug test hook) write FDNYCore_registry.txt: every variable, command, "
                                        "alias, default bind and described key",
                     CmdRegistry);
+    RegisterCommand("fd_dbg_fault", "(Debug test hook) a caught access violation, for the crash report",
+                    [](int, const char* const*) { crashlog::DebugFault(); });
 #endif
 }
 

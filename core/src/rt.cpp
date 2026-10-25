@@ -1,3 +1,4 @@
+// Tests: tests/core_loads.yaml tests/core_release.yaml
 // Freestanding runtime shims: the core links no CRT (kernel32/user32/bcrypt
 // only, like asi/FDNYDeterministic), so the compiler's implicit helpers live here.
 #include <stddef.h>

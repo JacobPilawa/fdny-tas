@@ -1,3 +1,4 @@
+// Tests: tests/hooks_frame.yaml tests/hooks_toggle.yaml
 #include "hooks.h"
 
 #include <windows.h>

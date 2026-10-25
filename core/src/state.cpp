@@ -1,3 +1,4 @@
+// Tests: tests/state_snapshot.yaml tests/hud_player.yaml
 #include "state.h"
 
 #include <windows.h>
