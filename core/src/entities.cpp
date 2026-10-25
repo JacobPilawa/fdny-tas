@@ -1,4 +1,3 @@
-// Tests: tests/recorder.yaml tests/speedrun_static_spawns.yaml
 #include "entities.h"
 
 #include <windows.h>

@@ -1,4 +1,3 @@
-// Tests: tests/console_basic.yaml tests/console_menu_safe.yaml
 #include "console.h"
 
 #include <windows.h>

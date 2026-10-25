@@ -12,4 +12,4 @@ between it and the harness's reads. The test compares the same fields at the sam
 points: Training idle, Training after walking, bank twice.
 
 **Runs, 2026-10-25, Debug:** 3 of 3 PASS. In each, 24 fields were compared at each Training
-point and 28 at each bank point, with no mismatches. Files: `run1_result.json` to `run3_result.json`.
+point and 28 at each bank point, with no mismatches.

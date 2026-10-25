@@ -1,4 +1,3 @@
-// Tests: tests/draw_layers.yaml tests/triggers.yaml tests/text_panels.yaml
 // User: On-screen text -- size and opacity of every FDNYCore text panel.
 #include "gfx.h"
 

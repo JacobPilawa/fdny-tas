@@ -1,4 +1,3 @@
-// Tests: tests/addr_verified.yaml tests/addr_bad_signature.yaml tests/addr_unknown_exe.yaml unit/test_addr.cpp
 #include "addr.h"
 
 #include <windows.h>

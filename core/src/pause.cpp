@@ -1,4 +1,3 @@
-// Tests: tests/pause_service.yaml tests/freecam.yaml
 #include "pause.h"
 
 #include <windows.h>

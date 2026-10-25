@@ -1,4 +1,3 @@
-// Tests: tests/skip_intro.yaml
 // User: Startup -- optional startup changes.
 #include "patches.h"
 

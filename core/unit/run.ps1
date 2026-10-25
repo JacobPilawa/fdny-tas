@@ -24,7 +24,7 @@ if (-not $PythonExe) { throw "Python not found" }
 if ($LASTEXITCODE -ne 0) { throw "addrgen header failed" }
 
 # Core sources under test: pure logic, no game calls (each listed on purpose).
-$under = @('src\addr.cpp', 'src\features\glitch_analysis.cpp', 'src\features\glitch_bsp.cpp',
+$under = @('src\addr.cpp', 'src\crashlog.cpp','src\features\glitch_analysis.cpp', 'src\features\glitch_bsp.cpp',
            'src\features\glitch_replay.cpp') | ForEach-Object { Join-Path $core $_ }
 $tests = Get-ChildItem $here -Filter *.cpp | ForEach-Object FullName
 

@@ -46,6 +46,6 @@ Now the test runs the Release core, then twice more with the core removed, back 
 | 6 lap positions | 10 laps, 1.0 to 3.6 u from the baselines (tolerance 32 u) |
 | 7 log errors | 0 |
 
-The test now takes about 8 minutes, against about 2.5 before: three routes instead of one.
+It takes about 8 minutes (three routes), so it runs on demand before a release
+(`tests/ondemand/`, owner's efficiency rule 2026-10-25), not in every suite run.
 
-Files: `baseline_route_output.txt`, `baseline_route_result.json`, `core_release_result.json`.

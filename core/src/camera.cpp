@@ -1,4 +1,3 @@
-// Tests: tests/fov_sets_camera.yaml tests/pause_service.yaml tests/freecam.yaml
 #include "camera.h"
 
 #include <windows.h>

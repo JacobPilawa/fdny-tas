@@ -1,4 +1,3 @@
-// Tests: tests/crashlog.yaml
 // Logs fatal-looking exceptions (first chance) to FDNYCore.log with the
 // faulting module+offset and the code addresses found on the stack, so a
 // crash can be traced to a function in Ghidra without a debugger attached.
@@ -72,13 +71,5 @@ LONG CALLBACK Handler(EXCEPTION_POINTERS* ep) {
 } // namespace
 
 void Install() { AddVectoredExceptionHandler(1, Handler); }
-
-#ifdef FDCORE_DEBUG
-__attribute__((noinline)) void DebugFault() {
-    log::Info("crashlog: test fault (fd_dbg_fault)");
-    const BOOL bad = IsBadReadPtr(reinterpret_cast<const void*>(0x10), 4);
-    log::Info("crashlog: test fault handled, game continues (IsBadReadPtr=%d)", bad);
-}
-#endif
 
 } // namespace fdcore::crashlog
