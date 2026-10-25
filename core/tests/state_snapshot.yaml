@@ -31,8 +31,7 @@ steps:
   - assert_snapshot_matches: {}
   - pipe: "pause off"
   - wait_pipe: {cmd: pause, key: active, equals: 0, timeout: 3}
-  - console: "loadmap bank"
-  - wait_s: 40
+  - loadmap: bank
   - assert_mem: {name: game.map_name, equals: bank}
   - pipe: "pause on"
   - wait_pipe: {cmd: pause, key: active, equals: 1, timeout: 3}

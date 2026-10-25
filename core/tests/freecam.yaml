@@ -15,8 +15,7 @@ steps:
   - assert_log: {contains: "freecam: ready (fd_pause; key P)"}
   - console: "fd_watermark 0"
   - console: "fd_rescuebot 0"
-  - console: "loadmap bank"
-  - wait_s: 40
+  - loadmap: bank
   # near the bank's first fire (the spike's burning spot is 144, 250, -1324), facing it
   - console: "fd_dbg_setpos 144 -47 -1000 180"
   - wait_log: {contains: "juggle: setpos 144 -47 -1000 (+yaw): ok", since_console: true, timeout: 10}

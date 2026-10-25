@@ -41,8 +41,7 @@ steps:
   - assert_pipe_stat: {cmd: glitch_box, key: hidden, equals: 1}
   - screenshot: 03_boxes_hidden
   - key: {key: b, hold: 0.2}
-  - console: "loadmap bank"
-  - wait_s: 40
+  - loadmap: bank
   - sample_pipe: {cmd: stats, as: bank}
   - sample_pipe: {cmd: textdraw_cost, as: bank_cost0}
   - wait_s: 6

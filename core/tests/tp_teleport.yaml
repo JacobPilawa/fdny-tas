@@ -45,8 +45,7 @@ steps:
   - assert_log: {contains: "console> fd_tp_load is practice-only (fd_profile is run)"}
   - console: "fd_profile practice"
   # another map: refused, position unchanged
-  - console: "loadmap bank"
-  - wait_s: 40
+  - loadmap: bank
   - sample_mem: {name: player.pos_x, as: x_bank}
   - sample_mem: {name: player.pos_z, as: z_bank}
   - console: "fd_tp_load"

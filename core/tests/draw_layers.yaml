@@ -14,8 +14,7 @@ record: false
 steps:
   - assert_log: {contains: "gfx: ready"}
   - console: "fd_watermark 0"
-  - console: "loadmap oil_rig_A"
-  - wait_s: 45
+  - loadmap: oil_rig_A
   - console: "fd_dbg_setpos -921.7 766 247 45"
   - wait_log: {contains: "juggle: setpos -922 766 247 (+yaw): ok", since_console: true, timeout: 10}
   - wait_s: 2
