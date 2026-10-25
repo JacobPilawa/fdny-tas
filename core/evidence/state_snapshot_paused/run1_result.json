@@ -1,0 +1,263 @@
+{
+  "test": "state_snapshot",
+  "core": "Debug",
+  "pass": true,
+  "crash": null,
+  "assertions": [
+    {
+      "step": "focus",
+      "pass": true,
+      "detail": "game window foreground at launch"
+    },
+    {
+      "step": "core_ready",
+      "pass": true,
+      "detail": "ready line seen"
+    },
+    {
+      "step": "address_table_version",
+      "pass": true,
+      "detail": "retail-1.1"
+    },
+    {
+      "step": "assert_log",
+      "pass": true,
+      "detail": "contains 'state: snapshot ready'"
+    },
+    {
+      "step": "wait_pipe",
+      "pass": true,
+      "detail": "pause.active = 1 after 0.00 s, want 1"
+    },
+    {
+      "step": "assert_snapshot_matches",
+      "pass": true,
+      "detail": "24 fields compared at frame 1419; mismatches: none"
+    },
+    {
+      "step": "wait_pipe",
+      "pass": true,
+      "detail": "pause.active = 0 after 0.00 s, want 0"
+    },
+    {
+      "step": "wait_pipe",
+      "pass": true,
+      "detail": "pause.active = 1 after 0.00 s, want 1"
+    },
+    {
+      "step": "assert_snapshot_matches",
+      "pass": true,
+      "detail": "24 fields compared at frame 1546; mismatches: none"
+    },
+    {
+      "step": "wait_pipe",
+      "pass": true,
+      "detail": "pause.active = 0 after 0.00 s, want 0"
+    },
+    {
+      "step": "assert_mem",
+      "pass": true,
+      "detail": "game.map_name='bank' expected 'bank' +/-0.0"
+    },
+    {
+      "step": "wait_pipe",
+      "pass": true,
+      "detail": "pause.active = 1 after 0.00 s, want 1"
+    },
+    {
+      "step": "assert_snapshot_matches",
+      "pass": true,
+      "detail": "28 fields compared at frame 2873; mismatches: none"
+    },
+    {
+      "step": "wait_pipe",
+      "pass": true,
+      "detail": "pause.active = 0 after 0.00 s, want 0"
+    },
+    {
+      "step": "wait_pipe",
+      "pass": true,
+      "detail": "pause.active = 1 after 0.00 s, want 1"
+    },
+    {
+      "step": "assert_snapshot_matches",
+      "pass": true,
+      "detail": "28 fields compared at frame 2953; mismatches: none"
+    },
+    {
+      "step": "no_crash",
+      "pass": true,
+      "detail": "no crash, hang or dialog"
+    },
+    {
+      "step": "log_errors",
+      "pass": true,
+      "detail": "0 ERROR line(s), limit 0"
+    }
+  ],
+  "samples": {
+    "module.exe": "0x400000",
+    "module.genesis": "0x10000000",
+    "pipe": [
+      [
+        "pause on",
+        "active=0 frames=0 clockpaused=0 block=0 hook=0"
+      ],
+      [
+        "pause off",
+        "active=1 frames=14 clockpaused=1 block=1 hook=1"
+      ],
+      [
+        "pause on",
+        "active=0 frames=14 clockpaused=0 block=0 hook=0"
+      ],
+      [
+        "pause off",
+        "active=1 frames=15 clockpaused=1 block=1 hook=1"
+      ],
+      [
+        "pause on",
+        "active=0 frames=15 clockpaused=0 block=0 hook=0"
+      ],
+      [
+        "pause off",
+        "active=1 frames=13 clockpaused=1 block=1 hook=1"
+      ],
+      [
+        "pause on",
+        "active=0 frames=13 clockpaused=0 block=0 hook=0"
+      ],
+      [
+        "pause off",
+        "active=1 frames=14 clockpaused=1 block=1 hook=1"
+      ]
+    ],
+    "snapshots": [
+      {
+        "frame": "1419",
+        "game_state": "1",
+        "map": "training",
+        "menu": "2",
+        "player": "1",
+        "pos_x": "-1268.000",
+        "pos_y": "-225.767",
+        "pos_z": "4692.000",
+        "vel_x": "0.000",
+        "vel_y": "0.000",
+        "vel_z": "0.000",
+        "speed_xy": "0.000",
+        "pitch": "0.000",
+        "yaw": "-270.000",
+        "time_left": "44979.124",
+        "move_state": "3",
+        "ground": "1",
+        "victims_total": "2",
+        "victims_rescued": "0",
+        "victims": "2",
+        "v0": "1300.000,-230.900,-4952.000,4",
+        "v1": "1656.000,-230.900,-4968.000,4",
+        "fires": "7",
+        "fires_burning": "0",
+        "fires_out": "0",
+        "bot_enabled": "0",
+        "bot_claimed": "0"
+      },
+      {
+        "frame": "1546",
+        "game_state": "1",
+        "map": "training",
+        "menu": "2",
+        "player": "1",
+        "pos_x": "-674.432",
+        "pos_y": "-225.767",
+        "pos_z": "4692.000",
+        "vel_x": "0.000",
+        "vel_y": "0.000",
+        "vel_z": "0.000",
+        "speed_xy": "0.000",
+        "pitch": "0.000",
+        "yaw": "-270.000",
+        "time_left": "44976.012",
+        "move_state": "3",
+        "ground": "1",
+        "victims_total": "2",
+        "victims_rescued": "0",
+        "victims": "2",
+        "v0": "1300.000,-230.900,-4952.000,4",
+        "v1": "1656.000,-230.900,-4968.000,4",
+        "fires": "7",
+        "fires_burning": "0",
+        "fires_out": "0",
+        "bot_enabled": "0",
+        "bot_claimed": "0"
+      },
+      {
+        "frame": "2873",
+        "game_state": "1",
+        "map": "bank",
+        "menu": "2",
+        "player": "1",
+        "pos_x": "-697.000",
+        "pos_y": "-47.875",
+        "pos_z": "1196.000",
+        "vel_x": "0.000",
+        "vel_y": "0.000",
+        "vel_z": "0.000",
+        "speed_xy": "0.000",
+        "pitch": "0.000",
+        "yaw": "-180.000",
+        "time_left": "44960.032",
+        "move_state": "3",
+        "ground": "1",
+        "victims_total": "6",
+        "victims_rescued": "0",
+        "victims": "6",
+        "v0": "1192.000,-38.900,-772.000,4",
+        "v1": "-1160.036,-38.900,-334.597,7",
+        "v2": "-511.000,-38.900,-578.000,4",
+        "v3": "-768.000,-38.900,-2160.000,4",
+        "v4": "1128.000,217.100,684.000,4",
+        "v5": "-2224.853,217.100,470.377,7",
+        "fires": "84",
+        "fires_burning": "0",
+        "fires_out": "0",
+        "bot_enabled": "1",
+        "bot_claimed": "0"
+      },
+      {
+        "frame": "2953",
+        "game_state": "1",
+        "map": "bank",
+        "menu": "2",
+        "player": "1",
+        "pos_x": "-697.000",
+        "pos_y": "-47.875",
+        "pos_z": "1196.000",
+        "vel_x": "0.000",
+        "vel_y": "0.000",
+        "vel_z": "0.000",
+        "speed_xy": "0.000",
+        "pitch": "0.000",
+        "yaw": "-180.000",
+        "time_left": "44957.940",
+        "move_state": "3",
+        "ground": "1",
+        "victims_total": "6",
+        "victims_rescued": "0",
+        "victims": "6",
+        "v0": "1192.000,-38.900,-772.000,4",
+        "v1": "-1062.103,-38.900,-371.105,7",
+        "v2": "-511.000,-38.900,-578.000,4",
+        "v3": "-768.000,-38.900,-2160.000,4",
+        "v4": "1128.000,217.100,684.000,4",
+        "v5": "-2259.996,217.100,371.449,7",
+        "fires": "85",
+        "fires_burning": "0",
+        "fires_out": "0",
+        "bot_enabled": "1",
+        "bot_claimed": "0"
+      }
+    ]
+  },
+  "video": "C:\\fdny-decomp\\core\\runs\\2026-10-25-003203-state_snapshot\\run.mp4"
+}
