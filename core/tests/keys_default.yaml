@@ -1,11 +1,16 @@
 name: keys_default
 # Owner request 2026-10-22 (D37): every feature has a default letter key, no F keys.
-# Presses each key in a level (game focused, console closed) and checks its effect:
-# J fd_juggle, H fd_hud_player, G fd_hud_warp (the warp HUD), then B / Z its hide /
-# freeze hotkeys, T trigger boxes (off -> on -> on + x-ray -> off), Y fd_triggers_all,
-# K / L teleporter save / load,
-# P pause (free camera; tests/freecam.yaml covers it in full). Practice-only keys are
-# refused under fd_profile run. The `toggle <var>` builtin is what the toggle binds run.
+# This test proves the binds: each default key, pressed in a level (game focused,
+# console closed), dispatches its command ("bind: <key> -> <command>"), and J's toggle
+# really runs (the `toggle <var>` builtin, both ways). What each command then does is
+# the feature's own test: juggle fire_juggle, H hud_player, G / B / Z / X the glitch
+# tests, T / Y triggers, K / L tp_teleport, P freecam. Which key maps to which command
+# is checked against the source by docs_registry.
+# Narrowed by the suite review (2026-10-24): it used to re-check every feature's effect
+# (24 key presses, 22 fixed waits), so a failure didn't say whether the bind or the
+# feature broke. Kept here because nothing else covers them: G off and on shows the boxes
+# even after a B hide (owner 2026-10-22); FDNYCore.cfg holds only changed binds; a
+# practice-only key is refused under fd_profile run.
 pre_files:
   - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
   - {src: null, dst: FDNYCore.cfg}
@@ -17,7 +22,7 @@ steps:
   - assert_log: {contains: "toggle fd_juggle"}
   - focus: {}
   - wait_s: 1
-  # J: fire-juggling arrow
+  # every default bind dispatches; toggles pressed twice to leave things as they were
   - key: {key: j, hold: 0.1}
   - wait_s: 0.5
   - assert_log: {contains: "bind: j -> toggle fd_juggle"}
@@ -25,32 +30,40 @@ steps:
   - key: {key: j, hold: 0.1}
   - wait_s: 0.5
   - assert_pipe_stat: {cmd: juggle, key: enabled, equals: 0}
-  # H: player HUD
   - key: {key: h, hold: 0.1}
-  - wait_s: 0.5
-  - assert_log: {contains: "console> fd_hud_player 1"}
-  - screenshot: hud_on
+  - wait_s: 0.2   # a release the core sees (it polls once per frame)
   - key: {key: h, hold: 0.1}
+  - wait_s: 0.2   # a release the core sees (it polls once per frame)
+  - key: {key: t, hold: 0.1}
+  - wait_s: 0.2   # a release the core sees (it polls once per frame)
+  - key: {key: t, hold: 0.1}
+  - wait_s: 0.2   # a release the core sees (it polls once per frame)
+  - key: {key: t, hold: 0.1}
+  - wait_s: 0.2   # a release the core sees (it polls once per frame)
+  - key: {key: y, hold: 0.1}
+  - wait_s: 0.2   # a release the core sees (it polls once per frame)
+  - key: {key: y, hold: 0.1}
+  - wait_s: 0.2   # a release the core sees (it polls once per frame)
+  - key: {key: k, hold: 0.1}
+  - wait_s: 0.2   # a release the core sees (it polls once per frame)
+  - key: {key: l, hold: 0.1}
   - wait_s: 0.5
-  - assert_log: {contains: "console> fd_hud_player 0"}
-  # G: collision HUD, then its own hotkeys B (hide) and Z (freeze)
+  - assert_log_count: {contains: "bind: h -> toggle fd_hud_player", equals: 2}   # every press seen
+  - assert_log_count: {contains: "bind: t -> fd_triggers_toggle", equals: 3}
+  - assert_log_count: {contains: "bind: y -> toggle fd_triggers_all", equals: 2}
+  - assert_log: {contains: "bind: k -> fd_tp_save"}
+  - assert_log: {contains: "bind: l -> fd_tp_load"}
+  - assert_log: {contains: "console> trigger boxes: off"}   # T three times: back to off
+  - key: {key: p, hold: 0.1}
+  - wait_pipe: {cmd: pause, key: active, equals: 1, timeout: 3}
+  - key: {key: p, hold: 0.1}
+  - wait_pipe: {cmd: pause, key: active, equals: 0, timeout: 3}
+  - assert_log: {contains: "bind: p -> fd_pause_toggle"}
+  # G on, B hides the boxes; G off and on again always shows them (owner 2026-10-22)
   - key: {key: g, hold: 0.1}
   - wait_s: 1
-  - assert_log: {contains: "console> fd_hud_warp 1"}
+  - assert_log: {contains: "bind: g -> toggle fd_hud_warp"}
   - assert_log: {contains: "glitch: hooks installed"}
-  - key: {key: b, hold: 0.2}
-  - wait_s: 0.3
-  - assert_pipe_stat: {cmd: glitch_box, key: hidden, equals: 1}
-  - key: {key: b, hold: 0.2}
-  - wait_s: 0.3
-  - assert_pipe_stat: {cmd: glitch_box, key: hidden, equals: 0}
-  - key: {key: z, hold: 0.2}
-  - wait_s: 0.3
-  - assert_pipe_stat: {cmd: glitch_box, key: frozen, equals: 1}
-  - key: {key: z, hold: 0.2}
-  - wait_s: 0.3
-  - assert_pipe_stat: {cmd: glitch_box, key: frozen, equals: 0}
-  # G off and on again always shows the boxes, even after a B hide (owner 2026-10-22)
   - key: {key: b, hold: 0.2}
   - wait_s: 0.3
   - assert_pipe_stat: {cmd: glitch_box, key: hidden, equals: 1}
@@ -62,39 +75,6 @@ steps:
   - assert_pipe_stat: {cmd: glitch_box, key: hidden, equals: 0}
   - key: {key: g, hold: 0.1}
   - wait_s: 0.5
-  # T cycles off -> on -> on + x-ray -> off; Y every trigger
-  - key: {key: t, hold: 0.1}
-  - wait_s: 0.5
-  - assert_log: {contains: "bind: t -> fd_triggers_toggle"}
-  - assert_log: {contains: "console> trigger boxes: on"}
-  - key: {key: y, hold: 0.1}
-  - wait_s: 0.5
-  - assert_log: {contains: "console> fd_triggers_all 1"}
-  - key: {key: t, hold: 0.1}
-  - wait_s: 0.5
-  - assert_log: {contains: "console> trigger boxes: on, x-ray"}
-  - screenshot: triggers_all_xray
-  - key: {key: y, hold: 0.1}
-  - key: {key: t, hold: 0.1}
-  - wait_s: 0.5
-  - assert_log: {contains: "console> trigger boxes: off"}
-  # K / L: teleporter save, walk away, load
-  - key: {key: k, hold: 0.1}
-  - wait_s: 0.5
-  - assert_log: {contains: "tp: saved"}
-  - sample_mem: {name: player.pos_x, as: tp_x}
-  - sample_mem: {name: player.pos_z, as: tp_z}
-  - key: {key: w, hold: 1.5}
-  - assert_moved: {x: tp_x, z: tp_z, min: 50}
-  - key: {key: l, hold: 0.1}
-  - wait_s: 0.5
-  - assert_log: {contains: "tp: loaded"}
-  - assert_same_pos: {x: tp_x, z: tp_z, tolerance: 1}
-  # P: pause and resume
-  - key: {key: p, hold: 0.1}
-  - wait_pipe: {cmd: pause, key: active, equals: 1, timeout: 3}
-  - key: {key: p, hold: 0.1}
-  - wait_pipe: {cmd: pause, key: active, equals: 0, timeout: 3}
   # FDNYCore.cfg holds only changes: the variables set above, not the default binds
   # (owner 2026-10-22: every default bind was written out); a changed default is written
   - console: "fd_writeconfig"

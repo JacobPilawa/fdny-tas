@@ -1,4 +1,4 @@
-// Tests: tests/window_alttab.yaml tests/window_parity_reference.yaml
+// Tests: tests/window_alttab.yaml tests/ondemand/window_parity_reference.yaml
 // User: Window -- keeps the mouse cursor in the game window only while the game is focused (the alt-tab fix; off while alttabfix.asi is installed).
 // The game calls SetCursorPos(200, 200) every frame from
 // GameControls::PollFrame (0x00439347: push 200; push 200; call [SetCursorPos]),
