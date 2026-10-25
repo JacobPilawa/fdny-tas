@@ -1,5 +1,6 @@
 name: glitch_records
-# Item 11a: fd_hud_glitch installs the collision overlay's 8 hooks inside the
+# Item 11a: fd_hud_warp (the warp HUD; fd_hud_glitch before 0.19, still an alias)
+# installs the collision overlay's 8 hooks inside the
 # game (same caves, same 128-byte records). Records flow in a level: player
 # collision traces and the per-frame tick (commits are rare on flat ground and
 # are validated by the 11b replay); hooks toggle off

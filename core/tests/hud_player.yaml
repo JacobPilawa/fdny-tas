@@ -1,7 +1,8 @@
 name: hud_player
 # Item 10: fd_hud_player draws every field of the old Python player overlay
 # in-game (X/Y/Z position, player state, screen state, X/Y/Z velocity, XY
-# speed) through Genesis' geEngine_Printf, and each drawn value equals memory
+# speed) in its textdraw panel (it used geEngine_Printf until text moved in-frame,
+# 0.15), and each drawn value equals memory
 # within one frame: drawn == same-frame snapshot value (also while moving),
 # and drawn == direct memory once the player is at rest. Screenshots.
 pre_files:

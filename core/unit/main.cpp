@@ -24,6 +24,7 @@ void TestAddrBadSignature();
 void TestAddrPatchSiteOccupied();
 void TestAddrResolveChain();
 void TestAddrFieldOffsets();
+void TestCrashlogReportsFault();
 
 namespace {
 
@@ -39,6 +40,7 @@ const Test kTests[] = {
     {"addr_patch_site_occupied", TestAddrPatchSiteOccupied},
     {"addr_resolve_chain", TestAddrResolveChain},
     {"addr_field_offsets", TestAddrFieldOffsets},
+    {"crashlog_reports_fault", TestCrashlogReportsFault},  // last: it leaves the handler installed
 };
 
 FILE* g_box = nullptr;
