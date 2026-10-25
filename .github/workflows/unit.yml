@@ -1,0 +1,48 @@
+# Unit tests (core/unit, D47) on every push and pull request: the core's pure logic built
+# for the host and run without the game (address table, warp HUD analysis parity against the
+# original Python overlay), plus the tools (arch_check rules, docgen). The game-driven suite
+# (core/tests) still needs the VM.
+name: unit
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  unit:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Zig version (from environment/config.ps1)
+        id: zig
+        shell: pwsh
+        run: |
+          . ./environment/config.ps1
+          "version=$ZigVersion" >> $env:GITHUB_OUTPUT
+
+      - name: Cache Zig
+        uses: actions/cache@v4
+        with:
+          path: |
+            environment/local/downloads
+            environment/local/tools/zig
+          key: zig-${{ steps.zig.outputs.version }}
+
+      - name: Install Zig
+        shell: pwsh
+        run: |
+          if (Get-ChildItem environment/local/tools/zig -Recurse -Filter zig.exe -ErrorAction SilentlyContinue) {
+            Write-Host "Zig ${{ steps.zig.outputs.version }} restored from the cache"
+          } else {
+            ./environment/scripts/get_zig.ps1
+            ./environment/scripts/install_zig.ps1
+          }
+
+      - name: Unit tests
+        shell: pwsh
+        run: ./core/unit/run.ps1

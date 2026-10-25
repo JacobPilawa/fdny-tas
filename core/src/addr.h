@@ -15,6 +15,10 @@ namespace fdcore::addr {
 void Init(const char* exeSha256, const char* genesisSha256, uintptr_t exeBase,
           uintptr_t genesisBase);
 
+#ifdef FDCORE_UNIT
+void ResetForUnitTest();  // core/unit runs Init several times in one process
+#endif
+
 bool VersionKnown();
 const char* VersionName();
 bool Usable(Id id);          // version known and this entry's signature verified

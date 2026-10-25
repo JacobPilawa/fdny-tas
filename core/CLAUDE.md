@@ -89,6 +89,7 @@ Every drawing belongs to a gfx layer, run in this fixed order each frame (D40, `
 
 1. `.\build.ps1` builds both configs (arch_check + `-Werror` clean).
 2. **Tests:** a new or changed behaviour gets a test in `tests/` (named in the module's `// Tests:` line). Never weaken or delete a test to make it pass; a flaky or environmental failure is rerun and reported as such, with evidence (e.g. the same failure on the previous version). Run the affected tests, and the full suite (`python -I harness/run_test.py --suite`) before a version bump.
+   - **Unit tests first where they can reach (D47):** logic that doesn't need the running game (parsing, math, table logic, the warp HUD analysis, the tools) is tested in `core/unit` (`.\unit\run.ps1`, seconds, also in CI on every push). Game-driven tests in `tests/` prove the behaviour in the game; don't use them to test arithmetic.
    - The game runs at the display's refresh rate (about 57 fps on the VM console, 34 on a 32 Hz remote session), so a test never asserts an absolute frame rate: compare against a baseline in the same run (D46, `assert_sample_ratio`).
    - Known environmental: `state_snapshot` can race when a fire spreads or a roaming bank victim moves between the two reads (0.16.1 and 0.17.0 alike).
 3. **Evidence** in `evidence/<topic>/`: logs, screenshots, measurements, plus a README for anything investigative (spikes: what was tried, numbers, verdict).

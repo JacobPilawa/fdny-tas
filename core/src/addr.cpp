@@ -160,6 +160,13 @@ void Init(const char* exeSha256, const char* genesisSha256, uintptr_t exeBase,
     else log::Warn("signatures: %d/%d OK", ok, total);
 }
 
+#ifdef FDCORE_UNIT
+void ResetForUnitTest() {
+    g_version = nullptr;
+    for (int i = 0; i < kCount; ++i) g_usable[i] = g_earlyVerified[i] = false;
+}
+#endif
+
 bool VersionKnown() { return g_version != nullptr; }
 const char* VersionName() { return g_version ? g_version->name : "unknown"; }
 bool Usable(Id id) { return g_version && g_usable[static_cast<int>(id)]; }
