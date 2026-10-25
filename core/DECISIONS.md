@@ -214,6 +214,21 @@ later session might "simplify" away; change one only with the owner's approval
 
 ## Process
 
+- **D49 Replay reads recordings the fdny-maps website's way; lines are a gfx block** (owner 2026-10-25).
+  - **Data:** `replay_data.cpp` follows `map_explorer/recording-data.js`:
+    - samples in file order, positions untouched;
+    - the same gap rule (500 ms / 2000 u);
+    - the same box defaults, and the same interpolation.
+    - Facing is blended without trigonometry (normalised blend), which matches at the recorder's ~30 ms steps.
+    - Unit-tested on the reference recording against numbers computed with the site's rule.
+  - **Colours follow the owner's spec, not the site's:**
+    - one run fades red → blue → green over its duration (the site uses a violet → red hue ramp);
+    - several on a map are ranked by duration, green (fastest) → blue → red (slowest). The site colours by upload order.
+  - **Drawing:**
+    - `gfx::SubmitWorldLines` draws each segment as a camera-facing strip, with the world boxes' tiles, layers and per-point colours. The glow is a wide 25% strip under each line.
+    - Measured on the reference run at 64x (the whole trace drawn, x-ray): frames 0.997 of the trace-cleared rate.
+    - The owner allowed decimating to points every 0.25–0.5 s if needed. It wasn't.
+  - **Rejected:** additive blending (no blend mode exposed by the poly API the core uses); decimating the data (both sides must draw the same samples).
 - **D48 Game tests share sessions; launch and exit only when a session can't be reused** (owner 2026-10-25).
   - **What:**
     - `harness/fdh/session.py` groups tests by what's fixed at launch: the build, the game cfg, files read at load (.asi, the address override, autoexec.cfg), env switches, a restart, and the Training setup. One game runs per group.

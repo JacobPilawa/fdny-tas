@@ -149,4 +149,18 @@ struct WorldBoxStats {
 };
 WorldBoxStats LastWorldBoxStats();
 
+// --- World lines -------------------------------------------------------------------------
+// Polylines in world space (recording traces, the replay's box edges and arrow). Each
+// segment is a strip widthPx wide facing the camera, coloured per point (blended along the
+// segment), drawn with the world-box tiles and alpha. Same layers and lifetime as world boxes.
+struct WorldLine {
+    const float (*pts)[3];
+    const uint32_t* rgb;  // one per point, 0xRRGGBB
+    int n;                // points; n - 1 segments
+    float widthPx;
+    uint8_t alpha;        // kept to 4 bits like the boxes
+};
+void SubmitWorldLines(const WorldLine* lines, int n, Layer layer);
+int LastWorldLineSegments();  // segments drawn last frame, both layers
+
 } // namespace fdcore::gfx

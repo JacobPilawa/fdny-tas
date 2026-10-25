@@ -25,6 +25,9 @@ void TestAddrPatchSiteOccupied();
 void TestAddrResolveChain();
 void TestAddrFieldOffsets();
 void TestCrashlogReportsFault();
+void TestReplayParsesSample();
+void TestReplayRejectsBadFiles();
+void TestReplayColors();
 
 namespace {
 
@@ -40,6 +43,9 @@ const Test kTests[] = {
     {"addr_patch_site_occupied", TestAddrPatchSiteOccupied},
     {"addr_resolve_chain", TestAddrResolveChain},
     {"addr_field_offsets", TestAddrFieldOffsets},
+    {"replay_parses_sample", TestReplayParsesSample},
+    {"replay_rejects_bad_files", TestReplayRejectsBadFiles},
+    {"replay_colors", TestReplayColors},
     {"crashlog_reports_fault", TestCrashlogReportsFault},  // last: it leaves the handler installed
 };
 

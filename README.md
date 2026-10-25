@@ -25,6 +25,7 @@ your changes are saved (FDNYCore.cfg). **Practice**: refused while `fd_profile` 
 | **Y** | on / off: also draw every other trigger, grey (zones, hints, doors); 0 = only rescue zones and exits | `toggle fd_triggers_all` |  |
 | **J** | on / off: fire-juggling arrow: where a carried survivor lands if you pass out now; 0 = off | `toggle fd_juggle` | yes |
 | **P** | pause / resume with the free camera (fd_pause; default key P) | `fd_pause_toggle` | yes |
+| **V** | play / pause the loaded recordings for this map; from the end, start again (key V) | `fd_replay_toggle` | yes |
 
 **Feature keys**: read by the feature itself while it is on; they can't be rebound.
 
@@ -58,6 +59,7 @@ your changes are saved (FDNYCore.cfg). **Practice**: refused while `fd_profile` 
 - **Trigger boxes**: draws the map's rescue zones and exits (and optionally every trigger) as boxes. (variables `fd_triggers`, `fd_triggers_all`, `fd_triggers_xray`; commands `fd_triggers_toggle`, `fd_triggers_list`; keys T, Y)
 - **Fire juggling**: an arrow showing where a carried survivor lands if you pass out now. (variables `fd_juggle`; keys J)
 - **Pause and free camera**: freeze the game and fly a camera around; the view returns to the player on resume. (variables `fd_pause`, `fd_freecam_speed`, `fd_freecam_sens`; commands `fd_pause_toggle`; keys P, W S, A D, E Q, SHIFT, CTRL, MOUSE)
+- **Replay**: plays recorder .jsonl files back in the level: the trace, the player's box and a facing arrow. (variables `fd_replay_speed`, `fd_replay_xray`; commands `fd_replay_load`, `fd_replay_clear`, `fd_replay_toggle`, `fd_replay_list`; keys V)
 - **Recorder**: automatically save player and victim trajectories as fdny-trajectory-v1 JSONL files in Recordings beside FDNYCore.asi. (variables `fd_record`, `fd_record_victims`, `fd_record_directory`; keys W A S D UPARROW LEFTARROW DOWNARROW RIGHTARROW C CTRL SPACE SHIFT MOUSE1 MOUSE2 1 2 3)
 
 ## Variables
@@ -90,6 +92,8 @@ when changed. **Practice**: refused while `fd_profile` is `run`.
 | `fd_pause` | `0` | 1 = freeze the game and fly a free camera (0 = resume, view back to the player) |  | yes | Pause and free camera |
 | `fd_freecam_speed` | `400` | free camera speed in units/s (400 = the run speed); Shift x4, Ctrl x0.25 | yes |  | Pause and free camera |
 | `fd_freecam_sens` | `0.075` | free camera mouse look in degrees per mouse count; higher = faster | yes |  | Pause and free camera |
+| `fd_replay_speed` | `1` | playback speed: 0.25 / 0.5 / 1 / 2 / 4 (any value > 0) | yes | yes | Replay |
+| `fd_replay_xray` | `0` | 1 = the replay shows through walls; 0 = walls hide it | yes | yes | Replay |
 | `fd_record` | `0` | 1 = automatically record each stage attempt to JSONL; 0 = off | yes |  | Recorder |
 | `fd_record_victims` | `1` | 1 = include victim tracks in new recordings; 0 = player only | yes |  | Recorder |
 | `fd_record_directory` | `Recordings` | output directory, absolute or relative to FDNYCore.asi; changes start a new recording | yes |  | Recorder |
@@ -119,6 +123,10 @@ when changed. **Practice**: refused while `fd_profile` is `run`.
 | `fd_triggers_toggle` | cycle the trigger boxes: off -> on -> on + x-ray -> off (key T) | yes | Trigger boxes |
 | `fd_triggers_list` | list the loaded map's triggers: class, open/shut, name, box | yes | Trigger boxes |
 | `fd_pause_toggle` | pause / resume with the free camera (fd_pause; default key P) | yes | Pause and free camera |
+| `fd_replay_load` | fd_replay_load <file.jsonl>: load a recording (the recordings folder, or a full path); several on one map are drawn together | yes | Replay |
+| `fd_replay_clear` | unload every recording |  | Replay |
+| `fd_replay_toggle` | play / pause the loaded recordings for this map; from the end, start again (key V) | yes | Replay |
+| `fd_replay_list` | list the .jsonl recordings in the recordings folder |  | Replay |
 
 ## Old names
 
