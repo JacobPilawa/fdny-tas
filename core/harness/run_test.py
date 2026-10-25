@@ -4,6 +4,7 @@
   python -I run_test.py --core Release tests/*.yaml
   python -I run_test.py --core none tests/x.yaml         # baseline, core removed
   python -I run_test.py --suite                           # every file in core/tests/
+  python -I run_test.py --ondemand                        # core/tests/ondemand/ (reference runs)
 """
 import argparse
 import glob
@@ -22,10 +23,13 @@ def main():
     ap.add_argument("tests", nargs="*")
     ap.add_argument("--core", default="Debug", choices=["Debug", "Release", "none"])
     ap.add_argument("--suite", action="store_true")
+    ap.add_argument("--ondemand", action="store_true")
     ap.add_argument("--tag", default="")
     ap.add_argument("--game-dir", default=GAME_DIR)
     a = ap.parse_args()
-    paths = sorted(glob.glob(os.path.join(runner.CORE_DIR, "tests", "*.yaml"))) if a.suite else a.tests
+    paths = (sorted(glob.glob(os.path.join(runner.CORE_DIR, "tests", "*.yaml"))) if a.suite else
+             sorted(glob.glob(os.path.join(runner.CORE_DIR, "tests", "ondemand", "*.yaml"))) if a.ondemand else
+             a.tests)
     core = None if a.core == "none" else a.core
     results = []
     for p in paths:

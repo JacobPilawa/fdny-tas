@@ -1,4 +1,4 @@
-// Tests: tests/fov_sets_camera.yaml tests/fov_parity_reference.yaml
+// Tests: tests/fov_sets_camera.yaml tests/ondemand/fov_parity_reference.yaml
 // User: Field of view -- the camera FOV: the classic FOV fix by default, or a fixed angle, Hor+ on wide screens.
 // fov feature (backlog item 6): the camera FOV, as a filter on the core's camera
 // service (which owns the geCamera_SetAttributes hook). Genesis stores Fov raw at
