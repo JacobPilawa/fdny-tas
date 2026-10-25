@@ -47,7 +47,8 @@ class Frame:
 
 def sessions(path):
     """[(frames, ended)] per hook install, in stream order."""
-    data = open(path, "rb").read()
+    with open(path, "rb") as f:
+        data = f.read()
     out = [[[], False]]
     off = 0
     while off + 128 <= len(data):

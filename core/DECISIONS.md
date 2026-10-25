@@ -214,6 +214,21 @@ later session might "simplify" away; change one only with the owner's approval
 
 ## Process
 
+- **D47 Unit tests: core logic built for the host, run without the game** (owner 2026-10-24: "go 1-5", item 1 of the suite review).
+  - **What:**
+    - `core/unit/run.ps1` builds `core/build/unit/fdcore_unit.exe`, an x86 host program, from chosen core sources with `-DFDCORE_UNIT`. `stubs.cpp` stands in for `log`.
+    - It runs the C++ tests, then every `core/unit/test_*.py` (`python -m unittest`).
+    - CI runs it on every push and PR (`.github/workflows/unit.yml`). It takes seconds without the game's maps and about a minute with them (VM).
+  - **First tests:**
+    - **`addr`:** fake exe/Genesis images built from the table's own signatures, covering version by hash, mismatches, Genesis relocation, patch sites taken by another mod, and pointer chains.
+    - **Warp HUD parity:** the replay driver moved to `glitch_replay.cpp`, shared with the game's Debug pipe so both run the same code. Its output is compared with the original Python overlay over seeded fuzz streams.
+    - **`arch_check`:** each rule has a test that seeds one violation of it.
+    - **`docgen`:** the release-notes section the workflow publishes (now `docgen.py notes`; a missing section stops the release) and the sheet.
+  - **Rules:**
+    - A logic change that a unit test can cover gets one there. Game-driven tests (`core/tests`) prove the behaviour in the game.
+    - Production code changes for unit tests only through `#ifdef FDCORE_UNIT` hooks such as `addr::ResetForUnitTest`.
+    - Each unit test was checked to fail when the logic it guards is broken: relocation tolerance off, one log label changed.
+  - **Rejected:** a test framework dependency (a 30-line `unit.h` is enough, and the code under test is freestanding); unit-testing through the game's Debug pipe (that's the 60 s per test this replaces).
 - **D46 Cost tests compare against a baseline in the same run, not a fixed frame rate** (owner 2026-10-24: "Do the tests need to be fps dependent? ... can they be redesigned?", then "implement").
   - **Why:** the game is locked to the display's refresh rate: about 57 fps on the VM console, 34 on a 32 Hz remote display session. `glitch_box_cost` (>= 250 ticks in 6 s) and `text_panels` (>= 300 frames) passed or failed with the session, whatever the code did (`evidence/fps_independent_tests/history.txt`).
   - **What:**

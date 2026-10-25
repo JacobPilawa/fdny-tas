@@ -4,6 +4,7 @@ source on every build, so the player-facing list can't go stale.
     python -I core/tools/docgen.py sheet <out.md> [--asi <FDNYCore.asi>]   # the sheet
     python -I core/tools/docgen.py sheet README.md                         # the source's: the repo README (pre-commit hook)
     python -I core/tools/docgen.py json                                    # what was read
+    python -I core/tools/docgen.py notes <version> [CHANGES.md]            # that version's release notes
 
 What it reads (string literals at the registration calls; adjacent literals joined):
   cmd::Cvar g_x = {"name", "default", "help", readOnly, archive, ...}   + cmd::RegisterCvar(&g_x)
@@ -375,7 +376,22 @@ def sheet(reg, asi=None):
     return "\n".join(L)
 
 
+def release_notes(text, version):
+    """The "## <version>" section of CHANGES.md (up to the next "## "), trimmed; None if
+    there isn't one. The release workflow puts it in the GitHub release's notes (D45)."""
+    m = re.search(rf"(?ms)^## {re.escape(version)}[ \t]*\r?\n(.*?)(?=^## |\Z)", text)
+    return m.group(1).strip() if m else None
+
+
 def main(argv):
+    if argv and argv[0] == "notes" and len(argv) >= 2:
+        path = argv[2] if len(argv) > 2 else os.path.join(REPO, "CHANGES.md")
+        notes = release_notes(open(path, encoding="utf-8").read(), argv[1])
+        if notes is None:
+            print(f"docgen: {path} has no '## {argv[1]}' section (add the release notes)", file=sys.stderr)
+            return 1
+        sys.stdout.write(notes + "\n")
+        return 0
     if not argv or argv[0] not in ("sheet", "json"):
         print(__doc__)
         return 2

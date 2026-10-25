@@ -60,6 +60,10 @@ and don't work around them; if a rule blocks a good design, stop and ask the own
 
 ## 4. Test
 
+- Logic that doesn't need the running game (parsing, math, decisions on data) gets a unit
+  test in `core/unit` (D47): add the source to `run.ps1`'s list, a `Test...` function to
+  `main.cpp`, or a `test_*.py`. Run `.\core\unit\run.ps1`.
+
 - Copy `core/templates/test.yaml` to `core/tests/<name>.yaml` (in the suite). Prove the
   behaviour with assertions (log lines, memory, pipe), not just "no crash". Add
   screenshots for anything visible.

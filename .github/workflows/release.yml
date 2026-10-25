@@ -105,11 +105,11 @@ jobs:
           $tag = '${{ steps.version.outputs.tag }}'
           gh release view $tag 2>$null | Out-Null
           if ($LASTEXITCODE -eq 0) { Write-Host "$tag already released: nothing to do"; exit 0 }
-          # What changed: this version's section of CHANGES.md ("## <version>" up to the next "## ").
+          # What changed: this version's section of CHANGES.md (docgen.py notes; unit-tested in
+          # core/unit/test_docgen.py). No section = no release: the notes are part of the bump.
           $v = '${{ steps.version.outputs.version }}'
-          $changes = ''
-          $m = [regex]::Match((Get-Content CHANGES.md -Raw), "(?ms)^## $([regex]::Escape($v))\b[^\n]*\n(.*?)(?=^## |\z)")
-          if ($m.Success) { $changes = $m.Groups[1].Value.Trim() } else { Write-Host "CHANGES.md has no '## $v' section" }
+          $changes = (python -I core/tools/docgen.py notes $v) -join "`n"
+          if ($LASTEXITCODE -ne 0) { throw "CHANGES.md has no '## $v' section: add the release notes" }
           $notes = @"
           FDNYCore $v, built from ${{ github.sha }} (${{ github.ref_name }}).
 
