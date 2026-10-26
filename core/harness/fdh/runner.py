@@ -832,6 +832,7 @@ class Run:
             if os.path.exists(dst):  # a real game file: restore it afterwards
                 shutil.copy2(dst, backup)
             if f.get("src"):
+                os.makedirs(os.path.dirname(dst), exist_ok=True)  # e.g. a recordings folder
                 shutil.copy2(os.path.join(CORE_DIR, f["src"]), dst)
             elif os.path.exists(dst):  # src: null -> the file must be absent for the test
                 os.remove(dst)

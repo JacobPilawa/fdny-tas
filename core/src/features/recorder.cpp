@@ -10,6 +10,7 @@
 #include "addr.h"
 #include "binds.h"
 #include "cmd.h"
+#include "console.h"
 #include "entities.h"
 #include "gen/version_gen.h"
 #include "hooks.h"
@@ -144,11 +145,8 @@ void Start(void* player) {
     }
     g_map[i] = 0;
     static char directory[kPathCap];
-    const char* configured = g_directory.value;
-    bool absolute = configured[0] && (configured[1] == ':' || configured[0] == '\\' || configured[0] == '/');
-    if (!configured[0] || lstrlenA(g_gameDir) + lstrlenA(configured) + 1 >= kPathCap) { Fail("invalid output directory"); return; }
-    if (absolute) lstrcpyA(directory, configured);
-    else { lstrcpyA(directory, g_gameDir); lstrcatA(directory, configured); }
+    // The same resolution as the replay's (console::GamePath, D51).
+    if (!g_directory.value[0] || !console::GamePath(g_directory.value, directory, sizeof(directory))) { Fail("invalid output directory"); return; }
     if (!CreateDirectoryA(directory, nullptr) && GetLastError() != ERROR_ALREADY_EXISTS) { Fail("cannot create output directory"); return; }
     SYSTEMTIME utc; GetSystemTime(&utc);
     wsprintfA(g_path, "%s\\%s_%04u-%02u-%02uT%02u-%02u-%02u.%03uZ_pid%lu_run%04lu.jsonl",

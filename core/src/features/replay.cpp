@@ -1,5 +1,5 @@
 // Tests: tests/replay.yaml unit/test_replay.cpp
-// User: Replay -- plays recorder .jsonl files back in the level: the trace, the player's box and a facing arrow.
+// User: Replay -- plays your recorded runs back in the level (trace, box, facing arrow): V plays this map's best and latest run, fd_replay picks from a list, fd_replay_ghost races one each spawn.
 // replay feature (owner request 2026-10-25): the fdny-maps website's recording playback
 // (map_explorer/recording.js), in the game. The data is read the site's way (replay_data.h),
 // so both draw the same trace. Colours (owner spec, not the site's): one recording fades red ->
@@ -9,19 +9,24 @@
 // world lines and boxes, hidden by walls; fd_replay_xray adds a dimmed copy over walls (D50).
 // The line is narrower with distance, half as wide in the air, has a white tick every second,
 // and is drawn through the samples it needs (replay_data's Simplify; all are used for playback).
+// Choosing runs without file names (D51): V loads this map's best finished and latest run,
+// fd_replay opens a picker, fd_replay_ghost starts a run with each spawn.
 #include <windows.h>
 #include <xmmintrin.h>
 
 #include "binds.h"
 #include "cmd.h"
 #include "console.h"
+#include "entities.h"
 #include "gfx.h"
 #include "hooks.h"
 #include "log.h"
 #include "modules.h"
+#include "pause.h"
 #include "replay_data.h"
 #include "state.h"
 #include "testpipe.h"
+#include "textdraw.h"
 
 namespace fdcore::replay {
 namespace {
@@ -126,25 +131,32 @@ void FreeRec(Rec& x) {
 
 void* Alloc(int bytes) { return VirtualAlloc(nullptr, bytes > 0 ? bytes : 1, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE); }
 
+// A file in the recordings folder (where the recorder writes: fd_record_directory, resolved
+// like the recorder does, console::GamePath; D51), or name itself when it's a full path.
 void Path(const char* name, char* out) {
-    const bool abs = name[0] && (name[1] == ':' || name[0] == '\\');
-    if (abs) {
+    out[0] = 0;
+    if (name[0] && (name[1] == ':' || name[0] == '\\' || name[0] == '/')) {
         lstrcpynA(out, name, MAX_PATH);
         return;
     }
-    const cmd::Cvar* dir = cmd::FindCvar("fd_record_directory");  // where the recorder writes
-    const char* sub = dir && dir->value[0] ? dir->value : "Recordings";
-    const bool subAbs = sub[1] == ':' || sub[0] == '\\';
-    wsprintfA(out, "%s%s\\%s", subAbs ? "" : console::GameDir(), sub, name);
+    const cmd::Cvar* dir = cmd::FindCvar("fd_record_directory");
+    char folder[MAX_PATH];
+    if (!console::GamePath(dir && dir->value[0] ? dir->value : "Recordings", folder, sizeof(folder))) return;
+    if (lstrlenA(folder) + 1 + lstrlenA(name) >= MAX_PATH) return;
+    wsprintfA(out, "%s\\%s", folder, name);
 }
 
-void CmdLoad(int argc, const char* const* argv) {
-    if (argc < 2) return console::Print("usage: fd_replay_load <file.jsonl> (in the recordings folder, or a full path)");
-    if (g_nRec >= kMaxRec) return console::Print("fd_replay_load: %d recordings loaded already (fd_replay_clear)", kMaxRec);
+HANDLE OpenRead(const char* path) {
+    return CreateFileA(path, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
+}
+
+// Loads a recording (a name in the recordings folder, or a full path); messages to the console.
+bool Load(const char* name) {
+    if (g_nRec >= kMaxRec) return console::Print("replay: %d recordings loaded already (fd_replay_clear)", kMaxRec), false;
     char path[MAX_PATH];
-    Path(argv[1], path);
-    HANDLE f = CreateFileA(path, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, OPEN_EXISTING, 0, nullptr);
-    if (f == INVALID_HANDLE_VALUE) return console::Print("fd_replay_load: cannot open %s", path);
+    Path(name, path);
+    HANDLE f = OpenRead(path);
+    if (f == INVALID_HANDLE_VALUE) return console::Print("replay: cannot open %s", path), false;
     const DWORD size = GetFileSize(f, nullptr);
     char* text = static_cast<char*>(Alloc(static_cast<int>(size) + 1));
     DWORD got = 0;
@@ -156,7 +168,7 @@ void CmdLoad(int argc, const char* const* argv) {
     if (text) VirtualFree(text, 0, MEM_RELEASE);
     if (!ok) {
         d::Free(&x.r);
-        return console::Print("fd_replay_load: %s: %s", path, read ? err : "cannot read");
+        return console::Print("replay: %s: %s", path, read ? err : "cannot read"), false;
     }
     // One block: positions, colours, run starts, kept samples, the frame's line (up to one
     // extra point per run), Simplify's work space, then the byte arrays.
@@ -164,7 +176,7 @@ void CmdLoad(int argc, const char* const* argv) {
     x.pts = static_cast<float(*)[3]>(Alloc(n * (12 + 4 + 4 + 4 + 2 * (12 + 4 + 1) + 8 + 1 + 1)));
     if (!x.pts) {
         d::Free(&x.r);
-        return console::Print("fd_replay_load: out of memory");
+        return console::Print("replay: out of memory"), false;
     }
     x.dpts = x.pts + n;
     x.rgb = reinterpret_cast<uint32_t*>(x.dpts + 2 * n);
@@ -198,26 +210,95 @@ void CmdLoad(int argc, const char* const* argv) {
     x.nTicks = 0;
     for (float t = x.tickStep; t <= x.r.duration && x.nTicks < kMaxTicks; t += x.tickStep)
         __builtin_memcpy(x.tick[x.nTicks++], d::FrameAt(x.r, t).pos, sizeof(x.tick[0]));
-    lstrcpynA(x.file, argv[1], sizeof(x.file));
+    lstrcpynA(x.file, name, sizeof(x.file));
     ++g_nRec;
     Recolor();
     g_time = 0, g_playing = false;
-    console::Print("fd_replay_load: %s: map %s, %d samples, %ld.%03ld s, %d line(s)", argv[1], x.r.stage, n,
+    console::Print("replay: loaded %s: map %s, %d samples, %ld.%03ld s, %d line(s)", name, x.r.stage, n,
                    static_cast<long>(x.r.duration) / 1000, static_cast<long>(x.r.duration) % 1000, x.nRuns);
     log::Info("replay: loaded %s (map %s, %d samples, %ld ms, %d runs)", path, x.r.stage, n,
               static_cast<long>(x.r.duration), x.nRuns);
     log::Info("replay: line through %d of %d samples, %d ticks", x.nKept, n, x.nTicks);
+    return true;
+}
+
+void CmdLoad(int argc, const char* const* argv) {
+    if (argc < 2) return console::Print("usage: fd_replay_load <file.jsonl> (in the recordings folder, or a full path)");
+    Load(argv[1]);
 }
 
 // Cleared recordings are freed at the next frame end: the world layer draws the line list
 // submitted at the previous frame end, which points into them, until then.
-Rec g_cleared[kMaxRec];
+Rec g_cleared[2 * kMaxRec];
 int g_nCleared = 0;
 
+void Unload(int i) {
+    if (g_nCleared < 2 * kMaxRec) g_cleared[g_nCleared++] = g_rec[i];
+    for (int j = i; j + 1 < g_nRec; ++j) g_rec[j] = g_rec[j + 1];
+    g_rec[--g_nRec] = Rec{};
+    Recolor();
+}
+
+void ClearAll() {
+    while (g_nRec) Unload(g_nRec - 1);
+    g_time = 0, g_playing = false;
+}
+
 void CmdClear(int, const char* const*) {
-    for (int i = 0; i < g_nRec && g_nCleared < kMaxRec; ++i) g_cleared[g_nCleared++] = g_rec[i], g_rec[i] = Rec{};
-    g_nRec = 0, g_time = 0, g_playing = false;
+    ClearAll();
     console::Print("fd_replay_clear: no recordings loaded");
+}
+
+int Loaded(const char* name) {
+    for (int i = 0; i < g_nRec; ++i)
+        if (lstrcmpiA(g_rec[i].file, name) == 0) return i;
+    return -1;
+}
+
+// --- The recordings folder (D51) --------------------------------------------------------
+constexpr int kMaxFiles = 1024, kTailBytes = 65536;
+d::FileInfo g_files[kMaxFiles];
+int g_nFiles = 0;
+char g_tail[kTailBytes];
+
+// Every .jsonl's name; for the files of `map` (if given) also the end of the file
+// (duration, complete). Then which runs were finished.
+void Scan(const char* map) {
+    char pattern[MAX_PATH];
+    Path("*.jsonl", pattern);
+    g_nFiles = 0;
+    WIN32_FIND_DATAA fd;
+    HANDLE h = pattern[0] ? FindFirstFileA(pattern, &fd) : INVALID_HANDLE_VALUE;
+    for (BOOL more = h != INVALID_HANDLE_VALUE; more && g_nFiles < kMaxFiles; more = FindNextFileA(h, &fd)) {
+        d::FileInfo& f = g_files[g_nFiles++];
+        d::ParseName(fd.cFileName, &f);
+        if (!map || !SameMap(f.map, map)) continue;
+        char path[MAX_PATH];
+        Path(f.name, path);
+        HANDLE file = OpenRead(path);
+        if (file == INVALID_HANDLE_VALUE) continue;
+        const DWORD size = GetFileSize(file, nullptr), want = size < kTailBytes ? size : kTailBytes;
+        DWORD got = 0;
+        if (SetFilePointer(file, static_cast<LONG>(size - want), nullptr, FILE_BEGIN) != INVALID_SET_FILE_POINTER &&
+            ReadFile(file, g_tail, want, &got, nullptr))
+            d::ReadTail(g_tail, static_cast<int>(got), &f);
+        CloseHandle(file);
+    }
+    if (h != INVALID_HANDLE_VALUE) FindClose(h);
+    d::MarkFinished(g_files, g_nFiles);
+}
+
+void Seconds(float ms, char* out) { wsprintfA(out, "%ld.%01ld s", static_cast<long>(ms) / 1000, static_cast<long>(ms) % 1000 / 100); }
+
+// Key V with nothing loaded for this map: the best finished run and the latest one.
+bool AutoLoad() {
+    Scan(g_map);
+    const int best = d::Best(g_files, g_nFiles, g_map), latest = d::Latest(g_files, g_nFiles, g_map);
+    log::Info("replay: V on %s: best %s, latest %s", g_map, best >= 0 ? g_files[best].name : "none",
+              latest >= 0 ? g_files[latest].name : "none");
+    if (best >= 0) Load(g_files[best].name);
+    if (latest >= 0 && latest != best) Load(g_files[latest].name);
+    return best >= 0 || latest >= 0;
 }
 
 float VisibleDuration() {
@@ -227,9 +308,94 @@ float VisibleDuration() {
     return dur;
 }
 
-// Key V: play / pause; from the end it starts again.
+// --- The picker (fd_replay; D51) --------------------------------------------------------
+// This map's newest runs (and the best, if older), numbered 1-9; a number shows / hides that
+// run. The game is paused while it's open (game input blocked; the keys are read here).
+constexpr int kRows = 9;
+int g_panel = -1;
+bool g_pickerOpen = false, g_pickerPaused = false;
+int g_row[kRows], g_nRows = 0;
+bool g_digitDown[kRows];
+
+void FillPicker() {
+    static char lines[kRows + 3][textdraw::kLineLen];
+    const char* ptrs[kRows + 3];
+    int n = 0;
+    wsprintfA(lines[n++], "Replays on %s: 1-9 show / hide, V plays, fd_replay closes", g_map);
+    const int best = d::Best(g_files, g_nFiles, g_map), latest = d::Latest(g_files, g_nFiles, g_map);
+    for (int r = 0; r < g_nRows; ++r) {
+        const d::FileInfo& f = g_files[g_row[r]];
+        SYSTEMTIME utc = {}, local = {};  // the name's UTC start, shown in local time
+        const char* s = f.stamp;
+        auto num = [](const char* p, int k) { WORD v = 0; for (int i = 0; i < k; ++i) v = static_cast<WORD>(v * 10 + (p[i] - '0')); return v; };
+        utc.wYear = num(s, 4), utc.wMonth = num(s + 5, 2), utc.wDay = num(s + 8, 2);
+        utc.wHour = num(s + 11, 2), utc.wMinute = num(s + 14, 2);
+        if (!SystemTimeToTzSpecificLocalTime(nullptr, &utc, &local)) local = utc;
+        char secs[16];
+        Seconds(f.duration, secs);
+        wsprintfA(lines[n++], "%d %s %02u-%02u %02u:%02u  %8s  %s%s%s", r + 1, Loaded(f.name) >= 0 ? "[x]" : "[ ]", local.wMonth,
+                  local.wDay, local.wHour, local.wMinute, secs, f.finished ? "finished" : "", g_row[r] == best ? "  best" : "",
+                  g_row[r] == latest ? "  latest" : "");
+    }
+    if (!g_nRows) lstrcpyA(lines[n++], "(no complete recordings of this map yet: fd_record 1 records your runs)");
+    for (int i = 0; i < n; ++i) ptrs[i] = lines[i];
+    textdraw::SetLines(g_panel, ptrs, n);
+}
+
+void OpenPicker() {
+    Scan(g_map);
+    // Newest complete runs first; the best keeps the last row if it's older.
+    g_nRows = 0;
+    bool used[kMaxFiles] = {};
+    while (g_nRows < kRows) {
+        int pick = -1;
+        for (int i = 0; i < g_nFiles; ++i)
+            if (!used[i] && g_files[i].complete && SameMap(g_files[i].map, g_map) &&
+                (pick < 0 || lstrcmpA(g_files[i].stamp, g_files[pick].stamp) > 0))
+                pick = i;
+        if (pick < 0) break;
+        used[pick] = true, g_row[g_nRows++] = pick;
+    }
+    const int best = d::Best(g_files, g_nFiles, g_map);
+    if (best >= 0 && !used[best]) g_row[g_nRows == kRows ? kRows - 1 : g_nRows++] = best;
+    for (bool& d : g_digitDown) d = true;  // a key already held doesn't count
+    g_pickerPaused = !pause::Active() && pause::Set(true, "replay picker");
+    g_pickerOpen = true;
+    FillPicker();
+    textdraw::Show(g_panel, true);
+    log::Info("replay: picker on %s: %d run(s)", g_map, g_nRows);
+}
+
+void ClosePicker() {
+    if (!g_pickerOpen) return;
+    g_pickerOpen = false;
+    textdraw::Show(g_panel, false);
+    if (g_pickerPaused && pause::Active()) pause::Set(false, "replay picker");
+    g_pickerPaused = false;
+}
+
+void PickerKeys() {
+    if (!g_pickerOpen) return;
+    if (!pause::Active() && g_pickerPaused) return ClosePicker();  // the level was left
+    for (int r = 0; r < kRows; ++r) {
+        const bool down = (GetAsyncKeyState('1' + r) & 0x8000) != 0;
+        const bool press = down && !g_digitDown[r] && binds::KeysLive();
+        g_digitDown[r] = down;
+        if (!press || r >= g_nRows) continue;
+        const d::FileInfo& f = g_files[g_row[r]];
+        const int i = Loaded(f.name);
+        if (i >= 0) Unload(i);
+        else Load(f.name);
+        FillPicker();
+    }
+}
+
+// Key V: play / pause; from the end it starts again. With nothing loaded for this map, it
+// loads the best finished run and the latest one first; with the picker open, closes it.
 void CmdToggle(int, const char* const*) {
-    if (!g_nRec) return console::Print("replay: nothing loaded (fd_replay_load <file>)");
+    ClosePicker();
+    if (g_map[0] && VisibleDuration() <= 0 && !AutoLoad())
+        return console::Print("replay: no recordings of %s in the recordings folder (fd_record 1 records your runs)", g_map);
     const float dur = VisibleDuration();
     if (dur <= 0) return console::Print("replay: no loaded recording is for this map ('%s')", g_map);
     if (!g_playing && g_time >= dur) g_time = 0;
@@ -248,6 +414,50 @@ void CmdList(int, const char* const*) {
     for (BOOL more = h != INVALID_HANDLE_VALUE; more; more = FindNextFileA(h, &fd)) console::Print("  %s", fd.cFileName), ++n;
     if (h != INVALID_HANDLE_VALUE) FindClose(h);
     console::Print("%d recording(s) in %s; loaded: %d", n, pattern, g_nRec);
+}
+
+// fd_replay: the picker; fd_replay <text>: load the first recording (by name) containing text.
+void CmdReplay(int argc, const char* const* argv) {
+    if (argc < 2) {
+        if (g_pickerOpen) return ClosePicker();
+        if (!g_map[0]) return console::Print("fd_replay: load a level first");
+        return OpenPicker();
+    }
+    Scan(nullptr);
+    const int i = d::Match(g_files, g_nFiles, argv[1]);
+    if (i < 0) return console::Print("fd_replay: no recording's name contains '%s' (fd_replay_list)", argv[1]);
+    if (Loaded(g_files[i].name) < 0) Load(g_files[i].name);
+}
+
+// --- Ghost (fd_replay_ghost; D51) -------------------------------------------------------
+// Each spawn (the recorder starts a run at the same moment), the chosen run of this map
+// starts with you, in time with the recording's clock.
+cmd::Cvar g_fdReplayGhost = {"fd_replay_ghost", "0",
+                             "1 = each time you spawn, your best finished run on the map starts with you (your latest if none "
+                             "is finished); 2 = your latest run; 0 = off", false, true, nullptr, {0}};
+DWORD g_spawnTick = 0;
+bool g_ghostPending = false;
+
+void PlayerInit(void*) { g_spawnTick = GetTickCount(), g_ghostPending = true; }
+
+// From the frame end after the spawn: the recorder has closed the previous run by then.
+void Ghost() {
+    g_ghostPending = false;
+    const char mode = g_fdReplayGhost.value[0];
+    if (mode != '1' && mode != '2') return;
+    ClosePicker();
+    ClearAll();
+    Scan(g_map);
+    int i = mode == '1' ? d::Best(g_files, g_nFiles, g_map) : -1;
+    const char* which = "best";
+    if (i < 0) i = d::Latest(g_files, g_nFiles, g_map), which = "latest";
+    if (i < 0) return log::Info("replay: ghost: no complete recording of %s", g_map);
+    if (!Load(g_files[i].name)) return;
+    g_lastTick = GetTickCount();
+    g_time = static_cast<float>(g_lastTick - g_spawnTick);  // the recording's clock starts at the spawn
+    g_playing = true;
+    log::Info("replay: ghost %s (%s, %ld ms) from %ld ms", g_files[i].name, which, static_cast<long>(g_files[i].duration),
+              static_cast<long>(g_time));
 }
 
 void AddLine(DrawList& L, const gfx::WorldLine& line) {
@@ -320,8 +530,11 @@ void FrameEnd() {
     const state::State& s = state::Current();
     for (; g_nCleared; --g_nCleared) FreeRec(g_cleared[g_nCleared - 1]);
     g_draw[0].nLines = g_draw[0].nBoxes = g_draw[1].nLines = g_draw[1].nBoxes = 0, g_visible = 0, g_ticks = 0;
-    if (s.gameState != 1 || !g_nRec) return;
+    if (s.gameState != 1) return ClosePicker();
     if (!SameMap(g_map, s.map)) lstrcpynA(g_map, s.map, sizeof(g_map)), g_time = 0, g_playing = false;
+    if (g_ghostPending) Ghost();
+    PickerKeys();
+    if (!g_nRec) return;
     const float dur = VisibleDuration();
     if (g_playing) {
         const DWORD now = GetTickCount();
@@ -378,21 +591,30 @@ bool Init() {
     cmd::RegisterCommand("fd_replay_load", "fd_replay_load <file.jsonl>: load a recording (the recordings folder, or a full path); "
                          "several on one map are drawn together", CmdLoad);
     cmd::RegisterCommand("fd_replay_clear", "unload every recording", CmdClear);
-    cmd::RegisterCommand("fd_replay_toggle", "play / pause the loaded recordings for this map; from the end, start again (key V)", CmdToggle);
+    cmd::RegisterCommand("fd_replay_toggle", "play / pause this map's recordings (with none loaded, loads its best finished and latest run first); from the end, start again (key V)", CmdToggle);
     cmd::RegisterCommand("fd_replay_list", "list the .jsonl recordings in the recordings folder", CmdList);
+    cmd::RegisterCommand("fd_replay", "fd_replay: pick this map's runs from a list (pauses); fd_replay <text>: load the first "
+                         "recording whose name contains text", CmdReplay);
+    cmd::RegisterCvar(&g_fdReplayGhost);
     cmd::SetPracticeOnly("fd_replay_speed");
     cmd::SetPracticeOnly("fd_replay_xray");
     cmd::SetPracticeOnly("fd_replay_load");
     cmd::SetPracticeOnly("fd_replay_toggle");
+    cmd::SetPracticeOnly("fd_replay");
+    cmd::SetPracticeOnly("fd_replay_ghost");
     binds::BindDefault("v", "fd_replay_toggle");  // D37
+    binds::DescribeKey("1 2 3 4 5 6 7 8 9", "replay picker: show / hide that run", "while the fd_replay list is open");
+    g_panel = textdraw::Create("replay_picker", textdraw::CENTER, 0, -120, 1, textdraw::C_TEXT);
+    textdraw::Show(g_panel, false);
+    if (!entities::ObservePlayer(PlayerInit, nullptr)) log::Warn("replay: no player observer; fd_replay_ghost off");
     hooks::OnFrameEnd(FrameEnd);
 #ifdef FDCORE_DEBUG
     testpipe::Register("replay", [](const char*, char* resp, int) {
         int us, meanUs;
         gfx::WorldLineCost(&us, &meanUs);
-        wsprintfA(resp, "loaded=%d visible=%d playing=%d time_ms=%ld lines=%d segs=%d ticks=%d us=%d mean_us=%d", g_nRec,
-                  g_visible, g_playing ? 1 : 0, static_cast<long>(g_time), g_draw[0].nLines + g_draw[1].nLines,
-                  gfx::LastWorldLineSegments(), g_ticks, us, meanUs);
+        wsprintfA(resp, "loaded=%d visible=%d playing=%d time_ms=%ld lines=%d segs=%d ticks=%d us=%d mean_us=%d picker=%d rows=%d",
+                  g_nRec, g_visible, g_playing ? 1 : 0, static_cast<long>(g_time), g_draw[0].nLines + g_draw[1].nLines,
+                  gfx::LastWorldLineSegments(), g_ticks, us, meanUs, g_pickerOpen ? 1 : 0, g_nRows);
     });
 #endif
     log::Info("replay: ready (fd_replay_load, key V%s)", gfx::WorldBoxesReady() ? "" : "; no world drawing: off");
@@ -402,4 +624,7 @@ bool Init() {
 } // namespace
 } // namespace fdcore::replay
 
-FDCORE_MODULE(replay, "replay", nullptr, 0, nullptr, &fdcore::replay::Init, 85)
+// After the recorder (100): it creates and enables the player hooks; the replay only adds a
+// listener. Enabling them here first, the recorder's victim hooks were then patched while the
+// game ran through the player hooks, and startup hung (keys_default, 2026-10-26; D51).
+FDCORE_MODULE(replay, "replay", nullptr, 0, nullptr, &fdcore::replay::Init, 110)

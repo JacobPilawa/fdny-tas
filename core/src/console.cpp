@@ -173,6 +173,15 @@ void Print(const char* fmt, ...) {
 }
 
 const char* GameDir() { return g_gameDir; }
+
+bool GamePath(const char* path, char* out, int cap) {
+    const bool absolute = path[0] && (path[1] == ':' || path[0] == '\\' || path[0] == '/');
+    const char* base = absolute ? "" : g_gameDir;
+    if (lstrlenA(base) + lstrlenA(path) + 1 > cap) return false;
+    lstrcpyA(out, base);
+    lstrcatA(out, path);
+    return true;
+}
 const char* CoreVersion() { return g_coreVersion; }
 
 } // namespace fdcore::console
