@@ -966,6 +966,8 @@ class Run:
         import sys as _sys
         _sys.path.insert(0, os.path.join(CORE_DIR, "harness"))
         import compare_runs
+        if self.session:  # a second game exits at once (code 0) while the session's one runs (D48)
+            self.session.close()
         bases = [Run(self.test_path, self.game_dir, None, f"{self.tag}-base{i}").execute() for i in (1, 2)]
         ok, checks = compare_runs.compare(bases[0], bases[1], result)
         failed = [f"{c['check']}: {c['detail']}" for c in checks if not c["pass"]]
