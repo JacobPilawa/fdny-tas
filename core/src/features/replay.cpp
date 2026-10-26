@@ -38,6 +38,8 @@ constexpr int kMaxRec = 8;
 constexpr float kTraceWorld = 8, kTraceMinPx = 3, kTraceMaxPx = 8, kGlowScale = 3.5f;
 constexpr float kEdgeWidth = 2, kArrowWidth = 4;
 constexpr float kSimplifyEps = 0.5f;  // world units: under a pixel from 160 units away
+// The line and ticks, above the recorded origin: halfway to the eye (72 above it; owner 2026-10-26).
+constexpr float kLineLift = 36;
 constexpr float kArrowLen = 100, kHeadLen = 20, kHeadWidth = 10;  // the site's ArrowHelper
 constexpr uint32_t kArrowRgb = 0xFFFF40;  // yellow: reads on sky, walls and the box
 constexpr uint32_t kTickRgb = 0xFFFFFF;
@@ -190,6 +192,7 @@ bool Load(const char* name) {
     x.nRuns = 0;
     for (int i = 0; i < n; ++i) {
         __builtin_memcpy(x.pts[i], x.r.s[i].pos, sizeof(x.pts[i]));
+        x.pts[i][1] += kLineLift;
         if (i == 0 || !d::CanJoin(x.r.s[i - 1], x.r.s[i])) x.runStart[x.nRuns++] = i;
     }
     // Drawn through: Simplify's points plus where the line turns thin, and the sample at half
@@ -208,8 +211,10 @@ bool Load(const char* name) {
     x.tickStep = 1000;
     while (x.r.duration / x.tickStep > kMaxTicks) x.tickStep += 1000;
     x.nTicks = 0;
-    for (float t = x.tickStep; t <= x.r.duration && x.nTicks < kMaxTicks; t += x.tickStep)
-        __builtin_memcpy(x.tick[x.nTicks++], d::FrameAt(x.r, t).pos, sizeof(x.tick[0]));
+    for (float t = x.tickStep; t <= x.r.duration && x.nTicks < kMaxTicks; t += x.tickStep) {
+        __builtin_memcpy(x.tick[x.nTicks], d::FrameAt(x.r, t).pos, sizeof(x.tick[0]));
+        x.tick[x.nTicks++][1] += kLineLift;
+    }
     lstrcpynA(x.file, name, sizeof(x.file));
     ++g_nRec;
     Recolor();
@@ -571,6 +576,7 @@ void FrameEnd() {
             }
             if (last < b) {
                 __builtin_memcpy(x.dpts[o], f.pos, sizeof(x.dpts[o]));
+                x.dpts[o][1] += kLineLift;
                 x.drgb[o] = x.ranked ? x.rgb[last] : TimeRgb(x, g_time), x.dair[o++] = x.air[last];
             }
             AddTrace(x.dpts + from, x.drgb + from, x.dair + from, o - from, xray);
