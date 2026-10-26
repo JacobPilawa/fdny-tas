@@ -141,3 +141,38 @@ void TestReplayColors() {
     d::ArrowDir(s, dir);
     CHECK(Near(dir[1], -1, 1e-3f) && Near(dir[2], 0, 1e-3f));
 }
+
+// The folder index (D51): the recorder's names, the end of a file, finished / best / latest / match.
+void TestReplayIndex() {
+    d::FileInfo f;
+    CHECK(d::ParseName("mbase_2026-10-23T21-11-10.274Z_pid204_run0001.jsonl", &f));
+    CHECK(strcmp(f.map, "mbase") == 0 && strcmp(f.stamp, "2026-10-23T21-11-10.274Z") == 0 && f.pid == 204 && f.run == 1);
+    CHECK(d::ParseName("oil_rig_a_2026-10-23T21-11-10.274Z_pid9_run0012.jsonl", &f) && strcmp(f.map, "oil_rig_a") == 0 && f.run == 12);
+    CHECK(!d::ParseName("my route.jsonl", &f) && strcmp(f.name, "my route.jsonl") == 0 && !f.map[0]);
+    // The reference file's last 64 KB: its last sample (victim lines follow it) and its end record.
+    int len = 0;
+    char* text = ReadFile("reference/original_tools/mbase_2026-10-23T21-11-10.274Z_pid204_run0001.jsonl", &len);
+    CHECK(text != nullptr);
+    if (text) {
+        const int tail = len < 65536 ? len : 65536;
+        d::ParseName("mbase_2026-10-23T21-11-10.274Z_pid204_run0001.jsonl", &f);
+        d::ReadTail(text + len - tail, tail, &f);
+        CHECK(f.complete && Near(f.duration, 33847));
+        free(text);
+    }
+    // One game (pid 7): mbase twice (restart), then bank (mbase's second run finished), then
+    // bank still being written; another game's mbase run with no next run.
+    const char* names[5] = {"mbase_2026-10-24T10-00-00.000Z_pid7_run0001.jsonl", "mbase_2026-10-24T10-01-00.000Z_pid7_run0002.jsonl",
+                            "bank_2026-10-24T10-02-00.000Z_pid7_run0003.jsonl", "mbase_2026-10-25T09-00-00.000Z_pid8_run0001.jsonl",
+                            "Test_A.jsonl"};
+    const float dur[5] = {50000, 40000, 30000, 20000, 0};
+    const bool complete[5] = {true, true, false, true, true};
+    d::FileInfo set[5];
+    for (int i = 0; i < 5; ++i) d::ParseName(names[i], &set[i]), set[i].duration = dur[i], set[i].complete = complete[i];
+    d::MarkFinished(set, 5);
+    CHECK(!set[0].finished && set[1].finished && !set[2].finished && !set[3].finished);
+    CHECK(d::Best(set, 5, "mbase") == 1);    // only the finished one, though run 4 is shorter
+    CHECK(d::Latest(set, 5, "mbase") == 3);  // newest complete
+    CHECK(d::Latest(set, 5, "bank") == -1);  // still being written
+    CHECK(d::Match(set, 5, "MBASE") == 0 && d::Match(set, 5, "pid8") == 3 && d::Match(set, 5, "te") == 4 && d::Match(set, 5, "zz") == -1);
+}

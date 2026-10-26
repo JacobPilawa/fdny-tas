@@ -56,6 +56,29 @@ int Simplify(const Sample* s, int a, int b, float eps, const uint8_t* force, uin
 constexpr int kAirSamples = 3;
 void AirFlags(const Sample* s, int n, uint8_t* air);
 
+// --- The recordings folder (D51) -----------------------------------------------------
+// The recorder names files <map>_<UTC start>_pid<n>_run<n>.jsonl; the index reads that
+// and the end of each file, never the whole file.
+struct FileInfo {
+    char name[112];     // file name, no folder
+    char map[40];       // lower case, from the name ("" if not the recorder's pattern)
+    char stamp[25];     // UTC start "YYYY-MM-DDTHH-MM-SS.mmmZ": sorts by time
+    unsigned pid, run;
+    float duration;     // the last sample's t_ms (ReadTail)
+    bool complete;      // ends with its end record: not being written, not cut off
+    bool finished;      // complete, and the same game's next run is on another map (MarkFinished)
+};
+// Fills name, and map / stamp / pid / run if the name is the recorder's pattern (true).
+bool ParseName(const char* file, FileInfo* out);
+// duration and complete from the file's last bytes.
+void ReadTail(const char* tail, int len, FileInfo* f);
+// A run is finished when the same game's (pid's) next run is on another map: the level
+// was left for the next one (or for another level through the menu, which counts too).
+void MarkFinished(FileInfo* f, int n);
+int Best(const FileInfo* f, int n, const char* map);    // fastest finished run on map, or -1
+int Latest(const FileInfo* f, int n, const char* map);  // newest complete run on map, or -1
+int Match(const FileInfo* f, int n, const char* text);  // first by name containing text (any case), or -1
+
 // Colours (owner spec 2026-10-25): one run fades red -> blue -> green over its duration
 // (f = t / duration); several runs get one colour each by duration, pure green for the
 // fastest through blue to pure red for the slowest.

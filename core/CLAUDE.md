@@ -24,7 +24,7 @@ The log lists `modules: N registered (...)` and one `module <name>: enabled | di
 |---|---|
 | `addr` | address table: verified addresses by Id (never raw addresses) |
 | `hooks` | `Create` (inline hook in a group), `OnFrameBegin` / `OnFrameEnd` / `OnLevelLoad` (`OnFrameEndLate` is gfx's only, R8) |
-| `cmd`, `console`, `binds` | variables, commands, config persistence (`RegisterConfigWriter`), `SetPracticeOnly` (refused in `fd_profile run`), console output; `binds::BindDefault(key, line)` for a feature's default key (the player's binds win), `binds::DescribeKey` for keys a feature reads itself |
+| `cmd`, `console`, `binds` | variables, commands, config persistence (`RegisterConfigWriter`), `SetPracticeOnly` (refused in `fd_profile run`), console output, `console::GamePath` (a folder setting, absolute or under the game folder: the recorder and the replay share it); `binds::BindDefault(key, line)` for a feature's default key (the player's binds win), `binds::DescribeKey` for keys a feature reads itself |
 | `camera` | view size; one FOV filter (`fov` uses it); a world-transform override (`SetWorldOverride`, `LastWorldXForm`: the free camera) |
 | `pause` | `Set(on, why)` / `Active()`: skip the simulation step and pause the game clock; ends itself on leaving the level. `textdraw::HideWhilePaused` for view-relative panels |
 | `state` | the frame's player snapshot |

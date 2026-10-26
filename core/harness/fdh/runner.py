@@ -832,6 +832,7 @@ class Run:
             if os.path.exists(dst):  # a real game file: restore it afterwards
                 shutil.copy2(dst, backup)
             if f.get("src"):
+                os.makedirs(os.path.dirname(dst), exist_ok=True)  # e.g. a recordings folder
                 shutil.copy2(os.path.join(CORE_DIR, f["src"]), dst)
             elif os.path.exists(dst):  # src: null -> the file must be absent for the test
                 os.remove(dst)
@@ -965,6 +966,8 @@ class Run:
         import sys as _sys
         _sys.path.insert(0, os.path.join(CORE_DIR, "harness"))
         import compare_runs
+        if self.session:  # a second game exits at once (code 0) while the session's one runs (D48)
+            self.session.close()
         bases = [Run(self.test_path, self.game_dir, None, f"{self.tag}-base{i}").execute() for i in (1, 2)]
         ok, checks = compare_runs.compare(bases[0], bases[1], result)
         failed = [f"{c['check']}: {c['detail']}" for c in checks if not c["pass"]]

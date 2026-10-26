@@ -5,6 +5,27 @@ Releases section of the repository page); each one's zip carries the key sheet g
 for that build. The release workflow copies a version's `## <version>` section below into
 its release notes (`core/CLAUDE.md`, "Done means").
 
+## 0.20.0
+
+**New: replay** (practice only). This plays your recordings from the recorder back inside the level:
+- **What it shows:**
+  - the path up to the playback time;
+  - a see-through box and a yellow arrow for your position and facing;
+  - a white cube for each second of the run.
+- **Colours:** one run fades red, then blue, then green over its length. Several runs on one map each get one colour, from green for the fastest to red for the slowest.
+- **Line:** it's drawn halfway between your feet and eye level, and at half width while you're in the air. Walls hide it; `fd_replay_xray 1` shows a dimmed copy through them.
+- **V:** play or pause. With nothing loaded, V first loads your best finished run and your latest run on the map.
+- **`fd_replay`:** opens a list of the map's newest runs. It shows the time, the length, and which runs are finished, best or latest. The game pauses while the list is open; keys 1–9 show or hide a run.
+- **`fd_replay <text>`:** loads the first recording whose name contains that text.
+- **`fd_replay_ghost`:** 1 starts your best run each time you spawn, so you race it; 2 starts your latest run.
+- **More controls:** `fd_replay_speed`, `fd_replay_load`, `fd_replay_list`, `fd_replay_clear`.
+- **"Finished" rule:** a run counts as finished when your next recording in the same game session is on another map. Quitting to the menu and starting a different level also counts as finished.
+
+**Fixes:**
+- A line that ran from behind you into the distance could vanish under the floor, for example along a straight hallway.
+- After a replay, the trigger boxes could stop drawing.
+- The recorder and the replay now find the recordings folder the same way.
+
 ## 0.19.0
 
 **Download note:** the GitHub release labelled v0.18.1 (2026-10-24) was built from `main` after

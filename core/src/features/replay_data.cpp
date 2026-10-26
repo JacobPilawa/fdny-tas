@@ -256,6 +256,106 @@ void AirFlags(const Sample* s, int n, uint8_t* air) {
     }
 }
 
+namespace {
+char Lower(char c) { return c >= 'A' && c <= 'Z' ? static_cast<char>(c - 'A' + 'a') : c; }
+bool Digits(const char* p, int n) {
+    for (int i = 0; i < n; ++i)
+        if (p[i] < '0' || p[i] > '9') return false;
+    return true;
+}
+unsigned UInt(const char*& p) {
+    unsigned v = 0;
+    while (*p >= '0' && *p <= '9') v = v * 10 + static_cast<unsigned>(*p++ - '0');
+    return v;
+}
+// The last occurrence of s in [p, end), or null.
+const char* FindLast(const char* p, const char* end, const char* s) {
+    const int n = lstrlenA(s);
+    for (const char* q = end - n; q >= p; --q) {
+        int i = 0;
+        while (i < n && q[i] == s[i]) ++i;
+        if (i == n) return q;
+    }
+    return nullptr;
+}
+} // namespace
+
+bool ParseName(const char* file, FileInfo* out) {
+    *out = FileInfo{};
+    lstrcpynA(out->name, file, sizeof(out->name));
+    // From the end: <map>_YYYY-MM-DDTHH-MM-SS.mmmZ_pid<n>_run<n>.jsonl
+    const char* pid = nullptr;
+    for (const char* p = file; *p; ++p)
+        if (p[0] == '_' && p[1] == 'p' && p[2] == 'i' && p[3] == 'd') pid = p;
+    constexpr int kStamp = 24;
+    if (!pid || pid - file < kStamp + 2) return false;
+    const char* st = pid - kStamp;
+    if (st[-1] != '_' || !Digits(st, 4) || st[4] != '-' || st[10] != 'T' || st[23] != 'Z') return false;
+    const char* p = pid + 4;
+    out->pid = UInt(p);
+    if (p[0] != '_' || p[1] != 'r' || p[2] != 'u' || p[3] != 'n') return false;
+    p += 4;
+    out->run = UInt(p);
+    const int mapLen = static_cast<int>(st - 1 - file);
+    if (mapLen >= static_cast<int>(sizeof(out->map))) return false;
+    for (int i = 0; i < mapLen; ++i) out->map[i] = Lower(file[i]);
+    out->map[mapLen] = 0;
+    lstrcpynA(out->stamp, st, kStamp + 1);
+    return true;
+}
+
+void ReadTail(const char* tail, int len, FileInfo* f) {
+    const char* end = tail + len;
+    f->complete = FindLast(tail, end, "{\"type\":\"end\"") != nullptr;
+    const char* s = FindLast(tail, end, "{\"type\":\"sample\"");
+    if (!s) return;
+    const char* eol = s;
+    while (eol < end && *eol != '\n') ++eol;
+    const char* t = FindLast(s, eol, "\"t_ms\":");  // in that line (victim lines follow it)
+    if (!t) return;
+    t += 7;
+    f->duration = static_cast<float>(UInt(t));
+}
+
+void MarkFinished(FileInfo* f, int n) {
+    for (int i = 0; i < n; ++i) {
+        f[i].finished = false;
+        if (!f[i].map[0] || !f[i].complete) continue;
+        for (int j = 0; j < n; ++j)
+            if (f[j].map[0] && f[j].pid == f[i].pid && f[j].run == f[i].run + 1)
+                f[i].finished = lstrcmpA(f[j].map, f[i].map) != 0;
+    }
+}
+
+int Best(const FileInfo* f, int n, const char* map) {
+    int best = -1;
+    for (int i = 0; i < n; ++i)
+        if (f[i].finished && f[i].duration > 0 && lstrcmpiA(f[i].map, map) == 0 && (best < 0 || f[i].duration < f[best].duration)) best = i;
+    return best;
+}
+
+int Latest(const FileInfo* f, int n, const char* map) {
+    int latest = -1;
+    for (int i = 0; i < n; ++i)
+        if (f[i].complete && f[i].duration > 0 && lstrcmpiA(f[i].map, map) == 0 && (latest < 0 || lstrcmpA(f[i].stamp, f[latest].stamp) > 0)) latest = i;
+    return latest;
+}
+
+int Match(const FileInfo* f, int n, const char* text) {
+    int pick = -1;
+    const int tl = lstrlenA(text);
+    for (int i = 0; i < n; ++i) {
+        bool hit = false;
+        for (const char* p = f[i].name; *p && !hit; ++p) {
+            int k = 0;
+            while (k < tl && p[k] && Lower(p[k]) == Lower(text[k])) ++k;
+            hit = k == tl;
+        }
+        if (hit && (pick < 0 || lstrcmpiA(f[i].name, f[pick].name) < 0)) pick = i;
+    }
+    return pick;
+}
+
 uint32_t TimeColor(float f) {
     if (!(f > 0)) f = 0;
     if (f > 1) f = 1;

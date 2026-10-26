@@ -30,6 +30,7 @@ void TestReplayRejectsBadFiles();
 void TestReplayColors();
 void TestReplaySimplify();
 void TestReplayAirFlags();
+void TestReplayIndex();
 
 namespace {
 
@@ -50,6 +51,7 @@ const Test kTests[] = {
     {"replay_colors", TestReplayColors},
     {"replay_simplify", TestReplaySimplify},
     {"replay_air_flags", TestReplayAirFlags},
+    {"replay_index", TestReplayIndex},
     {"crashlog_reports_fault", TestCrashlogReportsFault},  // last: it leaves the handler installed
 };
 

@@ -130,6 +130,13 @@ Kind Classify(uintptr_t ent, char* name, int nameCap) {
 
 // Rebuilds the trigger list from the entity list (on a map change and every kRescanFrames).
 void Scan(const state::State& s) {
+    // On the same map, exits keep their last open flag, so FrameEnd logs the change even when
+    // it lands on a rescan frame (suite 2026-10-26: the exit opened, "exit ... open" never came).
+    static uintptr_t wasOpen[kMax];
+    int nWas = 0;
+    const bool sameMap = lstrcmpA(g_map, s.map) == 0;
+    for (int i = 0; sameMap && i < g_n; ++i)
+        if (g_trig[i].kind == K_EXIT && g_trig[i].open) wasOpen[nWas++] = g_trig[i].ent;
     uintptr_t head = 0, vtbl = 0;
     uint32_t node = 0;
     int n = 0;
@@ -150,7 +157,8 @@ void Scan(const state::State& s) {
             __builtin_memcpy(t.box, box, sizeof(box));
             t.kind = Classify(ent, t.name, sizeof(t.name));
             uint8_t open = 0;
-            t.open = t.kind == K_EXIT && At(ent, Id::trigger_enabled, &open) && open;
+            t.open = t.kind == K_EXIT && !sameMap && At(ent, Id::trigger_enabled, &open) && open;
+            for (int k = 0; t.kind == K_EXIT && k < nWas; ++k) t.open = t.open || wasOpen[k] == ent;
             ++n;
         }
     int counts[3] = {}, open = 0;

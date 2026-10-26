@@ -13,6 +13,7 @@ record: true
 steps:
   - assert_log: {contains: "replay: ready"}
   - loadmap: mbase
+  - console: "fd_replay_clear"   # a shared session may have one loaded (D48)
   - console: "fd_replay_load {repo}/reference/original_tools/mbase_2026-10-23T21-11-10.274Z_pid204_run0001.jsonl"
   - assert_log: {contains: "(map mbase, 1391 samples, 33847 ms, 3 runs)"}
   - console: "fd_replay_xray 1"

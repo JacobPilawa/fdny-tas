@@ -14,6 +14,9 @@ bool Init(const char* gameDir, const char* coreVersion);
 void Print(const char* fmt, ...);
 
 const char* GameDir();      // with trailing backslash
+// A path from a setting: absolute (X:..., \..., /...) as given, otherwise under GameDir().
+// False if it doesn't fit in cap.
+bool GamePath(const char* path, char* out, int cap);
 const char* CoreVersion();
 
 } // namespace fdcore::console

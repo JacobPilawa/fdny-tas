@@ -214,6 +214,25 @@ later session might "simplify" away; change one only with the owner's approval
 
 ## Process
 
+- **D51 Choosing replays without file names** (owner 2026-10-26: "i like 1-4"; ghost "Cvar picks"; picker "No default key"; tab completion set aside).
+  - **Why:** recorder file names (`<map>_<UTC start>_pid<n>_run<n>.jsonl`) are long, and remembering them would leave the feature unused (owner).
+  - **One folder:** the recorder and the replay both resolve `fd_record_directory` with `console::GamePath` (absolute, or under the game folder; default `Recordings`). They used to have two copies, which differed on a leading `/`.
+  - **The index (`replay_data`, unit-tested):**
+    - from the name: the map, the UTC start, the pid and the run number;
+    - from the last 64 KB of the file only: the duration (the last sample's `t_ms`) and whether the end record is there (complete, not being written);
+    - **finished:** the same game's (pid's) next run is on another map. This works on files already recorded. It also counts leaving through the menu for another level, because the recorder has no level-complete event (that would need Ghidra work).
+  - **V:** with nothing loaded for the map, it loads the best finished run and the latest complete run, then plays.
+  - **`fd_replay`:** opens the picker: this map's 9 newest complete runs (the best keeps the last row if it is older), in local time, with duration, finished, best and latest. It pauses the game, which blocks game input; keys 1-9 load or unload a run, read only while the console is closed. V or `fd_replay` closes it.
+  - **`fd_replay <text>`:** the first file, by name, whose name contains the text, ignoring case.
+  - **`fd_replay_ghost`:** 1 = best (else latest), 2 = latest, at every spawn.
+    - The spawn is `entities::ObservePlayer`, the same moment the recorder's clock starts. The ghost starts at the time since the spawn, so it stays in step with the recording's clock: 1047 ms in the test, a level becoming playable after its spawn.
+    - It loads at the frame end after the spawn, once the recorder has closed the previous run.
+  - **Module order 110 (after the recorder):** with the replay at 85, it created and enabled the player hooks first. The recorder's victim hooks were then patched while the game ran through them, and startup hung, which made `keys_default` fail 3 times in 3 runs (slow frames, a missed key, then a hung window). At 110 it only adds a listener: 3 of 3 passed.
+  - **Rejected:**
+    - Tab completion: it needs the game console's input handling and edit buffer reverse-engineered first; set aside by the owner.
+    - Numbered console lists: the picker shows the same thing in the game.
+    - Friendlier recorder file names: with the above, names are rarely typed.
+    - Reading whole files to index them: a full recording is 0.5 MB, and only the end is needed.
 - **D50 World lines: one projection per point, mitered strips; the replay draws what it needs** (owner 2026-10-26: "Do em all", after a review of how other games and tools draw player paths).
   - **Measured first:** Debug CPU timer on world lines (`gfx::WorldLineCost`, replay pipe `us` / `mean_us`). On the reference run, xray on, after playing to the end (`evidence/replay_lines/`):
     - whole trace from above: 2665 strips, 3351 us per frame before; 525 strips, 554 us after;

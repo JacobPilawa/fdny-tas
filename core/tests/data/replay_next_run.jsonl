@@ -1,0 +1,3 @@
+{"type":"start","schema":"fdny-trajectory-v1","recorder_version":"1.1","stage":"bank","run":2}
+{"type":"sample","n":0,"t_ms":16,"position":[0,0,0]}
+{"type":"end","reason":"process_exit","samples":1,"elapsed_ms":20}
