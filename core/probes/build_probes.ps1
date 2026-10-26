@@ -7,12 +7,9 @@
 $ErrorActionPreference = 'Stop'
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 $core = Split-Path -Parent $here
-. (Join-Path $core '..\environment\config.ps1')
-$zig = Join-Path $ZigInstallDir 'zig.exe'
-if (-not (Test-Path $zig)) {
-    $zig = (Get-ChildItem (Split-Path $ZigInstallDir) -Recurse -Filter zig.exe -ErrorAction SilentlyContinue | Select-Object -First 1).FullName
-}
-if (-not $zig) { throw "zig.exe not found" }
+$zig = (Get-ChildItem (Join-Path $core '..\environment\local\tools\zig*\zig.exe') -ErrorAction SilentlyContinue | Select-Object -First 1).FullName
+if (-not $zig) { $zig = (Get-Command zig -ErrorAction SilentlyContinue).Source }
+if (-not $zig) { throw "zig not found: in environment\local\tools\zig*\ or on PATH" }
 $winInc = Join-Path (Split-Path -Parent $zig) 'lib\libc\include\any-windows-any'
 
 $outDir = Join-Path $core 'build\probes'

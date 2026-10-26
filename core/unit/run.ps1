@@ -10,14 +10,14 @@ param([switch]$NoPython)
 $ErrorActionPreference = 'Continue'
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 $core = Split-Path -Parent $here
-. (Join-Path $core '..\environment\config.ps1')
-$zig = Join-Path $ZigInstallDir 'zig.exe'
-if (-not (Test-Path $zig)) {
-    $zig = (Get-ChildItem (Split-Path $ZigInstallDir) -Recurse -Filter zig.exe -ErrorAction SilentlyContinue | Select-Object -First 1).FullName
-}
-if (-not $zig) { throw "zig.exe not found -- run environment\scripts\get_zig.ps1 + install_zig.ps1" }
+# Zig and Python: the VM's local tools (environment\local\tools, untracked), else PATH (CI).
+$tools = Join-Path $core '..\environment\local\tools'
+$zig = (Get-ChildItem (Join-Path $tools 'zig*\zig.exe') -ErrorAction SilentlyContinue | Select-Object -First 1).FullName
+if (-not $zig) { $zig = (Get-Command zig -ErrorAction SilentlyContinue).Source }
+if (-not $zig) { throw "zig not found: in environment\local\tools\zig*\ or on PATH" }
+$PythonExe = Join-Path $tools 'python\python.exe'
 if (-not (Test-Path $PythonExe)) { $PythonExe = (Get-Command python -ErrorAction SilentlyContinue).Source }
-if (-not $PythonExe) { throw "Python not found" }
+if (-not $PythonExe) { throw "Python not found: in environment\local\tools\python\ or on PATH" }
 
 # The generated address table header (build.ps1 normally writes it).
 & $PythonExe -I (Join-Path $core 'tools\addrgen.py') header (Join-Path $core 'src\gen\addresses_gen.h')
@@ -39,7 +39,7 @@ $args = @('c++', '-target', 'x86-windows-gnu', '-std=c++17', '-O1', '-g', '-fno-
 if ($LASTEXITCODE -ne 0) { throw "unit build failed ($LASTEXITCODE)" }
 "built $exe"
 
-Push-Location (Split-Path -Parent $core)  # tests read files under reference/
+Push-Location (Split-Path -Parent $core)  # tests read files under core/tests/data/
 & $exe
 $cppFailed = $LASTEXITCODE -ne 0
 Pop-Location

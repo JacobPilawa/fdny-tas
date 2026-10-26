@@ -5,8 +5,8 @@
 #   - push to any other branch (a feature branch): build only, uploaded as an
 #     artifact, no tag or release.
 # The build is core/build.ps1: arch_check, the address table, -Werror, the key sheet.
-# Zig comes from environment/scripts/get_zig.ps1 + install_zig.ps1 (version pinned in
-# environment/config.ps1); Python only needs its standard library here.
+# Zig comes from mlugg/setup-zig, the same version as the VM's (environment/local/tools);
+# Python only needs its standard library here.
 name: release
 
 on:
@@ -39,30 +39,9 @@ jobs:
           "version=$v" >> $env:GITHUB_OUTPUT
           "tag=v$v" >> $env:GITHUB_OUTPUT
 
-      - name: Zig version (from environment/config.ps1)
-        id: zig
-        shell: pwsh
-        run: |
-          . ./environment/config.ps1
-          "version=$ZigVersion" >> $env:GITHUB_OUTPUT
-
-      - name: Cache Zig
-        uses: actions/cache@v4
+      - uses: mlugg/setup-zig@v2
         with:
-          path: |
-            environment/local/downloads
-            environment/local/tools/zig
-          key: zig-${{ steps.zig.outputs.version }}
-
-      - name: Install Zig
-        shell: pwsh
-        run: |
-          if (Get-ChildItem environment/local/tools/zig -Recurse -Filter zig.exe -ErrorAction SilentlyContinue) {
-            Write-Host "Zig ${{ steps.zig.outputs.version }} restored from the cache"
-          } else {
-            ./environment/scripts/get_zig.ps1
-            ./environment/scripts/install_zig.ps1
-          }
+          version: 0.16.0
 
       - name: Build (Release)
         shell: pwsh
