@@ -2,10 +2,12 @@
 # hook regenerates it locally, but commits made on GitHub (web edits, PR suggestions) skip
 # the hook: 2026-10-24 "Set recorder default to off" changed fd_record's default in
 # recorder.cpp while the sheet kept saying 1. This fails such a push or PR.
+# Once per change, like unit.yml: pull requests, and pushes to main only.
 name: sheet-check
 
 on:
   push:
+    branches: [main]
   pull_request:
 
 jobs:
