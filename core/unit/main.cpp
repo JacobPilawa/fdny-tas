@@ -28,6 +28,8 @@ void TestCrashlogReportsFault();
 void TestReplayParsesSample();
 void TestReplayRejectsBadFiles();
 void TestReplayColors();
+void TestReplaySimplify();
+void TestReplayAirFlags();
 
 namespace {
 
@@ -46,6 +48,8 @@ const Test kTests[] = {
     {"replay_parses_sample", TestReplayParsesSample},
     {"replay_rejects_bad_files", TestReplayRejectsBadFiles},
     {"replay_colors", TestReplayColors},
+    {"replay_simplify", TestReplaySimplify},
+    {"replay_air_flags", TestReplayAirFlags},
     {"crashlog_reports_fault", TestCrashlogReportsFault},  // last: it leaves the handler installed
 };
 

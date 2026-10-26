@@ -74,6 +74,62 @@ void TestReplayRejectsBadFiles() {
     d::Free(&r);
 }
 
+namespace {
+float SegDist(const float* p, const float* a, const float* b) {
+    float ab[3], ap[3], l2 = 0, t = 0;
+    for (int i = 0; i < 3; ++i) ab[i] = b[i] - a[i], ap[i] = p[i] - a[i], l2 += ab[i] * ab[i], t += ap[i] * ab[i];
+    t = l2 > 0 ? t / l2 : 0;
+    t = t < 0 ? 0 : t > 1 ? 1 : t;
+    float d2 = 0;
+    for (int i = 0; i < 3; ++i) d2 += (ap[i] - ab[i] * t) * (ap[i] - ab[i] * t);
+    return sqrtf(d2);
+}
+} // namespace
+
+// The drawn line through the reference recording: under a third of the samples, every
+// dropped sample within eps of the line kept (Python's Douglas-Peucker: 476 of 1391 at 0.5).
+void TestReplaySimplify() {
+    int len = 0;
+    char* text = ReadFile("reference/original_tools/mbase_2026-10-23T21-11-10.274Z_pid204_run0001.jsonl", &len);
+    CHECK(text != nullptr);
+    if (!text) return;
+    d::Recording r;
+    char err[128];
+    CHECK(d::Parse(text, len, &r, err, sizeof(err)));
+    unsigned char* keep = static_cast<unsigned char*>(calloc(r.n, 1));
+    int* work = static_cast<int*>(malloc(2 * r.n * sizeof(int)));
+    const int kept = d::Simplify(r.s, 0, r.n - 1, 0.5f, nullptr, keep, work);
+    CHECK(kept > 400 && kept < 500);
+    CHECK(keep[0] && keep[r.n - 1]);
+    bool within = true;
+    for (int i = 0, prev = 0; i < r.n; ++i) {
+        if (!keep[i]) continue;
+        for (int k = prev + 1; k < i; ++k) within = within && SegDist(r.s[k].pos, r.s[prev].pos, r.s[i].pos) <= 0.5f + 1e-3f;
+        prev = i;
+    }
+    CHECK(within);
+    // Forced points stay: a straight line keeps only its ends and the forced one.
+    d::Sample line[5] = {};
+    for (int i = 0; i < 5; ++i) line[i].pos[0] = static_cast<float>(i * 10);
+    unsigned char force[5] = {0, 0, 1, 0, 0}, k5[5];
+    int w5[10];
+    CHECK(d::Simplify(line, 0, 4, 0.5f, force, k5, w5) == 3 && k5[0] && k5[2] && k5[4] && !k5[1] && !k5[3]);
+    free(keep), free(work);
+    d::Free(&r);
+    free(text);
+}
+
+// In the air: off the ground for 3 samples or more; one or two off (stairs) don't count.
+void TestReplayAirFlags() {
+    const int g[10] = {1, 0, 1, 0, 0, 1, 0, 0, 0, 1};
+    d::Sample s[10] = {};
+    for (int i = 0; i < 10; ++i) s[i].ground = g[i];
+    unsigned char air[10];
+    d::AirFlags(s, 10, air);
+    const unsigned char want[10] = {0, 0, 0, 0, 0, 0, 1, 1, 1, 0};
+    CHECK(memcmp(air, want, sizeof(want)) == 0);
+}
+
 void TestReplayColors() {
     CHECK(d::TimeColor(0) == 0xFF0000);
     CHECK(d::TimeColor(0.5f) == 0x0000FF);

@@ -93,7 +93,7 @@ when changed. **Practice**: refused while `fd_profile` is `run`.
 | `fd_freecam_speed` | `400` | free camera speed in units/s (400 = the run speed); Shift x4, Ctrl x0.25 | yes |  | Pause and free camera |
 | `fd_freecam_sens` | `0.075` | free camera mouse look in degrees per mouse count; higher = faster | yes |  | Pause and free camera |
 | `fd_replay_speed` | `1` | playback speed: 0.25 / 0.5 / 1 / 2 / 4 (any value > 0) | yes | yes | Replay |
-| `fd_replay_xray` | `0` | 1 = the replay shows through walls; 0 = walls hide it | yes | yes | Replay |
+| `fd_replay_xray` | `0` | 1 = the replay shows through walls (the trace dimmed there); 0 = walls hide it | yes | yes | Replay |
 | `fd_record` | `0` | 1 = automatically record each stage attempt to JSONL; 0 = off | yes |  | Recorder |
 | `fd_record_victims` | `1` | 1 = include victim tracks in new recordings; 0 = player only | yes |  | Recorder |
 | `fd_record_directory` | `Recordings` | output directory, absolute or relative to FDNYCore.asi; changes start a new recording | yes |  | Recorder |

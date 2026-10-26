@@ -150,17 +150,27 @@ struct WorldBoxStats {
 WorldBoxStats LastWorldBoxStats();
 
 // --- World lines -------------------------------------------------------------------------
-// Polylines in world space (recording traces, the replay's box edges and arrow). Each
-// segment is a strip widthPx wide facing the camera, coloured per point (blended along the
+// Polylines in world space (recording traces, the replay's box edges and arrow), each one
+// strip facing the camera with mitered corners (D50), coloured per point (blended along each
 // segment), drawn with the world-box tiles and alpha. Same layers and lifetime as world boxes.
 struct WorldLine {
     const float (*pts)[3];
-    const uint32_t* rgb;  // one per point, 0xRRGGBB
-    int n;                // points; n - 1 segments
-    float widthPx;
-    uint8_t alpha;        // kept to 4 bits like the boxes
+    const uint32_t* rgb;   // one per point, 0xRRGGBB
+    const uint8_t* thin;   // null, or one per point: nonzero = half width there
+    int n;                 // points; n - 1 segments
+    float widthPx;         // width in px; with widthWorld, the least
+    float widthWorld;      // 0, or the width in world units (narrower with distance), held
+    float maxPx;           //   between widthPx and maxPx
+    uint8_t alpha;         // kept to 4 bits like the boxes
+    uint8_t glowAlpha;     // 0, or a strip glowScale x as wide under the line, at this alpha
+    float glowScale;
 };
 void SubmitWorldLines(const WorldLine* lines, int n, Layer layer);
 int LastWorldLineSegments();  // segments drawn last frame, both layers
+#ifdef FDCORE_DEBUG
+// CPU time drawing world lines (both layers), in microseconds: the frame before and the mean
+// per frame since the previous call (frames that drew lines; resets the mean).
+void WorldLineCost(int* lastUs, int* meanUs);
+#endif
 
 } // namespace fdcore::gfx

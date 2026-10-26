@@ -24,8 +24,10 @@ steps:
   - assert_pipe_stat: {cmd: replay, key: playing, equals: 0}   # 33.8 s at 64x: at the end
   - assert_pipe_stat: {cmd: replay, key: time_ms, equals: 33847}
   - assert_pipe_stat: {cmd: replay, key: visible, equals: 1}
-  - assert_pipe_stat: {cmd: replay, key: lines, equals: 12}    # 2 trace lines x 2 (glow + core; the third run is one sample) + 6 box edges + 2 arrow
-  - assert_pipe_stat: {cmd: replay, key: segs, min: 100}       # segments drawn last frame (the ones on screen)
+  - assert_pipe_stat: {cmd: replay, key: lines, equals: 12}    # 2 trace lines (the third run is one sample) x 2 (world + dimmed x-ray copy) + 6 box edges + 2 arrow
+  - assert_pipe_stat: {cmd: replay, key: segs, min: 50}        # strips drawn last frame (the ones on screen; 87 since D50, 296 before)
+  - assert_pipe_stat: {cmd: replay, key: ticks, equals: 33}    # one a second over 33.8 s
+  - assert_log: {contains: "replay: line through 497 of 1391 samples, 33 ticks"}  # D50: Simplify (unit-tested) in the game
   - screenshot: replay_full_trace
   - sample_pipe: {cmd: stats, as: on0}
   - wait_s: 6
