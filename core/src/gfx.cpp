@@ -455,18 +455,14 @@ struct BoxTile {
     void* bmp;
     void* world;
     int settle;
-    int a4;  // alpha nibble
 };
-BoxTile g_boxTiles[4] = {};
+// By alpha nibble, 8 KB each, kept for the session. There were 4 slots, never freed: after the
+// replay (3 levels) and one more, trigger boxes got no tile and drew nothing (2026-10-26).
+BoxTile g_boxTiles[16] = {};
 
 void* BoxTile_(int a4) {
-    BoxTile* t = nullptr;
-    for (BoxTile& c : g_boxTiles)
-        if (c.bmp && c.a4 == a4) t = &c;
-    if (!t) {
-        for (BoxTile& c : g_boxTiles)
-            if (!c.bmp && !t) t = &c;
-        if (!t) return nullptr;  // more than 4 alpha levels in one list
+    BoxTile* t = &g_boxTiles[a4 & 15];
+    if (!t->bmp) {
         if (!(t->bmp = g_create(kBoxTex, kBoxTex, 1, kFormat4444))) return nullptr;
         void* target = nullptr;
         if (!g_lock(t->bmp, &target, 0, 0, kFormat4444) || !target) return nullptr;
@@ -477,7 +473,7 @@ void* BoxTile_(int a4) {
         for (int y = 0; d && static_cast<int>(info[2]) >= kBoxTex && y < kBoxTex; ++y)
             for (int x = 0; x < kBoxTex; ++x) d[y * info[2] + x] = texel;
         g_unlock(target);
-        t->a4 = a4, t->world = nullptr;
+        t->world = nullptr;
     }
     if (t->world != g_world) {
         if (!g_worldAdd(g_world, t->bmp)) return nullptr;

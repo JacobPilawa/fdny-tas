@@ -43,7 +43,7 @@ constexpr uint32_t kArrowRgb = 0xFFFF40;  // yellow: reads on sky, walls and the
 constexpr uint32_t kTickRgb = 0xFFFFFF;
 constexpr float kTickHalf = 5;        // tick cube half size, units
 constexpr int kMaxTicks = 60;         // per recording: every second, or sparser for long runs
-// Alpha levels: gfx keeps one tile per level and 4 levels a frame (triggers use 128 and 64).
+// Alpha levels: 4 bits, so 16 (gfx keeps a tile per level in use).
 constexpr uint8_t kLineAlpha = 255, kGlowAlpha = 64, kDimAlpha = 64, kBoxAlpha = 64, kBoxAlphaInside = 32;
 
 struct Rec {
