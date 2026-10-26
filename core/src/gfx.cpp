@@ -530,6 +530,14 @@ template <class V, class D> int Clip(const V* in, int n, V* out, D dist) {  // k
     return m;
 }
 
+// Screen clipping interpolates in screen space, where 1/depth is linear and depth is not: clip on
+// 1/z. Clipped on z, a strip from behind the eye to far away got nearly the far end's depth all
+// along and sank under the floor (owner report 2026-10-26, mbase; evidence/replay_depth).
+template <class V> void InvertZ(V* v, int n) {
+    for (int i = 0; i < n; ++i)
+        if (v[i].z > 0) v[i].z = 1 / v[i].z;
+}
+
 float Dot(float ax, float ay, float az, float bx, float by, float bz) { return ax * bx + ay * by + az * bz; }
 
 void DrawBoxes(const WorldBox* list, int n, bool xray);
@@ -653,11 +661,13 @@ void DrawBoxes(const WorldBox* list, int n, bool xray) {
             g_camProject(g_camera, &in, &p);
             a[k] = {p.x, p.y, p.z};
         }
+        InvertZ(a, m);
         int k = Clip(a, m, b, [](const ScrV& v) { return v.x; });
         k = Clip(b, k, a, [W](const ScrV& v) { return W - v.x; });
         k = Clip(a, k, b, [](const ScrV& v) { return v.y; });
         k = Clip(b, k, a, [H](const ScrV& v) { return H - v.y; });
         if (k < 3) continue;
+        InvertZ(a, k);
         const float r = static_cast<float>((f.rgb >> 16) & 0xFF), g = static_cast<float>((f.rgb >> 8) & 0xFF),
                     bl = static_cast<float>(f.rgb & 0xFF);
         TLVertex v[16];
@@ -703,11 +713,14 @@ void EmitQuad(const ScrC (&q)[4], void* tile, float W, float H) {
         for (int i = 0; i < 4; ++i) v[i] = {q[i].x, q[i].y, q[i].z, 0.5f, 0.5f, q[i].r, q[i].g, q[i].b, 255};
     } else {
         ScrC c1[12], c2[12];
-        k = Clip(q, 4, c1, [](const ScrC& p) { return p.x; });
+        for (int i = 0; i < 4; ++i) c2[i] = q[i];
+        InvertZ(c2, 4);
+        k = Clip(c2, 4, c1, [](const ScrC& p) { return p.x; });
         k = Clip(c1, k, c2, [W](const ScrC& p) { return W - p.x; });
         k = Clip(c2, k, c1, [](const ScrC& p) { return p.y; });
         k = Clip(c1, k, c2, [H](const ScrC& p) { return H - p.y; });
         if (k < 3) return;
+        InvertZ(c2, k);
         for (int i = 0; i < k; ++i) v[i] = {c2[i].x, c2[i].y, c2[i].z, 0.5f, 0.5f, c2[i].r, c2[i].g, c2[i].b, 255};
     }
     g_poly(Engine(), v, k, tile, kImmediate);
