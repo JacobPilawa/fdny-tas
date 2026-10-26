@@ -29,6 +29,7 @@ class ArchCheck(unittest.TestCase):
         shutil.copytree(os.path.join(CORE, "src"), os.path.join(self.root, "src"),
                         ignore=shutil.ignore_patterns("gen"))
         shutil.copytree(os.path.join(CORE, "tests"), os.path.join(self.root, "tests"))
+        shutil.copytree(os.path.join(CORE, "unit"), os.path.join(self.root, "unit"))  # // Tests: may name unit tests
         src = os.path.join(self.root, "src")
         for k, v in {"CORE": self.root, "SRC": src, "FEAT": os.path.join(src, "features"),
                      "TESTS": os.path.join(self.root, "tests")}.items():
