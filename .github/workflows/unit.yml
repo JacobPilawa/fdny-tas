@@ -18,30 +18,10 @@ jobs:
         with:
           python-version: "3.x"
 
-      - name: Zig version (from environment/config.ps1)
-        id: zig
-        shell: pwsh
-        run: |
-          . ./environment/config.ps1
-          "version=$ZigVersion" >> $env:GITHUB_OUTPUT
-
-      - name: Cache Zig
-        uses: actions/cache@v4
+      # The same Zig as the VM's (environment/local/tools); on PATH, cached by the action.
+      - uses: mlugg/setup-zig@v2
         with:
-          path: |
-            environment/local/downloads
-            environment/local/tools/zig
-          key: zig-${{ steps.zig.outputs.version }}
-
-      - name: Install Zig
-        shell: pwsh
-        run: |
-          if (Get-ChildItem environment/local/tools/zig -Recurse -Filter zig.exe -ErrorAction SilentlyContinue) {
-            Write-Host "Zig ${{ steps.zig.outputs.version }} restored from the cache"
-          } else {
-            ./environment/scripts/get_zig.ps1
-            ./environment/scripts/install_zig.ps1
-          }
+          version: 0.16.0
 
       - name: Unit tests
         shell: pwsh

@@ -15,19 +15,16 @@ param([ValidateSet('Debug', 'Release', 'Both')] [string]$Config = 'Both',
 
 $ErrorActionPreference = 'Stop'
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
-. (Join-Path $here '..\environment\config.ps1')
-$zig = Join-Path $ZigInstallDir 'zig.exe'
-if (-not (Test-Path $zig)) {
-    $zig = (Get-ChildItem (Split-Path $ZigInstallDir) -Recurse -Filter zig.exe -ErrorAction SilentlyContinue | Select-Object -First 1).FullName
-}
-if (-not $zig) { throw "zig.exe not found -- run environment\scripts\get_zig.ps1 + install_zig.ps1" }
+# Zig and Python: the VM's local tools (environment\local\tools, untracked), else PATH (the
+# GitHub workflows: setup-zig, setup-python). arch_check / addrgen / docgen use the standard library only.
+$tools = Join-Path $here '..\environment\local\tools'
+$zig = (Get-ChildItem (Join-Path $tools 'zig*\zig.exe') -ErrorAction SilentlyContinue | Select-Object -First 1).FullName
+if (-not $zig) { $zig = (Get-Command zig -ErrorAction SilentlyContinue).Source }
+if (-not $zig) { throw "zig not found: in environment\local\tools\zig*\ or on PATH" }
 $winInc = Join-Path (Split-Path -Parent $zig) 'lib\libc\include\any-windows-any'
-# The pinned Python (config.ps1) on the VM; elsewhere (the GitHub release workflow) any
-# Python 3 on PATH: arch_check / addrgen / docgen use the standard library only.
-if (-not (Test-Path $PythonExe)) {
-    $PythonExe = (Get-Command python -ErrorAction SilentlyContinue).Source
-    if (-not $PythonExe) { throw "Python not found: run environment\scripts\get_python.ps1 + install_python.ps1, or put python on PATH" }
-}
+$PythonExe = Join-Path $tools 'python\python.exe'
+if (-not (Test-Path $PythonExe)) { $PythonExe = (Get-Command python -ErrorAction SilentlyContinue).Source }
+if (-not $PythonExe) { throw "Python not found: in environment\local\tools\python\ or on PATH" }
 
 # Architecture rules first (core/CLAUDE.md): a violation stops the build.
 & $PythonExe -I (Join-Path $here 'tools\arch_check.py')

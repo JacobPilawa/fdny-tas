@@ -1,4 +1,4 @@
-// replay_data against the fdny-maps website's rules, on the sample recording in reference/
+// replay_data against the fdny-maps website's rules, on the sample recording in core/tests/data/
 // (expected numbers computed from the file with the site's canJoin, 2026-10-25).
 #include <math.h>
 #include <stdio.h>
@@ -28,7 +28,7 @@ bool Parse(const char* text, d::Recording* r, char* err) { return d::Parse(text,
 
 void TestReplayParsesSample() {
     int len = 0;
-    char* text = ReadFile("reference/original_tools/mbase_2026-10-23T21-11-10.274Z_pid204_run0001.jsonl", &len);
+    char* text = ReadFile("core/tests/data/mbase_2026-10-23T21-11-10.274Z_pid204_run0001.jsonl", &len);
     CHECK(text != nullptr);
     if (!text) return;
     d::Recording r;
@@ -90,7 +90,7 @@ float SegDist(const float* p, const float* a, const float* b) {
 // dropped sample within eps of the line kept (Python's Douglas-Peucker: 476 of 1391 at 0.5).
 void TestReplaySimplify() {
     int len = 0;
-    char* text = ReadFile("reference/original_tools/mbase_2026-10-23T21-11-10.274Z_pid204_run0001.jsonl", &len);
+    char* text = ReadFile("core/tests/data/mbase_2026-10-23T21-11-10.274Z_pid204_run0001.jsonl", &len);
     CHECK(text != nullptr);
     if (!text) return;
     d::Recording r;
@@ -151,7 +151,7 @@ void TestReplayIndex() {
     CHECK(!d::ParseName("my route.jsonl", &f) && strcmp(f.name, "my route.jsonl") == 0 && !f.map[0]);
     // The reference file's last 64 KB: its last sample (victim lines follow it) and its end record.
     int len = 0;
-    char* text = ReadFile("reference/original_tools/mbase_2026-10-23T21-11-10.274Z_pid204_run0001.jsonl", &len);
+    char* text = ReadFile("core/tests/data/mbase_2026-10-23T21-11-10.274Z_pid204_run0001.jsonl", &len);
     CHECK(text != nullptr);
     if (text) {
         const int tail = len < 65536 ? len : 65536;

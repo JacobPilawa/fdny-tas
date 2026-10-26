@@ -7,7 +7,7 @@ name: replay_pick
 pre_files:
   - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
   - {src: null, dst: FDNYCore.cfg}
-  - {src: ../reference/original_tools/mbase_2026-10-23T21-11-10.274Z_pid204_run0001.jsonl, dst: fdtest_recordings/mbase_2026-10-23T21-11-10.274Z_pid204_run0001.jsonl}
+  - {src: tests/data/mbase_2026-10-23T21-11-10.274Z_pid204_run0001.jsonl, dst: fdtest_recordings/mbase_2026-10-23T21-11-10.274Z_pid204_run0001.jsonl}
   - {src: tests/data/replay_next_run.jsonl, dst: fdtest_recordings/bank_2026-10-23T21-12-00.000Z_pid204_run0002.jsonl}
 setup: load_training
 steps:

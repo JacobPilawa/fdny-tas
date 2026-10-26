@@ -1,5 +1,5 @@
 name: replay
-# Replay (owner request 2026-10-25): the sample recording in reference/ (mbase, 1391 samples,
+# Replay (owner request 2026-10-25): the sample recording in tests/data/ (mbase, 1391 samples,
 # two gaps by the fdny-maps site's rule, so three lines) loads on its map, plays to the end
 # and draws its whole trace plus the box and arrow; key V toggles playback. The data rules,
 # gaps and colours are unit-tested (core/unit/test_replay.cpp); this proves the drawing in the
@@ -14,7 +14,7 @@ steps:
   - assert_log: {contains: "replay: ready"}
   - loadmap: mbase
   - console: "fd_replay_clear"   # a shared session may have one loaded (D48)
-  - console: "fd_replay_load {repo}/reference/original_tools/mbase_2026-10-23T21-11-10.274Z_pid204_run0001.jsonl"
+  - console: "fd_replay_load {repo}/core/tests/data/mbase_2026-10-23T21-11-10.274Z_pid204_run0001.jsonl"
   - assert_log: {contains: "(map mbase, 1391 samples, 33847 ms, 3 runs)"}
   - console: "fd_replay_xray 1"
   - console: "fd_replay_speed 64"
