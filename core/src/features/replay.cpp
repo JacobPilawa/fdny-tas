@@ -291,8 +291,10 @@ bool Init() {
     hooks::OnFrameEnd(FrameEnd);
 #ifdef FDCORE_DEBUG
     testpipe::Register("replay", [](const char*, char* resp, int) {
-        wsprintfA(resp, "loaded=%d visible=%d playing=%d time_ms=%ld lines=%d segs=%d", g_nRec, g_visible, g_playing ? 1 : 0,
-                  static_cast<long>(g_time), g_nLines, gfx::LastWorldLineSegments());
+        int us, meanUs;
+        gfx::WorldLineCost(&us, &meanUs);
+        wsprintfA(resp, "loaded=%d visible=%d playing=%d time_ms=%ld lines=%d segs=%d us=%d mean_us=%d", g_nRec, g_visible,
+                  g_playing ? 1 : 0, static_cast<long>(g_time), g_nLines, gfx::LastWorldLineSegments(), us, meanUs);
     });
 #endif
     log::Info("replay: ready (fd_replay_load, key V%s)", gfx::WorldBoxesReady() ? "" : "; no world drawing: off");

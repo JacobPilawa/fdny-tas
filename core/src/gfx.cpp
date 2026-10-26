@@ -101,6 +101,10 @@ struct LineList {
 LineList g_lineSubs[2][kMaxLayerSubs], g_linePrev[kMaxLayerSubs];
 int g_nLineSubs[2], g_nLinePrev = 0;
 int g_lineSegs = 0, g_lineSegsAcc = 0;
+#ifdef FDCORE_DEBUG
+double g_lineUsAcc = 0, g_lineUs = 0, g_lineUsSum = 0;  // this frame, last frame, since WorldLineCost
+int g_lineUsFrames = 0;
+#endif
 WorldBoxStats g_boxStats = {}, g_boxAcc = {};
 #ifdef FDCORE_DEBUG
 char g_order[32], g_lastOrder[32];
@@ -569,6 +573,8 @@ void RunLateLayers() {
     g_boxStats = g_boxAcc;
     g_lineSegs = g_lineSegsAcc, g_lineSegsAcc = 0;
 #ifdef FDCORE_DEBUG
+    if (g_lineUsAcc > 0) g_lineUsSum += g_lineUsAcc, ++g_lineUsFrames;
+    g_lineUs = g_lineUsAcc, g_lineUsAcc = 0;
     MarkLayer("hud");
 #endif
     RunSubs(LAYER_HUD);
@@ -706,7 +712,22 @@ void DrawSegment(CamV a, CamV b, uint32_t ca, uint32_t cb, float half, void* til
     ++g_lineSegsAcc;
 }
 
+void DrawLinesTimed(const WorldLine* list, int n, bool xray);
+
 void DrawLines(const WorldLine* list, int n, bool xray) {
+#ifdef FDCORE_DEBUG
+    LARGE_INTEGER fq, t0, t1;
+    QueryPerformanceFrequency(&fq);
+    QueryPerformanceCounter(&t0);
+    DrawLinesTimed(list, n, xray);
+    QueryPerformanceCounter(&t1);
+    g_lineUsAcc += static_cast<double>(t1.QuadPart - t0.QuadPart) * 1e6 / static_cast<double>(fq.QuadPart);
+#else
+    DrawLinesTimed(list, n, xray);
+#endif
+}
+
+void DrawLinesTimed(const WorldLine* list, int n, bool xray) {
     if (!list || n <= 0 || !g_boxOk || !g_world || !g_camera || !BeginDraw()) return;
     int vw, vh;
     ViewSize(&vw, &vh);
@@ -739,6 +760,14 @@ void SubmitWorldLines(const WorldLine* lines, int n, Layer layer) {
 }
 
 int LastWorldLineSegments() { return g_lineSegs; }
+
+#ifdef FDCORE_DEBUG
+void WorldLineCost(int* lastUs, int* meanUs) {
+    *lastUs = static_cast<int>(g_lineUs + 0.5);
+    *meanUs = g_lineUsFrames ? static_cast<int>(g_lineUsSum / g_lineUsFrames + 0.5) : 0;
+    g_lineUsSum = 0, g_lineUsFrames = 0;
+}
+#endif
 
 bool WorldBoxesReady() { return g_boxOk; }
 

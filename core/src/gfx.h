@@ -162,5 +162,10 @@ struct WorldLine {
 };
 void SubmitWorldLines(const WorldLine* lines, int n, Layer layer);
 int LastWorldLineSegments();  // segments drawn last frame, both layers
+#ifdef FDCORE_DEBUG
+// CPU time drawing world lines (both layers), in microseconds: the frame before and the mean
+// per frame since the previous call (frames that drew lines; resets the mean).
+void WorldLineCost(int* lastUs, int* meanUs);
+#endif
 
 } // namespace fdcore::gfx
