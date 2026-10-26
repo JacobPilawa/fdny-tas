@@ -384,7 +384,7 @@ class Run:
             self.console_log_text = self.read_core_log()  # for wait_log {since_console}
             inputs.type_text("`")  # backtick opens the game console in typing mode (R3b)
             time.sleep(0.2)
-            inputs.type_text(str(arg))
+            inputs.type_text(str(arg).replace("{repo}", os.path.dirname(CORE_DIR).replace("\\", "/")))  # / types; \ has no scan code here
             inputs.tap("enter")
             time.sleep(0.1)
             inputs.type_text("`")

@@ -25,7 +25,7 @@ if ($LASTEXITCODE -ne 0) { throw "addrgen header failed" }
 
 # Core sources under test: pure logic, no game calls (each listed on purpose).
 $under = @('src\addr.cpp', 'src\crashlog.cpp','src\features\glitch_analysis.cpp', 'src\features\glitch_bsp.cpp',
-           'src\features\glitch_replay.cpp') | ForEach-Object { Join-Path $core $_ }
+           'src\features\glitch_replay.cpp', 'src\features\replay_data.cpp') | ForEach-Object { Join-Path $core $_ }
 $tests = Get-ChildItem $here -Filter *.cpp | ForEach-Object FullName
 
 $outDir = Join-Path $core 'build\unit'
@@ -39,8 +39,10 @@ $args = @('c++', '-target', 'x86-windows-gnu', '-std=c++17', '-O1', '-g', '-fno-
 if ($LASTEXITCODE -ne 0) { throw "unit build failed ($LASTEXITCODE)" }
 "built $exe"
 
+Push-Location (Split-Path -Parent $core)  # tests read files under reference/
 & $exe
 $cppFailed = $LASTEXITCODE -ne 0
+Pop-Location
 
 $pyFailed = $false
 if (-not $NoPython) {

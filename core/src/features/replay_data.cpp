@@ -1,0 +1,229 @@
+#include "replay_data.h"
+
+#include <windows.h>
+#include <xmmintrin.h>
+
+namespace fdcore::replay::data {
+namespace {
+
+// --- a JSON reader for the recorder's flat lines ----------------------------------------
+// Each line is one object of numbers, strings and number arrays (recorder.cpp's writer).
+struct Line {
+    const char* p;
+    const char* end;
+};
+
+// The value after "key": in this line, or null.
+const char* Find(const Line& l, const char* key) {
+    int kl = lstrlenA(key);
+    for (const char* p = l.p; p + kl + 3 <= l.end; ++p) {
+        if (p[0] != '"' || p[kl + 1] != '"') continue;
+        bool same = true;
+        for (int i = 0; i < kl && same; ++i) same = p[1 + i] == key[i];
+        if (!same) continue;
+        const char* v = p + kl + 2;
+        while (v < l.end && (*v == ' ' || *v == ':')) ++v;
+        return v;
+    }
+    return nullptr;
+}
+
+bool Number(const char*& p, const char* end, double* out) {
+    double sign = 1, v = 0, scale = 0;
+    bool digits = false;
+    if (p < end && *p == '-') sign = -1, ++p;
+    while (p < end && *p >= '0' && *p <= '9') v = v * 10 + (*p++ - '0'), digits = true;
+    if (p < end && *p == '.') {
+        ++p, scale = 1;
+        while (p < end && *p >= '0' && *p <= '9') v = v * 10 + (*p++ - '0'), scale *= 10, digits = true;
+    }
+    if (!digits) return false;
+    if (scale) v /= scale;
+    if (p < end && (*p == 'e' || *p == 'E')) {
+        ++p;
+        int es = 1, e = 0;
+        if (p < end && (*p == '-' || *p == '+')) es = *p++ == '-' ? -1 : 1;
+        while (p < end && *p >= '0' && *p <= '9') e = e * 10 + (*p++ - '0');
+        for (int i = 0; i < e; ++i) v = es > 0 ? v * 10 : v / 10;
+    }
+    *out = sign * v;
+    return true;
+}
+
+bool Num(const Line& l, const char* key, double* out) {
+    const char* v = Find(l, key);
+    return v && Number(v, l.end, out);
+}
+
+bool Vec(const Line& l, const char* key, float out[3]) {
+    const char* v = Find(l, key);
+    if (!v || *v != '[') return false;
+    ++v;
+    for (int i = 0; i < 3; ++i) {
+        while (v < l.end && (*v == ' ' || *v == ',')) ++v;
+        double d;
+        if (!Number(v, l.end, &d) || !(d > -1e8 && d < 1e8)) return false;  // also NaN
+        out[i] = static_cast<float>(d);
+    }
+    return true;
+}
+
+bool Str(const Line& l, const char* key, char* out, int cap) {
+    const char* v = Find(l, key);
+    if (!v || *v != '"') return false;
+    int o = 0;
+    for (++v; v < l.end && *v != '"' && o + 1 < cap; ++v) out[o++] = *v == '\\' && v + 1 < l.end ? *++v : *v;
+    out[o] = 0;
+    return true;
+}
+
+bool Is(const Line& l, const char* type) {
+    char t[24];
+    return Str(l, "type", t, sizeof(t)) && lstrcmpA(t, type) == 0;
+}
+
+void Fail(char* err, int cap, const char* why, int line) { wsprintfA(err, "line %d: %s", line, why), (void)cap; }
+
+// sqrt without the CRT (SSE, like glitch_bsp's Sqrt).
+float Sqrtf(float v) { return _mm_cvtss_f32(_mm_sqrt_ss(_mm_set_ss(v))); }
+
+// sin / cos for |x| <= pi (pitch), no CRT: reduce to [-pi/2, pi/2], then Taylor to x^9.
+float Sin(float x) {
+    const float kPi = 3.14159265f;
+    if (x > kPi / 2) x = kPi - x;
+    if (x < -kPi / 2) x = -kPi - x;
+    const float x2 = x * x;
+    return x * (1 - x2 / 6 * (1 - x2 / 20 * (1 - x2 / 42 * (1 - x2 / 72))));
+}
+float Cos(float x) { return Sin(x + 3.14159265f / 2); }  // |x| <= pi/2: a pitch
+
+uint32_t Lerp(uint32_t a, uint32_t b, float t) {
+    uint32_t out = 0;
+    for (int sh = 0; sh <= 16; sh += 8) {
+        const float ca = static_cast<float>((a >> sh) & 0xFF), cb = static_cast<float>((b >> sh) & 0xFF);
+        out |= static_cast<uint32_t>(ca + (cb - ca) * t + 0.5f) << sh;
+    }
+    return out;
+}
+
+} // namespace
+
+bool Parse(const char* text, int len, Recording* out, char* err, int errCap) {
+    *out = Recording{};
+    err[0] = 0;
+    if (len >= 3 && static_cast<uint8_t>(text[0]) == 0xEF) text += 3, len -= 3;  // BOM
+    int lines = 0;
+    for (int i = 0; i < len; ++i) lines += text[i] == '\n';
+    out->s = static_cast<Sample*>(VirtualAlloc(nullptr, (lines + 1) * sizeof(Sample), MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE));
+    if (!out->s) return Fail(err, errCap, "out of memory", 0), false;
+    bool started = false;
+    int lineNo = 0;
+    for (const char* p = text; p < text + len;) {
+        const char* e = p;
+        while (e < text + len && *e != '\n') ++e;
+        if (e == text + len) break;  // an unfinished last line is dropped, like the site
+        Line l = {p, e};
+        p = e + 1, ++lineNo;
+        while (l.p < l.end && (*l.p == ' ' || *l.p == '\t' || *l.p == '\r')) ++l.p;
+        while (l.end > l.p && (l.end[-1] == ' ' || l.end[-1] == '\t' || l.end[-1] == '\r')) --l.end;
+        if (l.p == l.end) continue;
+        if (Is(l, "start")) {
+            char schema[32];
+            if (started) return Fail(err, errCap, "second start record", lineNo), false;
+            if (!Str(l, "schema", schema, sizeof(schema)) || lstrcmpA(schema, "fdny-trajectory-v1") != 0)
+                return Fail(err, errCap, "not fdny-trajectory-v1", lineNo), false;
+            char stage[128];
+            if (!Str(l, "stage", stage, sizeof(stage))) return Fail(err, errCap, "start without a stage", lineNo), false;
+            const char* base = stage;  // last path part, no .bsp, lower case
+            for (char* c = stage; *c; ++c) {
+                if (*c == '\\' || *c == '/') base = c + 1;
+                if (*c >= 'A' && *c <= 'Z') *c = static_cast<char>(*c - 'A' + 'a');
+            }
+            lstrcpynA(out->stage, base, sizeof(out->stage));
+            const int sl = lstrlenA(out->stage);
+            if (sl > 4 && lstrcmpA(out->stage + sl - 4, ".bsp") == 0) out->stage[sl - 4] = 0;
+            started = true;
+        } else if (Is(l, "sample")) {
+            if (!started) return Fail(err, errCap, "sample before the start record", lineNo), false;
+            Sample& s = out->s[out->n];
+            double t, n, v;
+            if (!Num(l, "n", &n) || static_cast<int>(n) != out->n) return Fail(err, errCap, "samples out of sequence (n)", lineNo), false;
+            if (!Num(l, "t_ms", &t) || !(t >= 0 && t <= 31.0 * 86400000.0)) return Fail(err, errCap, "bad t_ms", lineNo), false;
+            if (out->n && t < out->s[out->n - 1].t) return Fail(err, errCap, "t_ms goes backwards", lineNo), false;
+            if (!Vec(l, "position", s.pos)) return Fail(err, errCap, "bad position", lineNo), false;
+            s.t = static_cast<float>(t);
+            if (!Vec(l, "body_forward", s.fwd)) s.fwd[0] = 0, s.fwd[1] = 0, s.fwd[2] = 1;
+            s.pitch = Num(l, "pitch_deg", &v) ? static_cast<float>(v) : 0.0f;
+            s.state = Num(l, "player_state_raw", &v) ? static_cast<int>(v) : 0;
+            bool bounds = Vec(l, "bounds_min", s.mins) && Vec(l, "bounds_max", s.maxs);
+            for (int i = 0; bounds && i < 3; ++i) bounds = s.mins[i] < s.maxs[i];
+            if (!bounds) {  // the site's boundsFor default: 60 x 60, 85 high (25 crouched)
+                s.mins[0] = s.mins[1] = s.mins[2] = -30;
+                s.maxs[0] = s.maxs[2] = 30, s.maxs[1] = s.state == 4 ? 25.0f : 85.0f;
+            }
+            ++out->n;
+        }
+        // victim_sample / victim_end / end: not drawn by the replay (player traces only)
+    }
+    if (!started) return Fail(err, errCap, "no start record", lineNo), false;
+    if (!out->n) return Fail(err, errCap, "no samples", lineNo), false;
+    out->duration = out->s[out->n - 1].t;
+    return true;
+}
+
+void Free(Recording* r) {
+    if (r->s) VirtualFree(r->s, 0, MEM_RELEASE);
+    *r = Recording{};
+}
+
+bool CanJoin(const Sample& a, const Sample& b) {
+    const float dx = b.pos[0] - a.pos[0], dy = b.pos[1] - a.pos[1], dz = b.pos[2] - a.pos[2];
+    return b.t - a.t <= 500 && dx * dx + dy * dy + dz * dz <= 2000.0f * 2000.0f;
+}
+
+int IndexAt(const Recording& r, float t) {
+    int lo = 0, hi = r.n - 1, best = -1;
+    while (lo <= hi) {
+        const int mid = (lo + hi) / 2;
+        if (r.s[mid].t <= t) best = mid, lo = mid + 1;
+        else hi = mid - 1;
+    }
+    return best;
+}
+
+Sample FrameAt(const Recording& r, float t) {
+    int i = IndexAt(r, t);
+    if (i < 0) i = 0;
+    const Sample& a = r.s[i];
+    if (i + 1 >= r.n || !CanJoin(a, r.s[i + 1]) || r.s[i + 1].t <= a.t) return a;
+    const Sample& b = r.s[i + 1];
+    const float k = (t - a.t) / (b.t - a.t);
+    Sample s = a;
+    for (int j = 0; j < 3; ++j) s.pos[j] = a.pos[j] + (b.pos[j] - a.pos[j]) * k;
+    s.pitch = a.pitch + (b.pitch - a.pitch) * k;
+    // Facing in the horizontal plane, the short way round: the normalised blend of the two
+    // directions (the site's shortest-angle yaw blend, without trigonometry).
+    float x = a.fwd[0] + (b.fwd[0] - a.fwd[0]) * k, z = a.fwd[2] + (b.fwd[2] - a.fwd[2]) * k;
+    const float len = Sqrtf(x * x + z * z);
+    if (len > 1e-4f) s.fwd[0] = x / len, s.fwd[1] = 0, s.fwd[2] = z / len;
+    return s;
+}
+
+void ArrowDir(const Sample& s, float out[3]) {
+    const float p = s.pitch * 3.14159265f / 180.0f, c = Cos(p);
+    out[0] = s.fwd[0] * c, out[1] = -Sin(p), out[2] = s.fwd[2] * c;
+    const float len = Sqrtf(out[0] * out[0] + out[1] * out[1] + out[2] * out[2]);
+    if (len > 1e-6f)
+        for (int i = 0; i < 3; ++i) out[i] /= len;
+}
+
+uint32_t TimeColor(float f) {
+    if (!(f > 0)) f = 0;
+    if (f > 1) f = 1;
+    constexpr uint32_t kRed = 0xFF0000, kBlue = 0x0000FF, kGreen = 0x00FF00;
+    return f < 0.5f ? Lerp(kRed, kBlue, f * 2) : Lerp(kBlue, kGreen, (f - 0.5f) * 2);
+}
+
+uint32_t RankColor(int rank, int count) { return count <= 1 ? TimeColor(1) : TimeColor(1.0f - static_cast<float>(rank) / (count - 1)); }
+
+} // namespace fdcore::replay::data

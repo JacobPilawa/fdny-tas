@@ -2,6 +2,7 @@
 #include "gfx.h"
 
 #include <windows.h>
+#include <xmmintrin.h>
 
 #include "addr.h"
 #include "cmd.h"
@@ -93,6 +94,13 @@ BoxList g_boxSubs[2][kMaxLayerSubs];
 int g_nBoxSubs[2];
 BoxList g_worldPrev[kMaxLayerSubs];
 int g_nWorldPrev = 0;
+struct LineList {
+    const WorldLine* lines;
+    int n;
+};
+LineList g_lineSubs[2][kMaxLayerSubs], g_linePrev[kMaxLayerSubs];
+int g_nLineSubs[2], g_nLinePrev = 0;
+int g_lineSegs = 0, g_lineSegsAcc = 0;
 WorldBoxStats g_boxStats = {}, g_boxAcc = {};
 #ifdef FDCORE_DEBUG
 char g_order[32], g_lastOrder[32];
@@ -511,7 +519,7 @@ template <class V, class D> int Clip(const V* in, int n, V* out, D dist) {  // k
             const float* pa = &a.x;
             const float* pb = &b.x;
             float* pv = &v.x;
-            for (int k = 0; k < 3; ++k) pv[k] = pa[k] + (pb[k] - pa[k]) * t;
+            for (int k = 0; k < static_cast<int>(sizeof(V) / sizeof(float)); ++k) pv[k] = pa[k] + (pb[k] - pa[k]) * t;
             out[m++] = v;
         }
     }
@@ -521,6 +529,7 @@ template <class V, class D> int Clip(const V* in, int n, V* out, D dist) {  // k
 float Dot(float ax, float ay, float az, float bx, float by, float bz) { return ax * bx + ay * by + az * bz; }
 
 void DrawBoxes(const WorldBox* list, int n, bool xray);
+void DrawLines(const WorldLine* list, int n, bool xray);
 
 void RunSubs(Layer layer) {
     for (int i = 0; i < g_nLayerSubs[layer]; ++i) g_layerSubs[layer][i]();
@@ -535,6 +544,7 @@ void RunWorldLayer() {
     MarkLayer("world");
 #endif
     for (int i = 0; i < g_nWorldPrev; ++i) DrawBoxes(g_worldPrev[i].boxes, g_worldPrev[i].n, false);
+    for (int i = 0; i < g_nLinePrev; ++i) DrawLines(g_linePrev[i].lines, g_linePrev[i].n, false);
     RunSubs(LAYER_WORLD);
     g_flushed = false;  // the frame's later immediate draws flush the game's queued polys again
 }
@@ -547,11 +557,17 @@ void RunLateLayers() {
 #endif
     for (int i = 0; i < g_nBoxSubs[LAYER_OVERLAY]; ++i)
         DrawBoxes(g_boxSubs[LAYER_OVERLAY][i].boxes, g_boxSubs[LAYER_OVERLAY][i].n, true);
+    for (int i = 0; i < g_nLineSubs[LAYER_OVERLAY]; ++i)
+        DrawLines(g_lineSubs[LAYER_OVERLAY][i].lines, g_lineSubs[LAYER_OVERLAY][i].n, true);
     RunSubs(LAYER_OVERLAY);
     g_nWorldPrev = g_nBoxSubs[LAYER_WORLD];
     for (int i = 0; i < g_nWorldPrev; ++i) g_worldPrev[i] = g_boxSubs[LAYER_WORLD][i];
     g_nBoxSubs[LAYER_WORLD] = g_nBoxSubs[LAYER_OVERLAY] = 0;
+    g_nLinePrev = g_nLineSubs[LAYER_WORLD];
+    for (int i = 0; i < g_nLinePrev; ++i) g_linePrev[i] = g_lineSubs[LAYER_WORLD][i];
+    g_nLineSubs[LAYER_WORLD] = g_nLineSubs[LAYER_OVERLAY] = 0;
     g_boxStats = g_boxAcc;
+    g_lineSegs = g_lineSegsAcc, g_lineSegsAcc = 0;
 #ifdef FDCORE_DEBUG
     MarkLayer("hud");
 #endif
@@ -646,7 +662,83 @@ void DrawBoxes(const WorldBox* list, int n, bool xray) {
     g_boxAcc.boxes += st.boxes, g_boxAcc.faces += st.faces, g_boxAcc.polys += st.polys, g_boxAcc.inside += st.inside;
 }
 
+// sqrt without the CRT (SSE, like glitch_bsp's Sqrt).
+float Sqrtf(float v) { return _mm_cvtss_f32(_mm_sqrt_ss(_mm_set_ss(v))); }
+
+// One screen-space vertex with its colour (Clip interpolates every float).
+struct ScrC {
+    float x, y, z, r, g, b;
+};
+
+// A segment as a camera-facing strip: near-clipped in camera space, projected, widened
+// perpendicular to its screen direction, clipped to the view.
+void DrawSegment(CamV a, CamV b, uint32_t ca, uint32_t cb, float half, void* tile, bool xray, float W, float H) {
+    float ra = static_cast<float>((ca >> 16) & 0xFF), ga = static_cast<float>((ca >> 8) & 0xFF), ba = static_cast<float>(ca & 0xFF);
+    float rb = static_cast<float>((cb >> 16) & 0xFF), gb = static_cast<float>((cb >> 8) & 0xFF), bb = static_cast<float>(cb & 0xFF);
+    if (a.d < kNear && b.d < kNear) return;
+    if (a.d < kNear || b.d < kNear) {
+        const bool cutA = a.d < kNear;
+        const float t = (kNear - a.d) / (b.d - a.d);
+        CamV m = {a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, kNear};
+        const float mr = ra + (rb - ra) * t, mg = ga + (gb - ga) * t, mb = ba + (bb - ba) * t;
+        if (cutA) a = m, ra = mr, ga = mg, ba = mb;
+        else b = m, rb = mr, gb = mg, bb = mb;
+    }
+    Vec3 in = {a.x, a.y, -a.d}, pa, pb;
+    g_camProject(g_camera, &in, &pa);
+    in = {b.x, b.y, -b.d};
+    g_camProject(g_camera, &in, &pb);
+    const float dx = pb.x - pa.x, dy = pb.y - pa.y, len = Sqrtf(dx * dx + dy * dy);
+    if (len < 0.01f) return;
+    const float nx = -dy / len * half, ny = dx / len * half;
+    const float za = xray ? 1.0f : pa.z, zb = xray ? 1.0f : pb.z;
+    ScrC q[4] = {{pa.x + nx, pa.y + ny, za, ra, ga, ba}, {pb.x + nx, pb.y + ny, zb, rb, gb, bb},
+                 {pb.x - nx, pb.y - ny, zb, rb, gb, bb}, {pa.x - nx, pa.y - ny, za, ra, ga, ba}};
+    ScrC c1[12], c2[12];
+    int k = Clip(q, 4, c1, [](const ScrC& v) { return v.x; });
+    k = Clip(c1, k, c2, [W](const ScrC& v) { return W - v.x; });
+    k = Clip(c2, k, c1, [](const ScrC& v) { return v.y; });
+    k = Clip(c1, k, c2, [H](const ScrC& v) { return H - v.y; });
+    if (k < 3) return;
+    TLVertex v[12];
+    for (int i = 0; i < k; ++i) v[i] = {c2[i].x, c2[i].y, c2[i].z, 0.5f, 0.5f, c2[i].r, c2[i].g, c2[i].b, 255};
+    g_poly(Engine(), v, k, tile, kImmediate);
+    ++g_lineSegsAcc;
+}
+
+void DrawLines(const WorldLine* list, int n, bool xray) {
+    if (!list || n <= 0 || !g_boxOk || !g_world || !g_camera || !BeginDraw()) return;
+    int vw, vh;
+    ViewSize(&vw, &vh);
+    const float W = static_cast<float>(vw), H = static_cast<float>(vh);
+    void* tiles[16] = {};  // per alpha nibble, resolved once a frame (BoxTile_ counts settle frames)
+    bool asked[16] = {};
+    for (int l = 0; l < n; ++l) {
+        const WorldLine& line = list[l];
+        const int a4 = line.alpha >> 4;
+        if (!a4 || line.n < 2 || !line.pts || !line.rgb) continue;
+        if (!asked[a4]) asked[a4] = true, tiles[a4] = BoxTile_(a4);
+        if (!tiles[a4]) continue;
+        CamV prev = {};
+        for (int i = 0; i < line.n; ++i) {
+            const Vec3 w = {line.pts[i][0], line.pts[i][1], line.pts[i][2]};
+            Vec3 o;
+            g_camXform(g_camera, &w, &o);
+            const CamV c = {o.x, o.y, -o.z};
+            if (i) DrawSegment(prev, c, line.rgb[i - 1], line.rgb[i], line.widthPx * 0.5f, tiles[a4], xray, W, H);
+            prev = c;
+        }
+    }
+}
+
 } // namespace
+
+void SubmitWorldLines(const WorldLine* lines, int n, Layer layer) {
+    if (!lines || n <= 0 || layer == LAYER_HUD) return;
+    if (g_nLineSubs[layer] < kMaxLayerSubs) g_lineSubs[layer][g_nLineSubs[layer]++] = {lines, n};
+}
+
+int LastWorldLineSegments() { return g_lineSegs; }
 
 bool WorldBoxesReady() { return g_boxOk; }
 
