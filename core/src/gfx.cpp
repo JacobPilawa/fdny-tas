@@ -676,40 +676,135 @@ struct ScrC {
     float x, y, z, r, g, b;
 };
 
-// A segment as a camera-facing strip: near-clipped in camera space, projected, widened
-// perpendicular to its screen direction, clipped to the view.
-void DrawSegment(CamV a, CamV b, uint32_t ca, uint32_t cb, float half, void* tile, bool xray, float W, float H) {
-    float ra = static_cast<float>((ca >> 16) & 0xFF), ga = static_cast<float>((ca >> 8) & 0xFF), ba = static_cast<float>(ca & 0xFF);
-    float rb = static_cast<float>((cb >> 16) & 0xFF), gb = static_cast<float>((cb >> 8) & 0xFF), bb = static_cast<float>(cb & 0xFF);
-    if (a.d < kNear && b.d < kNear) return;
-    if (a.d < kNear || b.d < kNear) {
-        const bool cutA = a.d < kNear;
-        const float t = (kNear - a.d) / (b.d - a.d);
-        CamV m = {a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, kNear};
-        const float mr = ra + (rb - ra) * t, mg = ga + (gb - ga) * t, mb = ba + (bb - ba) * t;
-        if (cutA) a = m, ra = mr, ga = mg, ba = mb;
-        else b = m, rb = mr, gb = mg, bb = mb;
-    }
-    Vec3 in = {a.x, a.y, -a.d}, pa, pb;
-    g_camProject(g_camera, &in, &pa);
-    in = {b.x, b.y, -b.d};
-    g_camProject(g_camera, &in, &pb);
-    const float dx = pb.x - pa.x, dy = pb.y - pa.y, len = Sqrtf(dx * dx + dy * dy);
-    if (len < 0.01f) return;
-    const float nx = -dy / len * half, ny = dx / len * half;
-    const float za = xray ? 1.0f : pa.z, zb = xray ? 1.0f : pb.z;
-    ScrC q[4] = {{pa.x + nx, pa.y + ny, za, ra, ga, ba}, {pb.x + nx, pb.y + ny, zb, rb, gb, bb},
-                 {pb.x - nx, pb.y - ny, zb, rb, gb, bb}, {pa.x - nx, pa.y - ny, za, ra, ga, ba}};
-    ScrC c1[12], c2[12];
-    int k = Clip(q, 4, c1, [](const ScrC& v) { return v.x; });
-    k = Clip(c1, k, c2, [W](const ScrC& v) { return W - v.x; });
-    k = Clip(c2, k, c1, [](const ScrC& v) { return v.y; });
-    k = Clip(c1, k, c2, [H](const ScrC& v) { return H - v.y; });
-    if (k < 3) return;
+// World lines are drawn as strips (D50): every point is transformed and projected once, and
+// consecutive segments share mitered corners, so translucent strips neither overlap nor notch
+// at the joins. A point closer than kMergePx on screen to the last one kept adds nothing and
+// is skipped (far-away stretches of a dense recording are a pixel per sample).
+constexpr int kLineChunk = 1024;     // points per pass; a longer line goes in chunks sharing an end point
+constexpr float kMergePx = 1.5f;
+constexpr float kMiterLimit = 2.0f;  // longest corner in half widths; sharper turns overlap a little
+
+struct LinePt {
+    CamV c;                // camera space
+    ScrC s;                // projected (valid when c.d >= kNear)
+    float half;            // half width, px
+    float ox, oy;          // corner direction: unit perpendicular scaled by the miter
+};
+LinePt g_lp[kLineChunk];
+float g_segDx[kLineChunk], g_segDy[kLineChunk];  // unit screen direction of segment j -> j + 1 (0, 0: none)
+
+// Emits one strip quad, clipped to the view only when it reaches past it.
+void EmitQuad(const ScrC (&q)[4], void* tile, float W, float H) {
+    bool inside = true;
+    for (const ScrC& v : q) inside = inside && v.x >= 0 && v.x <= W && v.y >= 0 && v.y <= H;
     TLVertex v[12];
-    for (int i = 0; i < k; ++i) v[i] = {c2[i].x, c2[i].y, c2[i].z, 0.5f, 0.5f, c2[i].r, c2[i].g, c2[i].b, 255};
+    int k = 4;
+    if (inside) {
+        for (int i = 0; i < 4; ++i) v[i] = {q[i].x, q[i].y, q[i].z, 0.5f, 0.5f, q[i].r, q[i].g, q[i].b, 255};
+    } else {
+        ScrC c1[12], c2[12];
+        k = Clip(q, 4, c1, [](const ScrC& p) { return p.x; });
+        k = Clip(c1, k, c2, [W](const ScrC& p) { return W - p.x; });
+        k = Clip(c2, k, c1, [](const ScrC& p) { return p.y; });
+        k = Clip(c1, k, c2, [H](const ScrC& p) { return H - p.y; });
+        if (k < 3) return;
+        for (int i = 0; i < k; ++i) v[i] = {c2[i].x, c2[i].y, c2[i].z, 0.5f, 0.5f, c2[i].r, c2[i].g, c2[i].b, 255};
+    }
     g_poly(Engine(), v, k, tile, kImmediate);
     ++g_lineSegsAcc;
+}
+
+ScrC Project(const CamV& c, float r, float g, float b, bool xray) {
+    const Vec3 in = {c.x, c.y, -c.d};
+    Vec3 p;
+    g_camProject(g_camera, &in, &p);
+    return {p.x, p.y, xray ? 1.0f : p.z, r, g, b};
+}
+
+// Points [from, from + count) of a line: transform, project, merge, corners, then the line and
+// its glow as strips. focal: px per world unit at depth 1.
+void DrawChunk(const WorldLine& line, int from, int count, float focal, void* tile, void* glowTile, bool xray, float W, float H) {
+    int m = 0;
+    for (int i = from; i < from + count; ++i) {
+        const Vec3 w = {line.pts[i][0], line.pts[i][1], line.pts[i][2]};
+        Vec3 o;
+        g_camXform(g_camera, &w, &o);
+        LinePt& p = g_lp[m];
+        p.c = {o.x, o.y, -o.z};
+        const uint32_t rgb = line.rgb[i];
+        p.s = {0, 0, 0, static_cast<float>((rgb >> 16) & 0xFF), static_cast<float>((rgb >> 8) & 0xFF), static_cast<float>(rgb & 0xFF)};
+        if (p.c.d >= kNear) {
+            p.s = Project(p.c, p.s.r, p.s.g, p.s.b, xray);
+            const LinePt* q = m ? &g_lp[m - 1] : nullptr;
+            const float dx = q ? p.s.x - q->s.x : 0, dy = q ? p.s.y - q->s.y : 0;
+            if (q && q->c.d >= kNear && i != from + count - 1 && dx * dx + dy * dy < kMergePx * kMergePx) continue;
+            float wpx = line.widthPx;
+            if (line.widthWorld > 0) {
+                wpx = line.widthWorld * focal / p.c.d;
+                wpx = wpx < line.widthPx ? line.widthPx : wpx > line.maxPx ? line.maxPx : wpx;
+            }
+            p.half = wpx * (line.thin && line.thin[i] ? 0.25f : 0.5f);
+        }
+        ++m;
+    }
+    // Segment directions, then each point's corner: the mean of its two segments' normals,
+    // lengthened so the strip keeps its width through the turn.
+    for (int j = 0; j + 1 < m; ++j) {
+        const LinePt &a = g_lp[j], &b = g_lp[j + 1];
+        const float dx = b.s.x - a.s.x, dy = b.s.y - a.s.y, len = Sqrtf(dx * dx + dy * dy);
+        const bool ok = a.c.d >= kNear && b.c.d >= kNear && len >= 0.01f;
+        g_segDx[j] = ok ? dx / len : 0, g_segDy[j] = ok ? dy / len : 0;
+    }
+    for (int j = 0; j < m; ++j) {
+        const bool in = j > 0 && (g_segDx[j - 1] != 0 || g_segDy[j - 1] != 0);
+        const bool out = j + 1 < m && (g_segDx[j] != 0 || g_segDy[j] != 0);
+        const float inx = in ? -g_segDy[j - 1] : 0, iny = in ? g_segDx[j - 1] : 0;
+        const float outx = out ? -g_segDy[j] : 0, outy = out ? g_segDx[j] : 0;
+        float x = inx + outx, y = iny + outy;
+        const float len = Sqrtf(x * x + y * y);
+        LinePt& p = g_lp[j];
+        if (len < 1e-3f) {  // an end, or a full turn back
+            p.ox = out ? outx : inx, p.oy = out ? outy : iny;
+            continue;
+        }
+        x /= len, y /= len;
+        const float cosHalf = in ? x * inx + y * iny : 1;  // cos of half the turn
+        const float k = cosHalf > 1 / kMiterLimit ? 1 / cosHalf : kMiterLimit;
+        p.ox = x * k, p.oy = y * k;
+    }
+    // The line, then the glow: drawn first, the glow's depth would hide the line in LAYER_WORLD.
+    for (int pass = 0; pass < 2; ++pass) {
+        const bool glow = pass == 1;
+        if (glow && (!line.glowAlpha || !glowTile)) continue;
+        const float scale = glow ? line.glowScale : 1.0f;
+        for (int j = 0; j + 1 < m; ++j) {
+            const LinePt &a = g_lp[j], &b = g_lp[j + 1];
+            if (a.c.d < kNear && b.c.d < kNear) continue;
+            ScrC q[4];
+            if (a.c.d >= kNear && b.c.d >= kNear) {
+                if (g_segDx[j] == 0 && g_segDy[j] == 0) continue;
+                const float ha = a.half * scale, hb = b.half * scale;
+                q[0] = a.s, q[1] = b.s, q[2] = b.s, q[3] = a.s;
+                q[0].x += a.ox * ha, q[0].y += a.oy * ha, q[3].x -= a.ox * ha, q[3].y -= a.oy * ha;
+                q[1].x += b.ox * hb, q[1].y += b.oy * hb, q[2].x -= b.ox * hb, q[2].y -= b.oy * hb;
+            } else {
+                // Crosses the near plane: cut there, plain square ends (the cut is at the eye).
+                const LinePt& v = a.c.d >= kNear ? a : b;
+                const LinePt& h = a.c.d >= kNear ? b : a;
+                const float t = (kNear - v.c.d) / (h.c.d - v.c.d);
+                const CamV cc = {v.c.x + (h.c.x - v.c.x) * t, v.c.y + (h.c.y - v.c.y) * t, kNear};
+                const ScrC cut = Project(cc, v.s.r + (h.s.r - v.s.r) * t, v.s.g + (h.s.g - v.s.g) * t, v.s.b + (h.s.b - v.s.b) * t, xray);
+                const float dx = cut.x - v.s.x, dy = cut.y - v.s.y, len = Sqrtf(dx * dx + dy * dy);
+                if (len < 0.01f) continue;
+                const float hv = v.half * scale, hc = (line.widthWorld > 0 ? line.maxPx : line.widthPx) * 0.5f * scale;
+                const float nx = -dy / len, ny = dx / len;
+                q[0] = v.s, q[1] = cut, q[2] = cut, q[3] = v.s;
+                q[0].x += nx * hv, q[0].y += ny * hv, q[3].x -= nx * hv, q[3].y -= ny * hv;
+                q[1].x += nx * hc, q[1].y += ny * hc, q[2].x -= nx * hc, q[2].y -= ny * hc;
+            }
+            EmitQuad(q, glow ? glowTile : tile, W, H);
+        }
+    }
 }
 
 void DrawLinesTimed(const WorldLine* list, int n, bool xray);
@@ -732,23 +827,26 @@ void DrawLinesTimed(const WorldLine* list, int n, bool xray) {
     int vw, vh;
     ViewSize(&vw, &vh);
     const float W = static_cast<float>(vw), H = static_cast<float>(vh);
+    const Vec3 c0 = {0, 0, -100}, c1 = {100, 0, -100};  // px per unit at depth 1, from the camera's projection
+    Vec3 p0, p1;
+    g_camProject(g_camera, &c0, &p0);
+    g_camProject(g_camera, &c1, &p1);
+    const float focal = p1.x > p0.x ? p1.x - p0.x : p0.x - p1.x;
     void* tiles[16] = {};  // per alpha nibble, resolved once a frame (BoxTile_ counts settle frames)
     bool asked[16] = {};
+    auto tileFor = [&](uint8_t alpha) -> void* {
+        const int a4 = alpha >> 4;
+        if (a4 && !asked[a4]) asked[a4] = true, tiles[a4] = BoxTile_(a4);
+        return tiles[a4];
+    };
     for (int l = 0; l < n; ++l) {
         const WorldLine& line = list[l];
-        const int a4 = line.alpha >> 4;
-        if (!a4 || line.n < 2 || !line.pts || !line.rgb) continue;
-        if (!asked[a4]) asked[a4] = true, tiles[a4] = BoxTile_(a4);
-        if (!tiles[a4]) continue;
-        CamV prev = {};
-        for (int i = 0; i < line.n; ++i) {
-            const Vec3 w = {line.pts[i][0], line.pts[i][1], line.pts[i][2]};
-            Vec3 o;
-            g_camXform(g_camera, &w, &o);
-            const CamV c = {o.x, o.y, -o.z};
-            if (i) DrawSegment(prev, c, line.rgb[i - 1], line.rgb[i], line.widthPx * 0.5f, tiles[a4], xray, W, H);
-            prev = c;
-        }
+        if (line.n < 2 || !line.pts || !line.rgb) continue;
+        void* tile = tileFor(line.alpha);
+        if (!tile) continue;
+        void* glowTile = line.glowAlpha ? tileFor(line.glowAlpha) : nullptr;
+        for (int from = 0; from < line.n - 1; from += kLineChunk - 1)
+            DrawChunk(line, from, line.n - from < kLineChunk ? line.n - from : kLineChunk, focal, tile, glowTile, xray, W, H);
     }
 }
 

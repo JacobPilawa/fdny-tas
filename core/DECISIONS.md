@@ -214,6 +214,30 @@ later session might "simplify" away; change one only with the owner's approval
 
 ## Process
 
+- **D50 World lines: one projection per point, mitered strips; the replay draws what it needs** (owner 2026-10-26: "Do em all", after a review of how other games and tools draw player paths).
+  - **Measured first:** Debug CPU timer on world lines (`gfx::WorldLineCost`, replay pipe `us` / `mean_us`). On the reference run, xray on, after playing to the end (`evidence/replay_lines/`):
+    - whole trace from above: 2665 strips, 3351 us per frame before; 525 strips, 554 us after;
+    - the player's view at the start: 296 strips, 660-747 us before; 87 strips, 471-481 us after.
+    - The frame-ratio test can't show this: under the display's refresh cap, 3.4 ms fits in a frame's spare time (D46's limit).
+  - **gfx (`DrawChunk`):**
+    - every point is transformed and projected once per line, and the line's glow is drawn from the same points (it was a second line);
+    - consecutive segments share mitered corners, held to 2 half widths: a translucent strip no longer overlaps itself at every point, where the glow built up to nearly solid far away, or notches on the outside of turns;
+    - a point under 1.5 px on screen from the last one kept is skipped;
+    - a strip inside the view skips the 4 clip passes;
+    - optional width in world units, held between a least and a most px, and half width per point (`thin`).
+    - The line is drawn before its glow. In `LAYER_WORLD`, the glow drawn first hid the line (its depth), seen in the game.
+  - **Replay:**
+    - The line runs through `Simplify`'s samples: Douglas-Peucker at 0.5 units (under a pixel from 160 units away), plus every point where it turns thin and the half-time sample, where the colour fade turns blue. 497 of 1391 on the reference run. Playback and the box still use every sample; the line ends at the interpolated playback point. This replaces D49's "no decimation": the samples are untouched, the drawn line stays within 0.5 units of them.
+    - 8 units wide, held to 3-8 px, so distance reads as depth.
+    - Half width in the air: off the ground for 3 samples or more (the recorder's `ground_contact_raw`; on the reference run these are jumps, the jump key held and the vertical speed rising and falling). One or two samples off the ground on stairs don't count.
+    - A white 10-unit tick every second (up to 60 per recording; sparser for long runs): the spacing shows speed, which the colour fade doesn't.
+    - `fd_replay_xray 1`: the trace stays in the world layer and adds a 25% copy over walls, so what's behind a wall reads as dimmed. The box and arrow are over walls at full strength, as before.
+    - Cleared recordings are freed at the next frame end: the world layer draws the list submitted the frame before, which points into them (a crash, seen in `replay` once the trace was in the world layer with x-ray on).
+  - **Rejected:**
+    - additive glow (no blend mode in the poly API the core uses, as D49);
+    - round joins and caps (more polygons, for strips 3-8 px wide);
+    - simplifying in screen space each frame alone (the per-frame merge does that for far points; the load-time pass removes points everywhere for nothing per frame);
+    - dashes in the air (a dash pattern needs distance along the line and more polygons; half width says the same).
 - **D49 Replay reads recordings the fdny-maps website's way; lines are a gfx block** (owner 2026-10-25).
   - **Data:** `replay_data.cpp` follows `map_explorer/recording-data.js`:
     - samples in file order, positions untouched;

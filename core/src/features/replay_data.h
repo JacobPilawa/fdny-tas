@@ -16,6 +16,7 @@ struct Sample {
     float pitch;      // pitch_deg (positive looks down)
     float mins[3], maxs[3];  // collision box relative to pos (measured or the site's default)
     int state;        // player_state_raw (4 crouched, 5 climbing)
+    int ground;       // ground_contact_raw (1 when absent)
 };
 
 struct Recording {
@@ -42,6 +43,18 @@ int IndexAt(const Recording& r, float t);
 
 // Facing arrow direction: body_forward's horizontal part tilted by pitch (the site's formula).
 void ArrowDir(const Sample& s, float out[3]);
+
+// Which samples a drawn line needs (D50): Douglas-Peucker over samples [a, b], keeping the
+// path within eps world units. Sets keep[i] for a, b, every force[i] (may be null) and the
+// points needed; returns how many in [a, b]. force may be keep itself (marks kept as given).
+// work: 2 * (b - a + 1) ints. The samples
+// themselves are untouched (playback and the box use them all).
+int Simplify(const Sample* s, int a, int b, float eps, const uint8_t* force, uint8_t* keep, int* work);
+
+// In the air for the drawing: off the ground for at least kAirSamples samples in a row (a
+// jump or a fall; single samples off the ground on stairs and slopes don't count).
+constexpr int kAirSamples = 3;
+void AirFlags(const Sample* s, int n, uint8_t* air);
 
 // Colours (owner spec 2026-10-25): one run fades red -> blue -> green over its duration
 // (f = t / duration); several runs get one colour each by duration, pure green for the

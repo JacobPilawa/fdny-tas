@@ -155,6 +155,7 @@ bool Parse(const char* text, int len, Recording* out, char* err, int errCap) {
             if (!Vec(l, "body_forward", s.fwd)) s.fwd[0] = 0, s.fwd[1] = 0, s.fwd[2] = 1;
             s.pitch = Num(l, "pitch_deg", &v) ? static_cast<float>(v) : 0.0f;
             s.state = Num(l, "player_state_raw", &v) ? static_cast<int>(v) : 0;
+            s.ground = Num(l, "ground_contact_raw", &v) ? static_cast<int>(v) : 1;
             bool bounds = Vec(l, "bounds_min", s.mins) && Vec(l, "bounds_max", s.maxs);
             for (int i = 0; bounds && i < 3; ++i) bounds = s.mins[i] < s.maxs[i];
             if (!bounds) {  // the site's boundsFor default: 60 x 60, 85 high (25 crouched)
@@ -215,6 +216,44 @@ void ArrowDir(const Sample& s, float out[3]) {
     const float len = Sqrtf(out[0] * out[0] + out[1] * out[1] + out[2] * out[2]);
     if (len > 1e-6f)
         for (int i = 0; i < 3; ++i) out[i] /= len;
+}
+
+int Simplify(const Sample* s, int a, int b, float eps, const uint8_t* force, uint8_t* keep, int* work) {
+    int sp = 0;
+    for (int i = a, prev = a; i <= b; ++i) {
+        keep[i] = i == a || i == b || (force && force[i]);
+        if (keep[i] && i > prev) work[sp++] = prev, work[sp++] = i, prev = i;
+    }
+    while (sp) {  // ranges between kept points: keep the farthest point while it's beyond eps
+        const int hi = work[--sp], lo = work[--sp];
+        const float* p = s[lo].pos;
+        const float ab[3] = {s[hi].pos[0] - p[0], s[hi].pos[1] - p[1], s[hi].pos[2] - p[2]};
+        const float l2 = ab[0] * ab[0] + ab[1] * ab[1] + ab[2] * ab[2];
+        float best = eps * eps;
+        int pick = -1;
+        for (int k = lo + 1; k < hi; ++k) {
+            const float ap[3] = {s[k].pos[0] - p[0], s[k].pos[1] - p[1], s[k].pos[2] - p[2]};
+            float t = l2 > 0 ? (ap[0] * ab[0] + ap[1] * ab[1] + ap[2] * ab[2]) / l2 : 0;
+            t = t < 0 ? 0 : t > 1 ? 1 : t;
+            const float dx = ap[0] - ab[0] * t, dy = ap[1] - ab[1] * t, dz = ap[2] - ab[2] * t;
+            const float d2 = dx * dx + dy * dy + dz * dz;
+            if (d2 > best) best = d2, pick = k;
+        }
+        if (pick >= 0) keep[pick] = 1, work[sp++] = lo, work[sp++] = pick, work[sp++] = pick, work[sp++] = hi;
+    }
+    int n = 0;
+    for (int i = a; i <= b; ++i) n += keep[i];
+    return n;
+}
+
+void AirFlags(const Sample* s, int n, uint8_t* air) {
+    for (int i = 0; i < n;) {
+        int j = i;
+        while (j < n && !s[j].ground) ++j;
+        for (int k = i; k < j; ++k) air[k] = j - i >= kAirSamples;
+        if (j < n) air[j++] = 0;
+        i = j;
+    }
 }
 
 uint32_t TimeColor(float f) {

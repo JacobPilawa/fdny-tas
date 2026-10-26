@@ -71,7 +71,7 @@ Every drawing belongs to a gfx layer, run in this fixed order each frame (D40, `
 |---|---|
 | A text panel | `textdraw::Create(...)` (HUD layer): `STYLE_TRANSLUCENT` (default; opaque fallback without a world) or `STYLE_OPAQUE` (always visible, e.g. the watermark). Own colours: `textdraw::SetPalette`. |
 | Boxes in the level | `gfx::SubmitWorldBoxes(boxes, n, LAYER_WORLD or LAYER_OVERLAY)` from `OnFrameEnd`, every frame |
-| Lines in the level | `gfx::SubmitWorldLines(lines, n, layer)`: polylines, colour per point, width in px (the replay) |
+| Lines in the level | `gfx::SubmitWorldLines(lines, n, layer)`: polylines as mitered strips, colour per point, width in px or world units, optional glow and thin points (the replay; D50) |
 | Your own drawing in a layer | `gfx::OnLayer(layer, fn)` (a new kind of drawing is a gfx block first, R5) |
 | Opaque image / rect | `gfx::Decal`, `gfx::SolidRect` |
 | Per-pixel alpha | `gfx::AlphaSurface` (256 px 4444 tiles, world-attached; colours are 4 bits per channel) |
