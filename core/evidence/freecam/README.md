@@ -74,3 +74,5 @@ fire state, burn and O2.
   - Pause: **P**. P isn't a game key, and the console's typing mode already blocks binds.
   - Free cam up / down: **E / Q**.
   - The probe's F5/F6/F7 were for the spike only.
+
+_The logs and run output named above were removed on 2026-10-27 (repository tidy-up); git history keeps them._

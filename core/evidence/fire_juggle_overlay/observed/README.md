@@ -52,3 +52,5 @@ Screenshots:
 - `fire_out_locked.png`
 - `passed_out.png`
 - `respawned.png`
+
+_The logs and run output named above were removed on 2026-10-27 (repository tidy-up); git history keeps them._

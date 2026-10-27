@@ -498,7 +498,7 @@ class Run:
         """fd_juggle's arrow against the harness's own computation: player position, yaw
         and the safe spot (+0x3400) read directly from memory; landing point T = spot -
         30 X; view axes measured live (forward = (sin yaw, cos yaw), right = (-cos yaw,
-        sin yaw), evidence/fire_juggle_overlay/yaw_probe.log); 8 sectors of 45 degrees,
+        sin yaw), evidence/fire_juggle_overlay); 8 sectors of 45 degrees,
         8 = "o" under 16 u. {locked: 0|1} (default 1) is asserted too; {locked: auto} derives
         it from memory for a player who isn't moving (frozen = spot != position, exactly,
         since Think's write copies the position), and fails if the position changes

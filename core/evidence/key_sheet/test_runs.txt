@@ -1,8 +1,0 @@
-2026-10-23-165055-keys_default pass=True
-2026-10-23-165211-vars_binds_persist pass=True
-2026-10-23-165355-console_basic pass=True
-2026-10-23-165449-window_alttab pass=True
-2026-10-23-165556-freecam pass=False
-2026-10-23-165848-freecam pass=True
-2026-10-23-170207-core_loads (Release) pass=True
-2026-10-23-164912-docs_registry pass=True (2026-10-23-164751: FAIL before alttabfix.asi was moved out: window module off, see docs_registry_first_run_alttabfix.json)

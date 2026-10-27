@@ -75,3 +75,5 @@ minus 30 on X, standing on the floor below that spot.
 
 Not tested: moving a liftable away and repeating; the extinguisher or hose aimed at
 yourself; type-2 emitters on other maps; a real out-of-bounds spot.
+
+_The logs and run output named above were removed on 2026-10-27 (repository tidy-up); git history keeps them._

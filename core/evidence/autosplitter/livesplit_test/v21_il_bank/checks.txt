@@ -1,9 +1,0 @@
-﻿  [PASS] script loaded: HOST loaded FDNY_ILs.asl, 30 segments, refresh 66.6666666666667 Hz
-  [PASS] no script errors: none
-  [PASS] start count: game: 1 run start(s); timer: 1 start(s)
-  [PASS] start 1: gameplay began 18372.898; timer start 18372.941 (+0.043 s, allowed 0.1)
-  [PASS] split count: game: 1 stage end(s)/win(s) (case expects 1); timer: 1 split(s)
-  [PASS] split 1 (bank won): split 0 ms (game clock) after the win flag (allowed 0-70)
-  [PASS] split 1 game time: timer 26.6515 s, played 26.665 s over 1 interval(s) (tolerance 0.08)
-  [PASS] reset count: game: 1 menu visit(s) during a run; timer: 1 reset(s)
-  [PASS] reset 1: menu at 18405.629; reset at 18405.791 (+0.162 s, allowed 0.5)

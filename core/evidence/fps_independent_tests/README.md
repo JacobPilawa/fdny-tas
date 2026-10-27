@@ -60,3 +60,5 @@ and 2662 us per frame in Training, 2019 in Bank. Its other checks passed, and th
 was then dropped as display-dependent.
 
 Files: `history.txt`, `glitch_box_cost_result.json`, `text_panels_result.json`.
+
+_The logs and run output named above were removed on 2026-10-27 (repository tidy-up); git history keeps them._

@@ -1,6 +1,0 @@
-15:32:28 liftable 0x8dc7220 centre (180.0, 0.0, 84.0): drop above -> (150.0, -36.9, 84.0); control 150 u aside -> (300.0, -36.9, 84.0); height difference +0.0 u
-15:32:47 liftable 0x8db0be8 centre (908.0, 27.0, 435.0): drop above -> (878.0, 39.1, 435.0); control 150 u aside -> (1028.0, 39.1, 435.0); height difference +0.0 u
-15:33:06 liftable 0x8ddd1a8 centre (1281.0, 5.0, -168.0): drop above -> (1251.0, 47.1, -168.0); control 150 u aside -> (1401.0, -38.9, -168.0); height difference +86.0 u
-15:33:24 liftable 0x8dc66b8 centre (1324.0, 4.0, -142.0): drop above -> (1294.0, 47.1, -142.0); control 150 u aside -> (1444.0, -38.9, -142.0); height difference +86.0 u
-15:33:42 liftable 0x8ddf038 centre (1193.0, 0.0, -435.0): drop above -> (1163.0, -38.9, -435.0); control 150 u aside -> (1313.0, -21.9, -435.0); height difference -17.0 u
-15:33:42 DONE

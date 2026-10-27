@@ -158,3 +158,5 @@ source is left, and it is identified to the spawn / list-order step.
 Files: `run13/` (log, traces, script timelines with the heat / spread lines, `compare.txt`,
 `firediff_*.txt`); probe helpers `demo_scriptdiff.py`, `demo_firediff.py`, `re_refs.py`,
 `re_fieldwrites.py`, `re_thunkcallers.py`.
+
+_The logs and run output named above were removed on 2026-10-27 (repository tidy-up); git history keeps them._

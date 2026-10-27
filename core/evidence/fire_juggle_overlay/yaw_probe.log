@@ -1,9 +1,0 @@
-yaw   0.0 key w: dx=   +0.0 dz= +156.2 (yaw now 0.0)
-yaw   0.0 key d: dx= -109.4 dz=   +0.0 (yaw now 0.0)
-yaw  90.0 key w: dx= +156.2 dz=   +0.0 (yaw now 90.0)
-yaw  90.0 key d: dx=   +0.0 dz= +101.0 (yaw now 90.0)
-yaw 180.0 key w: dx=   +0.0 dz= -158.2 (yaw now 180.0)
-yaw 180.0 key d: dx= +100.1 dz=   +0.0 (yaw now 180.0)
-yaw 270.0 key w: dx= -168.1 dz=   +0.0 (yaw now 270.0)
-yaw 270.0 key d: dx=   +0.0 dz= -100.9 (yaw now 270.0)
-DONE
