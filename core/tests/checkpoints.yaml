@@ -35,8 +35,9 @@ steps:
   - loadmap: training
   - wait_pipe: {cmd: triggers, key: n, equals: 25, timeout: 10}
   - key: {key: n, hold: 0.1}
-  - wait_log: {contains: "checkpoints: loaded 2 native checkpoints for training", timeout: 10}
   - wait_pipe: {cmd: triggers, key: n, equals: 27, timeout: 10}
+  # The N press logs its line before a wait_log could start counting: count both loads.
+  - assert_log_count: {contains: "checkpoints: loaded 2 native checkpoints for training", equals: 2}
   - console: "fd_profile run"
   - console: "fd_checkpoints 1"
   - assert_log: {contains: "fd_checkpoints is practice-only (fd_profile is run)"}
