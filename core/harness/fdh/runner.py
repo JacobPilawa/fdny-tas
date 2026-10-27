@@ -104,6 +104,23 @@ class Run:
             inputs.mouse_move_rel(*arg)
         elif kind == "rclick":
             inputs.mouse_click_here(right=True)
+        elif kind == "gclick":
+            # Game-cursor click: the menus track their own cursor from DirectInput
+            # deltas (1:1, clamped to the screen), so slam to the top-left corner,
+            # then move by the target coords.
+            inputs.mouse_move_rel(-3000, -3000)
+            time.sleep(0.15)
+            inputs.mouse_move_rel(*arg)
+            time.sleep(0.25)
+            # The click lands wherever the OS cursor is. Relative moves can leave
+            # it outside the game window (e.g. if it was warped mid-move), and a
+            # stray click on the taskbar opened the Start menu (2026-10-21). An
+            # absolute SetCursorPos yields no DirectInput delta, so park the OS
+            # cursor inside the window: the game's own menu cursor stays put.
+            cx, cy, cw, ch = self.g.client_rect()
+            inputs.set_cursor(cx + cw // 2, cy + ch // 2)
+            time.sleep(0.1)
+            inputs.mouse_click_here()
         elif kind == "screenshot":
             path, luma = capture.screenshot(self.g.client_rect(), os.path.join(self.out, f"{arg}.png"))
             self.samples[f"screenshot.{arg}.luma"] = round(luma, 1)
@@ -226,6 +243,15 @@ class Run:
                 self.resolver = addrtable.Resolver(self.g.pm, self.resolver_version, bases)
                 if arg.get("wait_s"):
                     time.sleep(float(arg["wait_s"]))
+        elif kind == "alt_tab":
+            inputs.alt_tab()
+            time.sleep(float(arg.get("wait_s", 1.5)) if isinstance(arg, dict) else 1.5)
+        elif kind == "assert_foreground":
+            is_game = inputs.foreground() == self.g.hwnd
+            self.record("assert_foreground", is_game == bool(arg),
+                        f"game {'is' if is_game else 'is not'} the foreground window (expected {'game' if arg else 'other'})")
+        elif kind == "set_cursor":
+            inputs.set_cursor(*arg)
         elif kind == "assert_cursor":
             x, y = inputs.cursor_pos()
             if arg.get("window_centre"):
@@ -789,7 +815,10 @@ class Run:
             if shared and f["dst"].lower() == "fdnycore.cfg":
                 f = {"dst": session.TEST_CFG, "src": f.get("src")}
             dst = os.path.join(self.game_dir, f["dst"])
-            backup = dst + ".fdh-backup"
+            # Per run: baseline_route's runs without the core are nested in its own run, and a
+            # shared name let the inner run consume the outer backup, so the outer run then
+            # deleted the game's FDNYFireFighter.cfg (2026-10-26).
+            backup = f"{dst}.fdh-backup-{id(self):x}"
             if os.path.exists(dst):  # a real game file: restore it afterwards
                 shutil.copy2(dst, backup)
             if f.get("src"):
