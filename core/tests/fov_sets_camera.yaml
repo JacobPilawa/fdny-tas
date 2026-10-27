@@ -1,11 +1,10 @@
 name: fov_sets_camera
-# Item 6: with the original FOV fix removed, FDNYCore's default reproduces it
-# (camera FOV 2.002 = fov_parity_reference), and fd_fov sets the camera FOV
+# Item 6: FDNYCore's default reproduces the original FOV fix
+# (camera FOV 2.002, measured with the original fix: evidence/foundation), and fd_fov sets the camera FOV
 # in memory (Genesis units: 2*tan(hfov/2) at 4:3 / 640x480):
 #   fd_fov 90 -> 2.0     fd_fov 120 -> 3.4641     fd_fov -1 -> game's own 1.428148
 pre_files:
   - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
-  - {src: null, dst: FDNYFirefighterAmericanHeroFOVFix.asi}
   - {src: null, dst: FDNYCore.cfg}
 setup: load_training
 record: true

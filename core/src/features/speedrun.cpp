@@ -1,5 +1,5 @@
-// Tests: tests/speedrun_static_spawns.yaml tests/speedrun_rescuebot.yaml tests/ondemand/speedrun_reference_deterministic.yaml
-// User: Speedrun options -- fixed victim spawns and the RescueBot switch (shown on the watermark; off while FDNYDeterministic.asi is installed).
+// Tests: tests/speedrun_static_spawns.yaml tests/speedrun_rescuebot.yaml
+// User: Speedrun options -- fixed victim spawns and the RescueBot switch (shown on the watermark).
 // speedrun module (backlog item 8): port of asi/FDNYDeterministic.
 //
 // Static victim spawns: VictimRescueEnt::SpawnAtSpot copies the RNG-chosen
@@ -29,7 +29,6 @@ namespace {
 using addr::Id;
 
 bool g_hooked = false;
-const char* g_deferTo = nullptr;  // an installed plugin this module replaces
 
 // --- variables -----------------------------------------------------------------
 volatile long g_static = 0;  // fd_static_spawns
@@ -197,7 +196,7 @@ void ApplyRescueBot(cmd::Cvar& v) {
     uintptr_t tryStart = addr::ExportAddress(Id::patch_rescuebot_trystart);
     uintptr_t ctorImm = addr::ExportAddress(Id::patch_rescuebot_ctor_enable);
     if (!tryStart || !ctorImm) {
-        console::Print("fd_rescuebot: unavailable (patch sites not verified or used by another mod)");
+        console::Print("fd_rescuebot: unavailable (patch sites not verified)");
         return;
     }
     bool ok = WriteByte(tryStart, on ? 0x6A : 0xC3) && WriteByte(ctorImm, on ? 0x01 : 0x00);
@@ -209,20 +208,7 @@ const Id kSpawnNeeds[] = {Id::patch_victim_spawn, Id::game_snap_to_floor, Id::ga
 
 } // namespace
 
-bool ApplyEarlyPatch(const char* gameDir) {
-    // The plugins this module replaces hook the same sites. The ASI loader
-    // loads alphabetically, so FDNYCore.asi comes first and would take the
-    // spawn site from them; a player who still has one installed keeps it.
-    static const char* const kReplaced[] = {"FDNYDeterministic.asi", "FDNYVictimSpawns.asi"};
-    for (const char* other : kReplaced) {
-        char path[MAX_PATH];
-        wsprintfA(path, "%s%s", gameDir, other);
-        if (GetFileAttributesA(path) != INVALID_FILE_ATTRIBUTES) {
-            g_deferTo = other;
-            log::Info("speedrun: %s is installed; static spawns and RescueBot left to it", other);
-            return false;
-        }
-    }
+bool ApplyEarlyPatch() {
     g_hooked = entities::FilterVictimSpot(OnVictimSpot);
     if (!g_hooked) log::Warn("speedrun: no victim-spot filter (see the entities line); static spawns inactive");
     else log::Info("speedrun: static spawns use the entities victim-spot filter");
@@ -230,7 +216,6 @@ bool ApplyEarlyPatch(const char* gameDir) {
 }
 
 bool Init() {
-    if (g_deferTo) return false;  // arch-allow: R10 FDNYDeterministic.asi owns these sites (logged in ApplyEarlyPatch)
     bool spawnsOk = g_hooked;
     for (Id id : kSpawnNeeds) spawnsOk = spawnsOk && addr::Usable(id);
     if (spawnsOk) {
@@ -244,14 +229,14 @@ bool Init() {
     if (addr::Usable(Id::patch_rescuebot_trystart) && addr::Usable(Id::patch_rescuebot_ctor_enable) &&
         addr::Usable(Id::rescuebot_enabled))
         cmd::RegisterCvar(&g_fdRescueBot);
-    else log::Warn("speedrun: RescueBot sites unavailable (used by another mod, e.g. FDNYDeterministic.asi?)");
+    else log::Warn("speedrun: RescueBot sites unavailable (signature mismatch, see above)");
     log::Info("speedrun: ready (static spawns %s, rescuebot %s)", spawnsOk ? "available" : "unavailable",
               addr::Usable(Id::patch_rescuebot_trystart) ? "available" : "unavailable");
     return true;
 }
 
 namespace {
-void Early(const char* gameDir) { ApplyEarlyPatch(gameDir); }
+void Early(const char*) { ApplyEarlyPatch(); }
 } // namespace
 
 } // namespace fdcore::speedrun

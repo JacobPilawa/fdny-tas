@@ -118,7 +118,7 @@ Every drawing belongs to a gfx layer, run in this fixed order each frame (D40, `
 
 ## Owner decisions in force
 
-- Old tools stay installed (FOV fix, alttabfix, FDNYDeterministic, Python overlays): no further development, don't delete. The core defers to them where they own a patch site. A test of a feature that replaces one removes that tool for its run (`pre_files` with `src: null`).
+- Players run FDNYCore alone; the core doesn't detect or defer to the old tools (FOV fix, alttabfix, FDNYDeterministic), and the VM's game folder doesn't have them (D55). A patch site someone else changed is a signature mismatch: left alone, with a warning.
 - The watermark stays opaque (decal path).
 - The practice-only list is the agent's default; the owner still has to confirm it.
 - No extra log files for overlay output: it goes to `FDNYCore.log` (`glitch|` lines).
