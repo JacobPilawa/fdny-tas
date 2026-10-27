@@ -17,7 +17,10 @@ steps:
   - key: {key: w, hold: 2}
   - console: "fd_tp_load"
   - wait_log: {contains: "checkpoint Spawn:", since_console: true, timeout: 5}
-  - console: "hint 4 (This must not replace the checkpoint)"
+  - sample_pipe: {cmd: game_hints, as: hints_priority}
+  - console: "hint 4 This must not replace the checkpoint"
+  - assert_pipe_stat: {cmd: game_hints, key: suppressed, min: 1, since: hints_priority}
+  - assert_pipe_stat: {cmd: game_hints, key: passed, equals: 0, since: hints_priority}
   - screenshot: timestamp_native_priority
   - key: {key: w, hold: 2}
   - console: "fd_tp_load"
@@ -25,11 +28,16 @@ steps:
   - assert_log_count: {contains: "checkpoint Spawn:", equals: 1}
   - key: {key: n, hold: 0.1}
   - assert_log: {contains: "checkpoints: timestamps off"}
+  # With timestamps off the game's own hints show again.
+  - sample_pipe: {cmd: game_hints, as: hints_off}
+  - console: "hint 4 Game hint"
+  - assert_pipe_stat: {cmd: game_hints, key: passed, min: 1, since: hints_off}
   - loadmap: training
   - wait_pipe: {cmd: triggers, key: n, equals: 25, timeout: 10}
   - key: {key: n, hold: 0.1}
-  - wait_log: {contains: "checkpoints: loaded 2 native checkpoints for training", timeout: 10}
   - wait_pipe: {cmd: triggers, key: n, equals: 27, timeout: 10}
+  # The N press logs its line before a wait_log could start counting: count both loads.
+  - assert_log_count: {contains: "checkpoints: loaded 2 native checkpoints for training", equals: 2}
   - console: "fd_profile run"
   - console: "fd_checkpoints 1"
   - assert_log: {contains: "fd_checkpoints is practice-only (fd_profile is run)"}
