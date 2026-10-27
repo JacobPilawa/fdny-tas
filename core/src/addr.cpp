@@ -64,22 +64,6 @@ bool VerifySig(const Entry& e) {
     return true;
 }
 
-// A `patch.*` code site whose live bytes start with another mod's detour
-// shape: a NOP run, or a JMP/CALL rel32. Anything else is a real mismatch.
-bool OccupiedByOtherMod(const Entry& e) {
-    const char* p = "patch.";
-    for (int i = 0; p[i]; ++i)
-        if (e.name[i] != p[i]) return false;
-    uint8_t live[kMaxSig];
-    if (!e.sigLen || !SafeRead(g_bases[e.module] + e.sigRva, live, e.sigLen)) return false;
-    if ((live[0] == 0x90 && live[1] == 0x90) || live[0] == 0xE9 || live[0] == 0xE8) return true;
-    // A 1-byte patch (e.g. asi/FDNYDeterministic's ret / imm8): only the first
-    // byte differs, everything after it is still the original code.
-    for (int i = 1; i < e.sigLen; ++i)
-        if (live[i] != e.sig[i]) return false;
-    return true;
-}
-
 } // namespace
 
 // Same as SafeRead, for data the core changes (teleporter): a fault is a failure.
@@ -138,25 +122,17 @@ void Init(const char* exeSha256, const char* genesisSha256, uintptr_t exeBase,
     }
     log::Info("address table: version %s selected", g_version->name);
 
-    int ok = 0, total = 0, occupied = 0;
+    int ok = 0, total = 0;
     for (int i = 0; i < kCount; ++i) {
         const Entry& e = g_version->entries[i];
         if (!e.rva) continue;  // absent in this version
         g_usable[i] = g_earlyVerified[i] || VerifySig(e);
-        if (!g_usable[i] && OccupiedByOtherMod(e)) {
-            // Another plugin (e.g. alttabfix.asi) detoured one of our patch
-            // sites: expected, not a version mismatch. The entry stays unusable.
-            log::Info("patch site %s occupied by another mod; left alone", e.name);
-            ++occupied;
-            continue;
-        }
         ++total;
         if (g_usable[i]) ++ok;
         else log::Warn("signature mismatch: %s (expected at %s+%08lx); entry disabled", e.name,
                        e.module ? "Genesis.dll" : "exe", static_cast<unsigned long>(e.sigRva));
     }
-    if (ok == total) log::Info("signatures: all OK (%d/%d, %d patch site(s) occupied by other mods)", ok, total,
-                               occupied);
+    if (ok == total) log::Info("signatures: all OK (%d/%d)", ok, total);
     else log::Warn("signatures: %d/%d OK", ok, total);
 }
 

@@ -12,7 +12,7 @@ bool ObserveVictims(EntityFn spawned, EntityFn updated, EntityFn destroying);
 // SpawnAtSpot after the RNG-chosen spot is copied to the victim and before the game
 // floor-snaps it, so it may rewrite the victim's position. The site is patched at
 // once, so call this from a module's early step (DllMain, before any level). False if
-// the site doesn't match (another mod patched it) or a filter is already set.
+// the site's signature doesn't match or a filter is already set.
 bool FilterVictimSpot(EntityFn filter);
 
 // Runtime RCS_BoundsTrigger support. The world owns the native roots; this

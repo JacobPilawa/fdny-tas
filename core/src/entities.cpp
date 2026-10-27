@@ -71,8 +71,8 @@ bool FilterVictimSpot(EntityFn filter) {
     uintptr_t site = addr::EarlyCodeAddress(addr::Id::patch_victim_spawn);
     uintptr_t snap = addr::EarlyCodeAddress(addr::Id::game_snap_to_floor);
     if (!site || !snap) {
-        log::Warn("entities: victim-spawn site doesn't match (already hooked by another mod, e.g. "
-                  "FDNYDeterministic.asi?); no spot filter");
+        log::Warn("entities: victim-spawn site doesn't match (signature mismatch, see above); "
+                  "no spot filter");
         return false;
     }
     g_spotTramp = static_cast<uint8_t*>(VirtualAlloc(nullptr, 0x40, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE));

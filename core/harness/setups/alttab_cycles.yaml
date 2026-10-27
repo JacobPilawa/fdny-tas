@@ -1,5 +1,4 @@
-# Five alt-tab cycles, identical for the FDNYCore test and the alttabfix.asi
-# reference. Away: the cursor must move freely (a user moving the mouse to
+# Five alt-tab cycles (window_alttab). Away: the cursor must move freely (a user moving the mouse to
 # (900,700) keeps it there). Back: the cursor is held at the game window
 # centre, the game renders, and keeps the cursor there.
 steps:

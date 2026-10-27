@@ -11,7 +11,6 @@ name: state_snapshot
 pre_files:
   - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
   - {src: null, dst: FDNYCore.cfg}
-  - {src: null, dst: FDNYDeterministic.asi}
 setup: load_training
 record: true
 steps:

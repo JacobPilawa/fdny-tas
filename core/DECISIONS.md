@@ -30,12 +30,12 @@ later session might "simplify" away; change one only with the owner's approval
   A standalone `FDNYRecorder.asi` disables this feature to prevent duplicate capture.
 
 - **D44 `entities` owns all of SpawnAtSpot, including the spot filter** (owner 2026-10-24: "Do 1 and 2"). Speedrun used to patch 0x0045D717 inside the function whose entry `entities` hooks (D3: one owner per function).
-  - **What:** `entities::FilterVictimSpot(fn)` installs the trampoline before the floor snap and holds one filter. It must be called from a module's early step, since the patch goes in at DllMain, before any level exists. Speedrun calls it and keeps its own defer check for FDNYDeterministic / FDNYVictimSpawns (D5).
+  - **What:** `entities::FilterVictimSpot(fn)` installs the trampoline before the floor snap and holds one filter. It must be called from a module's early step, since the patch goes in at DllMain, before any level exists. Speedrun calls it.
   - **One filter, not a list:** two features moving the same victim would need an ordering rule. A second request fails, like camera's FOV filter.
   - **Rejected:** routing the pin through the entry hook's spawn observer. That runs after SpawnAtSpot returns, so after the floor snap, and the moved victim would float or sink.
 
 - **D4 Every address lives in `addresses.json`** (rule R4). It is versioned by exe + Genesis SHA-256, and every entry is signature-checked at startup. A bad signature disables only what needs that entry, and the game runs on. This replaced raw addresses so an unknown game version degrades instead of crashing.
-- **D5 Defer to other mods that own a patch site** (alttabfix, FOV fix, FDNYDeterministic). Owner: the old tools stay installed. The core detects an occupied site and leaves it alone rather than double-patching.
+- **D5 Defer to other mods that own a patch site** (alttabfix, FOV fix, FDNYDeterministic). Superseded by D55.
 - **D6 Ghidra work goes through subagents**, read-only; the primary session never calls GhidrAssist MCP. Project rule (memory: loop owns Ghidra writes).
 
 ## Architecture
@@ -73,7 +73,7 @@ later session might "simplify" away; change one only with the owner's approval
 
 - **D18 Teleporter writes position, view and zeroed motion at frame end; it does not use the game's Verb_Reset.** Verb_Reset drops held objects and the victim, resets health and zones, moves to an escape-mutated checkpoint, and SnapToFloor commits (0,1,0) without a floor. Owner: it only works on the map it was saved on. It has a single in-memory slot; stance is not saved.
 - **D19 Collision-overlay output goes to `FDNYCore.log` (`glitch|` lines), no extra files** (owner).
-- **D20 Speedrun options (static spawns, RescueBot off) re-implement FDNYDeterministic and stand down when it is installed** (D5). Replacing the standalone `.asi` is an open owner question.
+- **D20 Speedrun options (static spawns, RescueBot off) re-implement FDNYDeterministic.** They no longer stand down when it is installed (D55).
 - **D24 Trigger boxes come from live memory every level; there is no BSP scan or coordinate file** (owner). Triggers are the entities whose vtable is `trigger.vtbl`. The set is rescanned on a map change and about once a second. The exits' open flag is read every frame. Spike: `trigger_boxes/README.md`.
 - **D25 Trigger classes are the game's own tests, not kind and not our own parsing rules:**
   - Kind is 8 for every trigger: the constructor writes it, so it can't separate exits.
@@ -214,6 +214,10 @@ later session might "simplify" away; change one only with the owner's approval
 
 ## Process
 
+- **D55 The core doesn't defer to the old tools** (owner 2026-10-27: "Players will be instructed to only use the specific .asi for fdnycore so any failures from additional tooling is on them"). Replaces D5.
+  - **What:** no detection of alttabfix, the FOV fix, FDNYDeterministic or FDNYVictimSpawns. Speedrun no longer stands down when FDNYDeterministic.asi is in the game folder. A patch site another mod has detoured is a plain signature mismatch (`addr`): still never patched, now a warning. The on-demand tests that ran the old tools are gone, and the VM's game folder no longer has them (moved to `C:\fdny-decomp-oldtools-20261027`).
+  - **Kept:** signature checks. They are what stops a double patch, and they don't depend on knowing which mod got there first.
+  - **Rejected:** keeping the deferral for players who mix tools (the owner: unsupported); deleting the old tools from the VM (moved, not deleted).
 - **D54 Rules an agent missed become checks** (owner 2026-10-27, after the review of PR #20: "add that on a third branch").
   - **R1 covers strings:** a core string holding a name a feature registers (also as a prefix) fails arch_check. PR #20's entities service carried `fd_checkpoints_contact`; the include-only check let it through. The `bind` usage example named `fd_tp_save` and now uses `echo`.
   - **R10:** a feature's `Init()` logs why it refuses (PR #20 returned false silently; `modules.cpp` said "init failed; see above" with nothing above). Refusals logged in an early step say so with `// arch-allow: R10` (speedrun, window).

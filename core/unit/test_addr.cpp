@@ -157,16 +157,15 @@ void TestAddrBadSignature() {
     Free(exe, gen);
 }
 
-void TestAddrPatchSiteOccupied() {
-    // Another mod's jmp at a patch site: left alone, not counted as a mismatch.
+void TestAddrPatchSiteDetoured() {
+    // Another mod's jmp at a patch site: a signature mismatch like any other, never patched (D55).
     Image exe, gen;
     CHECK(Build(exe, gen, 0));
     const addr::Entry& p = V().entries[static_cast<int>(Id::patch_victim_spawn)];
     exe.base[p.sigRva] = 0xE9;
     Init(exe, gen);
     CHECK(!addr::Usable(Id::patch_victim_spawn));
-    CHECK(unit::LogContains("patch site patch.victim_spawn occupied by another mod; left alone"));
-    CHECK(!unit::LogContains("signature mismatch: patch.victim_spawn"));
+    CHECK(unit::LogContains("signature mismatch: patch.victim_spawn"));
     Free(exe, gen);
 }
 

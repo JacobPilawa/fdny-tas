@@ -14,7 +14,7 @@ void TestAddrAllVerify();
 void TestAddrGenesisAtPreferredBase();
 void TestAddrUnknownVersion();
 void TestAddrBadSignature();
-void TestAddrPatchSiteOccupied();
+void TestAddrPatchSiteDetoured();
 void TestAddrResolveChain();
 void TestAddrFieldOffsets();
 void TestCrashlogReportsFault();
@@ -37,7 +37,7 @@ const Test kTests[] = {
     {"addr_genesis_at_preferred_base", TestAddrGenesisAtPreferredBase},
     {"addr_unknown_version", TestAddrUnknownVersion},
     {"addr_bad_signature", TestAddrBadSignature},
-    {"addr_patch_site_occupied", TestAddrPatchSiteOccupied},
+    {"addr_patch_site_detoured", TestAddrPatchSiteDetoured},
     {"addr_resolve_chain", TestAddrResolveChain},
     {"addr_field_offsets", TestAddrFieldOffsets},
     {"replay_parses_sample", TestReplayParsesSample},

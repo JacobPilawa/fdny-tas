@@ -1,12 +1,10 @@
 name: window_alttab
-# Item 7: with alttabfix.asi removed, FDNYCore's window module gives the same
-# behaviour as alttabfix (window_parity_reference runs the identical script
-# against the original): five scripted alt-tab cycles; while away the mouse
+# Item 7: FDNYCore's window module gives alttabfix.asi's behaviour: five
+# scripted alt-tab cycles; while away the mouse
 # is free, when back it is held at the game window centre, the game keeps
 # rendering, no crash, and the player can still move afterwards.
 pre_files:
   - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
-  - {src: null, dst: alttabfix.asi}
   - {src: null, dst: FDNYCore.cfg}
 setup: load_training
 record: true

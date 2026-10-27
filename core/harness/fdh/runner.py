@@ -454,7 +454,7 @@ class Run:
         sys.path.insert(0, os.path.join(CORE_DIR, "tools"))
         import docgen
         reg = docgen.read_source()
-        # A module that disabled itself (window under alttabfix.asi) registers nothing: its
+        # A module that disabled itself (window, on a signature mismatch) registers nothing: its
         # items are expected only when it is enabled. Every module must be known to both.
         mods = {r[1]: r[2] == "1" for r in rows if r[0] == "module"}
         src_mods = {s["module"]: s["file"] for s in reg["sections"] if s["module"]}

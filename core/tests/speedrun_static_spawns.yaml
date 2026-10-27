@@ -1,12 +1,9 @@
 name: speedrun_static_spawns
-# Item 8: with FDNYDeterministic.asi absent and fd_static_spawns 1 (default
-# pins = spot 0 for every victim, the same as FDNYDeterministic's skeleton
-# ini), victim positions are identical across three loads of Training and
-# every victim is at its spot 0 -- the same script and assertions
-# speedrun_reference_deterministic passes with the original plugin.
+# Item 8: with fd_static_spawns 1 (default pins = spot 0 for every victim, the
+# same as FDNYDeterministic's skeleton ini), victim positions are identical
+# across three loads of Training and every victim is at its spot 0.
 pre_files:
   - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
-  - {src: null, dst: FDNYDeterministic.asi}
   - {src: tests/data/fdcore_static_spawns.cfg, dst: FDNYCore.cfg}
 setup: load_training
 record: true

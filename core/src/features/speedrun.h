@@ -5,9 +5,9 @@
 namespace fdcore::speedrun {
 
 // DllMain (before WinMain): install the victim-spawn trampoline.
-bool ApplyEarlyPatch(const char* gameDir);
+bool ApplyEarlyPatch();
 
 // After the address table and console are up: fd_static_spawns, fd_spawns, fd_rescuebot.
-bool Init();  // false when FDNYDeterministic.asi is installed (it owns the sites)
+bool Init();
 
 } // namespace fdcore::speedrun

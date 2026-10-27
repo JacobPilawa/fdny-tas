@@ -39,7 +39,7 @@ and don't work around them; if a rule blocks a good design, stop and ask the own
 - Every address, offset or field gets an `addresses.json` entry with `sig` (first 16
   bytes, for code), `ghidra` (the evidence) and `note` (who uses it). Code uses
   `addr::Id::<entry>`; `build.ps1` regenerates the header.
-- If a site may be patched by another mod, detect and defer (D5); never double-patch.
+- Never patch a site whose signature doesn't match (`addr::Usable`); the core doesn't look for other mods (D55).
 
 ## 3. Code
 

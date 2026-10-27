@@ -1,5 +1,5 @@
-// Tests: tests/window_alttab.yaml tests/ondemand/window_parity_reference.yaml
-// User: Window -- keeps the mouse cursor in the game window only while the game is focused (the alt-tab fix; off while alttabfix.asi is installed).
+// Tests: tests/window_alttab.yaml
+// User: Window -- keeps the mouse cursor in the game window only while the game is focused (the alt-tab fix).
 // The game calls SetCursorPos(200, 200) every frame from
 // GameControls::PollFrame (0x00439347: push 200; push 200; call [SetCursorPos]),
 // even when it isn't the foreground window, so after alt-tab the mouse stays
@@ -63,8 +63,8 @@ cmd::Cvar g_fdWindowCursor = {
 bool ApplyEarlyPatch() {
     uintptr_t site = addr::EarlyCodeAddress(Id::patch_cursor_warp);
     if (!site) {
-        log::Warn("window: cursor-warp site doesn't match (already patched by another mod, e.g. "
-                  "alttabfix.asi?); window module inactive");
+        log::Warn("window: cursor-warp site doesn't match (signature mismatch, see above); "
+                  "window module inactive");
         return false;
     }
     uint8_t code[16];

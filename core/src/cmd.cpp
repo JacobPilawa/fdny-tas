@@ -241,7 +241,7 @@ void CmdRegistry(int, const char* const*) {
     for (int i = 0; binds::DefaultAt(i, &a, &b) && o < cap; ++i) o += wsprintfA(buf + o, "bind\t%s\t%s\r\n", a, b);
     for (int i = 0; binds::DescribedAt(i, &a, &b, &c) && o < cap; ++i)
         o += wsprintfA(buf + o, "key\t%s\t%s\t%s\r\n", a, b, c);
-    // A module that turned itself off (e.g. window, when alttabfix.asi owns its site) registered nothing.
+    // A module that turned itself off (e.g. window, on a signature mismatch) registered nothing.
     for (int i = 0; i < modules::Count() && o < cap; ++i)
         o += wsprintfA(buf + o, "module\t%s\t%d\r\n", modules::At(i)->name, modules::At(i)->enabled ? 1 : 0);
     char path[MAX_PATH];
