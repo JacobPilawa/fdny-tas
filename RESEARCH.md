@@ -8,6 +8,13 @@ strategy for decomposing it. Update it in place as understanding grows
 — this file's job is to let a fresh session (or a fresh VM) get
 oriented in one read, without re-deriving everything from scratch.
 
+**Since 2026-10-27** the per-symbol research database (`research/research.db`,
+`research.html`, `research_report.ps1`) and the VM scripts under `environment/` are
+local-only on the VM, not in the repo; references to them below point at the VM's disk.
+The old plugins, splitters and Python tools named below (`asi/`, `livesplit/`,
+`tools/collision_overlay`, the spawn tools) left the repo too; git history keeps them. The Ghidra labels themselves are in
+`ghidra_export/`.
+
 ---
 
 ## Prime directive (from the project owner)

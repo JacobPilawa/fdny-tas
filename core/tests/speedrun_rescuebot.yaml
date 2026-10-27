@@ -5,7 +5,7 @@ name: speedrun_rescuebot
 # the bot is back as shipped (1); fd_rescuebot 0 live -> 0 at once.
 # (There is no bot body to see: the bot is invisible logic whose only
 # on-screen trace is a "RESCUEBOT:" subtitle when it claims a victim, which
-# TryStartRescue -> ret makes impossible. See PROGRESS.md item 8.)
+# TryStartRescue -> ret makes impossible. See the former core/PROGRESS.md item 8, in git history.)
 pre_files:
   - {src: tests/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
   - {src: null, dst: FDNYDeterministic.asi}

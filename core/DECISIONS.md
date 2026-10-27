@@ -53,7 +53,7 @@ later session might "simplify" away; change one only with the owner's approval
   - `geEngine_Printf`: one ~29 µs blit per character, max 40 strings × 80 chars; a full box ran at 12 fps;
   - an external overlay window: no fullscreen or OBS capture, and a second UI thread.
 
-  Evidence: `text_cutover/`, PROGRESS "In-frame text investigation".
+  Evidence: `text_cutover/`, the former core/PROGRESS.md "In-frame text investigation" (git history).
 - **D12 `geEngine_FlushPipeline` once before the frame's first immediate draw.** Without it, the cached 3D is drawn over the 2D inside EndFrame. This was the cause of the early "invisible bitmaps".
 - **D13 Placement from the camera rect, never the window client size** (0.14.1). With dgVoodoo scaling, the window is the desktop size and the render is smaller, so right- and bottom-anchored panels landed off-frame.
 - **D14 Translucency = `gfx::AlphaSurface`: 256-px 4444 tiles attached with `geWorld_AddBitmap`, drawn with `geEngine_RenderPoly`** (flags 1, z 1.0, −0.5 px offset). Spike: `alpha_spike/README.md`. Rejected or impossible:

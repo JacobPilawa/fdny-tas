@@ -22,6 +22,12 @@ branch `main`; `fdny-bxt` was retired on 2026-10-24, and work goes on feature br
 after every commit, and the owner reads and edits from elsewhere and pushes back.
 See `CLAUDE.md`.
 
+**Since 2026-10-27 the repo holds only what the tooling needs.** The VM build
+(`environment/`: `config.ps1`, the `get_`/`install_` scripts, Packer) and the research
+database (`research/research.db`, `research.html`) are local-only on the VM, untracked and
+ignored. Paths below that point there refer to the VM's disk. The working notes for the
+decomp VM, which used to be the root `CLAUDE.md`, are the last section of this file.
+
 ## Prime directive (project owner, 2026-08-27)
 
 The point of the decompilation is **clarity of labeling**, not a
@@ -571,3 +577,92 @@ to build the next piece.
   git (`get_gh.ps1`, then `install_gh.ps1`), and upload the scripts in the `.pkr.hcl` file
   block if it lists them by name, so a rebuilt VM includes gh. Login stays manual: the owner's
   fine-grained token.
+
+## Decomp VM working notes (moved from the root CLAUDE.md, 2026-10-27)
+
+For future Ghidra fact-finding and labeling work on the VM. The files they name under
+`environment/` and `research/` are local-only on the VM since 2026-10-27.
+
+**Repo on the VM.** It reaches a freshly built VM as a plain file copy via the Packer file
+provisioner, not a clone. The copy is a git repo (PortableGit at `environment\local\tools\git`,
+not on PATH). Untracked files that were once tracked are deleted from disk by any checkout or
+pull that brings their deletion; a backup of everything removed on 2026-10-26/27 is in
+`C:\fdny-decomp-untracked-20261026` (its `restore.txt` lists the files).
+
+**Installing tools.** Follow the `get_<thing>.ps1` (download only) / `install_<thing>.ps1`
+(extract/install only) convention in `environment/scripts/` and add params to
+`environment/config.ps1`, then update `environment/packer/scripts/provision.ps1` (and the
+`.pkr.hcl` if new files need uploading) so future builds include it. **Never rebuild the VM
+yourself**: `packer build` from inside it would tear down the machine you run on. Editing the
+build scripts for next time is fine; triggering the build is a human decision, from the host.
+
+**Conventions.**
+- `environment/config.ps1` is the single source of truth for every path, version, URL and
+  VM/build parameter. Scripts dot-source it; never hardcode a value it defines.
+- Every script in `environment/scripts/` is flat and follows the get/install naming.
+  `common.ps1` holds shared helpers (`Get-RepoFile`, `Expand-ToolZip`, `Get-FirstSubDir`,
+  `Set-ConfigValue`, `Add-ToolPluginInclude`).
+- Script-specific params (URLs, filenames) are named variables at the top of the file; a
+  value used by more than one script belongs in `config.ps1`.
+- `environment/local/` is machine-generated state (`local/tools/`, `local/downloads/`, Ghidra
+  projects). Never put a script there.
+- PowerShell is the default, not a rule: use Python (or anything else) when PowerShell is the
+  wrong tool.
+- Before asserting something "can't be done" or "requires manual GUI steps", verify it
+  (diff before/after state, read the logs). This project was wrong about that more than once
+  (Phase 1.5/2 above).
+
+**Environment gotchas (verified).**
+- The host repo lives on a cloud-sync drive (Google Drive, `G:\`). Hyper-V's VMMS can't attach
+  an ISO/VHD stored there (ACL errors from `Add-VMDvdDrive`), so Packer's cache/output
+  (`$PackerCacheDir`, `$PackerOutputDir`) must stay on a local NTFS volume (`C:\`).
+- No `oscdimg`/`mkisofs`: the Packer template uses Generation 1 VMs + `floppy_files` for
+  `autounattend.xml`, not Generation 2 + `cd_files`.
+- `autounattend.xml`'s `FirstLogonCommands` must not cap `winrm/config/winrs
+  MaxMemoryPerShellMB` (must be `"0"`): WinRS enforces it as a job-object limit on the whole
+  process tree, which silently kills Ghidra's headless JVM.
+- GhidrAssistMCP's server only starts once a project + CodeBrowser tool is open with a program
+  loaded, not from the bare Project Manager or from opening a `.gpr` on the command line.
+- PowerShell Direct / WinRM sessions run in Session 0, where a GUI app hangs during AWT/Swing
+  init. To drive a GUI, use a scheduled task with `schtasks /it` (the console's interactive
+  session).
+- VM admin credentials: `Administrator` / `pass` (`$VmAdminPassword` in `config.ps1`; keep it in
+  sync with `autounattend.xml`). Persistent registry autologon, no screen lock or sleep (Phase 2's
+  post-build changes).
+
+**Rebuilding the VM** (from the host, elevated PowerShell, never from inside the VM):
+`.\environment\scripts\build_vm.ps1`. Hyper-V VM creation needs admin rights (or `Hyper-V
+Administrators`). See `environment/packer/README.md`, including importing the built VM into
+Hyper-V Manager afterwards (`packer build` unregisters its own build VM).
+
+**Game environment on the VM (verified 2026-10-21, from the former core/PROGRESS.md).**
+- Exe SHA-256 `4b3b4dc1…d2fc3e`, Genesis.dll `5014bb87…6c4643` (full hashes in
+  `core/addresses.json`). Exe base 0x00400000, Genesis 0x10000000 in every run so far.
+- The game folder has Ultimate ASI Loader (`dinput8.dll`), dgVoodoo (D3D8/D3D9/DDraw/D3DImm +
+  `dgVoodoo.conf`), the FOV fix and alttabfix, LiveSplit with 2 autosplitters. Game cfg: D3D via
+  dgVoodoo, 640x480.
+- Rendering: dgVoodoo set to windowed (`FullScreenMode = false`, `[DirectX] Resolution =
+  unforced`; original in `core/backup/dgVoodoo.conf`, local-only). 640x480 client area on a
+  1024x768 desktop.
+- Audio: the VM has no sound device and the game fatal-errors (`TSoundEngine::open(): Error
+  opening sound engine`). Fixed with the VB-CABLE virtual audio driver
+  (`get_vbcable.ps1`/`install_vbcable.ps1`; its install sets Audiosrv/AudioEndpointBuilder to
+  Automatic).
+- alttabfix.asi needs the VC++ 2015-2022 x86 runtime (ASI Loader error 126 without it):
+  `get_vcredist.ps1`/`install_vcredist.ps1`.
+- ffmpeg is pinned to BtbN autobuild-2026-09-30-13-08 (`get_ffmpeg.ps1`/`install_ffmpeg.ps1`);
+  gdigrab works. Harness Python deps are in `config.ps1` `PythonPipPackages` (mss, Pillow,
+  pydirectinput, PyYAML).
+- The game's own console needs `ImADeveloper = true` in `FDNYFireFighter.cfg` (it also skips the
+  intro movies). The core provides its own console, so the cfg stays the owner's original
+  (`ImADeveloper = false`; original in `core/backup/FDNYFireFighter.cfg`).
+- Front end: the splash advances on any LMB; the menus draw their own cursor from DirectInput
+  deltas (1:1, clamped), so absolute cursor moves are ignored. Path to Training: splash, `game`
+  (97,457), career slot "Hotrod Stein" (195,165), briefing `GO!` (568,450), about 20 s load
+  (`core/harness/setups/load_training.yaml`).
+- Game clock: hard-capped at 60 FPS (`GameClock::ComputeFrameDelta` 0x0042BF70 busy-waits while
+  dt <= 1/60); about 55-57 fps on the VM console. The focus-loss pause is `GameClock::Pause`
+  0x0042BF20, called from `MainWindow::RunMessageLoop` on WM_ACTIVATEAPP(wParam=0).
+- Saves: the pristine originals are in the repo-root `FDNYSP1.1_0e4c1e9f.zip` (local-only); a
+  copy taken after some harness runs is in `core/backup/Saves`. Harness runs only use the
+  "Hotrod Stein" slot.

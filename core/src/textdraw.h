@@ -10,7 +10,7 @@
 // frames), and each frame costs one geEngine_FlushPipeline + one
 // geEngine_DrawBitmap per visible panel. The flush matters: without it the
 // engine's cached 3D polys are drawn after (over) the blit inside EndFrame.
-// Measured: a 400x346 box at full frame rate (PROGRESS.md, "In-frame text
+// Measured: a 400x346 box at full frame rate (the former core/PROGRESS.md, "In-frame text
 // investigation").
 #pragma once
 

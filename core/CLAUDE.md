@@ -8,8 +8,8 @@ compiler flags; the reasons are in `DECISIONS.md`. Change a rule only with an
 owner-approved entry there.
 
 Read before working: the repository `README.md` (the key sheet: every feature, key, variable and command; generated
-from the source, D41), the core services below, `DECISIONS.md` (why), the tail of
-`PROGRESS.md` (what happened last). To add a feature, use the `new-feature` skill
+from the source, D41), the core services below, `DECISIONS.md` (why), `git log` (what happened last).
+To add a feature, use the `new-feature` skill
 (`.claude/skills/new-feature/`).
 
 ## Core services
@@ -96,7 +96,7 @@ Every drawing belongs to a gfx layer, run in this fixed order each frame (D40, `
    - Tests run the Debug build (it has the test pipe) unless they say `core: Release`. `core_release` proves the shipped build starts and plays. Before a release, `tests/ondemand/baseline_route` (`expect: baseline_equivalent`, ~8 min) proves the game behaves the same with and without it.
    - A test that compares the core's view of the world with the harness's own reads pauses the simulation while it compares (Debug pipe `pause on`), so nothing moves between the two reads (`state_snapshot`, which used to race on a spreading fire or a roaming victim).
 3. **Evidence** in `evidence/<topic>/`: a README with the numbers (what ran, results, verdict). Add logs or screenshots only when the README can't carry the point; test runs keep theirs in `runs/` (untracked).
-4. **Docs:** anything user-visible is described in the code: help texts, the `// User:` line, `binds::DescribeKey` (the key sheet is generated from them, D41; check the root `README.md` reads well); `DECISIONS.md` for any non-obvious choice; a `PROGRESS.md` entry (`- <date> it<N>: **<version>** ...`).
+4. **Docs:** anything user-visible is described in the code: help texts, the `// User:` line, `binds::DescribeKey` (the key sheet is generated from them, D41; check the root `README.md` reads well); `DECISIONS.md` for any non-obvious choice. The commit message says what changed and how it was tested; there is no separate progress log.
 5. **Version:** bump `VERSION` (minor for features/architecture, patch for fixes).
    - Add the release notes to the root `CHANGES.md` (hand-written), under `## <VERSION>`: the release workflow puts that section in the release's notes.
    - Merging the `core\VERSION` change to `main` runs `.github/workflows/release.yml`. It builds Release from source on a GitHub Windows runner (same zig, `build.ps1`) and publishes the GitHub release `v<VERSION>`: `FDNYCore-<VERSION>.asi`, a zip with it and its key sheet (D41: version, SHA-256, keys, features, variables, commands), and the SHA-256. An existing tag is never overwritten.

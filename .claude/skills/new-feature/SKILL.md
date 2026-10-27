@@ -12,10 +12,10 @@ and don't work around them; if a rule blocks a good design, stop and ask the own
 
 ## 1. Orient (before writing code)
 
-- Read `core/CLAUDE.md`, `core/DECISIONS.md` and the last few entries of `core/PROGRESS.md`.
+- Read `core/CLAUDE.md`, `core/DECISIONS.md` and the recent `git log`.
 - **Check for something existing first** (owner rule). Look in `core/src/features/`, the
-  services in `core/src/`, the console commands (the repository `README.md`, the key sheet), and the old tools
-  (`asi/`, `tools/`). Extend what's there instead of adding a parallel path.
+  services in `core/src/` and the console commands (the repository `README.md`, the key
+  sheet). Extend what's there instead of adding a parallel path.
 - Decide the shape:
   - **Feature or service?** A feature uses services. If it needs a hook another piece
     already owns, or something two features would share, it's a service change first
@@ -34,7 +34,8 @@ and don't work around them; if a rule blocks a good design, stop and ask the own
 ## 2. Game research and addresses
 
 - Ghidra lookups go through subagents (read-only); the primary session never calls
-  GhidrAssist MCP. Prior knowledge: `research/research.db`, `RESEARCH.md`, and memory.
+  GhidrAssist MCP. Prior knowledge: `RESEARCH.md`, `ghidra_export/`, memory, and on the
+  VM the local-only `research/research.db`.
 - Every address, offset or field gets an `addresses.json` entry with `sig` (first 16
   bytes, for code), `ghidra` (the evidence) and `note` (who uses it). Code uses
   `addr::Id::<entry>`; `build.ps1` regenerates the header.
@@ -75,8 +76,8 @@ and don't work around them; if a rule blocks a good design, stop and ask the own
 
 ## 5. Finish
 
-- Evidence: `core/evidence/<name>/` (logs, screenshots, numbers; a README for anything
-  investigative).
+- Evidence: `core/evidence/<name>/`: a README with the numbers; logs or screenshots only
+  when the README can't carry the point (`core/CLAUDE.md`, "Done means").
 - The player docs are the generated key sheet (the repository `README.md`, rewritten by every build
   and the pre-commit hook): check your feature's lines read well, and fix the help texts
   and `// User:` line in the code, never the sheet. A new service goes in `core/CLAUDE.md`'s
@@ -84,11 +85,10 @@ and don't work around them; if a rule blocks a good design, stop and ask the own
 - On the version bump: the release notes under `## <version>` in the root `CHANGES.md`.
   Merging the bump to `main` publishes the GitHub release (built by the workflow, D45).
 - `core/DECISIONS.md`: an entry for every non-obvious choice (what, why, rejected).
-- `core/PROGRESS.md`: `- <date> it<N>: **<version>** <what>; tests; evidence path.`
 - `core/VERSION`: bump minor for a feature, patch for a fix.
 - Commit (git not on PATH: `environment\local\tools\git\cmd`): one topic, message via
   `-F` from a UTF-8 file without BOM, with the Co-Authored-By / Claude-Session lines.
-  Don't stage `research/research.db-*`.
+  The message says what changed and how it was tested (there is no progress log).
 
 ## 6. Report to the owner
 
