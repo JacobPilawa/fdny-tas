@@ -53,6 +53,12 @@ Not machine-checked, still rules:
 - **Practice-only** variables/commands are declared by the feature (`cmd::SetPracticeOnly`). Anything that shows information the game doesn't, or moves the player, is practice-only. Speedrun-category options (static spawns, RescueBot) are not; they show on the watermark.
 - **Drawing order:** state updates in `hooks::OnFrameEnd`; drawing happens in a gfx layer (the table below, R8).
 - **Freestanding C++17:** no CRT, no STL, no exceptions/RTTI, no `<initializer_list>`; no 64-bit integer division (use doubles or `MulDiv`); large locals are `static` (no stack probes). Windows API via kernel32/user32/gdi32/bcrypt only.
+- **No player runtime dependencies.** What ships is the game + the ASI loader + `FDNYCore.asi` (+ its cfg). No Python, .NET, companion exe or VC++ redist; 32-bit only.
+- **Console-first.** Every feature is an `fd_` command or variable, saved to the config and runnable from `autoexec.cfg` (the key sheet lists them all, R9).
+- **Piggyback first.** Before building a subsystem, look for a fixture the game or engine already has and reuse it (the core's console is the game's own; the camera, clock and entity list are the game's). Record what you found either way.
+- **Genesis exports are hooked by name** (GetProcAddress + MinHook); never proxy or replace the DLL. Check every Genesis3D 1.1 SDK signature against the installed `Genesis.dll`'s export table: this build differs from stock 1.1 in places.
+- **Asking vs deciding.** A choice that is irreversible and could reasonably go either way goes to the owner, once, with a recommendation. A reversible one takes the sensible default and is recorded.
+- **Where findings go.** Choices (what, why, rejected): `DECISIONS.md`. Findings, measurements, assumptions and workarounds: the topic's `evidence/<topic>/README.md` (the early ones are in `evidence/foundation/`, the warp HUD's game research in `evidence/warp_hud/`). Game knowledge beyond the core: `RESEARCH.md`. A changed test tolerance is explained in the commit message.
 
 ## Drawing: pick the block and the layer
 
@@ -111,7 +117,7 @@ Every drawing belongs to a gfx layer, run in this fixed order each frame (D40, `
 
 ## Owner decisions in force
 
-- Old tools stay installed (FOV fix, alttabfix, FDNYDeterministic, Python overlays): no further development, don't delete. The core defers to them where they own a patch site.
+- Old tools stay installed (FOV fix, alttabfix, FDNYDeterministic, Python overlays): no further development, don't delete. The core defers to them where they own a patch site. A test of a feature that replaces one removes that tool for its run (`pre_files` with `src: null`).
 - The watermark stays opaque (decal path).
 - The practice-only list is the agent's default; the owner still has to confirm it.
 - No extra log files for overlay output: it goes to `FDNYCore.log` (`glitch|` lines).

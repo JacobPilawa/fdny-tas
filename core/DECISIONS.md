@@ -53,7 +53,7 @@ later session might "simplify" away; change one only with the owner's approval
   - `geEngine_Printf`: one ~29 µs blit per character, max 40 strings × 80 chars; a full box ran at 12 fps;
   - an external overlay window: no fullscreen or OBS capture, and a second UI thread.
 
-  Evidence: `text_cutover/`, the former core/PROGRESS.md "In-frame text investigation" (git history).
+  Evidence: `text_cutover/`, `foundation/` "In-frame text investigation".
 - **D12 `geEngine_FlushPipeline` once before the frame's first immediate draw.** Without it, the cached 3D is drawn over the 2D inside EndFrame. This was the cause of the early "invisible bitmaps".
 - **D13 Placement from the camera rect, never the window client size** (0.14.1). With dgVoodoo scaling, the window is the desktop size and the render is smaller, so right- and bottom-anchored panels landed off-frame.
 - **D14 Translucency = `gfx::AlphaSurface`: 256-px 4444 tiles attached with `geWorld_AddBitmap`, drawn with `geEngine_RenderPoly`** (flags 1, z 1.0, −0.5 px offset). Spike: `alpha_spike/README.md`. Rejected or impossible:
@@ -214,7 +214,7 @@ later session might "simplify" away; change one only with the owner's approval
 
 ## Process
 
-- **D52 No parity test against the Python collision overlay** (owner 2026-10-27: "we no longer need to test parity against the python script if the warp overlay is now superseded by the fdny native implementation"). The warp HUD is the reference now. Removed: `tools/collision_overlay/`, the Debug `.glitchrec` / `.glitchbox` dumps and the `glitch_replay` pipe, `glitch_replay.cpp`, the harness's replay/fuzz/compare scripts, and the tests `glitch_parity_log`, `ondemand/glitch_parity_fuzz` and `unit/test_glitch_parity.py`. Supersedes the parity parts of D38 and D47. The warp HUD keeps its game tests (`glitch_records`, `glitch_box_cost`, `text_panels`, `keys_default`).
+- **D52 No parity test against the Python collision overlay** (owner 2026-10-27: "we no longer need to test parity against the python script if the warp overlay is now superseded by the fdny native implementation"). The warp HUD is the reference now. Removed: the overlay (`tools/collision_overlay/`; its game research write-ups moved to `evidence/warp_hud/`), the Debug `.glitchrec` / `.glitchbox` dumps and the `glitch_replay` pipe, `glitch_replay.cpp`, the harness's replay/fuzz/compare scripts, and the tests `glitch_parity_log`, `ondemand/glitch_parity_fuzz` and `unit/test_glitch_parity.py`. Supersedes the parity parts of D38 and D47. The warp HUD keeps its game tests (`glitch_records`, `glitch_box_cost`, `text_panels`, `keys_default`).
 - **D51 Choosing replays without file names** (owner 2026-10-26: "i like 1-4"; ghost "Cvar picks"; picker "No default key"; tab completion set aside).
   - **Why:** recorder file names (`<map>_<UTC start>_pid<n>_run<n>.jsonl`) are long, and remembering them would leave the feature unused (owner).
   - **One folder:** the recorder and the replay both resolve `fd_record_directory` with `console::GamePath` (absolute, or under the game folder; default `Recordings`). They used to have two copies, which differed on a leading `/`.

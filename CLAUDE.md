@@ -19,6 +19,23 @@ decompilation of the game:
 The repo holds only what the tooling needs: no game binaries, no Ghidra `.rep`, no raw
 logs or run output, no files nothing uses.
 
+## Working rules
+
+- **Keep the living docs current, in place.** `plan.md` is the infrastructure plan and
+  `RESEARCH.md` the understanding of the game: read them before decomp or VM work, and when
+  you learn something that changes them, change them rather than noting it and following
+  stale guidance. Keep the two separate.
+- **Research the game before granular Ghidra work** (prior art, the engine, format docs) and
+  record what you find in `RESEARCH.md`.
+- **Verify empirically before asserting something "can't be done"** or "needs manual GUI
+  steps": diff before/after state, read the actual logs. This project has been wrong about
+  that more than once (`plan.md`, Phase 1.5/2).
+- **Installing a tool** on the VM follows the `get_<thing>.ps1` / `install_<thing>.ps1`
+  convention with its parameters in `environment/config.ps1` (local-only; `plan.md`, "Decomp
+  VM working notes", has the conventions and the gotchas).
+- PowerShell is the default on this Windows VM, not a rule: use Python (or anything else)
+  when PowerShell is the wrong tool.
+
 ## Git and GitHub
 
 - `origin` = `git@github.com:RichardFranksComputer/fdny-tas.git` (private). The VM pushes

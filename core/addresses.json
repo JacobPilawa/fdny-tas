@@ -269,7 +269,7 @@
             "ref": "instruction at 0x004274c2 embeds 0x00503a78",
             "ghidra": "xref confirmed 2026-10-21: MOV EDX,[0x00503a78] in FUN_00427420 (Console::SetState region)"
           },
-          "ghidra": "g_everGame 0x00503A78 -> +0x30 player (tools/collision_overlay EG_PLAYER/OFF_POS)",
+          "ghidra": "g_everGame 0x00503A78 -> +0x30 player (collision overlay EG_PLAYER/OFF_POS; core/evidence/warp_hud/HOOK_SITES.md section 7)",
           "note": "player world position X"
         },
         "player.pos_y": {
@@ -1095,7 +1095,7 @@
             "bytes": "83 EC 24 8B 4C 24 28 8B 51 18 8B 44 24 3C 81 C2",
             "ref": "first 16 bytes of the function at 0x00438c10"
           },
-          "ghidra": "geWorld_Collision body entry (83EC24 8B4C2428, 7 bytes; resume +7); tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "geWorld_Collision body entry (83EC24 8B4C2428, 7 bytes; resume +7); core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "records caller stack + impact slot before the call"
         },
         "glitch.exit_box": {
@@ -1109,7 +1109,7 @@
             "bytes": "5E 83 C4 24 C3 A1 C4 2E 36 10 8B 54 24 54 52 8B",
             "ref": "first 16 bytes of the function at 0x00438d0a"
           },
-          "ghidra": "geWorld_Collision exit (box hit): 5E 83C424 C3; tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "geWorld_Collision exit (box hit): 5E 83C424 C3; core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "records result, Col impact/plane, global plane, fresh count"
         },
         "glitch.exit_ray": {
@@ -1123,7 +1123,7 @@
             "bytes": "5E 83 C4 24 C3 5F 33 C0 5E 83 C4 24 C3 90 90 90",
             "ref": "first 16 bytes of the function at 0x00438db6"
           },
-          "ghidra": "geWorld_Collision exit (ray hit): 5E 83C424 C3; tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "geWorld_Collision exit (ray hit): 5E 83C424 C3; core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "same as exit_box"
         },
         "glitch.exit_miss": {
@@ -1137,7 +1137,7 @@
             "bytes": "5E 83 C4 24 C3 90 90 90 90 90 90 90 90 90 90 90",
             "ref": "first 16 bytes of the function at 0x00438dbe"
           },
-          "ghidra": "geWorld_Collision exit (miss): 5E 83C424 C3; tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "geWorld_Collision exit (miss): 5E 83C424 C3; core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "same as exit_box"
         },
         "glitch.boxw": {
@@ -1151,7 +1151,7 @@
             "bytes": "5B 83 C4 2C C3 DD D8 5F 5E B8 01 00 00 00 5D A3",
             "ref": "first 16 bytes of the function at 0x004371c2"
           },
-          "ghidra": "box-clip fresh-write epilogue: 5B 83C42C C3; tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "box-clip fresh-write epilogue: 5B 83C42C C3; core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "counts fresh impact writes"
         },
         "glitch.rayw": {
@@ -1165,7 +1165,7 @@
             "bytes": "C7 05 44 2F 36 10 01 00 00 00 5D 5B 5F B8 01 00",
             "ref": "first 16 bytes of the function at 0x00436633"
           },
-          "ghidra": "ray-clip write: C705 <latch 0x10362F44> 01000000 (10 bytes; absolute operand is relocated); resume +10; tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "ray-clip write: C705 <latch 0x10362F44> 01000000 (10 bytes; absolute operand is relocated); resume +10; core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "counts fresh writes; outside a call = engine lighting ray record"
         },
         "glitch.commit": {
@@ -1179,7 +1179,7 @@
             "bytes": "8D 46 4C 8B C8 89 11 8B 54 24 14 89 51 04 8B 54",
             "ref": "first 16 bytes of the function at 0x0043f9c7"
           },
-          "ghidra": "BModelEnt::Think step-down commit 0x0043F9C7: 8D464C 8BC8 8911 (7 bytes; resume +7); ESI = entity; tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "BModelEnt::Think step-down commit 0x0043F9C7: 8D464C 8BC8 8911 (7 bytes; resume +7); ESI = entity; core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "records the warp commit (impact, normal, old position)"
         },
         "glitch.tick": {
@@ -1193,7 +1193,7 @@
             "bytes": "A1 78 3A 50 00 8B 48 04 6A 00 E8 52 97 06 00 83",
             "ref": "first 16 bytes of the function at 0x0042af0f"
           },
-          "ghidra": "GameSession::RunFrame 0x0042AF0F: A1 783A5000 (mov eax,[g_everGame]; 5 bytes; resume +5); tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "GameSession::RunFrame 0x0042AF0F: A1 783A5000 (mov eax,[g_everGame]; 5 bytes; resume +5); core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "per-simulated-frame tick counter"
         },
         "genesis.impact": {
@@ -1206,7 +1206,7 @@
             "bytes": "A3 9C 2E 36 10 8B 44 24 2C 89 0D",
             "ref": "Genesis instruction at 0x10036603 embeds 0x10362e9c"
           },
-          "ghidra": "Genesis global last-collision impact point x,y,z (G_IMPACT 0x10362E9C); tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "Genesis global last-collision impact point x,y,z (G_IMPACT 0x10362E9C); core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "the stale-hit slot"
         },
         "genesis.plane": {
@@ -1219,7 +1219,7 @@
             "bytes": "BF 48 2F 36 10 F3 A5 8B 4C 24 18",
             "ref": "Genesis instruction at 0x100365f8 embeds 0x10362f48"
           },
-          "ghidra": "Genesis global last-collision plane normal x,y,z + dist (G_PLANE 0x10362F48); tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "Genesis global last-collision plane normal x,y,z + dist (G_PLANE 0x10362F48); core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "plane the warp gate sees"
         },
         "genesis.planes_ptr": {
@@ -1232,7 +1232,7 @@
             "bytes": "A1 F8 2E 36 10 8D 34 88 8B 42 04",
             "ref": "Genesis instruction at 0x100353d5 embeds 0x10362ef8"
           },
-          "ghidra": "Genesis pointer to the loaded world plane array (G_PLANES_PTR 0x10362EF8); MapFinder compares its first 16 KB with each .bsp; tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "Genesis pointer to the loaded world plane array (G_PLANES_PTR 0x10362EF8); MapFinder compares its first 16 KB with each .bsp; core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "map recognition"
         },
         "player.object": {
@@ -1894,7 +1894,7 @@
         }
       },
       "classify": {
-        "_comment": "Caller classification for hud_glitch, copied from the Python collision overlay (its HOOK_SITES.md section 6, in git history)",
+        "_comment": "Caller classification for hud_glitch, from core/evidence/warp_hud/HOOK_SITES.md section 6",
         "special": {
           "tracetofloor": "0x492da6",
           "groundheight": "0x48ffc6",

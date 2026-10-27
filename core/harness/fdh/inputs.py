@@ -126,10 +126,23 @@ def mouse_click_here(right=False):
     _send(INPUT(INPUT_MOUSE, _U(mi=MOUSEINPUT(0, 0, 0, up, 0, 0))))
 
 
+def alt_tab():
+    """A real Alt+Tab, as a player presses it (switches to the previous window)."""
+    key_down("alt")
+    time.sleep(0.05)
+    tap("tab", 0.05)
+    time.sleep(0.05)
+    key_up("alt")
+
+
 def cursor_pos():
     pt = wt.POINT()
     user32.GetCursorPos(ctypes.byref(pt))
     return pt.x, pt.y
+
+
+def set_cursor(x, y):
+    user32.SetCursorPos(int(x), int(y))
 
 
 def foreground():
