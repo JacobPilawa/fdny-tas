@@ -36,3 +36,16 @@ and drawn from live memory, with 50% boxes, depth-tested or x-ray, at about 1 ms
   the view; default depth-tested (queued), with an x-ray toggle.
 - Boxes containing the camera are drawn too (it's how you see you're in a zone), at a lower
   alpha so stacked zones don't wash out the view.
+
+## Found while building the feature
+
+- **Opening the exit in a test:** the game's `runrescuebot` script verb makes the RescueBot
+  claim one victim per call, bypassing its enabled flag and its cap. `rescued` stays 0 (bot
+  claims count by omission); the exit opens through `UpdateZonesAndWin`'s gate (delivered >=
+  total - claimed) and `SetEnabled(1)`, the game's own path (`tests/triggers.yaml`).
+- **Mouse aiming isn't repeatable in tests:** a 900 px move pitched the view to the sky, and
+  4 x 300 px landed about 90 degrees short. The test walks into the boxes instead.
+- **A new level can reuse the old world's address:** bank's world was allocated at Training's,
+  so a pointer comparison never re-attached gfx's box tile (D30).
+
+_The logs, screenshots and run output named above were removed on 2026-10-27 (repository tidy-up); git history keeps them._

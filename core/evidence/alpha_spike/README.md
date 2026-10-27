@@ -79,3 +79,5 @@ The VM ran at about 37 fps all evening. The no-probe control measured the same (
 
 - `core/src`: untouched. The shipping textdraw (565 decals) is unchanged.
 - The probe uses one non-exported Genesis RVA (0x171E0, mode 7 only). It is spike code, kept out of `addresses.json` on purpose.
+
+_The logs, screenshots and run output named above were removed on 2026-10-27 (repository tidy-up); git history keeps them._

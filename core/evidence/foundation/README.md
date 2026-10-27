@@ -214,7 +214,7 @@ Live 2026-10-21: in Training, gameState = 1 and mapName = `training`. All 12 cha
 
 ## Item 4: console (done)
 
-- **It's the game's console.** FDNYCore doesn't draw its own: it makes sure the game's developer console exists for every player, intercepts typed lines, and prints into it. The console is drawn by the game's own `Console::Render`, inside RenderFrame, so it shows on any driver (screenshot `evidence/item04/02_console_exec.png`).
+- **It's the game's console.** FDNYCore doesn't draw its own: it makes sure the game's developer console exists for every player, intercepts typed lines, and prints into it. The console is drawn by the game's own `Console::Render`, inside RenderFrame, so it shows on any driver.
 - **Console without ImADeveloper (decision, reversible).** The game creates the console only when `ImADeveloper` is set: in `roc_CreateEngineSubsystems` 0x004992D0, `JZ` at 0x00499370 skips operator new(0x4A0) + ctor 0x004277D0(640, 460) + `MOV [MainWindow+0x70],EAX`.
   - Forcing the flag would turn on about 16 debug paths: diagnostic spam into the console, dev keys, F12, a 0xDEADBEEF sentinel write per frame, extra debug HUD objects, and RescueBot/hose debug text.
   - So the core NOPs **only that JZ**, in memory, from DllMain, which runs before WinMain (verified live: `g_mainWindow` and `g_console` are still null there). The game then creates its console itself at the normal moment.
@@ -222,7 +222,7 @@ Live 2026-10-21: in Training, gameState = 1 and mapName = `training`. All 12 cha
 - **Rejected approach (documented failure).** Calling the ctor ourselves at the first frame crashed: AV at 0x0047EAC8 reading `[g_everGame 0x00503A78]+4`.
   - Some frames render **before** WinMain reaches `roc_CreateEngineSubsystems`, which is also where `g_everGame` (the root) is allocated, at 0x0042CD65.
   - The ctor depends on that root, and also on root+4 (the 0x17C-byte subsystem, 0x00495190).
-  - Evidence: `evidence/item04/attempt2_lazy_ctor_crash.FDNYCore.log`. The new crashlog (below) located it without a debugger.
+  - Evidence: the crash log, in git history (`evidence/item04/`, removed 2026-10-27). The new crashlog (below) located it without a debugger.
 - **Interception (`src/console.cpp`).** MinHook on `ScriptEngine::ExecLine` 0x00470F10, group `console`. It's thiscall, takes the game `String` by value, and the callee releases it; its only caller is the console's Enter handler, after the game has already echoed `--> line` and before it adds history.
   - Our lines (`cmd::Dispatch`) are handled and the handle released the way ExecLine does: decrement, then `String::FreeRep` 0x004011C0 at <= 0. The game never sees them.
   - Everything else is passed to the original untouched, so game verbs (`listmaps`, `loadmap`, ...) keep working.

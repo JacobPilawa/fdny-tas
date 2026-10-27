@@ -1,4 +1,8 @@
-# fd_juggle 0.18.1: observed, not predicted
+# fd_juggle: observed, not predicted
+
+`fd_juggle` (practice-only) shows an arrow and the horizontal distance to where a carried
+survivor would land if the player passed out now: T = (S.x - 30, S.y, S.z), where S is the
+safe spot at PlayerRescueEnt+0x3400. The mechanism is in `fire_juggling/`.
 
 Owner ruling (2026-10-22): remove the conditions from the overlay. Show `-` when the game
 saved the spot this frame and the arrow otherwise, so that players work out the
@@ -47,10 +51,12 @@ Fixes:
 
 After the fixes: 3/3 PASS (`*-fire_juggle-obsfixb1..3`).
 
-Screenshots:
-- `glyph_yaw000_right.png`
-- `fire_out_locked.png`
-- `passed_out.png`
-- `respawned.png`
+_The logs, screenshots and run output named above were removed on 2026-10-27 (repository tidy-up); git history keeps them._
 
-_The logs and run output named above were removed on 2026-10-27 (repository tidy-up); git history keeps them._
+## Measured
+
+- **View yaw:** W moves (sin yaw, cos yaw) in world (x, z): yaw 0 -> +Z, 90 -> +X, 180 -> -Z,
+  270 -> -X. D (strafe right) moves (-cos yaw, sin yaw).
+- **O2** refills at about 0.1/s on clean ground; the burn meter cools at 0.1/s.
+- **Fire nodes move along their paths,** so fixed fire coordinates burn only sometimes
+  (D33: `fd_dbg_tofire` searches live).

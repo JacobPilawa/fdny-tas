@@ -34,3 +34,5 @@ Probe tests: `tests/probes/probe_trigger_depth*.yaml`,
 no longer tints it (an old known gap).
 
 **Tests after the change:** triggers, text_panels, text_alpha, freecam: PASS.
+
+_The logs, screenshots and run output named above were removed on 2026-10-27 (repository tidy-up); git history keeps them._

@@ -53,7 +53,7 @@ later session might "simplify" away; change one only with the owner's approval
   - `geEngine_Printf`: one ~29 µs blit per character, max 40 strings × 80 chars; a full box ran at 12 fps;
   - an external overlay window: no fullscreen or OBS capture, and a second UI thread.
 
-  Evidence: `text_cutover/`, `foundation/` "In-frame text investigation".
+  Evidence: `foundation/` "In-frame text investigation".
 - **D12 `geEngine_FlushPipeline` once before the frame's first immediate draw.** Without it, the cached 3D is drawn over the 2D inside EndFrame. This was the cause of the early "invisible bitmaps".
 - **D13 Placement from the camera rect, never the window client size** (0.14.1). With dgVoodoo scaling, the window is the desktop size and the render is smaller, so right- and bottom-anchored panels landed off-frame.
 - **D14 Translucency = `gfx::AlphaSurface`: 256-px 4444 tiles attached with `geWorld_AddBitmap`, drawn with `geEngine_RenderPoly`** (flags 1, z 1.0, −0.5 px offset). Spike: `alpha_spike/README.md`. Rejected or impossible:
@@ -317,7 +317,7 @@ later session might "simplify" away; change one only with the owner's approval
     - Each unit test was checked to fail when the logic it guards is broken: relocation tolerance off, one log label changed.
   - **Rejected:** a test framework dependency (a 30-line `unit.h` is enough, and the code under test is freestanding); unit-testing through the game's Debug pipe (that's the 60 s per test this replaces).
 - **D46 Cost tests compare against a baseline in the same run, not a fixed frame rate** (owner 2026-10-24: "Do the tests need to be fps dependent? ... can they be redesigned?", then "implement").
-  - **Why:** the game is locked to the display's refresh rate: about 57 fps on the VM console, 34 on a 32 Hz remote display session. `glitch_box_cost` (>= 250 ticks in 6 s) and `text_panels` (>= 300 frames) passed or failed with the session, whatever the code did (`evidence/fps_independent_tests/history.txt`).
+  - **Why:** the game is locked to the display's refresh rate: about 57 fps on the VM console, 34 on a 32 Hz remote display session. `glitch_box_cost` (>= 250 ticks in 6 s) and `text_panels` (>= 300 frames) passed or failed with the session, whatever the code did (`evidence/fps_independent_tests/`).
   - **What:**
     - feature on >= 0.9 x feature off, in 6 s windows back to back (`assert_sample_ratio`);
     - CPU-only costs under a budget (the warp HUD's box build, `draw_us_avg` <= 1 ms);

@@ -75,4 +75,14 @@ fire state, burn and O2.
   - Free cam up / down: **E / Q**.
   - The probe's F5/F6/F7 were for the spike only.
 
-_The logs and run output named above were removed on 2026-10-27 (repository tidy-up); git history keeps them._
+_The logs, screenshots and run output named above were removed on 2026-10-27 (repository tidy-up); git history keeps them._
+
+## Found while building the feature
+
+- **A `loadmap` while paused deadlocked.** During a load, RenderFrame (and so the frame events)
+  stops, and the load waits for the skipped simulation step. The pause service's
+  TickSubsystems detour checks `game.state` and resumes (D34, "Ending a pause").
+- **The console works while paused.** Enter is handled synchronously by `Console::OnKeyDown`
+  0x00428C50 from WM_KEYDOWN, ahead of the input block.
+- **The game camera bobs about 2 u** with the player standing still, so `tests/freecam.yaml`'s
+  snap-back check allows 5 u.

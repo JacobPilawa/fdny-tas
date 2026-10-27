@@ -127,7 +127,7 @@ victims (carrying, hosing, the RescueBot) would desync. To get there:
 
 ## Resumed 2026-10-24: runs 8-13, the remaining world non-determinism
 
-Picked up at `STATUS.md` 7B (fire spread differed at load frame 3).
+Picked up where the spike paused (fire spread differed at load frame 3).
 
 | Run | Probe change | Found |
 |---|---|---|
@@ -158,5 +158,69 @@ source is left, and it is identified to the spawn / list-order step.
 Files: `run13/` (log, traces, script timelines with the heat / spread lines, `compare.txt`,
 `firediff_*.txt`); probe helpers `demo_scriptdiff.py`, `demo_firediff.py`, `re_refs.py`,
 `re_fieldwrites.py`, `re_thunkcallers.py`.
+
+## Key facts (retail 1.1)
+
+From the spike's status file (2026-10-24), folded in here with its next steps.
+
+| Fact | Address / detail |
+|---|---|
+| Frame order | `GameSession::RunFrame` 0x0042AEA0: pending level change -> `GameSession::LoadLevel` 0x0042AB00 (thiscall, 1 stack arg, `RET 4`) -> `GameClock::Tick` 0x0042C080 (ECX = 0x502AB8, no args) -> `GameControls` PollFrame (input) -> `TickSubsystems` 0x00429520 -> `RenderFrame` |
+| Clock outputs | dt float at 0x502AB8+0x4C (0x00502B04), `g_gameTimeMs` int at +0x44 (0x00502AFC). Load: 5 frames of game.state 2/3 before state 1 on bank |
+| Input | both drains call `IDirectInputDevice8::GetDeviceData` (vtable +0x28, cbObjectData 20, flags 0), mouse then keyboard, once each per frame; both devices share the dinput8 vtable |
+| RNG | MT19937 `g_mtState` 0x00501A28 (624 words), words-left 0x004FF370, next-ptr 0x005023EC. `Rand_Float01` 0x00404AC0 (cdecl, no args, float in st0) **inlines the draw**; `MT19937_NextU32` 0x00404A70 only serves `Rand_Below` 0x00404B30. ~860 draws per frame on bank |
+| RNG consumers | presentation: `ParticleSystem::Emit`, `WaterImpactFx::Draw`, `HoseGfx::RebuildGeometry`, `AshSim::*`, `Fire::EmitEmbers`, `FireFx::Init`, `MiscEmitterFXImpl::Update`, `Camera::UpdateShake`, `ROCSoundSystem::Play`, `TChatterSet::PlayRandom`, `StreamTube::BuildMesh`, `PlayerRescueEnt::DoFootstep`, menu, roster names. Gameplay: `FireRescueEnt::TrySpawnSpreadFire`, `Hotspot::AdvanceActiveFire`, victim roam / idle / spawn, `RescueBot::*` |
+| Fire strength (2026-10-24) | `FireRescueEnt` vtbl 0x004E1780 slot 18 = 0x004483A0 (thiscall, 1 arg = the player): strength = max(abs(dx), abs(dy), abs(dz)) from the player to the fire (+0x7C..+0x84), then `SetFireStrength` 0x00448320 -> `TrySpawnSpreadFire`. Gated on `fire+0xB8` in 0..3, which is **never initialised** (only `inc` at 0x00448533): an original bug, the source of load-to-load fire variation. Spread delay scales with the small-fire counter `DAT_00502B90` (0 at every load) |
+| Script timing | `ScriptActor::Tick` 0x00470740: a `wait` (state 1) ends when `g_gameTimeMs >= actor+0x48`; one queued command per tick. Replays identically |
+| Fire spread gate | `TrySpawnSpreadFire` 0x00447A90: `FireFx::GetExtents(fire+0x12C).x > const` **and** `g_gameTimeMs >= fire+0x124`, then a roll vs strength `+0x128`. Extents come from size keyframes (`FireFx::UpdateSizeKeyframes` by `g_gameTimeMs`), scheduled by `FUN_00447920` (from `FireRescueEnt::HandleScriptCommand`, i.e. the level script) and by the spread stepper |
+| Entity list | `[0x00502AAC]+0x64` head node; node +0 entity, +4 next; entity +0x18 kind (2 victim, 6 fire), +0x4C position; victim +0x120 state |
+| Timer offsets | from `[g_everGame]+0x30`: `+0x343C` = mission time left (bit-exact in replays); `+0x32FC` = constant ASCII "[Cou". An older research note calls +0x32FC the timer, 0x140 lower (maybe a different base). Unresolved |
+| Ghost assets | `Data\Acts\firefighter.act`, `Fireman.act`; Genesis exports `geActor_DefCreateFromFile`, `geActor_Create`, `geWorld_AddActor`, `geActor_SetPose`, `geActor_SetAlpha`, `geActor_SetBlendingType` (the last two never imported by the game). The game's own actors: `RenderInstance` (0x00491EA0..) -> `geActor_SetPose` / `geActor_Render` |
+
+## Picking the demo work back up
+
+**The exact next step (2026-10-24):** the last source. In run 13 play 1, at frame 106, a spawned
+child fire is at a different position in the entity list (fire numbering shifts by one) while every
+gameplay RNG draw count is identical, so which fire receives which random number changes from there.
+- Hypothesis, unverified: entities take a free slot in the fixed 512-slot `EntityHandleTable`
+  (0x0049B9E0), and which slots are free depends on earlier lifetimes that the simulation doesn't decide.
+- Instrument `roc_SpawnEntity` 0x0049D4C0 / `EntityManager::FlushSpawnQueue` 0x0049C670: for each
+  spawn, log the slot / list position, and which slots were free.
+- Fix candidates: a deterministic slot pick, or a full handle-table reset at `LoadLevel`.
+- The probe and its diff tools (`demo_compare.py`, `demo_firediff.py`, `demo_scriptdiff.py`) are in git history (`2a7f5bd`).
+
+Done already (runs 8-13, `README.md` "Resumed"):
+- script timing: replays;
+- the small-fire counter: 0 at every load;
+- fire strength: distance to the player;
+- the uninitialised `fire+0xB8`: fixed by the zero-filled heap;
+- GameClock +0x50 / +0x54: fed back on playback;
+- the clock imports' thunks: no callers.
+
+**Success criterion:** victim hash and entity count identical between the recording and every
+playback for a whole level, several runs in a row (now: 2 of the last 3). Then rerun with a run that carries a victim and hoses a fire.
+
+**After that, productising** (FDNYCore services, not a probe):
+- a clock override service (extend `pause`, which already owns GameClock calls);
+- a DirectInput service (`GetDeviceData`);
+- an RNG service with the presentation / gameplay split, with the presentation list reviewed in Ghidra;
+- a defined start: RNG and virtual time from `LoadLevel`, a fixed predecessor or reset, static spawns;
+- a demo file format;
+- the probe's per-frame compare, kept as a desync detector;
+- handling of console / menus / alt-tab / `fd_pause` during a recording.
+
+**Note:** the RNG split changes which numbers gameplay sees compared with the vanilla game,
+so it is only acceptable inside a demo or practice context. Decide that with the owner
+before any `fd_profile run` use.
+
+### Known gaps and caveats
+
+- The presentation call-site list is heuristic (research.db names + "next symbol" ends).
+  Some functions may be mis-bounded or missing.
+- The probe's stack walk attributes `Rand_FloatRange` draws to the first `call` return
+  address found on the stack. It is good enough for histograms, not a proven unwinder.
+- Measured on one map (bank) and one ~32 s input script, on the VM (dgVoodoo, windowed).
+- The +0x32FC vs +0x343C timer-offset discrepancy with an older research note is unresolved.
+- Genesis3D source folders beyond `engine.c` / netcode were not read.
 
 _The logs and run output named above were removed on 2026-10-27 (repository tidy-up); git history keeps them._
