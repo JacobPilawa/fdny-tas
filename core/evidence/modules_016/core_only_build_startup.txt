@@ -1,7 +1,0 @@
-﻿[2026-10-22 00:40:01.724] [INFO] console: ready (game console; FDNYCore commands intercepted at ScriptEngine::ExecLine)
-[2026-10-22 00:40:01.788] [INFO] camera: ready (geCamera_SetAttributes hooked)
-[2026-10-22 00:40:01.891] [INFO] gfx: ready (decals, alpha surfaces, solid rects)
-[2026-10-22 00:40:01.921] [INFO] textdraw: ready
-[2026-10-22 00:40:01.951] [INFO] profile: ready (fd_profile, fd_watermark); other asi: alttabfix FDNYFirefighterAmericanHeroFOVFix
-[2026-10-22 00:40:01.981] [INFO] modules: 1 registered (levelwatch)
-[2026-10-22 00:40:02.010] [INFO] module levelwatch: enabled

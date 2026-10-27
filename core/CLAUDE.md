@@ -8,8 +8,8 @@ compiler flags; the reasons are in `DECISIONS.md`. Change a rule only with an
 owner-approved entry there.
 
 Read before working: the repository `README.md` (the key sheet: every feature, key, variable and command; generated
-from the source, D41), the core services below, `DECISIONS.md` (why), the tail of
-`PROGRESS.md` (what happened last). To add a feature, use the `new-feature` skill
+from the source, D41), the core services below, `DECISIONS.md` (why), `git log` (what happened last).
+To add a feature, use the `new-feature` skill
 (`.claude/skills/new-feature/`).
 
 ## Core services
@@ -53,6 +53,12 @@ Not machine-checked, still rules:
 - **Practice-only** variables/commands are declared by the feature (`cmd::SetPracticeOnly`). Anything that shows information the game doesn't, or moves the player, is practice-only. Speedrun-category options (static spawns, RescueBot) are not; they show on the watermark.
 - **Drawing order:** state updates in `hooks::OnFrameEnd`; drawing happens in a gfx layer (the table below, R8).
 - **Freestanding C++17:** no CRT, no STL, no exceptions/RTTI, no `<initializer_list>`; no 64-bit integer division (use doubles or `MulDiv`); large locals are `static` (no stack probes). Windows API via kernel32/user32/gdi32/bcrypt only.
+- **No player runtime dependencies.** What ships is the game + the ASI loader + `FDNYCore.asi` (+ its cfg). No Python, .NET, companion exe or VC++ redist; 32-bit only.
+- **Console-first.** Every feature is an `fd_` command or variable, saved to the config and runnable from `autoexec.cfg` (the key sheet lists them all, R9).
+- **Piggyback first.** Before building a subsystem, look for a fixture the game or engine already has and reuse it (the core's console is the game's own; the camera, clock and entity list are the game's). Record what you found either way.
+- **Genesis exports are hooked by name** (GetProcAddress + MinHook); never proxy or replace the DLL. Check every Genesis3D 1.1 SDK signature against the installed `Genesis.dll`'s export table: this build differs from stock 1.1 in places.
+- **Asking vs deciding.** A choice that is irreversible and could reasonably go either way goes to the owner, once, with a recommendation. A reversible one takes the sensible default and is recorded.
+- **Where findings go.** Choices (what, why, rejected): `DECISIONS.md`. Findings, measurements, assumptions and workarounds: the topic's `evidence/<topic>/README.md` (the early ones are in `evidence/foundation/`, the warp HUD's game research in `evidence/warp_hud/`). Game knowledge beyond the core: `RESEARCH.md`. A changed test tolerance is explained in the commit message.
 
 ## Drawing: pick the block and the layer
 
@@ -96,7 +102,7 @@ Every drawing belongs to a gfx layer, run in this fixed order each frame (D40, `
    - Tests run the Debug build (it has the test pipe) unless they say `core: Release`. `core_release` proves the shipped build starts and plays. Before a release, `tests/ondemand/baseline_route` (`expect: baseline_equivalent`, ~8 min) proves the game behaves the same with and without it.
    - A test that compares the core's view of the world with the harness's own reads pauses the simulation while it compares (Debug pipe `pause on`), so nothing moves between the two reads (`state_snapshot`, which used to race on a spreading fire or a roaming victim).
 3. **Evidence** in `evidence/<topic>/`: a README with the numbers (what ran, results, verdict). Add logs or screenshots only when the README can't carry the point; test runs keep theirs in `runs/` (untracked).
-4. **Docs:** anything user-visible is described in the code: help texts, the `// User:` line, `binds::DescribeKey` (the key sheet is generated from them, D41; check the root `README.md` reads well); `DECISIONS.md` for any non-obvious choice; a `PROGRESS.md` entry (`- <date> it<N>: **<version>** ...`).
+4. **Docs:** anything user-visible is described in the code: help texts, the `// User:` line, `binds::DescribeKey` (the key sheet is generated from them, D41; check the root `README.md` reads well); `DECISIONS.md` for any non-obvious choice. The commit message says what changed and how it was tested; there is no separate progress log.
 5. **Version:** bump `VERSION` (minor for features/architecture, patch for fixes).
    - Add the release notes to the root `CHANGES.md` (hand-written), under `## <VERSION>`: the release workflow puts that section in the release's notes.
    - Merging the `core\VERSION` change to `main` runs `.github/workflows/release.yml`. It builds Release from source on a GitHub Windows runner (same zig, `build.ps1`) and publishes the GitHub release `v<VERSION>`: `FDNYCore-<VERSION>.asi`, a zip with it and its key sheet (D41: version, SHA-256, keys, features, variables, commands), and the SHA-256. An existing tag is never overwritten.
@@ -111,8 +117,8 @@ Every drawing belongs to a gfx layer, run in this fixed order each frame (D40, `
 
 ## Owner decisions in force
 
-- Old tools stay installed (FOV fix, alttabfix, FDNYDeterministic, Python overlays): no further development, don't delete. The core defers to them where they own a patch site.
+- Old tools stay installed (FOV fix, alttabfix, FDNYDeterministic, Python overlays): no further development, don't delete. The core defers to them where they own a patch site. A test of a feature that replaces one removes that tool for its run (`pre_files` with `src: null`).
 - The watermark stays opaque (decal path).
 - The practice-only list is the agent's default; the owner still has to confirm it.
 - No extra log files for overlay output: it goes to `FDNYCore.log` (`glitch|` lines).
-- Spikes and probes never modify working code: standalone probes in `probes/`, tests in `tests/probes/` (outside the suite).
+- Spikes and probes never modify working code: standalone probes in `probes/`, tests in `tests/probes/` (outside the suite). Delete them once the result is in `evidence/` (D22).

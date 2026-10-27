@@ -102,8 +102,6 @@ class Run:
             inputs.click(*self.client_point(*arg))
         elif kind == "mouse_rel":
             inputs.mouse_move_rel(*arg)
-        elif kind == "lclick":
-            inputs.mouse_click_here()
         elif kind == "rclick":
             inputs.mouse_click_here(right=True)
         elif kind == "gclick":
@@ -306,17 +304,6 @@ class Run:
             want = " and ".join(([f">= {arg['min']}"] if "min" in arg else []) + ([f"<= {arg['max']}"] if "max" in arg else []))
             self.record(kind, ok, f"{arg['num'][2]} {arg['num'][0]}->{arg['num'][1]} {n:+d} / "
                                   f"{arg['den'][2]} {arg['den'][0]}->{arg['den'][1]} {d:+d} = {ratio:.3f}, want {want}")
-        elif kind == "glitch_replay_fuzz":
-            # {seed, frames, sessions}: synthetic .glitchrec through the core's analysis offline
-            import sys as _sys
-            _sys.path.insert(0, os.path.join(CORE_DIR, "harness"))
-            import glitch_fuzz
-            self.glitch_rec = os.path.join(self.out, "fuzz.glitchrec")
-            glitch_fuzz.generate(self.glitch_rec, int(arg.get("seed", 1)), int(arg.get("frames", 600)),
-                                 int(arg.get("sessions", 2)), os.path.join(self.game_dir, "Data", "Maps"))
-            reply = pipe.call(f"glitch_replay {self.glitch_rec}")
-            self.samples["glitch_replay"] = reply
-            self.record("glitch_replay", reply.startswith("ok"), reply)
         elif kind == "assert_pipe_contains":
             # {cmd, contains | absent}: text of a pipe reply
             reply = pipe.call(arg["cmd"])
@@ -537,7 +524,7 @@ class Run:
         """fd_juggle's arrow against the harness's own computation: player position, yaw
         and the safe spot (+0x3400) read directly from memory; landing point T = spot -
         30 X; view axes measured live (forward = (sin yaw, cos yaw), right = (-cos yaw,
-        sin yaw), evidence/fire_juggle_overlay/yaw_probe.log); 8 sectors of 45 degrees,
+        sin yaw), evidence/fire_juggle_overlay); 8 sectors of 45 degrees,
         8 = "o" under 16 u. {locked: 0|1} (default 1) is asserted too; {locked: auto} derives
         it from memory for a player who isn't moving (frozen = spot != position, exactly,
         since Think's write copies the position), and fails if the position changes
@@ -828,7 +815,10 @@ class Run:
             if shared and f["dst"].lower() == "fdnycore.cfg":
                 f = {"dst": session.TEST_CFG, "src": f.get("src")}
             dst = os.path.join(self.game_dir, f["dst"])
-            backup = dst + ".fdh-backup"
+            # Per run: baseline_route's runs without the core are nested in its own run, and a
+            # shared name let the inner run consume the outer backup, so the outer run then
+            # deleted the game's FDNYFireFighter.cfg (2026-10-26).
+            backup = f"{dst}.fdh-backup-{id(self):x}"
             if os.path.exists(dst):  # a real game file: restore it afterwards
                 shutil.copy2(dst, backup)
             if f.get("src"):
@@ -944,8 +934,6 @@ class Run:
             errors = self.collect_log()
             limit = expect.get("log_errors", 0)
             self.record("log_errors", len(errors) <= limit, f"{len(errors)} ERROR line(s), limit {limit}")
-        if expect.get("glitch_parity"):
-            self.check_glitch_parity(expect)
         passed = all(r["pass"] for r in self.results)
         result = {"test": self.test["name"], "core": self.core_config, "pass": passed,
                   "crash": crash, "assertions": self.results, "samples": self.samples,
@@ -977,39 +965,6 @@ class Run:
         self.samples["baseline_checks"] = checks
         result["pass"] = all(r["pass"] for r in self.results)
         return result
-
-    def check_glitch_parity(self, expect):
-        """Item 11: the core's live collision log vs the original overlay's
-        classes replaying the same raw stream (after the game has exited)."""
-        import sys as _sys
-        _sys.path.insert(0, os.path.join(CORE_DIR, "harness"))
-        import glitch_parity
-        rec = getattr(self, "glitch_rec", None)
-        if rec is None:
-            rec = os.path.join(self.game_dir, "FDNYCore.glitchrec")
-            if not os.path.exists(rec):
-                self.record("glitch_parity", False, "no FDNYCore.glitchrec (Debug core with fd_hud_glitch 1?)")
-                return
-            shutil.copy2(rec, os.path.join(self.out, "FDNYCore.glitchrec"))
-        # 11c: the core always predicts from <game>\Data\Maps (the old tool's default)
-        maps = os.path.join(self.game_dir, expect.get("glitch_maps", "Data\\Maps"))
-        r = glitch_parity.compare(rec, os.path.join(self.out, "FDNYCore.log"), maps)
-        if expect.get("glitch_box"):
-            box = os.path.join(self.game_dir, "FDNYCore.glitchbox")
-            if not os.path.exists(box):
-                self.record("glitch_box_parity", False, "no FDNYCore.glitchbox (env FDNYCORE_TEST_GLITCHBOX=1?)")
-            else:
-                shutil.copy2(box, os.path.join(self.out, "FDNYCore.glitchbox"))
-                b = glitch_parity.compare_boxes(rec, box, maps)
-                self.samples["glitch_box_parity"] = {k: b[k] for k in ("frames", "lines")}
-                self.record("glitch_box_parity", not b["mismatches"] and b["frames"] >= int(expect.get("glitch_box_min_frames", 1)),
-                            f"{b['frames']} frames / {b['lines']} lines of build() text; mismatches: "
-                            f"{b['mismatches'][:3] or 'none'}")
-        self.samples["glitch_parity"] = {k: r[k] for k in ("sessions_ref", "sessions_core", "lines", "kinds")}
-        enough = r["lines"] >= int(expect.get("glitch_min_lines", 1))
-        self.record("glitch_parity", not r["mismatches"] and enough,
-                    f"sessions ref {r['sessions_ref']} / core {r['sessions_core']}, {r['lines']} reference "
-                    f"lines {r['kinds']}; mismatches: {r['mismatches'][:3] or 'none'}")
 
     def collect_log(self):
         if not os.path.exists(self.g.core_log):

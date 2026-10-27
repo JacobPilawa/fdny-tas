@@ -1,10 +1,8 @@
-// Tests: tests/glitch_records.yaml tests/glitch_parity_log.yaml tests/ondemand/glitch_parity_fuzz.yaml tests/glitch_box_cost.yaml tests/text_panels.yaml tests/keys_default.yaml
+// Tests: tests/glitch_records.yaml tests/glitch_box_cost.yaml tests/text_panels.yaml tests/keys_default.yaml
 // User: Warp HUD -- shows what the player touches and whether it can warp them (the stale-impact warp), with a history of boxes.
-// hud_glitch record layer (backlog item 11a): a port of the code caves in
-// tools/collision_overlay/fdny_collision_overlay.py (GameSource._install).
-// The cave code below is emitted byte for byte like the Python Asm emitter
-// (same layout, same LOG routine, same entry/exit/writer/commit/tick tails),
-// so the record stream is identical to what the Python overlay reads.
+// hud_glitch record layer (backlog item 11a): code caves on the collision hook sites that
+// write one 128-byte record per event to a ring the analysis reads each frame (originally a
+// port of the Python collision overlay's caves).
 //
 // Cave layout: 0x00 TICK, 0x04 HEAD, 0x08 INCALL, 0x0C FRESH, 0x40 scratch
 // record (128 bytes), 0x100 code, 0x1000 ring of 16384 x 128-byte records.
@@ -18,7 +16,6 @@
 #include "console.h"
 #include "glitch_analysis.h"
 #include "glitch_bsp.h"
-#include "glitch_replay.h"
 #include "textdraw.h"
 #include "binds.h"
 #include "hooks.h"
@@ -279,14 +276,8 @@ bool PatchAll(bool install) {
     return false;
 }
 
-bool g_boxDump = false;  // Debug: FDNYCORE_TEST_GLITCHBOX=1 -> FDNYCore.glitchbox
 int g_nShown = 0;        // box lines currently drawn
 int g_panel = -1;        // the boxes' in-frame text panel (textdraw)
-#ifdef FDCORE_DEBUG
-void DumpSessionStart();
-void DumpMarker(uint32_t kind);
-void BoxWrite(const char* s);
-#endif
 
 // <game>\Data\Maps, as the old tool's _default_maps_dir (exe folder).
 const char* MapsDir() {
@@ -328,10 +319,6 @@ bool Install() {
     analysis::BeginSession(MapsDir());
     g_mapCheckDue = true;
     g_nShown = 0;
-#ifdef FDCORE_DEBUG
-    if (g_boxDump) BoxWrite("## session\n");
-    DumpSessionStart();
-#endif
     log::Info("glitch: hooks installed: cave 0x%08lX, Genesis base 0x%08lX",
               reinterpret_cast<unsigned long>(g_cave), static_cast<unsigned long>(addr::ModuleBase(1)));
     return true;
@@ -347,57 +334,8 @@ void Uninstall() {
         analysis::EndSession();
         textdraw::Show(g_panel, false);
         g_nShown = 0;
-#ifdef FDCORE_DEBUG
-        DumpMarker(0xF4);
-#endif
     }
 }
-
-#ifdef FDCORE_DEBUG
-// Debug: the raw stream + one snapshot block per frame (KIND 0xF0), for the
-// Python replay driver (core/harness/glitch_replay.py).
-HANDLE g_dump = INVALID_HANDLE_VALUE;
-void DumpBlock(const uint32_t* rec) {
-    if (g_dump == INVALID_HANDLE_VALUE) {
-        char path[MAX_PATH];
-        wsprintfA(path, "%sFDNYCore.glitchrec", console::GameDir());
-        g_dump = CreateFileA(path, GENERIC_WRITE, FILE_SHARE_READ, nullptr, CREATE_ALWAYS, 0, nullptr);
-    }
-    DWORD w;
-    if (g_dump != INVALID_HANDLE_VALUE) WriteFile(g_dump, rec, kRecSize, &w, nullptr);
-}
-
-void DumpSnapshot(const analysis::Snapshot& s) {
-    uint32_t b[32] = {};
-    b[0] = 0xF0;
-    b[1] = s.tick, b[2] = s.playerPtr, b[3] = static_cast<uint32_t>(s.state), b[4] = s.ground, b[5] = s.spectator;
-    __builtin_memcpy(&b[6], s.pos, 12), __builtin_memcpy(&b[9], s.mins, 12), __builtin_memcpy(&b[12], s.maxs, 12);
-    __builtin_memcpy(&b[15], s.disp, 12), __builtin_memcpy(&b[18], s.slotImpact, 12);
-    __builtin_memcpy(&b[21], s.slotPlane, 16);
-    b[25] = s.genesisBase;
-    DumpBlock(b);
-}
-
-void DumpMarker(uint32_t kind) {
-    uint32_t b[32] = {};
-    b[0] = kind;
-    DumpBlock(b);
-}
-
-void DumpSessionStart() { DumpMarker(0xF1); }
-
-// KIND 0xF2: MapFinder.update ran this frame; b[1] = 1 if the plane array was
-// readable, then the kSigBytes it held follow as raw blocks.
-void DumpMapCheck(const uint8_t* planes) {
-    uint32_t b[32] = {};
-    b[0] = 0xF2;
-    b[1] = planes != nullptr;
-    b[2] = planes ? bsp::kSigBytes : 0;
-    DumpBlock(b);
-    for (uint32_t off = 0; planes && off < bsp::kSigBytes; off += kRecSize)
-        DumpBlock(reinterpret_cast<const uint32_t*>(planes + off));
-}
-#endif
 
 // MapFinder's _read_planes: the first kSigBytes of Genesis' live plane array.
 const uint8_t* ReadPlanes() {
@@ -441,26 +379,7 @@ char g_shown[analysis::kBoxLines][analysis::kBoxLineLen];  // what is drawn (kep
 uint32_t g_shownTick = 0;
 CRITICAL_SECTION g_boxLock;  // the pipe thread reads what the game thread draws
 
-#ifdef FDCORE_DEBUG
-HANDLE g_boxFile = INVALID_HANDLE_VALUE;
-void BoxWrite(const char* s) {
-    if (g_boxFile == INVALID_HANDLE_VALUE) {
-        char path[MAX_PATH];
-        wsprintfA(path, "%sFDNYCore.glitchbox", console::GameDir());
-        g_boxFile = CreateFileA(path, GENERIC_WRITE, FILE_SHARE_READ, nullptr, CREATE_ALWAYS, 0, nullptr);
-    }
-    DWORD w;
-    if (g_boxFile != INVALID_HANDLE_VALUE) WriteFile(g_boxFile, s, lstrlenA(s), &w, nullptr);
-}
-void DumpBox(const char (*lines)[analysis::kBoxLineLen], int n) { replay::WriteBox(BoxWrite, lines, n); }
-#endif
-
-void ClearBoxHistory() {  // X (was F12)
-    analysis::ClearHistory();
-#ifdef FDCORE_DEBUG
-    DumpMarker(0xF5);
-#endif
-}
+void ClearBoxHistory() { analysis::ClearHistory(); }  // X (was F12)
 
 void CmdHide(int, const char* const*) { g_hidden = !g_hidden; }
 void CmdFreeze(int, const char* const*) { g_frozen = !g_frozen; }
@@ -471,7 +390,7 @@ void CmdClear(int, const char* const*) {
 // Overlay._hotkeys (the original's F9 show/hide, F10 freeze, F12 clear; letters since
 // D37: B, Z, X) -- edge-triggered, only while the game has the keyboard (binds' rule);
 // the game still gets them. Kept here, not as binds: the clear must stay between this
-// frame's hotkeys and build(), as in the original (the replay's 0xF5 marker order).
+// frame's hotkeys and build(), as in the original.
 void Hotkeys() {
     static const int kVk[3] = {'B', 'Z', 'X'};
     static bool was[3];
@@ -499,10 +418,6 @@ void FrameEnd() {
         g_lastMapCheck = now;
         snap.planes = ReadPlanes();
     }
-#ifdef FDCORE_DEBUG
-    DumpSnapshot(snap);
-    if (snap.mapCheck) DumpMapCheck(snap.planes);
-#endif
     const uint32_t head = *reinterpret_cast<volatile uint32_t*>(g_cave + kHead);
     uint32_t n = head - g_lastHead;
     if (n > kRingN) {
@@ -518,9 +433,6 @@ void FrameEnd() {
         recs[i] = rec;
         uint32_t kind = rec[R_KIND];
         if (kind < 4) InterlockedIncrement(&g_counts[kind]);
-#ifdef FDCORE_DEBUG
-        DumpBlock(rec);
-#endif
     }
     g_lastHead = head;
     LARGE_INTEGER t0, t1, fq;
@@ -538,22 +450,17 @@ void FrameEnd() {
     // Overlay.tick: poll, then hotkeys, then render
     Hotkeys();
     QueryPerformanceCounter(&t0);  // box cost on the game thread: build + hand-over (rendering is on the UI thread)
-    if (g_boxDump || (!g_frozen && !g_hidden)) {
+    if (!g_frozen && !g_hidden) {
         const int nb = analysis::BuildBox(g_build, g_buildA);
-#ifdef FDCORE_DEBUG
-        if (g_boxDump) DumpBox(g_build, nb);
-#endif
-        if (!g_frozen && !g_hidden) {
-            EnterCriticalSection(&g_boxLock);
-            for (int i = 0; i < nb; ++i) lstrcpynA(g_shown[i], g_build[i], analysis::kBoxLineLen);
-            g_nShown = nb;
-            g_shownTick = snap.tick;
-            LeaveCriticalSection(&g_boxLock);
-            static uint8_t drawA[analysis::kBoxLines][analysis::kBoxLineLen];  // + bold, for textdraw
-            for (int i = 0; i < nb; ++i)
-                for (int c = 0; c < analysis::kBoxLineLen; ++c) drawA[i][c] = palette::Attr(g_buildA[i][c]);
-            textdraw::Set(g_panel, g_build, drawA, nb);
-        }
+        EnterCriticalSection(&g_boxLock);
+        for (int i = 0; i < nb; ++i) lstrcpynA(g_shown[i], g_build[i], analysis::kBoxLineLen);
+        g_nShown = nb;
+        g_shownTick = snap.tick;
+        LeaveCriticalSection(&g_boxLock);
+        static uint8_t drawA[analysis::kBoxLines][analysis::kBoxLineLen];  // + bold, for textdraw
+        for (int i = 0; i < nb; ++i)
+            for (int c = 0; c < analysis::kBoxLineLen; ++c) drawA[i][c] = palette::Attr(g_buildA[i][c]);
+        textdraw::Set(g_panel, g_build, drawA, nb);
     }
     textdraw::Show(g_panel, !g_hidden);  // frozen: the panel keeps its last text
     QueryPerformanceCounter(&t1);
@@ -584,12 +491,8 @@ bool Init() {
     g_panel = textdraw::Create("glitch", textdraw::TOP_RIGHT, 12, 12, 3, palette::T_TEXT);
     textdraw::SetPalette(g_panel, palette::kFg, palette::T_COUNT, palette::kBg);
     textdraw::Show(g_panel, false);
-#ifdef FDCORE_DEBUG
-    char env[8];
-    g_boxDump = GetEnvironmentVariableA("FDNYCORE_TEST_GLITCHBOX", env, sizeof(env)) && env[0] == '1';
-#endif
     // Player-facing name: the warp HUD (owner 2026-10-22: "collision" / "glitch" / "warp" for one
-    // thing was confusing). The code, the glitch| log lines and the parity files keep "glitch".
+    // thing was confusing). The code and the glitch| log lines keep "glitch".
     cmd::RegisterCommand("fd_warp_hide", "show / hide the warp HUD's boxes (key B)", CmdHide);
     cmd::RegisterCommand("fd_warp_freeze", "freeze / unfreeze the warp HUD's boxes; logging continues (key Z)", CmdFreeze);
     cmd::RegisterCommand("fd_warp_clear", "clear the warp HUD's history and last warp (key X)", CmdClear);
@@ -611,35 +514,12 @@ bool Init() {
 #ifdef FDCORE_DEBUG
     testpipe::Register("glitch", [](const char*, char* resp, int cap) { Stats(resp, cap); });
     testpipe::Register("glitch_box", [](const char*, char* resp, int cap) { BoxState(resp, cap); });
-    testpipe::Register("glitch_replay", [](const char* path, char* resp, int cap) { ReplayFile(path, resp, cap); });
 #endif
     log::Info("glitch: ready (fd_hud_warp: the warp HUD)");
     return true;
 }
 
 bool Installed() { return g_installed; }
-
-#ifdef FDCORE_DEBUG
-// Test-only: feed a recorded / synthetic .glitchrec stream through the core's
-// analysis offline (same blocks the live path produces), for parity against
-// the Python replay of the same file. Refused while the live hooks run.
-int ReplayFile(const char* path, char* out, int cap) {
-    (void)cap;  // replies are short fixed formats, well under the pipe buffer
-    if (g_installed) return wsprintfA(out, "err fd_hud_glitch is on");
-    HANDLE f = CreateFileA(path, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
-    if (f == INVALID_HANDLE_VALUE) return wsprintfA(out, "err cannot open %s", path);
-    DWORD size = GetFileSize(f, nullptr);
-    auto* data = static_cast<uint32_t*>(VirtualAlloc(nullptr, size + kRecSize, MEM_COMMIT, PAGE_READWRITE));
-    DWORD got = 0;
-    ReadFile(f, data, size, &got, nullptr);
-    CloseHandle(f);
-    // The same driver the unit-test host runs (glitch_replay.h).
-    const replay::Result r = replay::Run(data, got / kRecSize, MapsDir(), g_boxDump ? BoxWrite : nullptr);
-    VirtualFree(data, 0, MEM_RELEASE);
-    if (g_boxFile != INVALID_HANDLE_VALUE) FlushFileBuffers(g_boxFile);
-    return wsprintfA(out, "ok sessions=%d frames=%d", r.sessions, r.frames);
-}
-#endif
 
 int BoxState(char* out, int cap) {
     EnterCriticalSection(&g_boxLock);

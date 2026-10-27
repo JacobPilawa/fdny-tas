@@ -21,7 +21,7 @@
 // the survivor lands at your feet either way. A write to anywhere else (e.g. the respawn
 // mirroring the checkpoint) is logged as "written elsewhere".
 // Read in OnFrameEnd, after Think and that frame's fire damage (round2_frame_order.txt).
-// View yaw (live, evidence/fire_juggle_overlay/yaw_probe.log): forward = (sin yaw, cos yaw)
+// View yaw (live, evidence/fire_juggle_overlay): forward = (sin yaw, cos yaw)
 // in world (x, z), strafe right = (-cos yaw, sin yaw).
 #include <windows.h>
 

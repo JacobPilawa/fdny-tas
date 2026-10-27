@@ -212,3 +212,5 @@ before any `fd_profile run` use.
   - the Ghidra GZF script is waiting for approval;
   - delete the old `gitbackup` folder after the owner verifies it;
   - research.db corrections.
+
+_The logs and run output named above were removed on 2026-10-27 (repository tidy-up); git history keeps them._

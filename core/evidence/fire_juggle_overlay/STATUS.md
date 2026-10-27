@@ -151,3 +151,5 @@ Background: KB `fire-juggling`, `core/evidence/fire_juggling/`.
     styles for module authors, suite line), DECISIONS D32 (gate) and D33 (test hooks),
     PROGRESS it26.
   - Committed and pushed; owner report given; loop stopped.
+
+_The logs and run output named above were removed on 2026-10-27 (repository tidy-up); git history keeps them._

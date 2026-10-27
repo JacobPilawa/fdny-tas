@@ -154,3 +154,5 @@ started from the menu, `mapName` changes at the load start.
 
 Test results: `livesplit/README.md` "Results"; logs in `livesplit_test/v22_*`, the v2.1
 control `v21_il_subway_restart`, and the stall run `v22pre_il_oilrig_stall`.
+
+_The logs and run output named above were removed on 2026-10-27 (repository tidy-up); git history keeps them._

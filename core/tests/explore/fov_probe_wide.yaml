@@ -1,9 +1,0 @@
-name: explore_fov_probe_wide
-pre_files:
-  - {src: tests/data/fovfix_1920x1080_f14.ini, dst: FDNYFirefighterAmericanHeroFOVFix.ini}
-setup: load_training
-record: false
-steps:
-  - wait_s: 2
-expect:
-  no_crash: true

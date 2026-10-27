@@ -23,3 +23,5 @@ on the display's refresh rate (D46, `evidence/fps_independent_tests/`). Rerun on
 32 Hz display, both PASS, which makes the 0.19.0 suite 38/38.
 
 Files: `suite_0.19.0.txt` (this run), `suite_main_3c5aa54.txt` (the earlier `main` run).
+
+_The logs and run output named above were removed on 2026-10-27 (repository tidy-up); git history keeps them._

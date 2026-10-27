@@ -34,3 +34,5 @@ From `FDNYCore.log` (static spawns run):
 6 "pinned to spot 0" lines over the 3 Training loads; the victims' positions are equal across loads and at spot 0.
 
 Files: `FDNYCore.log`, `result.json`.
+
+_The logs and run output named above were removed on 2026-10-27 (repository tidy-up); git history keeps them._

@@ -1,8 +1,6 @@
-// hud_glitch analysis (backlog item 11b): C++ port of the per-frame analysis
-// of tools/collision_overlay/fdny_collision_overlay.py -- Ev / Model /
-// FrameAnalyzer / TextLog / GameSource._classify + poll's record decoding.
-// Parity is checked by replaying the same record stream through the
-// original Python classes (core/harness/glitch_replay.py).
+// hud_glitch analysis (backlog item 11b): the per-frame analysis of the collision
+// record stream (originally a C++ port of the Python collision overlay's Ev / Model /
+// FrameAnalyzer / TextLog / GameSource._classify + poll's record decoding).
 #pragma once
 
 #include <stdint.h>

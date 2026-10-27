@@ -3,7 +3,7 @@ of two without-core runs of tests/baseline_route.yaml?
 
 python -I compare_runs.py <nocore_a> <nocore_b> <core>   (run dirs or result.json)
 
-Checks (LOOP.md "Baseline equivalence"):
+Checks:
  1 no crash / hang / dialog in any run
  2 same map + game state at start, every lap and the end
  3 identical module bases (exe, Genesis.dll)

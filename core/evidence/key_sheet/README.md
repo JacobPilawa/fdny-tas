@@ -18,3 +18,5 @@ writes `build/<Config>/README.md` on every build and `-Dist` puts the Release on
 
 arch_check R9 was checked the same way: a feature file without its `// User:` line, and
 one calling `GetAsyncKeyState` without `binds::DescribeKey`, are both reported.
+
+_The logs and run output named above were removed on 2026-10-27 (repository tidy-up); git history keeps them._

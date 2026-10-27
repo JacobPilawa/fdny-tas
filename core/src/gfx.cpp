@@ -372,7 +372,6 @@ bool AlphaSurface::Upload(const uint32_t* px, int stride, int w, int h, const Al
                 __builtin_memcpy(dst + y * ds, g_tileBuf + y * kTile, kTile * sizeof(uint16_t));
             g_unlock(target);
             __builtin_memcpy(t.shadow, g_tileBuf, sizeof(g_tileBuf));
-            ++uploads_;
         }
     return true;
 }

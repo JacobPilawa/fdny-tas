@@ -24,3 +24,5 @@ Files: `FDNYCore.log`, `result.json`, `watermark_two_cores.png`.
 
 Also rerun after the change: `core_loads`, `addr_bad_signature` (Debug address override, now found by
 module handle), `recorder`, `draw_layers`: all PASS.
+
+_The logs and run output named above were removed on 2026-10-27 (repository tidy-up); git history keeps them._

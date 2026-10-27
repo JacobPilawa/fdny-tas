@@ -839,7 +839,7 @@ void ClearHistory() {
 
 // --- Overlay.build() --------------------------------------------------------------
 // Text plus the original's Text-widget tags, per character (attrs). The tags
-// map to colours in the renderer; the text alone is what parity compares.
+// map to colours in the renderer.
 namespace {
 
 constexpr int W_INNER = 61, COORD_COL = 19, SRC_W = COORD_COL - 8, HISTORY_ROWS = 10, AGE_DIM_TICKS = 180;

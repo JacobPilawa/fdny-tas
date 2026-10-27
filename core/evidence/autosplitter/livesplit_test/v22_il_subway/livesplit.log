@@ -1,9 +1,0 @@
-  52271.9122 clock=0 HOST loaded FDNY_ILs.asl, 30 segments, refresh 200 Hz
-  52291.3651 clock=685 TIMER start game=None
-  52291.3651 clock=685 TIMER running game=None
-  52318.4568 clock=27781 TIMER split 1 game=27.0849
-  52318.4569 clock=27781 TIMER paused game=27.0849
-  52319.2883 clock=29087 TIMER running game=27.0873
-  52331.3203 clock=41150 TIMER split 2 game=39.1193
-  52331.3219 clock=41150 TIMER paused game=39.1207
-  52337.3901 clock=16544 TIMER reset

@@ -1,9 +1,8 @@
 // hud_glitch warp window (backlog item 11c): C++ port of Bsp / MapFinder /
-// describe_window from tools/collision_overlay/fdny_collision_overlay.py.
+// describe_window from the Python collision overlay.
 // Predicts the player's NEXT frame from the loaded map's .bsp (world model,
 // Genesis' box clip ported literally). Python's double arithmetic and its
-// float32 rounding points are reproduced exactly (SSE2 doubles, no FMA), so
-// the replay parity test can compare text byte for byte.
+// float32 rounding points are reproduced exactly (SSE2 doubles, no FMA).
 #pragma once
 
 #include <stdint.h>

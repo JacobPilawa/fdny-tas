@@ -1,9 +1,0 @@
-[2026-10-21 02:39:59.063] [INFO] FDNYCore loaded from C:\fdny-decomp\FDNY SP 1.1\FDNYCore.asi
-[2026-10-21 02:39:59.107] [INFO] FDNYCore 0.2.0 (Debug) exe=C:\fdny-decomp\FDNY SP 1.1\FDNYFirefighter.exe sha256=4b3b4dc1cc0b05bcb42c8e27ac6f6ca72fe5f7064ca8122fda7d41e7f6d2fc3e base=00400000
-[2026-10-21 02:39:59.133] [INFO] Genesis.dll sha256=5014bb879706bfb5ae6cf9ce1de63dc3deebdcc5b8e1b41f247b284a336c4643 base=10000000
-[2026-10-21 02:39:59.163] [INFO] address table: Debug override loaded from C:\fdny-decomp\FDNY SP 1.1\FDNYCore.addroverride.txt
-[2026-10-21 02:39:59.199] [INFO] address table: version retail-1.1 selected
-[2026-10-21 02:39:59.246] [WARN] signature mismatch: game.map_name (expected at exe+0002465a); entry disabled
-[2026-10-21 02:39:59.282] [WARN] signatures: 22/23 OK
-[2026-10-21 02:39:59.313] [INFO] module levelwatch: disabled (needs game.map_name)
-[2026-10-21 02:39:59.341] [INFO] FDNYCore ready

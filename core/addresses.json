@@ -269,7 +269,7 @@
             "ref": "instruction at 0x004274c2 embeds 0x00503a78",
             "ghidra": "xref confirmed 2026-10-21: MOV EDX,[0x00503a78] in FUN_00427420 (Console::SetState region)"
           },
-          "ghidra": "g_everGame 0x00503A78 -> +0x30 player (tools/collision_overlay EG_PLAYER/OFF_POS)",
+          "ghidra": "g_everGame 0x00503A78 -> +0x30 player (collision overlay EG_PLAYER/OFF_POS; core/evidence/warp_hud/HOOK_SITES.md section 7)",
           "note": "player world position X"
         },
         "player.pos_y": {
@@ -416,7 +416,7 @@
             "bytes": "83 EC 20 56 8B 74 24 28 8B 86 68 36 03 00 85 C0",
             "ref": "first 16 bytes of Genesis.dll export geEngine_BeginFrame"
           },
-          "ghidra": "Genesis.dll export table (core/notes/genesis_exports.txt, ordinal 440); called from ROCRender::RenderFrame 0x0049490F",
+          "ghidra": "Genesis.dll export table (ordinal 440); called from ROCRender::RenderFrame 0x0049490F",
           "note": "cdecl geBoolean geEngine_BeginFrame(geEngine*, geCamera*, geBoolean ClearScreen); frame start"
         },
         "genesis.end_frame": {
@@ -488,35 +488,7 @@
           },
           "ghidra": "String::FreeRep 0x004011C0 (ExecLine release path 0x00470FA4)",
           "note": "thiscall(ECX=&slot); frees the rep after the caller dropped refcount to <= 0"
-        },
-        "con.ctor": {
-          "module": "exe",
-          "kind": "code",
-          "rva": "0x277D0",
-          "chain": [],
-          "type": "ptr",
-          "sig": {
-            "rva": "0x277D0",
-            "bytes": "6A FF 68 60 D4 4C 00 64 A1 00 00 00 00 50 64 89",
-            "ref": "first 16 bytes of the function at 0x004277d0"
-          },
-          "ghidra": "console ctor 0x004277D0 (Ghidra label PlayerRescueEnt::Init is wrong); called from roc_CreateEngineSubsystems 0x00499394",
-          "note": "thiscall(ECX=new 0x4A0-byte object) void(int w=640, int h=460); writes g_console 0x00502A90; RET 8"
-        },
-        "crt.operator_new": {
-          "module": "exe",
-          "kind": "code",
-          "rva": "0xA5A84",
-          "chain": [],
-          "type": "ptr",
-          "sig": {
-            "rva": "0xA5A84",
-            "bytes": "56 8B 74 24 08 EB 10 56 E8 E1 56 01 00 85 C0 59",
-            "ref": "first 16 bytes of the function at 0x004a5a84"
-          },
-          "ghidra": "operator new 0x004A5A84 (roc_CreateEngineSubsystems 0x00499372)",
-          "note": "cdecl void*(size_t)"
-        },
+        },
         "str.empty_rep": {
           "module": "exe",
           "rva": "0x101908",
@@ -1112,20 +1084,6 @@
           "ghidra": "WinMain 0x0042C800: 0x0042CC5C mov al,[ImADeveloper]; test; 0x0042CC63 jne 0x0042CD63 skips the block that plays Data\\\\Movies\\\\ActiValue.avi (0x004DFADC) and Data\\\\Movies\\\\Mekada.avi (0x004DFAC4) (capstone disassembly 2026-10-21)",
           "note": "6-byte jne rel32 -> nop; jmp rel32 when fd_skip_intro is 1 (DllMain)"
         },
-        "genesis.printf": {
-          "module": "genesis",
-          "rva": "0x24B60",
-          "export": "geEngine_Printf",
-          "chain": [],
-          "type": "ptr",
-          "sig": {
-            "rva": "0x24B60",
-            "bytes": "81 EC 04 04 00 00 A1 F0 A8 0A 10 33 84 24 04 04",
-            "ref": "first 16 bytes of Genesis.dll export geEngine_Printf"
-          },
-          "ghidra": "Genesis.dll export geEngine_Printf (ordinal 451, RVA 0x24B60, core/notes/genesis_exports.txt); imported by the exe; Genesis3D 1.1: geBoolean geEngine_Printf(geEngine*, int32 x, int32 y, const char* fmt, ...) cdecl (bare export name)",
-          "note": "in-frame debug text (engine font); used by the HUDs"
-        },
         "glitch.entry": {
           "module": "genesis",
           "kind": "code",
@@ -1137,7 +1095,7 @@
             "bytes": "83 EC 24 8B 4C 24 28 8B 51 18 8B 44 24 3C 81 C2",
             "ref": "first 16 bytes of the function at 0x00438c10"
           },
-          "ghidra": "geWorld_Collision body entry (83EC24 8B4C2428, 7 bytes; resume +7); tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "geWorld_Collision body entry (83EC24 8B4C2428, 7 bytes; resume +7); core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "records caller stack + impact slot before the call"
         },
         "glitch.exit_box": {
@@ -1151,7 +1109,7 @@
             "bytes": "5E 83 C4 24 C3 A1 C4 2E 36 10 8B 54 24 54 52 8B",
             "ref": "first 16 bytes of the function at 0x00438d0a"
           },
-          "ghidra": "geWorld_Collision exit (box hit): 5E 83C424 C3; tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "geWorld_Collision exit (box hit): 5E 83C424 C3; core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "records result, Col impact/plane, global plane, fresh count"
         },
         "glitch.exit_ray": {
@@ -1165,7 +1123,7 @@
             "bytes": "5E 83 C4 24 C3 5F 33 C0 5E 83 C4 24 C3 90 90 90",
             "ref": "first 16 bytes of the function at 0x00438db6"
           },
-          "ghidra": "geWorld_Collision exit (ray hit): 5E 83C424 C3; tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "geWorld_Collision exit (ray hit): 5E 83C424 C3; core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "same as exit_box"
         },
         "glitch.exit_miss": {
@@ -1179,7 +1137,7 @@
             "bytes": "5E 83 C4 24 C3 90 90 90 90 90 90 90 90 90 90 90",
             "ref": "first 16 bytes of the function at 0x00438dbe"
           },
-          "ghidra": "geWorld_Collision exit (miss): 5E 83C424 C3; tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "geWorld_Collision exit (miss): 5E 83C424 C3; core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "same as exit_box"
         },
         "glitch.boxw": {
@@ -1193,7 +1151,7 @@
             "bytes": "5B 83 C4 2C C3 DD D8 5F 5E B8 01 00 00 00 5D A3",
             "ref": "first 16 bytes of the function at 0x004371c2"
           },
-          "ghidra": "box-clip fresh-write epilogue: 5B 83C42C C3; tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "box-clip fresh-write epilogue: 5B 83C42C C3; core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "counts fresh impact writes"
         },
         "glitch.rayw": {
@@ -1207,7 +1165,7 @@
             "bytes": "C7 05 44 2F 36 10 01 00 00 00 5D 5B 5F B8 01 00",
             "ref": "first 16 bytes of the function at 0x00436633"
           },
-          "ghidra": "ray-clip write: C705 <latch 0x10362F44> 01000000 (10 bytes; absolute operand is relocated); resume +10; tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "ray-clip write: C705 <latch 0x10362F44> 01000000 (10 bytes; absolute operand is relocated); resume +10; core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "counts fresh writes; outside a call = engine lighting ray record"
         },
         "glitch.commit": {
@@ -1221,7 +1179,7 @@
             "bytes": "8D 46 4C 8B C8 89 11 8B 54 24 14 89 51 04 8B 54",
             "ref": "first 16 bytes of the function at 0x0043f9c7"
           },
-          "ghidra": "BModelEnt::Think step-down commit 0x0043F9C7: 8D464C 8BC8 8911 (7 bytes; resume +7); ESI = entity; tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "BModelEnt::Think step-down commit 0x0043F9C7: 8D464C 8BC8 8911 (7 bytes; resume +7); ESI = entity; core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "records the warp commit (impact, normal, old position)"
         },
         "glitch.tick": {
@@ -1235,7 +1193,7 @@
             "bytes": "A1 78 3A 50 00 8B 48 04 6A 00 E8 52 97 06 00 83",
             "ref": "first 16 bytes of the function at 0x0042af0f"
           },
-          "ghidra": "GameSession::RunFrame 0x0042AF0F: A1 783A5000 (mov eax,[g_everGame]; 5 bytes; resume +5); tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "GameSession::RunFrame 0x0042AF0F: A1 783A5000 (mov eax,[g_everGame]; 5 bytes; resume +5); core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "per-simulated-frame tick counter"
         },
         "genesis.impact": {
@@ -1248,7 +1206,7 @@
             "bytes": "A3 9C 2E 36 10 8B 44 24 2C 89 0D",
             "ref": "Genesis instruction at 0x10036603 embeds 0x10362e9c"
           },
-          "ghidra": "Genesis global last-collision impact point x,y,z (G_IMPACT 0x10362E9C); tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "Genesis global last-collision impact point x,y,z (G_IMPACT 0x10362E9C); core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "the stale-hit slot"
         },
         "genesis.plane": {
@@ -1261,7 +1219,7 @@
             "bytes": "BF 48 2F 36 10 F3 A5 8B 4C 24 18",
             "ref": "Genesis instruction at 0x100365f8 embeds 0x10362f48"
           },
-          "ghidra": "Genesis global last-collision plane normal x,y,z + dist (G_PLANE 0x10362F48); tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "Genesis global last-collision plane normal x,y,z + dist (G_PLANE 0x10362F48); core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "plane the warp gate sees"
         },
         "genesis.planes_ptr": {
@@ -1274,7 +1232,7 @@
             "bytes": "A1 F8 2E 36 10 8D 34 88 8B 42 04",
             "ref": "Genesis instruction at 0x100353d5 embeds 0x10362ef8"
           },
-          "ghidra": "Genesis pointer to the loaded world plane array (G_PLANES_PTR 0x10362EF8); MapFinder compares its first 16 KB with each .bsp; tools/collision_overlay (HOOK_SITES.md; Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "Genesis pointer to the loaded world plane array (G_PLANES_PTR 0x10362EF8); MapFinder compares its first 16 KB with each .bsp; core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "map recognition"
         },
         "player.object": {
@@ -1440,34 +1398,7 @@
           },
           "ghidra": "Genesis.dll export @geEngine_DrawBitmap@20 (RVA 0x24230); fastcall: ECX=engine, EDX=bitmap; stack (GE_Rect* {Left,Right,Top,Bottom} or NULL, x, y); RET 0xC",
           "note": "hud_glitch box bitmap (item 11d)"
-        },
-        "engine.f_font_bitmap": {
-          "module": "field",
-          "rva": "0x336B0",
-          "chain": [],
-          "type": "u32",
-          "sig": null,
-          "ghidra": "geEngine: the font geBitmap* the Printf drawer (0x10025C60) blits glyphs from (Haiku, hand-decoded)",
-          "note": "offset into the geEngine*"
-        },
-        "engine.f_font_glyphs": {
-          "module": "field",
-          "rva": "0x336B4",
-          "chain": [],
-          "type": "u32",
-          "sig": null,
-          "ghidra": "geEngine: 256 glyph dwords (hi16 / lo16 = glyph cell origin) indexed by character",
-          "note": "offset into the geEngine*"
-        },
-        "engine.f_printf_count": {
-          "module": "field",
-          "rva": "0x34874",
-          "chain": [],
-          "type": "u32",
-          "sig": null,
-          "ghidra": "geEngine: queued geEngine_Printf strings this frame (max 40, 80 chars each; entries at +0x33AB4, 0x58 bytes)",
-          "note": "offset into the geEngine*"
-        },
+        },
         "genesis.flush_pipeline": {
           "module": "genesis",
           "rva": "0x24A30",
@@ -1851,20 +1782,6 @@
           "ghidra": "Genesis.dll export @geBitmap_Destroy@4 (RVA 0x1AF40); fastcall: ECX=geBitmap** (handle cleared); RET",
           "note": "hud_glitch box bitmap (item 11d)"
         },
-        "genesis.bitmap_set_color_key": {
-          "module": "genesis",
-          "rva": "0x1B770",
-          "export": "@geBitmap_SetColorKey@16",
-          "chain": [],
-          "type": "ptr",
-          "sig": {
-            "rva": "0x1B770",
-            "bytes": "53 56 8B F1 8B 46 70 85 C0 57 8B DA 0F 85 E6 00",
-            "ref": "first 16 bytes of Genesis.dll export @geBitmap_SetColorKey@16"
-          },
-          "ghidra": "Genesis.dll export @geBitmap_SetColorKey@16 (RVA 0x1B770); fastcall: ECX=bitmap, EDX=HaveColorKey; stack (ColorKey in the bitmap's format, Smart); D3DDrv's decal Blt uses DDBLT_KEYSRC, so a bitmap without a colour key never shows",
-          "note": "hud_glitch box bitmap (item 11d)"
-        },
         "entity.f_forward": {
           "module": "field",
           "rva": "0x40",
@@ -1977,7 +1894,7 @@
         }
       },
       "classify": {
-        "_comment": "Caller classification for hud_glitch, copied from tools/collision_overlay (HOOK_SITES.md section 6) by tools/addrgen.py-era script; the replay parity test compares against the overlay module itself",
+        "_comment": "Caller classification for hud_glitch, from core/evidence/warp_hud/HOOK_SITES.md section 6",
         "special": {
           "tracetofloor": "0x492da6",
           "groundheight": "0x48ffc6",
