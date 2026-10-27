@@ -488,7 +488,7 @@
           },
           "ghidra": "String::FreeRep 0x004011C0 (ExecLine release path 0x00470FA4)",
           "note": "thiscall(ECX=&slot); frees the rep after the caller dropped refcount to <= 0"
-        },
+        },
         "str.empty_rep": {
           "module": "exe",
           "rva": "0x101908",
@@ -1083,7 +1083,7 @@
           },
           "ghidra": "WinMain 0x0042C800: 0x0042CC5C mov al,[ImADeveloper]; test; 0x0042CC63 jne 0x0042CD63 skips the block that plays Data\\\\Movies\\\\ActiValue.avi (0x004DFADC) and Data\\\\Movies\\\\Mekada.avi (0x004DFAC4) (capstone disassembly 2026-10-21)",
           "note": "6-byte jne rel32 -> nop; jmp rel32 when fd_skip_intro is 1 (DllMain)"
-        },
+        },
         "glitch.entry": {
           "module": "genesis",
           "kind": "code",
@@ -1398,7 +1398,7 @@
           },
           "ghidra": "Genesis.dll export @geEngine_DrawBitmap@20 (RVA 0x24230); fastcall: ECX=engine, EDX=bitmap; stack (GE_Rect* {Left,Right,Top,Bottom} or NULL, x, y); RET 0xC",
           "note": "hud_glitch box bitmap (item 11d)"
-        },
+        },
         "genesis.flush_pipeline": {
           "module": "genesis",
           "rva": "0x24A30",
@@ -1781,7 +1781,7 @@
           },
           "ghidra": "Genesis.dll export @geBitmap_Destroy@4 (RVA 0x1AF40); fastcall: ECX=geBitmap** (handle cleared); RET",
           "note": "hud_glitch box bitmap (item 11d)"
-        },
+        },
         "entity.f_forward": {
           "module": "field",
           "rva": "0x40",
