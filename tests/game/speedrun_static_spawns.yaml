@@ -1,0 +1,23 @@
+name: speedrun_static_spawns
+# Item 8: with fd_static_spawns 1 (default pins = spot 0 for every victim, the
+# same as FDNYDeterministic's skeleton ini), victim positions are identical
+# across three loads of Training and every victim is at its spot 0.
+pre_files:
+  - {src: tests/game/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
+  - {src: tests/game/data/fdcore_static_spawns.cfg, dst: FDNYCore.cfg}
+setup: load_training
+record: true
+# SpawnAtSpot has one owner, the entities service: its spot filter (speedrun) and its
+# victim observers (recorder, on the function's entry) run together here.
+steps:
+  - assert_log: {contains: "entities: victim-spot filter at"}
+  - assert_log: {contains: "speedrun: static spawns use the entities victim-spot filter"}
+  - assert_log: {contains: "module recorder: enabled"}
+  - assert_log: {contains: "pinned to spot 0"}
+  - run_setup: reload_training_3x
+  - assert_victims_equal: {runs: [run1, run2, run3], tolerance: 0.5}
+  - assert_victims_at_spot0: run1
+  - assert_victims_at_spot0: run3
+expect:
+  no_crash: true
+  log_errors: 0

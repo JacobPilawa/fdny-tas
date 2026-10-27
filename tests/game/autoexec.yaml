@@ -1,0 +1,19 @@
+name: autoexec
+# Item 5: autoexec.cfg in the game folder runs at startup (before any input),
+# including binds it defines.
+pre_files:
+  - {src: tests/game/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
+  - {src: null, dst: FDNYCore.cfg}
+  - {src: tests/game/data/autoexec_test.cfg, dst: autoexec.cfg}
+record: true
+steps:
+  - wait_s: 6
+  - assert_log: {contains: "config: startup (FDNYCore.cfg: none, autoexec.cfg: ran)"}
+  - assert_log: {contains: "console> autoexec-ran-777"}
+  - key: f6
+  - wait_s: 0.5
+  - assert_log_count: {contains: "console> autoexec-bind-ok", equals: 1}
+  - assert_screen_nonblack: menu
+expect:
+  no_crash: true
+  log_errors: 0

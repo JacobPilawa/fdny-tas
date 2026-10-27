@@ -1,0 +1,22 @@
+name: <name>
+# <What this proves, in one or two sentences: the behaviour and the threshold.
+#  Name it in the feature's "// Tests:" line.>
+# Steps available (tools/harness/fdh/runner.py): wait_s, key {key, hold}, console "<line>",
+# screenshot <name>, assert_log {contains}, assert_log_count, assert_mem {name,
+# equals, tolerance}, sample_pipe {cmd, as}, assert_pipe_stat {cmd, key, min|equals,
+# since}, assert_pipe_contains {cmd, contains|absent}, assert_file, assert_snapshot_matches,
+# run_setup. Setups: tools/harness/setups/*.yaml (load_training, ...).
+pre_files:
+  - {src: tests/game/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
+  - {src: null, dst: FDNYCore.cfg}          # start from defaults (or a tests/game/data/ cfg)
+setup: load_training
+record: true
+steps:
+  - assert_log: {contains: "module <name>: enabled"}
+  - console: "fd_<name> 1"
+  - wait_s: 2
+  - assert_log: {contains: "<name>: <expected log line>"}
+  - screenshot: <name>_on
+expect:
+  no_crash: true
+  log_errors: 0

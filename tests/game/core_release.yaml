@@ -1,0 +1,30 @@
+name: core_release
+# The Release build (what players install) loads, verifies the address table, starts every
+# module and reaches a level, with no ERROR lines. Every other test runs the Debug build
+# (it has the test pipe); this one has no pipe, so it checks the log, memory and the screen.
+# Added by the suite review (2026-10-24): nothing tested Release before it shipped.
+core: Release
+# fd_skip_intro must be in FDNYCore.cfg at launch (the core reads it in DllMain): own launch.
+own_session: true
+pre_files:
+  - {src: tests/game/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
+  # The harness's intro-skip switch is Debug-only; a Release player skips the movies with
+  # fd_skip_intro "1" in FDNYCore.cfg, so the test does too (they can stall on the VM).
+  - {src: tests/game/data/fdcore_skip_intro.cfg, dst: FDNYCore.cfg}
+setup: load_training
+record: true
+steps:
+  - assert_log: {contains: "(Release) exe="}
+  - assert_log: {contains: "address table: version retail-1.1 selected"}
+  - assert_log: {contains: "signatures: all OK"}
+  - assert_log_count: {contains: "[INFO] modules: ", equals: 1}
+  - assert_log: {contains: "module speedrun: enabled"}
+  - assert_log: {contains: "module recorder: enabled"}
+  - assert_log: {contains: "FDNYCore ready"}
+  - assert_log: {contains: "patches: intro movies skipped (fd_skip_intro)"}
+  - assert_mem: {name: game.map_name, equals: training}
+  - key: {key: w, hold: 1.0}
+  - assert_screen_nonblack: release_in_level
+expect:
+  no_crash: true
+  log_errors: 0

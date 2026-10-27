@@ -1,5 +1,5 @@
 {
-  "_comment": "FDNYCore address table: the ONLY place addresses live. Shared by the core (via a generated header, item 2) and core/harness. Keyed by exe+Genesis SHA-256. 'rva' is relative to 'module'; 'chain' = pointer offsets applied after reading the root (CE/LiveSplit style: read [base+rva], then for each offset but the last, read [p+off]; the last offset is added). 'deref_root': false = the root is a static struct, so the offsets are added without dereferencing. 'sig' = byte signature verified at startup (item 2); 'ghidra' = where it was confirmed.",
+  "_comment": "FDNYCore address table: the ONLY place addresses live. Shared by the core (via a generated header, item 2) and tools/harness. Keyed by exe+Genesis SHA-256. 'rva' is relative to 'module'; 'chain' = pointer offsets applied after reading the root (CE/LiveSplit style: read [base+rva], then for each offset but the last, read [p+off]; the last offset is added). 'deref_root': false = the root is a static struct, so the offsets are added without dereferencing. 'sig' = byte signature verified at startup (item 2); 'ghidra' = where it was confirmed.",
   "versions": {
     "retail-1.1": {
       "exe_sha256": "4b3b4dc1cc0b05bcb42c8e27ac6f6ca72fe5f7064ca8122fda7d41e7f6d2fc3e",
@@ -269,7 +269,7 @@
             "ref": "instruction at 0x004274c2 embeds 0x00503a78",
             "ghidra": "xref confirmed 2026-10-21: MOV EDX,[0x00503a78] in FUN_00427420 (Console::SetState region)"
           },
-          "ghidra": "g_everGame 0x00503A78 -> +0x30 player (collision overlay EG_PLAYER/OFF_POS; core/evidence/warp_hud/HOOK_SITES.md section 7)",
+          "ghidra": "g_everGame 0x00503A78 -> +0x30 player (collision overlay EG_PLAYER/OFF_POS; docs/evidence/warp_hud/HOOK_SITES.md section 7)",
           "note": "player world position X"
         },
         "player.pos_y": {
@@ -634,7 +634,7 @@
             "bytes": "8B 15 78 3A 50 00 8B 12 83 F8 02 0F",
             "ref": "instruction at 0x004274c2 embeds 0x00503a78"
           },
-          "ghidra": "root g_everGame 0x00503A78 (Ghidra); [EG+0x288]+0x8 = camera controller found by live pointer scan (harness/pointer_scan.py, 2026-10-21; same object also reachable as g_mainWindow+0x3A0->+0x8). Controller+0x5C = geCamera* (geCamera_Create result stored at 0x00491BE0, Ghidra); Genesis stores Fov at geCamera+0 (geCamera_SetAttributes 0x1000138D)",
+          "ghidra": "root g_everGame 0x00503A78 (Ghidra); [EG+0x288]+0x8 = camera controller found by live pointer scan (tools/harness/pointer_scan.py, 2026-10-21; same object also reachable as g_mainWindow+0x3A0->+0x8). Controller+0x5C = geCamera* (geCamera_Create result stored at 0x00491BE0, Ghidra); Genesis stores Fov at geCamera+0 (geCamera_SetAttributes 0x1000138D)",
           "note": "in-level player camera FOV as stored by Genesis = 2*tan(hfov/2). (A static GameSession+0x64 list walk was a dead end: that list is the entity list.)"
         },
         "patch.cursor_warp": {
@@ -757,7 +757,7 @@
             "bytes": "C7 06 90 10 4E 00 C7 07 88 10 4E 00",
             "ref": "instruction at 0x00441ca8 embeds 0x004e1090 (MOV [ESI],0x4e1090; MOV [EDI],0x4e1088)"
           },
-          "ghidra": "BoundsTriggerEnt::Construct 0x00441C60 installs it at [this+0] (0x00441CA8); the same ctor writes kind 8 unconditionally (0x00441D2F), so kind can't tell exits from other triggers. Live 2026-10-22: Training 25 / bank 14 entities with this vtable (core/evidence/trigger_boxes)",
+          "ghidra": "BoundsTriggerEnt::Construct 0x00441C60 installs it at [this+0] (0x00441CA8); the same ctor writes kind 8 unconditionally (0x00441D2F), so kind can't tell exits from other triggers. Live 2026-10-22: Training 25 / bank 14 entities with this vtable (docs/evidence/trigger_boxes)",
           "note": "RCS_BoundsTrigger instances are entities whose [entity+0] equals this address (triggers feature)"
         },
         "trigger.box": {
@@ -766,7 +766,7 @@
           "chain": [],
           "type": "f32",
           "sig": null,
-          "ghidra": "6 floats min xyz, max xyz: AABB overlap 0x004817A0 reads min +0/+4/+8, max +0xC/+0x10/+0x14; TestEntityOverlap 0x00440CE0 passes this+0xE4; filled by Spawn 0x00441040 from the model bounds (0x004818C0). World space (live alignment, core/evidence/trigger_boxes)",
+          "ghidra": "6 floats min xyz, max xyz: AABB overlap 0x004817A0 reads min +0/+4/+8, max +0xC/+0x10/+0x14; TestEntityOverlap 0x00440CE0 passes this+0xE4; filled by Spawn 0x00441040 from the model bounds (0x004818C0). World space (live alignment, docs/evidence/trigger_boxes)",
           "note": "trigger volume, world space (triggers feature)"
         },
         "trigger.userdata": {
@@ -1058,7 +1058,7 @@
           "chain": [],
           "type": "f32",
           "sig": null,
-          "ghidra": "FireRescueEnt world centre x,y,z: FireRescueEnt::Spawn/AdvanceSpread writes point + (0,4,0) here, TrySpawnSpreadFire writes the child's spawn point, and the touch callback 0x004483A0 (queues msg 0x7531 = fire damage) tests the toucher against it. Entity +0x4C reads (0,0,0) for fires (verified live on bank, core/evidence/fire_juggling/run3.log)",
+          "ghidra": "FireRescueEnt world centre x,y,z: FireRescueEnt::Spawn/AdvanceSpread writes point + (0,4,0) here, TrySpawnSpreadFire writes the child's spawn point, and the touch callback 0x004483A0 (queues msg 0x7531 = fire damage) tests the toucher against it. Entity +0x4C reads (0,0,0) for fires (verified live on bank, docs/evidence/fire_juggling/README.md, run 3)",
           "note": "x,y,z; fd_juggle's Debug test hook stands the player here"
         },
         "fire.intensity": {
@@ -1095,7 +1095,7 @@
             "bytes": "83 EC 24 8B 4C 24 28 8B 51 18 8B 44 24 3C 81 C2",
             "ref": "first 16 bytes of the function at 0x00438c10"
           },
-          "ghidra": "geWorld_Collision body entry (83EC24 8B4C2428, 7 bytes; resume +7); core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "geWorld_Collision body entry (83EC24 8B4C2428, 7 bytes; resume +7); docs/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "records caller stack + impact slot before the call"
         },
         "glitch.exit_box": {
@@ -1109,7 +1109,7 @@
             "bytes": "5E 83 C4 24 C3 A1 C4 2E 36 10 8B 54 24 54 52 8B",
             "ref": "first 16 bytes of the function at 0x00438d0a"
           },
-          "ghidra": "geWorld_Collision exit (box hit): 5E 83C424 C3; core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "geWorld_Collision exit (box hit): 5E 83C424 C3; docs/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "records result, Col impact/plane, global plane, fresh count"
         },
         "glitch.exit_ray": {
@@ -1123,7 +1123,7 @@
             "bytes": "5E 83 C4 24 C3 5F 33 C0 5E 83 C4 24 C3 90 90 90",
             "ref": "first 16 bytes of the function at 0x00438db6"
           },
-          "ghidra": "geWorld_Collision exit (ray hit): 5E 83C424 C3; core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "geWorld_Collision exit (ray hit): 5E 83C424 C3; docs/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "same as exit_box"
         },
         "glitch.exit_miss": {
@@ -1137,7 +1137,7 @@
             "bytes": "5E 83 C4 24 C3 90 90 90 90 90 90 90 90 90 90 90",
             "ref": "first 16 bytes of the function at 0x00438dbe"
           },
-          "ghidra": "geWorld_Collision exit (miss): 5E 83C424 C3; core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "geWorld_Collision exit (miss): 5E 83C424 C3; docs/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "same as exit_box"
         },
         "glitch.boxw": {
@@ -1151,7 +1151,7 @@
             "bytes": "5B 83 C4 2C C3 DD D8 5F 5E B8 01 00 00 00 5D A3",
             "ref": "first 16 bytes of the function at 0x004371c2"
           },
-          "ghidra": "box-clip fresh-write epilogue: 5B 83C42C C3; core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "box-clip fresh-write epilogue: 5B 83C42C C3; docs/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "counts fresh impact writes"
         },
         "glitch.rayw": {
@@ -1165,7 +1165,7 @@
             "bytes": "C7 05 44 2F 36 10 01 00 00 00 5D 5B 5F B8 01 00",
             "ref": "first 16 bytes of the function at 0x00436633"
           },
-          "ghidra": "ray-clip write: C705 <latch 0x10362F44> 01000000 (10 bytes; absolute operand is relocated); resume +10; core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "ray-clip write: C705 <latch 0x10362F44> 01000000 (10 bytes; absolute operand is relocated); resume +10; docs/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "counts fresh writes; outside a call = engine lighting ray record"
         },
         "glitch.commit": {
@@ -1179,7 +1179,7 @@
             "bytes": "8D 46 4C 8B C8 89 11 8B 54 24 14 89 51 04 8B 54",
             "ref": "first 16 bytes of the function at 0x0043f9c7"
           },
-          "ghidra": "BModelEnt::Think step-down commit 0x0043F9C7: 8D464C 8BC8 8911 (7 bytes; resume +7); ESI = entity; core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "BModelEnt::Think step-down commit 0x0043F9C7: 8D464C 8BC8 8911 (7 bytes; resume +7); ESI = entity; docs/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "records the warp commit (impact, normal, old position)"
         },
         "glitch.tick": {
@@ -1193,7 +1193,7 @@
             "bytes": "A1 78 3A 50 00 8B 48 04 6A 00 E8 52 97 06 00 83",
             "ref": "first 16 bytes of the function at 0x0042af0f"
           },
-          "ghidra": "GameSession::RunFrame 0x0042AF0F: A1 783A5000 (mov eax,[g_everGame]; 5 bytes; resume +5); core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "GameSession::RunFrame 0x0042AF0F: A1 783A5000 (mov eax,[g_everGame]; 5 bytes; resume +5); docs/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "per-simulated-frame tick counter"
         },
         "genesis.impact": {
@@ -1206,7 +1206,7 @@
             "bytes": "A3 9C 2E 36 10 8B 44 24 2C 89 0D",
             "ref": "Genesis instruction at 0x10036603 embeds 0x10362e9c"
           },
-          "ghidra": "Genesis global last-collision impact point x,y,z (G_IMPACT 0x10362E9C); core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "Genesis global last-collision impact point x,y,z (G_IMPACT 0x10362E9C); docs/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "the stale-hit slot"
         },
         "genesis.plane": {
@@ -1219,7 +1219,7 @@
             "bytes": "BF 48 2F 36 10 F3 A5 8B 4C 24 18",
             "ref": "Genesis instruction at 0x100365f8 embeds 0x10362f48"
           },
-          "ghidra": "Genesis global last-collision plane normal x,y,z + dist (G_PLANE 0x10362F48); core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "Genesis global last-collision plane normal x,y,z + dist (G_PLANE 0x10362F48); docs/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "plane the warp gate sees"
         },
         "genesis.planes_ptr": {
@@ -1232,7 +1232,7 @@
             "bytes": "A1 F8 2E 36 10 8D 34 88 8B 42 04",
             "ref": "Genesis instruction at 0x100353d5 embeds 0x10362ef8"
           },
-          "ghidra": "Genesis pointer to the loaded world plane array (G_PLANES_PTR 0x10362EF8); MapFinder compares its first 16 KB with each .bsp; core/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
+          "ghidra": "Genesis pointer to the loaded world plane array (G_PLANES_PTR 0x10362EF8); MapFinder compares its first 16 KB with each .bsp; docs/evidence/warp_hud/HOOK_SITES.md ( Unicorn-emulation-verified against the real Genesis.dll)",
           "note": "map recognition"
         },
         "player.object": {
@@ -1355,7 +1355,7 @@
           "chain": [],
           "type": "f32",
           "sig": null,
-          "ghidra": "PlayerRescueEnt last safe spot x,y,z: PlayerRescueEnt::Think 0x00452570 copies +0x4C here each frame only when the flinch flags are clear, burn +0x3538 < 0.1, on-ground +0x12C, O2 +0x3450 > 0.5 and state != 6. Verb_Reset 0x0044FF10 copies it into the position before DropAtPlayer 0x0045C1A0 (a carried survivor lands there, -30 X, floored); ResetLocomotionState 0x0044CD10 mirrors the respawn checkpoint +0x534 into it. Verified live on bank 2026-10-22 (KB fire-juggling; core/evidence/fire_juggling/round2_frame_order.txt)",
+          "ghidra": "PlayerRescueEnt last safe spot x,y,z: PlayerRescueEnt::Think 0x00452570 copies +0x4C here each frame only when the flinch flags are clear, burn +0x3538 < 0.1, on-ground +0x12C, O2 +0x3450 > 0.5 and state != 6. Verb_Reset 0x0044FF10 copies it into the position before DropAtPlayer 0x0045C1A0 (a carried survivor lands there, -30 X, floored); ResetLocomotionState 0x0044CD10 mirrors the respawn checkpoint +0x534 into it. Verified live on bank 2026-10-22 (KB fire-juggling; docs/evidence/fire_juggling/README.md, round 2)",
           "note": "x,y,z; the fire-juggling landing point is (x - 30, y, z)"
         },
         "player.f_burn": {
@@ -1364,7 +1364,7 @@
           "chain": [],
           "type": "f32",
           "sig": null,
-          "ghidra": "PlayerRescueEnt burn meter: TakeFireDamage 0x00451640 adds dt*1.2*severity, > 1.0 -> PassOut(1); Think cools it by 0.1*dt on frames with no flinch flag; ResetLocomotionState zeroes it. Measured live: cools 0.1/s (core/evidence/fire_juggling/run3.log, phase C)",
+          "ghidra": "PlayerRescueEnt burn meter: TakeFireDamage 0x00451640 adds dt*1.2*severity, > 1.0 -> PassOut(1); Think cools it by 0.1*dt on frames with no flinch flag; ResetLocomotionState zeroes it. Measured live: cools 0.1/s (docs/evidence/fire_juggling/README.md, run 3, phase C)",
           "note": "0..1+; the safe spot is frozen while >= 0.1"
         },
         "player.f_flinch": {
@@ -1373,7 +1373,7 @@
           "chain": [],
           "type": "u32",
           "sig": null,
-          "ghidra": "PlayerRescueEnt four fire-flinch bytes +0x353C..+0x353F (SetFireFlinchDir 0x0044BB00, one per 90-degree quadrant), set by TakeFireDamage after Think and cleared by Think at the end of its frame: nonzero at frame end = fire contact this frame (round2_frame_order.txt)",
+          "ghidra": "PlayerRescueEnt four fire-flinch bytes +0x353C..+0x353F (SetFireFlinchDir 0x0044BB00, one per 90-degree quadrant), set by TakeFireDamage after Think and cleared by Think at the end of its frame: nonzero at frame end = fire contact this frame (docs/evidence/fire_juggling/README.md, round 2)",
           "note": "read as one u32; nonzero = burnt this frame"
         },
         "player.f_o2": {
@@ -1425,7 +1425,7 @@
             "ref": "first 16 bytes of Genesis.dll export @geEngine_RenderPoly@20"
           },
           "ghidra": "capstone 2026-10-21: fastcall ECX=engine (unused), EDX=GE_TLVertex* {x,y,z,u,v,r,g,b,a} floats; stack (NumPoints, geBitmap* or NULL, Flags); RET 0xC. Flags bit 0 = straight to the driver (vtbl +0x84 textured / +0x7C gouraud), else queued. Textured path ORs 0xC (no z-mask/z-write)",
-          "note": "gfx alpha surfaces / solid quads (core/evidence/alpha_spike)"
+          "note": "gfx alpha surfaces / solid quads (docs/evidence/alpha_spike)"
         },
         "genesis.render_world": {
           "module": "genesis",
@@ -1517,7 +1517,7 @@
             "bytes": "56 8B F1 8B 46 08 8D 4E 08 6A 00 6A 00 FF 10 8B",
             "ref": "first 16 bytes of the function at 0x00429520"
           },
-          "ghidra": "GameSession::TickSubsystems 0x00429520 (thiscall ECX=session, no stack args), called once per frame from GameSession::RunFrame at 0x0042AF0A (returns to 0x0042AF0F), before ROCRender::RenderFrame at 0x0042AF19. Runs the entity lists (+0x08/+0x50/+0x98 sweep 0x0049C0E0, +0xE0), the spawn/callback queues and ROCSoundSystem::Frame. Skipping it froze player, victims and mission timer while rendering went on (core/evidence/freecam, probe runs p2-p5)",
+          "ghidra": "GameSession::TickSubsystems 0x00429520 (thiscall ECX=session, no stack args), called once per frame from GameSession::RunFrame at 0x0042AF0A (returns to 0x0042AF0F), before ROCRender::RenderFrame at 0x0042AF19. Runs the entity lists (+0x08/+0x50/+0x98 sweep 0x0049C0E0, +0xE0), the spawn/callback queues and ROCSoundSystem::Frame. Skipping it froze player, victims and mission timer while rendering went on (docs/evidence/freecam, probe runs p2-p5)",
           "note": "pause service: one owner of this hook; skipped while paused"
         },
         "session.on_key": {
@@ -1545,7 +1545,7 @@
             "bytes": "56 8B F1 8A 46 1C 84 C0 75 0D C6 46 1C 01 FF 15",
             "ref": "first 16 bytes of the function at 0x0042bf20"
           },
-          "ghidra": "GameClock::Pause 0x0042BF20: this = subtimer in ECX, no stack args, plain RET; sets +0x1C paused and +0x0C = timeGetTime. Called by MainWindow::RunMessageLoop 0x004994F8 on focus loss with ECX = 0x502AD8 if [0x502AF8] else 0x502AB8. While paused ComputeFrameDelta 0x0042BF70 skips its body: elapsed stops, dt keeps its last value, no 60 FPS Sleep cap (live: core/evidence/freecam p5, clock frozen at 81739 ms)",
+          "ghidra": "GameClock::Pause 0x0042BF20: this = subtimer in ECX, no stack args, plain RET; sets +0x1C paused and +0x0C = timeGetTime. Called by MainWindow::RunMessageLoop 0x004994F8 on focus loss with ECX = 0x502AD8 if [0x502AF8] else 0x502AB8. While paused ComputeFrameDelta 0x0042BF70 skips its body: elapsed stops, dt keeps its last value, no 60 FPS Sleep cap (live: docs/evidence/freecam p5, clock frozen at 81739 ms)",
           "note": "pause service; call on the active subtimer (clock.selector)"
         },
         "clock.resume": {
@@ -1559,7 +1559,7 @@
             "bytes": "56 8B F1 8A 46 1C 84 C0 74 17 C6 46 1C 00 FF 15",
             "ref": "first 16 bytes of the function at 0x0042bf40"
           },
-          "ghidra": "GameClock::Resume 0x0042BF40: this = subtimer in ECX, plain RET; clears +0x1C and adds the paused span to the base +0x08. Caller 0x004995D3 (focus regained), same ECX choice as Pause. Live: first dt after resume 0.017 (core/evidence/freecam p5)",
+          "ghidra": "GameClock::Resume 0x0042BF40: this = subtimer in ECX, plain RET; clears +0x1C and adds the paused span to the base +0x08. Caller 0x004995D3 (focus regained), same ECX choice as Pause. Live: first dt after resume 0.017 (docs/evidence/freecam p5)",
           "note": "pause service"
         },
         "clock.game_timer": {
@@ -1626,7 +1626,7 @@
             "bytes": "8B 15 78 3A 50 00 8B 12 83 F8 02 0F",
             "ref": "instruction at 0x004274c2 embeds 0x00503a78"
           },
-          "ghidra": "GameControls+0x18 (DirectInputProvider+8): DrainMouseBuffer 0x00437AB0 zeroes it, then sums DIMOFS_X deltas each poll (GameControls::PollFrame 0x00439330, before the simulation; not gated by +0x330). GetAxis 0x00437620 axis 0. Live: +30 per frame for a 300 px move while paused (core/evidence/freecam p2)",
+          "ghidra": "GameControls+0x18 (DirectInputProvider+8): DrainMouseBuffer 0x00437AB0 zeroes it, then sums DIMOFS_X deltas each poll (GameControls::PollFrame 0x00439330, before the simulation; not gated by +0x330). GetAxis 0x00437620 axis 0. Live: +30 per frame for a 300 px move while paused (docs/evidence/freecam p2)",
           "note": "free camera yaw: this frame's mouse X sum"
         },
         "controls.mouse_y": {
@@ -1639,7 +1639,7 @@
             "bytes": "8B 15 78 3A 50 00 8B 12 83 F8 02 0F",
             "ref": "instruction at 0x004274c2 embeds 0x00503a78"
           },
-          "ghidra": "GameControls+0x1C: DIMOFS_Y sum per poll (as controls.mouse_x). Live: +10 per frame for a 100 px move (core/evidence/freecam p2)",
+          "ghidra": "GameControls+0x1C: DIMOFS_Y sum per poll (as controls.mouse_x). Live: +10 per frame for a 100 px move (docs/evidence/freecam p2)",
           "note": "free camera pitch: this frame's mouse Y sum"
         },
         "genesis.camera_set_world_xform": {
@@ -1653,7 +1653,7 @@
             "bytes": "53 55 8B E9 56 8B DA 57 8D BD D0 00 00 00 B9 0C",
             "ref": "first 16 bytes of Genesis.dll export @geCamera_SetWorldSpaceXForm@8"
           },
-          "ghidra": "fastcall ECX=camera, EDX=const geXForm3d* (9 floats AX..CZ + translation); copies it to camera+0xD0 and derives the camera-space transform. Exe: called once per frame from 0x0049217E (sim side; none while paused). Live: set at RenderFrame entry it is overwritten before the world render; set inside geEngine_RenderWorld on the passed camera it shows (core/evidence/freecam p2-p5)",
+          "ghidra": "fastcall ECX=camera, EDX=const geXForm3d* (9 floats AX..CZ + translation); copies it to camera+0xD0 and derives the camera-space transform. Exe: called once per frame from 0x0049217E (sim side; none while paused). Live: set at RenderFrame entry it is overwritten before the world render; set inside geEngine_RenderWorld on the passed camera it shows (docs/evidence/freecam p2-p5)",
           "note": "camera service: free-camera override, applied from gfx's RenderWorld detour"
         },
         "genesis.camera_get_world_xform": {
@@ -1902,7 +1902,7 @@
             "bytes": "6A FF 68 AB F0 4C 00 64 A1 00 00 00 00 50 64 89",
             "ref": "BoundsTrigger factory and spawn-queue disassembly"
           },
-          "ghidra": "core/evidence/checkpoints/README.md",
+          "ghidra": "docs/evidence/checkpoints/README.md",
           "note": "entities: allocate native BoundsTrigger from a class descriptor and spawn request"
         },
         "entity.admit": {
@@ -1915,7 +1915,7 @@
             "bytes": "56 8B 74 24 08 8B 06 57 8B F9 8B CE FF 50 1C 85",
             "ref": "BoundsTrigger factory and spawn-queue disassembly"
           },
-          "ghidra": "core/evidence/checkpoints/README.md",
+          "ghidra": "docs/evidence/checkpoints/README.md",
           "note": "entities: register a runtime trigger with the GameSession entity manager"
         },
         "entity.trigger_initialize": {
@@ -1928,7 +1928,7 @@
             "bytes": "6A FF 68 98 EF 4C 00 64 A1 00 00 00 00 50 64 89",
             "ref": "BoundsTrigger factory and spawn-queue disassembly"
           },
-          "ghidra": "core/evidence/checkpoints/README.md",
+          "ghidra": "docs/evidence/checkpoints/README.md",
           "note": "entities: initialize trigger model, bounds and ScriptActor bindings"
         },
         "game.session": {
@@ -1951,7 +1951,7 @@
           "chain": [],
           "type": "ptr",
           "sig": null,
-          "ghidra": "core/evidence/checkpoints/README.md",
+          "ghidra": "docs/evidence/checkpoints/README.md",
           "note": "Native entity class descriptor used for runtime trigger construction"
         },
         "string.chars": {
@@ -1960,7 +1960,7 @@
           "chain": [],
           "type": "ptr",
           "sig": null,
-          "ghidra": "core/evidence/checkpoints/README.md",
+          "ghidra": "docs/evidence/checkpoints/README.md",
           "note": "Character buffer in a refcounted game String; native contact event decoding"
         },
         "script.fire_event": {
@@ -1995,7 +1995,7 @@
             "bytes": "6A FF 68 D8 0A 4D 00 64 A1 00 00 00 00 50 64 89",
             "ref": "Native hint constructor at 0x004564c0"
           },
-          "ghidra": "core/evidence/checkpoints/README.md",
+          "ghidra": "docs/evidence/checkpoints/README.md",
           "note": "textdraw native hints: original bitmap font and four-second priority"
         },
         "hint.text_widget": {
@@ -2008,7 +2008,7 @@
             "bytes": "6A FF 68 9A 3D 4D 00 64 A1 00 00 00 00 50 64 89",
             "ref": "Native text-widget constructor at 0x0048c780"
           },
-          "ghidra": "core/evidence/checkpoints/README.md",
+          "ghidra": "docs/evidence/checkpoints/README.md",
           "note": "textdraw: offset only checkpoint hint rectangle, preserving native font"
         },
         "player.hint": {
@@ -2022,7 +2022,7 @@
         }
       },
       "classify": {
-        "_comment": "Caller classification for hud_glitch, from core/evidence/warp_hud/HOOK_SITES.md section 6",
+        "_comment": "Caller classification for hud_glitch, from docs/evidence/warp_hud/HOOK_SITES.md section 6",
         "special": {
           "tracetofloor": "0x492da6",
           "groundheight": "0x48ffc6",
