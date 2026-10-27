@@ -488,35 +488,7 @@
           },
           "ghidra": "String::FreeRep 0x004011C0 (ExecLine release path 0x00470FA4)",
           "note": "thiscall(ECX=&slot); frees the rep after the caller dropped refcount to <= 0"
-        },
-        "con.ctor": {
-          "module": "exe",
-          "kind": "code",
-          "rva": "0x277D0",
-          "chain": [],
-          "type": "ptr",
-          "sig": {
-            "rva": "0x277D0",
-            "bytes": "6A FF 68 60 D4 4C 00 64 A1 00 00 00 00 50 64 89",
-            "ref": "first 16 bytes of the function at 0x004277d0"
-          },
-          "ghidra": "console ctor 0x004277D0 (Ghidra label PlayerRescueEnt::Init is wrong); called from roc_CreateEngineSubsystems 0x00499394",
-          "note": "thiscall(ECX=new 0x4A0-byte object) void(int w=640, int h=460); writes g_console 0x00502A90; RET 8"
-        },
-        "crt.operator_new": {
-          "module": "exe",
-          "kind": "code",
-          "rva": "0xA5A84",
-          "chain": [],
-          "type": "ptr",
-          "sig": {
-            "rva": "0xA5A84",
-            "bytes": "56 8B 74 24 08 EB 10 56 E8 E1 56 01 00 85 C0 59",
-            "ref": "first 16 bytes of the function at 0x004a5a84"
-          },
-          "ghidra": "operator new 0x004A5A84 (roc_CreateEngineSubsystems 0x00499372)",
-          "note": "cdecl void*(size_t)"
-        },
+        },
         "str.empty_rep": {
           "module": "exe",
           "rva": "0x101908",
@@ -1111,21 +1083,7 @@
           },
           "ghidra": "WinMain 0x0042C800: 0x0042CC5C mov al,[ImADeveloper]; test; 0x0042CC63 jne 0x0042CD63 skips the block that plays Data\\\\Movies\\\\ActiValue.avi (0x004DFADC) and Data\\\\Movies\\\\Mekada.avi (0x004DFAC4) (capstone disassembly 2026-10-21)",
           "note": "6-byte jne rel32 -> nop; jmp rel32 when fd_skip_intro is 1 (DllMain)"
-        },
-        "genesis.printf": {
-          "module": "genesis",
-          "rva": "0x24B60",
-          "export": "geEngine_Printf",
-          "chain": [],
-          "type": "ptr",
-          "sig": {
-            "rva": "0x24B60",
-            "bytes": "81 EC 04 04 00 00 A1 F0 A8 0A 10 33 84 24 04 04",
-            "ref": "first 16 bytes of Genesis.dll export geEngine_Printf"
-          },
-          "ghidra": "Genesis.dll export geEngine_Printf (ordinal 451, RVA 0x24B60); imported by the exe; Genesis3D 1.1: geBoolean geEngine_Printf(geEngine*, int32 x, int32 y, const char* fmt, ...) cdecl (bare export name)",
-          "note": "in-frame debug text (engine font); used by the HUDs"
-        },
+        },
         "glitch.entry": {
           "module": "genesis",
           "kind": "code",
@@ -1440,34 +1398,7 @@
           },
           "ghidra": "Genesis.dll export @geEngine_DrawBitmap@20 (RVA 0x24230); fastcall: ECX=engine, EDX=bitmap; stack (GE_Rect* {Left,Right,Top,Bottom} or NULL, x, y); RET 0xC",
           "note": "hud_glitch box bitmap (item 11d)"
-        },
-        "engine.f_font_bitmap": {
-          "module": "field",
-          "rva": "0x336B0",
-          "chain": [],
-          "type": "u32",
-          "sig": null,
-          "ghidra": "geEngine: the font geBitmap* the Printf drawer (0x10025C60) blits glyphs from (Haiku, hand-decoded)",
-          "note": "offset into the geEngine*"
-        },
-        "engine.f_font_glyphs": {
-          "module": "field",
-          "rva": "0x336B4",
-          "chain": [],
-          "type": "u32",
-          "sig": null,
-          "ghidra": "geEngine: 256 glyph dwords (hi16 / lo16 = glyph cell origin) indexed by character",
-          "note": "offset into the geEngine*"
-        },
-        "engine.f_printf_count": {
-          "module": "field",
-          "rva": "0x34874",
-          "chain": [],
-          "type": "u32",
-          "sig": null,
-          "ghidra": "geEngine: queued geEngine_Printf strings this frame (max 40, 80 chars each; entries at +0x33AB4, 0x58 bytes)",
-          "note": "offset into the geEngine*"
-        },
+        },
         "genesis.flush_pipeline": {
           "module": "genesis",
           "rva": "0x24A30",
@@ -1850,21 +1781,7 @@
           },
           "ghidra": "Genesis.dll export @geBitmap_Destroy@4 (RVA 0x1AF40); fastcall: ECX=geBitmap** (handle cleared); RET",
           "note": "hud_glitch box bitmap (item 11d)"
-        },
-        "genesis.bitmap_set_color_key": {
-          "module": "genesis",
-          "rva": "0x1B770",
-          "export": "@geBitmap_SetColorKey@16",
-          "chain": [],
-          "type": "ptr",
-          "sig": {
-            "rva": "0x1B770",
-            "bytes": "53 56 8B F1 8B 46 70 85 C0 57 8B DA 0F 85 E6 00",
-            "ref": "first 16 bytes of Genesis.dll export @geBitmap_SetColorKey@16"
-          },
-          "ghidra": "Genesis.dll export @geBitmap_SetColorKey@16 (RVA 0x1B770); fastcall: ECX=bitmap, EDX=HaveColorKey; stack (ColorKey in the bitmap's format, Smart); D3DDrv's decal Blt uses DDBLT_KEYSRC, so a bitmap without a colour key never shows",
-          "note": "hud_glitch box bitmap (item 11d)"
-        },
+        },
         "entity.f_forward": {
           "module": "field",
           "rva": "0x40",

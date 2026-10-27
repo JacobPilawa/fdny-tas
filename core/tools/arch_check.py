@@ -21,7 +21,6 @@ DRAW_IDS = re.compile(r"Id::genesis_(draw_bitmap|render_poly|bitmap_\w+|add_bitm
                       r"world_add_bitmap|world_remove_bitmap|flush_pipeline|printf)\b")
 DRAW_ALLOWED = {
     "gfx.cpp": "the drawing service itself",
-    "bench.cpp": "Debug benchmark of the raw engine paths (in-frame text investigation)",
 }
 # R4: raw game addresses (8-digit hex in the exe or Genesis.dll image ranges).
 ADDR = re.compile(r"\b0[xX]([0-9A-Fa-f]{8})\b")

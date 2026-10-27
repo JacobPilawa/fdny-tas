@@ -1,9 +1,0 @@
-name: explore_fov_probe_f10
-pre_files:
-  - {src: tests/data/fovfix_640x480_f10.ini, dst: FDNYFirefighterAmericanHeroFOVFix.ini}
-setup: load_training
-record: false
-steps:
-  - wait_s: 2
-expect:
-  no_crash: true

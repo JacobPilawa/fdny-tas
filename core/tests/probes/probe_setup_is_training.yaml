@@ -1,9 +1,0 @@
-name: probe_setup_is_training
-# Not in the suite: the harness setup load_training must enter Training (career slot
-# "Hotrod Stein" restored from core/backup/Saves after the autosplitter probes advanced it).
-setup: load_training
-record: false
-steps:
-  - assert_log: {contains: "event: level_load 'training'"}
-expect:
-  no_crash: true

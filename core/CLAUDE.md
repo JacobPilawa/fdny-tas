@@ -115,4 +115,4 @@ Every drawing belongs to a gfx layer, run in this fixed order each frame (D40, `
 - The watermark stays opaque (decal path).
 - The practice-only list is the agent's default; the owner still has to confirm it.
 - No extra log files for overlay output: it goes to `FDNYCore.log` (`glitch|` lines).
-- Spikes and probes never modify working code: standalone probes in `probes/`, tests in `tests/probes/` (outside the suite).
+- Spikes and probes never modify working code: standalone probes in `probes/`, tests in `tests/probes/` (outside the suite). Delete them once the result is in `evidence/` (D22).
