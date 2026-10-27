@@ -300,6 +300,9 @@ WidgetFn g_widgetOriginal;
 bool g_hintReady, g_ownHint, g_priority;
 void* g_hintOwner;
 uint32_t g_hintStart, g_hintDuration;
+#ifdef FDCORE_DEBUG
+unsigned long g_hintPassed, g_hintSuppressed;  // the game's own hints, for tests/checkpoints.yaml
+#endif
 bool Tick(uint32_t* tick) {
     uintptr_t slot = 0;
     return addr::Resolve(addr::Id::clock_elapsed_ms, &slot) && addr::SafeRead(slot, tick, 4);
@@ -314,9 +317,15 @@ uintptr_t __fastcall Hint(void* owner, void*, float seconds, uint32_t text) {
     const bool suppress = g_priority && owner == g_hintOwner && Tick(&now) && now-g_hintStart < g_hintDuration;
     SetLastError(error);
     if (suppress) {
+#ifdef FDCORE_DEBUG
+        ++g_hintSuppressed;
+#endif
         // The original consumes this by-value String, even when no widget is drawn.
         console::ReleaseGameString(text); SetLastError(error); return 0;
     }
+#ifdef FDCORE_DEBUG
+    ++g_hintPassed;
+#endif
     if (owner == g_hintOwner) g_priority = false;
     return g_hintOriginal(owner, seconds, text);
 }
@@ -337,7 +346,15 @@ bool InitGameHints() {
     // If optional positioning is unavailable, preserve the original centered hint.
     if (addr::Usable(addr::Id::hint_text_widget))
         hooks::Create("game_hints", addr::Id::hint_text_widget, reinterpret_cast<void*>(Widget), reinterpret_cast<void**>(&g_widgetOriginal));
-    g_hintReady = hooks::SetEnabled("game_hints", true); return g_hintReady;
+    g_hintReady = hooks::SetEnabled("game_hints", true);
+#ifdef FDCORE_DEBUG
+    // Test hook: `game_hints`: the game's hints shown and held back by a GameHint priority window.
+    if (g_hintReady)
+        testpipe::Register("game_hints", [](const char*, char* resp, int) {
+            wsprintfA(resp, "passed=%lu suppressed=%lu", g_hintPassed, g_hintSuppressed);
+        });
+#endif
+    return g_hintReady;
 }
 bool GameHint(const char* text, uint32_t milliseconds) {
     void* owner = HintOwner(); uint32_t now = 0;
