@@ -214,6 +214,7 @@ later session might "simplify" away; change one only with the owner's approval
 
 ## Process
 
+- **D52 No parity test against the Python collision overlay** (owner 2026-10-27: "we no longer need to test parity against the python script if the warp overlay is now superseded by the fdny native implementation"). The warp HUD is the reference now. Removed: `tools/collision_overlay/`, the Debug `.glitchrec` / `.glitchbox` dumps and the `glitch_replay` pipe, `glitch_replay.cpp`, the harness's replay/fuzz/compare scripts, and the tests `glitch_parity_log`, `ondemand/glitch_parity_fuzz` and `unit/test_glitch_parity.py`. Supersedes the parity parts of D38 and D47. The warp HUD keeps its game tests (`glitch_records`, `glitch_box_cost`, `text_panels`, `keys_default`).
 - **D51 Choosing replays without file names** (owner 2026-10-26: "i like 1-4"; ghost "Cvar picks"; picker "No default key"; tab completion set aside).
   - **Why:** recorder file names (`<map>_<UTC start>_pid<n>_run<n>.jsonl`) are long, and remembering them would leave the feature unused (owner).
   - **One folder:** the recorder and the replay both resolve `fd_record_directory` with `console::GamePath` (absolute, or under the game folder; default `Recordings`). They used to have two copies, which differed on a leading `/`.

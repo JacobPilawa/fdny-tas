@@ -1,6 +1,5 @@
 // The core services the code under test calls, for the host program. log keeps every
-// line in memory (unit::LogContains) and, when a file is open (glitch-replay), writes it
-// in FDNYCore.log's format so harness/glitch_parity.py reads it unchanged.
+// line in memory (unit::LogContains).
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
@@ -11,11 +10,9 @@
 namespace {
 char g_lines[1 << 20];
 int g_len = 0;
-FILE* g_file = nullptr;
 
-// "<tag><text>" as one line: the file gets it whole, memory keeps what fits.
+// "<tag><text>" as one line; memory keeps what fits.
 void Add(const char* level, const char* tag, const char* text) {
-    if (g_file) fprintf(g_file, "[0000-00-00 00:00:00.000] [%s] %s%s\n", level, tag, text);
     char line[2048];
     int n = snprintf(line, sizeof(line), "[%s] %s%s\n", level, tag, text);
     if (n < 0) return;
@@ -41,18 +38,6 @@ void ClearLog() { g_len = 0, g_lines[0] = 0; }
 } // namespace unit
 
 namespace fdcore::log {
-bool Open(const char* path) {
-    g_file = fopen(path, "wb");
-    return g_file != nullptr;
-}
-bool OpenAppend(const char* path) {
-    g_file = fopen(path, "ab");
-    return g_file != nullptr;
-}
-void Close() {
-    if (g_file) fclose(g_file);
-    g_file = nullptr;
-}
 void Info(const char* fmt, ...) {
     va_list ap;
     va_start(ap, fmt);

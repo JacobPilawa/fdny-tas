@@ -1977,7 +1977,7 @@
         }
       },
       "classify": {
-        "_comment": "Caller classification for hud_glitch, copied from tools/collision_overlay (HOOK_SITES.md section 6) by tools/addrgen.py-era script; the replay parity test compares against the overlay module itself",
+        "_comment": "Caller classification for hud_glitch, copied from the Python collision overlay (its HOOK_SITES.md section 6, in git history)",
         "special": {
           "tracetofloor": "0x492da6",
           "groundheight": "0x48ffc6",

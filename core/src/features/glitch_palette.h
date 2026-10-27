@@ -1,4 +1,4 @@
-// The collision overlay's colours (tools/collision_overlay COLORS / SOURCE_COLORS /
+// The collision overlay's colours (the Python overlay's COLORS / SOURCE_COLORS /
 // PLAYER_COLORS), as a textdraw palette: a tag is the colour index, BG_WARP /
 // BG_FLASH are textdraw background slots 1 / 2 (both set = slot 3, drawn as flash).
 #pragma once
