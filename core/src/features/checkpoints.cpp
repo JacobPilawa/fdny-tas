@@ -566,8 +566,13 @@ const addr::Id kNeeds[] = {addr::Id::entity_trigger_factory, addr::Id::entity_ad
     addr::Id::clock_elapsed_ms, addr::Id::hint_show, addr::Id::str_from_cstr,
     addr::Id::str_free_rep, addr::Id::str_empty_rep};
 bool Init() {
-    if (!entities::ObserveNativeContacts(ContactEvent) || !entities::ObservePlayer(PlayerInitialized, nullptr)) return false;
-    if (!textdraw::InitGameHints()) return false;
+    if (!entities::ObserveNativeContacts(ContactEvent)) {
+        log::Warn("checkpoints: native contacts already observed by another module"); return false;
+    }
+    if (!entities::ObservePlayer(PlayerInitialized, nullptr)) {
+        log::Warn("checkpoints: player observers unavailable"); return false;
+    }
+    if (!textdraw::InitGameHints()) { log::Warn("checkpoints: native hint hook unavailable"); return false; }
     g_fdCheckpoints.onChange = OnTimestamps;
     cmd::RegisterCvar(&g_fdCheckpoints);
     cmd::RegisterCommand("fd_checkpoints_status", "show timestamp enable state and number of loaded native checkpoints", Status);

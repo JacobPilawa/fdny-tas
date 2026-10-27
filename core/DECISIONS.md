@@ -214,6 +214,16 @@ later session might "simplify" away; change one only with the owner's approval
 
 ## Process
 
+- **D53 Practice checkpoints use native triggers and hints** (Jacob Pilawa, PR #20). The entities service
+  owns BoundsTrigger creation/contact observation and retains definitions until
+  world teardown; one binding for an event nothing fires (core-generic, it names no feature)
+  enables native contact processing.
+  Textdraw uses the native bitmap font with upward positioning and four-second
+  priority. The existing free camera, input capture and gfx projection support
+  the editor. Drafts autosave to `Checkpoints/<mission>.txt`; restart applies them.
+  Player initialization starts timing; menu resume preserves it. Rejected: custom
+  overlap polling, replacing BSPs and custom hint surfaces. Evidence:
+  `evidence/checkpoints/README.md`.
 - **D52 No parity test against the Python collision overlay** (owner 2026-10-27: "we no longer need to test parity against the python script if the warp overlay is now superseded by the fdny native implementation"). The warp HUD is the reference now. Removed: the overlay (`tools/collision_overlay/`; its game research write-ups moved to `evidence/warp_hud/`), the Debug `.glitchrec` / `.glitchbox` dumps and the `glitch_replay` pipe, `glitch_replay.cpp`, the harness's replay/fuzz/compare scripts, and the tests `glitch_parity_log`, `ondemand/glitch_parity_fuzz` and `unit/test_glitch_parity.py`. Supersedes the parity parts of D38 and D47. The warp HUD keeps its game tests (`glitch_records`, `glitch_box_cost`, `text_panels`, `keys_default`).
 - **D51 Choosing replays without file names** (owner 2026-10-26: "i like 1-4"; ghost "Cvar picks"; picker "No default key"; tab completion set aside).
   - **Why:** recorder file names (`<map>_<UTC start>_pid<n>_run<n>.jsonl`) are long, and remembering them would leave the feature unused (owner).
@@ -309,13 +319,3 @@ later session might "simplify" away; change one only with the owner's approval
 - **D21 Tests are never weakened or deleted to pass.** An environmental failure (slow VM frame rate, a race in a read) is rerun and reported with evidence, for example the previous version failing identically.
 - **D22 Spikes don't touch working code:** standalone probes (`probes/`) and probe tests (`tests/probes/`, outside the suite). Once the result is written up in `evidence/`, the probe is deleted (owner 2026-10-27: the repo holds only what the tooling needs); git history keeps it.
 - **D23 Patterns live in the repo, enforced where possible** (this file, `CLAUDE.md`, `tools/arch_check.py`, the `new-feature` skill). Session memory is machine-local and doesn't transfer.
-
-- **D52 Practice checkpoints use native triggers and hints.** The entities service
-  owns BoundsTrigger creation/contact observation and retains definitions until
-  world teardown; one unused event binding enables native contact processing.
-  Textdraw uses the native bitmap font with upward positioning and four-second
-  priority. The existing free camera, input capture and gfx projection support
-  the editor. Drafts autosave to `Checkpoints/<mission>.txt`; restart applies them.
-  Player initialization starts timing; menu resume preserves it. Rejected: custom
-  overlap polling, replacing BSPs and custom hint surfaces. Evidence:
-  `evidence/checkpoints/README.md`.

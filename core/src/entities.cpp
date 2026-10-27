@@ -265,9 +265,9 @@ bool AddNativeTrigger(const char* name, const float* min, const float* max) {
     d.name = storage.name; d.reach = 0;
     for (auto& script : d.scripts) script = nullptr;
     // BoundsTrigger checks ScriptActor's event-table count before collecting
-    // contacts (0x440ce0 / 0x440dc0). An unused binding keeps that native path
-    // active without running an authored command on touch/untouch.
-    d.scripts[0] = "fd_checkpoints_contact: hint 0 (checkpoint)";
+    // contacts (0x440ce0 / 0x440dc0). A binding for an event nothing fires keeps that
+    // native path active without running an authored command on touch/untouch.
+    d.scripts[0] = "fdcore_native_contact: hint 0 (native trigger)";
     for (int a = 0; a < 3; ++a) d.position[a] = (min[a]+max[a])*.5f;
     NativeRequest request = {&d, 0, 10000, reinterpret_cast<void*>(g_descriptor)};
     uintptr_t slot = 0; uint32_t session = 0;
