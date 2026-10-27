@@ -5,6 +5,27 @@ Releases section of the repository page); each one's zip carries the key sheet g
 for that build. The release workflow copies a version's `## <version>` section below into
 its release notes (`core/CLAUDE.md`, "Done means").
 
+## 0.21.0
+
+**New: practice checkpoints** (by Jacob Pilawa; practice only). Boxes you place in a level
+that show your elapsed level time when you reach them:
+- **Timestamps:** `fd_checkpoints 1` (key N toggles, saved). Touching a checkpoint shows its
+  name and `mm:ss:ddd` in the game's own hint text for four seconds, once per attempt. A box
+  you spawn inside fires only after you've left it once. Restarting the mission starts a new
+  attempt; going to the menu and back doesn't.
+- **Editor:** `fd_checkpoints_edit 1` pauses and opens the free camera with the editor.
+  - Space or Insert places a box ahead of the camera;
+  - left-drag a box or its coloured arrow to move it, a face cube to resize it;
+  - the arrow keys and PgUp/PgDn move the selected box (Shift resizes, Ctrl moves 1 unit);
+  - Ctrl+C / V / D copy, paste and duplicate; Delete removes; Home / End undo and redo;
+  - `fd_checkpoints_name "text"` names the selected box; P leaves the editor.
+- **Files:** one per mission, `Checkpoints/<mission>.txt` in the game folder, saved
+  automatically as you edit (with one `.bak` of the previous file). Restart the mission to use
+  your edits. `fd_checkpoints_save` retries a failed save; `fd_checkpoints_status` shows
+  what's loaded. The BSP viewer reads and writes the same format.
+- Up to 32 checkpoints per mission. `fd_checkpoints_distance` and `fd_checkpoints_step` set
+  where new boxes appear and how far a key moves them.
+
 ## 0.20.0
 
 **New: replay** (practice only). This plays your recordings from the recorder back inside the level:
