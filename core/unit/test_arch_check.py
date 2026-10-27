@@ -58,6 +58,35 @@ class ArchCheck(unittest.TestCase):
                    + '\n#include "glitch.h"\n')
         self.assertEqual(self.rules(), (1, ["R1"]))
 
+    def test_r1_core_string_names_feature_setting(self):
+        # A feature's variable inside a core string, also as the start of a longer name.
+        self.write("log.cpp", open(os.path.join(CORE, "src", "log.cpp"), encoding="utf-8").read()
+                   + '\nconst char* kProbe = "fd_hud_warp_contact: hint 0";\n')
+        self.assertEqual(self.rules(), (1, ["R1"]))
+
+    def test_r1_core_names_in_comments_are_fine(self):
+        self.write("log.cpp", open(os.path.join(CORE, "src", "log.cpp"), encoding="utf-8").read()
+                   + "\n// fd_hud_warp turns the warp HUD on\n")
+        self.assertEqual(self.rules(), (0, []))
+
+    def test_r10_init_refuses_silently(self):
+        self.write("features/probe.cpp", FEATURE.format(body="bool Init() {\n    if (!g) return false;\n"
+                                                             "    return true;\n}\nbool g;"))
+        self.assertEqual(self.rules(), (1, ["R10"]))
+
+    def test_r10_init_logs_its_refusal(self):
+        self.write("features/probe.cpp", FEATURE.format(body="bool g;\nbool Init() {\n    if (!g) {\n"
+                                                             "        log::Warn(\"probe: no g\",\n"
+                                                             "                  1);\n        return false;\n"
+                                                             "    }\n    return true;\n}"))
+        self.assertEqual(self.rules(), (0, []))
+
+    def test_r10_refusal_logged_elsewhere_allowed(self):
+        self.write("features/probe.cpp", FEATURE.format(body="bool g;\nbool Init() {\n    if (!g) return false;"
+                                                             "  // arch-allow: R10 logged by the early step\n"
+                                                             "    return true;\n}"))
+        self.assertEqual(self.rules(), (0, []))
+
     def test_r2_feature_includes_other_feature(self):
         self.write("features/probe.cpp", FEATURE.format(body='#include "glitch.h"'))
         self.assertEqual(self.rules(), (1, ["R2"]))

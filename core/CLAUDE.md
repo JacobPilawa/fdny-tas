@@ -38,7 +38,7 @@ The log lists `modules: N registered (...)` and one `module <name>: enabled | di
 
 | Rule | What | Enforced by |
 |---|---|---|
-| R1 | Core files (`src/*`) never include a feature header. The core never names a feature. | arch_check |
+| R1 | Core files (`src/*`) never include a feature header. The core never names a feature: no core string holds a variable, command or alias a feature registers (also as the start of a longer name). | arch_check |
 | R2 | A feature includes core headers and its own group's headers only (`glitch_*` = group `glitch`). Features talk to each other only through core services. | arch_check |
 | R3 | Each feature group has exactly one `FDCORE_MODULE(...)`, in a file whose `// Tests:` line names existing tests. | arch_check |
 | R4 | No game addresses or module-base+RVA in code: every address/offset is an `addresses.json` entry, used by `addr::Id`. Exceptions need `// arch-allow: R4 <why>` on the line. | arch_check |
@@ -47,6 +47,7 @@ The log lists `modules: N registered (...)` and one `module <name>: enabled | di
 | R7 | No dynamically initialised globals or exit-time destructors: there is no CRT, they never run. Globals must be constant-initialisable (`= {}`, `constexpr`). | `-Wglobal-constructors -Wexit-time-destructors -Werror` |
 | R8 | The draw order is gfx's: only gfx subscribes to the late frame step (`hooks::OnFrameEndLate`); everything else draws from a gfx layer (D40). | arch_check |
 | R9 | The key sheet is built from the source (D41). Each feature module has a `// User: <Title> -- <one sentence>` line. A feature that reads keys itself (not a bind) declares them with `binds::DescribeKey`. Registrations take string literals. | arch_check, `tools/docgen.py` (in `build.ps1` and the pre-commit hook, which also stages `KEY_SHEET.md`), `tests/docs_registry.yaml` |
+| R10 | A feature's `Init()` logs why it refuses: every `return false` follows a `log::` / `console::Print` call in the same or the previous statement. A refusal logged elsewhere (an early step) carries `// arch-allow: R10 <where>`. | arch_check |
 
 Not machine-checked, still rules:
 - **Service ownership.** A Genesis/exe function is hooked by exactly one owner. Shared hooks belong to a core service that offers subscriptions/filters (frame events → `hooks`, camera → `camera`, rendered world → `gfx`). A feature that needs a hooked function asks the owning service; if none exists, add the service to the core first.
@@ -103,7 +104,7 @@ Every drawing belongs to a gfx layer, run in this fixed order each frame (D40, `
    - A test that compares the core's view of the world with the harness's own reads pauses the simulation while it compares (Debug pipe `pause on`), so nothing moves between the two reads (`state_snapshot`, which used to race on a spreading fire or a roaming victim).
 3. **Evidence** in `evidence/<topic>/`: a README with the numbers (what ran, results, verdict). Add logs or screenshots only when the README can't carry the point; test runs keep theirs in `runs/` (untracked).
 4. **Docs:** anything user-visible is described in the code: help texts, the `// User:` line, `binds::DescribeKey` (the key sheet is generated from them, D41; check the root `README.md` reads well); `DECISIONS.md` for any non-obvious choice. The commit message says what changed and how it was tested; there is no separate progress log.
-5. **Version:** bump `VERSION` (minor for features/architecture, patch for fixes).
+5. **Version:** the PR that releases bumps `VERSION` (minor for features/architecture, patch for fixes) and writes its `CHANGES.md` section. That is a feature PR when it ships on its own, or one release PR for several merged features; a feature PR that doesn't release leaves `VERSION` alone.
    - Add the release notes to the root `CHANGES.md` (hand-written), under `## <VERSION>`: the release workflow puts that section in the release's notes.
    - Merging the `core\VERSION` change to `main` runs `.github/workflows/release.yml`. It builds Release from source on a GitHub Windows runner (same zig, `build.ps1`) and publishes the GitHub release `v<VERSION>`: `FDNYCore-<VERSION>.asi`, a zip with it and its key sheet (D41: version, SHA-256, keys, features, variables, commands), and the SHA-256. An existing tag is never overwritten.
    - The GitHub release is the only download (D45): no `.asi` is committed to the repo.

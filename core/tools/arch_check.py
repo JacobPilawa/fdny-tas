@@ -69,6 +69,45 @@ def group(name):
     return os.path.splitext(name)[0].split("_")[0]
 
 
+def string_literals(text):
+    """(line, content) of every string literal outside comments."""
+    out, i, n, line = [], 0, len(text), 1
+    while i < n:
+        if text.startswith("//", i):
+            j = text.find("\n", i)
+            i = n if j < 0 else j
+        elif text.startswith("/*", i):
+            j = text.find("*/", i + 2)
+            j = n if j < 0 else j + 2
+            line += text.count("\n", i, j)
+            i = j
+        elif text[i] == '"':
+            j = i + 1
+            while j < n and text[j] != '"':
+                j += 2 if text[j] == "\\" else 1
+            out.append((line, text[i + 1:j]))
+            i = j + 1
+        else:
+            line += text[i] == "\n"
+            i += 1
+    return out
+
+
+# R1b: the names a feature registers (variables, commands, aliases).
+REGISTERED = re.compile(r'(?:cmd::Cvar\s+\w+\s*=\s*\{\s*|RegisterCommand\(\s*|RegisterAlias\(\s*)"(fd_\w+)"')
+
+
+def function_body(code, start):
+    """The text of the brace block that opens at or after start (code without comments)."""
+    i = code.index("{", start)
+    depth = 0
+    for j in range(i, len(code)):
+        depth += {"{": 1, "}": -1}.get(code[j], 0)
+        if depth == 0:
+            return code[i:j + 1], code.count("\n", 0, i) + 1
+    return code[i:], code.count("\n", 0, i) + 1
+
+
 def includes(text):
     return [(i + 1, m.group(1)) for i, l in enumerate(text.splitlines())
             for m in [re.match(r'\s*#include\s+"([^"]+)"', l)] if m]
@@ -84,6 +123,25 @@ def main():
         for ln, inc in includes(open(f, encoding="utf-8-sig").read()):
             if os.path.basename(inc) in feat_headers or inc.startswith("features/"):
                 fail("R1 core-includes-feature", f, ln, f'core file includes feature header "{inc}"')
+
+    # R1b: ... nor names one in a string: a variable, command or alias a feature registers
+    # (also as the start of a longer name, like fd_<name>_contact). The core's own names
+    # are excluded even when a feature reads them.
+    core_names = set()
+    for f in core_files:
+        core_names |= set(REGISTERED.findall(open(f, encoding="utf-8-sig").read()))
+    feat_names = set()
+    for f in feat_files:
+        feat_names |= set(REGISTERED.findall(open(f, encoding="utf-8-sig").read()))
+    feat_names -= core_names
+    if feat_names:
+        named = re.compile(r"(?<!\w)(" + "|".join(sorted(map(re.escape, feat_names), key=len, reverse=True))
+                           + r")(?![A-Za-z0-9])")
+        for f in core_files:
+            for ln, s in string_literals(open(f, encoding="utf-8-sig").read()):
+                m = named.search(s)
+                if m:
+                    fail("R1 core-names-feature", f, ln, f'core string names the feature setting "{m.group(1)}"')
 
     # R2: a feature includes core headers and its own group's headers only.
     for f in feat_files:
@@ -153,6 +211,24 @@ def main():
         if re.search(r"\bGetAsyncKeyState\s*\(", code) and not re.search(r"\bDescribeKey\s*\(", code):
             fail("R9 sheet-from-source", f, 1, "reads keys itself (GetAsyncKeyState) but declares none with "
                  "binds::DescribeKey: the key sheet would miss them")
+
+    # R10: a feature's Init() logs why it refuses: every "return false" in it is in the same
+    # statement as a log:: or console::Print call, or right after one (modules.cpp then says
+    # "init failed; see above"). A refusal logged elsewhere (an early step) says so with
+    # "// arch-allow: R10 <where>".
+    for f in feat_files:
+        raw = open(f, encoding="utf-8-sig").read()
+        raw_lines, code = raw.splitlines(), strip_comments(raw)
+        for m in re.finditer(r"\bbool\s+Init\s*\(\s*\)\s*\{", code):
+            body, first = function_body(code, m.start())
+            for r in re.finditer(r"\breturn\s+false\b", body):
+                ln = first + body.count("\n", 0, r.start())
+                if re.search(r"arch-allow: R10 \S", raw_lines[ln - 1]):
+                    continue
+                statements = body[:r.start()].split(";")  # [-1]: this statement, [-2]: the one before
+                if not re.search(r"\b(log::\w+|console::Print)\s*\(", "".join(statements[-2:])):
+                    fail("R10 init-refusal-reason", f, ln, "Init() refuses without logging why: "
+                         "log::Warn(\"<name>: ...\") before return false")
 
     # Not here, enforced by the compiler instead (build.ps1 flags, -Werror):
     #   R6 Debug-only testpipe::Register: declared only in Debug, a stray call breaks Release.
