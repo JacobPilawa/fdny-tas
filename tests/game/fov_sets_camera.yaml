@@ -1,0 +1,33 @@
+name: fov_sets_camera
+# Item 6: FDNYCore's default reproduces the original FOV fix
+# (camera FOV 2.002, measured with the original fix: docs/evidence/foundation), and fd_fov sets the camera FOV
+# in memory (Genesis units: 2*tan(hfov/2) at 4:3 / 640x480):
+#   fd_fov 90 -> 2.0     fd_fov 120 -> 3.4641     fd_fov -1 -> game's own 1.428148
+pre_files:
+  - {src: tests/game/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
+  - {src: null, dst: FDNYCore.cfg}
+setup: load_training
+record: true
+steps:
+  - assert_log: {contains: "fov: ready"}
+  - assert_mem: {name: camera.fov, equals: 2.002, tolerance: 0.0005}
+  - screenshot: fov_default_classic
+  - console: "fd_fov -1"
+  - wait_s: 0.5
+  - assert_mem: {name: camera.fov, equals: 1.428148, tolerance: 0.0005}
+  - screenshot: fov_game_stock
+  - console: "fd_fov 90"
+  - wait_s: 0.5
+  - assert_mem: {name: camera.fov, equals: 2.0, tolerance: 0.0005}
+  - screenshot: fov_90
+  - console: "fd_fov 120"
+  - wait_s: 0.5
+  - assert_mem: {name: camera.fov, equals: 3.4641, tolerance: 0.0005}
+  - screenshot: fov_120
+  - console: "fd_fov 0"
+  - wait_s: 0.5
+  - assert_mem: {name: camera.fov, equals: 2.002, tolerance: 0.0005}
+  - assert_file: {path: FDNYCore.cfg, absent: "fd_fov"}
+expect:
+  no_crash: true
+  log_errors: 0

@@ -1,0 +1,73 @@
+name: pause_service
+# Core services for fd_pause (docs/evidence/freecam, D34): the `pause` service skips
+# GameSession::TickSubsystems and pauses the game clock; the `camera` service puts a
+# world-transform override on the camera of geEngine_RenderWorld. Driven through the
+# Debug-only pipes `pause on|off` and `camera_override <dy>|off` (applied on the game
+# thread). On bank with the RescueBot off.
+pre_files:
+  - {src: tests/game/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
+  - {src: null, dst: FDNYCore.cfg}
+setup: load_training
+record: false
+steps:
+  - assert_log: {contains: "pause: ready"}
+  - assert_log: {contains: "world override available"}
+  - console: "fd_watermark 0"
+  - console: "fd_rescuebot 0"
+  - loadmap: bank
+  - assert_pipe_stat: {cmd: pause, key: active, equals: 0}
+  - assert_pipe_stat: {cmd: pause, key: hook, equals: 0}
+  - assert_pipe_stat: {cmd: camera_override, key: have_last, equals: 1}
+  - screenshot: running
+  # pause: everything that moves stands still, the clock too
+  - pipe: "pause on"
+  - wait_pipe: {cmd: pause, key: active, equals: 1, timeout: 3}
+  - assert_pipe_stat: {cmd: pause, key: clockpaused, equals: 1}
+  - assert_pipe_stat: {cmd: pause, key: block, equals: 1}
+  - assert_pipe_stat: {cmd: pause, key: hook, equals: 1}
+  - wait_s: 0.3
+  - sample_victims: p1
+  - sample_mem: {name: mission.time_left, as: time_p1}
+  - sample_mem: {name: clock.elapsed_ms, as: clock_p1}
+  - sample_mem: {name: player.pos_x, as: x_p1}
+  - sample_mem: {name: player.pos_z, as: z_p1}
+  - wait_s: 4
+  - sample_victims: p2
+  - assert_victims_equal: {runs: [p1, p2], tolerance: 0.01}
+  - assert_mem: {name: mission.time_left, equals_sample: time_p1}
+  - assert_mem: {name: clock.elapsed_ms, equals_sample: clock_p1}
+  - assert_mem: {name: player.pos_x, equals_sample: x_p1}
+  - assert_mem: {name: player.pos_z, equals_sample: z_p1}
+  - assert_pipe_stat: {cmd: pause, key: frames, min: 100}
+  - screenshot: paused
+  # the camera override: the game's last transform lifted 150 u, on screen while paused
+  - pipe: "camera_override 150"
+  - wait_pipe: {cmd: camera_override, key: active, equals: 1, timeout: 3}
+  - wait_s: 0.5
+  - screenshot: override_up150
+  - pipe: "camera_override off"
+  - wait_pipe: {cmd: camera_override, key: active, equals: 0, timeout: 3}
+  - wait_s: 0.5
+  - screenshot: override_off
+  # resume: the clock goes on from where it stopped (no jump of the paused 5+ s)
+  - pipe: "pause off"
+  - wait_pipe: {cmd: pause, key: active, equals: 0, timeout: 3}
+  - assert_pipe_stat: {cmd: pause, key: block, equals: 0}
+  - assert_pipe_stat: {cmd: pause, key: hook, equals: 0}
+  - wait_s: 1
+  - assert_mem: {name: clock.elapsed_ms, equals_sample: clock_p1, tolerance: 2500}
+  - assert_mem: {name: mission.time_left, equals_sample: time_p1, tolerance: 2.5}
+  - screenshot: resumed
+  # leaving the level ends a pause: a game loadmap typed while paused. Rendering stops while
+  # loading, so the service resumes from its TickSubsystems detour (run fc3: it waited in a
+  # frame event that never came, and the load waited for the simulation: deadlock)
+  - pipe: "pause on"
+  - wait_pipe: {cmd: pause, key: active, equals: 1, timeout: 3}
+  - console: "loadmap training"
+  - wait_log: {contains: "pause: off (level change)", since_console: true, timeout: 60}
+  - wait_s: 30
+  - assert_pipe_stat: {cmd: pause, key: active, equals: 0}
+  - assert_pipe_stat: {cmd: pause, key: block, equals: 0}
+expect:
+  no_crash: true
+  log_errors: 0

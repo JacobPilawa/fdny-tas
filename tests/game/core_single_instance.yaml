@@ -1,0 +1,28 @@
+name: core_single_instance
+# Two cores installed under release-style names: FDNYCore-test.asi (loads first: the
+# ASI loader goes alphabetically) and FDNYCoreZ.asi. Only the first starts; the second
+# logs one "stays inert" line naming the first and installs nothing. The watermark
+# skips the running core by handle, whatever its file is called, and lists the inert
+# copy. FDNYCore.asi itself is removed for the run (restored afterwards).
+pre_files:
+  - {src: tests/game/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
+  - {src: null, dst: FDNYCore.cfg}
+  - {src: null, dst: FDNYCore.asi}
+  - {src: build/Debug/FDNYCore.asi, dst: FDNYCore-test.asi}
+  - {src: build/Debug/FDNYCore.asi, dst: FDNYCoreZ.asi}
+setup: load_training
+record: true
+steps:
+  - assert_log: {contains: "FDNYCoreZ.asi stays inert: another copy is already loaded"}
+  - assert_log: {contains: "FDNYCore-test.asi); keep one FDNYCore*.asi"}
+  - assert_log_count: {contains: "stays inert", equals: 1}
+  - assert_log_count: {contains: "FDNYCore loaded from", equals: 1}
+  - assert_log_count: {contains: "FDNYCore ready", equals: 1}
+  - assert_log_count: {contains: "[INFO] modules: ", equals: 1}
+  - assert_pipe_contains: {cmd: watermark, absent: "FDNYCore-test"}
+  - console: "fd_watermark 1"
+  - wait_s: 1
+  - screenshot: watermark_two_cores
+expect:
+  no_crash: true
+  log_errors: 0

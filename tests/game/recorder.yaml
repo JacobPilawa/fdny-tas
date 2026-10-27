@@ -1,0 +1,48 @@
+name: recorder
+# Player-update capture, repeated same-map attempts, opt-out and write failure.
+# The harness validates the JSONL files written by these stage attempts.
+# Recording is off by default (owner, "Set recorder default to off"): the test first checks
+# that nothing records, then opts in with fd_record 1. The rest is unchanged.
+pre_files:
+  - {src: tests/game/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
+  - {src: null, dst: FDNYCore.cfg}
+  - {src: null, dst: autoexec.cfg}
+  - {src: null, dst: FDNYRecorder.asi}
+setup: load_training
+record: true
+steps:
+  - assert_log: {contains: "module recorder: enabled"}
+  - wait_s: 1
+  - assert_pipe_stat: {cmd: recorder, key: active, equals: 0}   # default off: nothing recorded
+  - assert_pipe_stat: {cmd: recorder, key: runs, equals: 0}
+  - console: "fd_record 1"
+  - wait_s: 1
+  - assert_pipe_stat: {cmd: recorder, key: active, equals: 1}
+  - assert_pipe_stat: {cmd: recorder, key: samples, min: 10}
+  - sample_pipe: {cmd: recorder, as: before}
+  - key: {key: w, hold: 0.5}
+  - assert_pipe_stat: {cmd: recorder, key: samples, min: 1, since: before}
+  - loadmap: training
+  - assert_pipe_stat: {cmd: recorder, key: runs, min: 1, since: before}
+  - assert_pipe_stat: {cmd: recorder, key: active, equals: 1}
+  - console: "fd_record 0"
+  - wait_s: 1
+  - assert_pipe_stat: {cmd: recorder, key: active, equals: 0}
+  - sample_pipe: {cmd: recorder, as: disabled}
+  - wait_s: 0.5
+  - assert_pipe_stat: {cmd: recorder, key: samples, equals: 0, since: disabled}
+  - console: "fd_record_directory FDNYCore.asi"
+  - console: "fd_record 1"
+  - wait_s: 1
+  - assert_pipe_stat: {cmd: recorder, key: failed, equals: 1}
+  - assert_pipe_stat: {cmd: recorder, key: active, equals: 0}
+  - assert_log: {contains: "recorder: cannot create"}
+  - console: "fd_record_directory Recordings"
+  - wait_s: 1
+  - assert_pipe_stat: {cmd: recorder, key: active, equals: 1}
+  - console: "fd_record 0"
+  - wait_s: 1
+  - assert_recordings: {stage: training, min_runs: 2, min_samples: 10, victims: true}
+expect:
+  no_crash: true
+  log_errors: 0

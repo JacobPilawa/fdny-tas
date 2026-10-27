@@ -1,0 +1,58 @@
+name: tp_teleport
+# Item 13: fd_tp_save stores position + view; fd_tp_load restores them (and
+# they stay: the next frames integrate from the new spot) -- also bound to a
+# key; refused on another map (position unchanged) and in fd_profile run.
+pre_files:
+  - {src: tests/game/data/game_cfg_player.cfg, dst: FDNYFireFighter.cfg}
+  - {src: null, dst: FDNYCore.cfg}
+setup: load_training
+record: true
+steps:
+  - wait_s: 1
+  - sample_mem: {name: player.pos_x, as: x_saved}
+  - sample_mem: {name: player.pos_y, as: y_saved}
+  - sample_mem: {name: player.pos_z, as: z_saved}
+  - sample_mem: {name: player.yaw, as: yaw_saved}
+  - sample_mem: {name: player.pitch, as: pitch_saved}
+  - console: "fd_tp_save"
+  - assert_log: {contains: "tp: saved"}
+  - screenshot: 01_saved
+  # move away and turn
+  - key: {key: w, hold: 2.0}
+  - mouse_rel: [300, -60]
+  - key: {key: w, hold: 1.0}
+  - assert_moved: {x: x_saved, z: z_saved, min: 100}
+  # teleport back: position + view restored, and still there a second later
+  - console: "fd_tp_load"
+  - assert_log: {contains: "tp: loaded"}
+  - wait_s: 1.0
+  - assert_same_pos: {x: x_saved, z: z_saved, tolerance: 2}
+  - assert_mem: {name: player.pos_y, equals_sample: y_saved, tolerance: 2}
+  - assert_mem: {name: player.yaw, equals_sample: yaw_saved, tolerance: 0.01}
+  - assert_mem: {name: player.pitch, equals_sample: pitch_saved, tolerance: 0.01}
+  - screenshot: 02_loaded
+  # bound to a key
+  - console: 'bind f5 "fd_tp_load"'
+  - key: {key: w, hold: 1.5}
+  - assert_moved: {x: x_saved, z: z_saved, min: 50}
+  - key: {key: f5, hold: 0.2}
+  - wait_s: 1.0
+  - assert_same_pos: {x: x_saved, z: z_saved, tolerance: 2}
+  - console: "unbind f5"
+  # practice-only
+  - console: "fd_profile run"
+  - console: "fd_tp_load"
+  - assert_log: {contains: "console> fd_tp_load is practice-only (fd_profile is run)"}
+  - console: "fd_profile practice"
+  # another map: refused, position unchanged
+  - loadmap: bank
+  - sample_mem: {name: player.pos_x, as: x_bank}
+  - sample_mem: {name: player.pos_z, as: z_bank}
+  - console: "fd_tp_load"
+  - assert_log: {contains: "fd_tp_load: saved on training, this is bank -- refused"}
+  - wait_s: 1.0
+  - assert_same_pos: {x: x_bank, z: z_bank, tolerance: 1}
+  - screenshot: 03_refused_on_bank
+expect:
+  no_crash: true
+  log_errors: 0
