@@ -416,7 +416,7 @@
             "bytes": "83 EC 20 56 8B 74 24 28 8B 86 68 36 03 00 85 C0",
             "ref": "first 16 bytes of Genesis.dll export geEngine_BeginFrame"
           },
-          "ghidra": "Genesis.dll export table (core/notes/genesis_exports.txt, ordinal 440); called from ROCRender::RenderFrame 0x0049490F",
+          "ghidra": "Genesis.dll export table (ordinal 440); called from ROCRender::RenderFrame 0x0049490F",
           "note": "cdecl geBoolean geEngine_BeginFrame(geEngine*, geCamera*, geBoolean ClearScreen); frame start"
         },
         "genesis.end_frame": {
@@ -1123,7 +1123,7 @@
             "bytes": "81 EC 04 04 00 00 A1 F0 A8 0A 10 33 84 24 04 04",
             "ref": "first 16 bytes of Genesis.dll export geEngine_Printf"
           },
-          "ghidra": "Genesis.dll export geEngine_Printf (ordinal 451, RVA 0x24B60, core/notes/genesis_exports.txt); imported by the exe; Genesis3D 1.1: geBoolean geEngine_Printf(geEngine*, int32 x, int32 y, const char* fmt, ...) cdecl (bare export name)",
+          "ghidra": "Genesis.dll export geEngine_Printf (ordinal 451, RVA 0x24B60); imported by the exe; Genesis3D 1.1: geBoolean geEngine_Printf(geEngine*, int32 x, int32 y, const char* fmt, ...) cdecl (bare export name)",
           "note": "in-frame debug text (engine font); used by the HUDs"
         },
         "glitch.entry": {

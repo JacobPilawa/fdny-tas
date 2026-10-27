@@ -61,7 +61,6 @@ public:
     bool Upload(const uint32_t* px, int stride, int w, int h);  // (re)creates as needed
     bool Draw(int x, int y);  // false while settling / without a bitmap
     void Destroy();
-    bool Exists() const { return bmp_ != nullptr; }
 
 private:
     void* bmp_ = nullptr;
@@ -88,7 +87,6 @@ public:
     // caller may fall back to a Decal.
     bool Draw(int x, int y);
     void Destroy();
-    int TilesUploaded() const { return uploads_; }
 
 private:
     struct Tile {
@@ -98,7 +96,7 @@ private:
         int settle;
     };
     Tile tiles_[kMaxTiles] = {};
-    int cols_ = 0, rows_ = 0, w_ = 0, h_ = 0, uploads_ = 0;
+    int cols_ = 0, rows_ = 0, w_ = 0, h_ = 0;
     bool Attach(Tile& t);
 };
 
