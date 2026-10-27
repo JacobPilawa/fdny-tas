@@ -94,7 +94,7 @@ bool IsGameKey(int vk) {
 
 void CmdBind(int argc, const char* const* argv) {
     if (argc < 2) {
-        console::Print("usage: bind <key> [\"command\"]   (e.g. bind f5 \"fd_tp_save\")");
+        console::Print("usage: bind <key> [\"command\"]   (e.g. bind f5 \"echo saved\")");
         return;
     }
     int vk = ParseKey(argv[1]);

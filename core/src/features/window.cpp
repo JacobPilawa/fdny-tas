@@ -87,7 +87,7 @@ bool ApplyEarlyPatch() {
 }
 
 bool Init() {
-    if (!g_patched) return false;  // ApplyEarlyPatch logged why
+    if (!g_patched) return false;  // arch-allow: R10 ApplyEarlyPatch logged why
     cmd::RegisterCvar(&g_fdWindowCursor);
     binds::DescribeKey("o", "free the mouse cursor from the game window (held)", "while fd_window_cursor is 1");  // CursorWarp
     return true;

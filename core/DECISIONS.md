@@ -214,6 +214,11 @@ later session might "simplify" away; change one only with the owner's approval
 
 ## Process
 
+- **D54 Rules an agent missed become checks** (owner 2026-10-27, after the review of PR #20: "add that on a third branch").
+  - **R1 covers strings:** a core string holding a name a feature registers (also as a prefix) fails arch_check. PR #20's entities service carried `fd_checkpoints_contact`; the include-only check let it through. The `bind` usage example named `fd_tp_save` and now uses `echo`.
+  - **R10:** a feature's `Init()` logs why it refuses (PR #20 returned false silently; `modules.cpp` said "init failed; see above" with nothing above). Refusals logged in an early step say so with `// arch-allow: R10` (speedrun, window).
+  - **Version:** the PR that releases bumps `VERSION` and writes `CHANGES.md`; a feature PR that waits for a release PR doesn't. This is what PRs #17-#19 already did; the old wording said every feature PR.
+  - **Rejected:** wording alone (both rules were already written, in `core/CLAUDE.md` and the skill, and were missed); CI checking that a feature PR bumps `VERSION` (contradicts batching releases).
 - **D53 Practice checkpoints use native triggers and hints** (Jacob Pilawa, PR #20). The entities service
   owns BoundsTrigger creation/contact observation and retains definitions until
   world teardown; one binding for an event nothing fires (core-generic, it names no feature)

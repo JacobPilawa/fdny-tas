@@ -6,7 +6,7 @@ description: Add or substantially change an FDNYCore feature (a mod feature, ove
 # Adding an FDNYCore feature
 
 Follow these steps in order. The rules are in `core/CLAUDE.md` (arch_check enforces
-R1-R5, the compiler R6-R7) and the reasons in `core/DECISIONS.md`. Don't re-derive them,
+R1-R5 and R8-R10, the compiler R6-R7) and the reasons in `core/DECISIONS.md`. Don't re-derive them,
 and don't work around them; if a rule blocks a good design, stop and ask the owner
 (a rule changes only with a `DECISIONS.md` entry).
 
@@ -56,7 +56,8 @@ and don't work around them; if a rule blocks a good design, stop and ask the own
     `addr::EarlyCodeAddress`.
 - Globals constant-initialisable only (`= {}`, `constexpr`; R7). No STL, CRT or
   `<initializer_list>`.
-- Log a `<name>: ready (...)` line, and a reason on every refusal or disable.
+- Log a `<name>: ready (...)` line, and a reason on every refusal or disable (R10 checks
+  `Init()`). Core services never name the feature, not even in a string (R1).
 - `.\core\build.ps1` must pass: arch_check and `-Werror`.
 
 ## 4. Test
@@ -68,7 +69,7 @@ and don't work around them; if a rule blocks a good design, stop and ask the own
 - Copy `core/templates/test.yaml` to `core/tests/<name>.yaml` (in the suite). Prove the
   behaviour with assertions (log lines, memory, pipe), not just "no crash". Add
   screenshots for anything visible.
-- Run it, then the full suite before the version bump:
+- Run it, then the full suite before a version bump:
   `python -I core/harness/run_test.py --suite` (Python not on PATH:
   `environment\local\tools\python`).
 - Never weaken a test. For a failure you believe is environmental, rerun it, show it
@@ -82,10 +83,11 @@ and don't work around them; if a rule blocks a good design, stop and ask the own
   and the pre-commit hook): check your feature's lines read well, and fix the help texts
   and `// User:` line in the code, never the sheet. A new service goes in `core/CLAUDE.md`'s
   "Core services" table.
-- On the version bump: the release notes under `## <version>` in the root `CHANGES.md`.
-  Merging the bump to `main` publishes the GitHub release (built by the workflow, D45).
 - `core/DECISIONS.md`: an entry for every non-obvious choice (what, why, rejected).
-- `core/VERSION`: bump minor for a feature, patch for a fix.
+- Version, only if this PR releases (ask the owner when unsure): `core/VERSION` minor for
+  a feature, patch for a fix, and the release notes under `## <version>` in the root
+  `CHANGES.md`. Merging the bump to `main` publishes the GitHub release (D45); a feature
+  that waits for a later release PR leaves both alone.
 - Commit (git not on PATH: `environment\local\tools\git\cmd`): one topic, message via
   `-F` from a UTF-8 file without BOM, with the Co-Authored-By / Claude-Session lines.
   The message says what changed and how it was tested (there is no progress log).

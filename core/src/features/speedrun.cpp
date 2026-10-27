@@ -230,7 +230,7 @@ bool ApplyEarlyPatch(const char* gameDir) {
 }
 
 bool Init() {
-    if (g_deferTo) return false;  // FDNYDeterministic.asi owns these sites (logged in ApplyEarlyPatch)
+    if (g_deferTo) return false;  // arch-allow: R10 FDNYDeterministic.asi owns these sites (logged in ApplyEarlyPatch)
     bool spawnsOk = g_hooked;
     for (Id id : kSpawnNeeds) spawnsOk = spawnsOk && addr::Usable(id);
     if (spawnsOk) {
