@@ -30,6 +30,7 @@
 #include "modules.h"
 #include "pause.h"
 #include "state.h"
+#include "spectator.h"
 #include "testpipe.h"
 
 namespace fdcore::freecam {
@@ -47,6 +48,7 @@ struct Cam {
 };
 Cam g_cam = {};
 bool g_flying = false;
+bool g_suspended = false;
 float g_rebuildErr = -1.0f;  // max |game - rebuilt| over the 9 rotation cells at the start
 float g_moved = 0.0f;        // camera distance flown this pause
 uint32_t g_keyMask = 0;      // keys seen last frame (pipe)
@@ -144,6 +146,7 @@ void SetPauseVar(const char* v) {
 
 void OnPause(cmd::Cvar& v) {
     if (g_syncing) return;
+    if (spectator::Active()) { SetPauseVar("0"); return; }
     const bool on = v.value[0] != '0';
     if (on) {
         if (!pause::Set(true, "fd_pause")) {
@@ -163,6 +166,21 @@ void CmdToggle(int, const char* const*) { cmd::SetCvar(&g_fdPause, g_fdPause.val
 bool Down(int vk) { return (GetAsyncKeyState(vk) & 0x8000) != 0; }
 
 void FrameBegin() {
+    // The modal viewer has taken the camera and pause. Do not clear its override
+    // through StopFlying; abandon only this feature's previous ownership.
+    if (spectator::Active()) {
+        if (g_flying) g_suspended = true;
+        g_flying = false; g_wantResumeDt = false;
+        return;
+    }
+    if (g_suspended) {
+        g_suspended = false;
+        if (pause::Active() && g_fdPause.value[0] != '0') {
+            camera::XForm saved;
+            Build(g_cam, &saved); camera::SetWorldOverride(&saved);
+            QueryPerformanceCounter(&g_last); g_flying = true;
+        }
+    }
     // The service ends a pause on its own (level change, menu): follow it.
     if (!pause::Active()) {
         if (g_fdPause.value[0] != '0') StopFlying(), SetPauseVar("0");

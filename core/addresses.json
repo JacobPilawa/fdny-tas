@@ -2019,6 +2019,349 @@
           "sig": null,
           "ghidra": "PlayerRescueEnt root+0x5f4: constructor 0x44d550 and hint route 0x44ee50",
           "note": "Native hint UI receiver, textdraw service"
+        },
+        "menu.allocate": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0xa5a84",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0xa5a84",
+            "bytes": "56 8B 74 24 08 EB 10 56 E8 E1 56 01 00 85 C0 59",
+            "ref": "first 16 bytes of the native menu function"
+          },
+          "ghidra": "Native menu/widget call traced at 0x4a5a84; see docs/evidence/recordings/README.md",
+          "note": "menu service: allocate"
+        },
+        "menu.array_resize": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x3b6e0",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x3b6e0",
+            "bytes": "56 8B F1 8B 46 04 57 8B 7C 24 0C 3B F8 0F 84 7E",
+            "ref": "first 16 bytes of the native menu function"
+          },
+          "ghidra": "Native menu/widget call traced at 0x43b6e0; see docs/evidence/recordings/README.md",
+          "note": "menu service: array resize"
+        },
+        "menu.text_set": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x8c780",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x8c780",
+            "bytes": "6A FF 68 9A 3D 4D 00 64 A1 00 00 00 00 50 64 89",
+            "ref": "first 16 bytes of the native menu function"
+          },
+          "ghidra": "Native menu/widget call traced at 0x48c780; see docs/evidence/recordings/README.md",
+          "note": "menu service: text set"
+        },
+        "menu.row_construct": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x368f0",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x368f0",
+            "bytes": "6A FF 68 0D E5 4C 00 64 A1 00 00 00 00 50 64 89",
+            "ref": "first 16 bytes of the native menu function"
+          },
+          "ghidra": "Native menu/widget call traced at 0x4368f0; see docs/evidence/recordings/README.md",
+          "note": "menu service: row construct"
+        },
+        "menu.font_frame": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x7d300",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x7d300",
+            "bytes": "8B 44 24 04 56 8D 71 04 56 89 06 E8 A0 FF FF FF",
+            "ref": "first 16 bytes of the native menu function"
+          },
+          "ghidra": "Native menu/widget call traced at 0x47d300; see docs/evidence/recordings/README.md",
+          "note": "menu service: font frame"
+        },
+        "menu.go": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x2d3e0",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x2d3e0",
+            "bytes": "53 8B 5C 24 08 85 DB 56 8B F1 7C 64 3B 9E 5C 01",
+            "ref": "first 16 bytes of the native menu function"
+          },
+          "ghidra": "Native menu/widget call traced at 0x42d3e0; see docs/evidence/recordings/README.md",
+          "note": "menu service: go"
+        },
+        "menu.back": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x2d460",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x2d460",
+            "bytes": "83 41 3C FE 79 07 C7 41 3C 00 00 00 00 8B 41 3C",
+            "ref": "first 16 bytes of the native menu function"
+          },
+          "ghidra": "Native menu/widget call traced at 0x42d460; see docs/evidence/recordings/README.md",
+          "note": "menu service: back"
+        },
+        "menu.page_draw": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x35d80",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x35d80",
+            "bytes": "56 8B F1 8B 56 04 85 D2 57 8B 3D 38 C0 4D 00 74",
+            "ref": "first 16 bytes of the native menu function"
+          },
+          "ghidra": "Native menu/widget call traced at 0x435d80; see docs/evidence/recordings/README.md",
+          "note": "menu service: page draw"
+        },
+        "menu.text_draw": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x8b7c0",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x8b7c0",
+            "bytes": "55 8B EC 83 E4 F8 83 EC 48 A1 78 3A 50 00 53 55",
+            "ref": "first 16 bytes of the native menu function"
+          },
+          "ghidra": "Native menu/widget call traced at 0x48b7c0; see docs/evidence/recordings/README.md",
+          "note": "menu service: text draw"
+        },
+        "menu.page_construct": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x36630",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x36630",
+            "bytes": "6A FF 68 9B E4 4C 00 64 A1 00 00 00 00 50 64 89",
+            "ref": "first 16 bytes of the native menu function"
+          },
+          "ghidra": "Native menu/widget call traced at 0x436630; see docs/evidence/recordings/README.md",
+          "note": "menu service: page construct"
+        },
+        "menu.page_setup": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x366d0",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x366d0",
+            "bytes": "6A FF 68 B8 E4 4C 00 64 A1 00 00 00 00 50 64 89",
+            "ref": "first 16 bytes of the native menu function"
+          },
+          "ghidra": "Native menu/widget call traced at 0x4366d0; see docs/evidence/recordings/README.md",
+          "note": "menu service: page setup"
+        },
+        "menu.select_stage": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x2f280",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x2f280",
+            "bytes": "6A FF 64 A1 00 00 00 00 68 10 DE 4C 00 50 8B 44",
+            "ref": "first 16 bytes of the native menu function"
+          },
+          "ghidra": "Native menu/widget call traced at 0x42f280; see docs/evidence/recordings/README.md",
+          "note": "menu service: select stage"
+        },
+        "menu.title_draw": {
+          "module": "exe",
+          "kind": "code",
+          "rva": "0x2eea0",
+          "chain": [],
+          "type": "ptr",
+          "sig": {
+            "rva": "0x2eea0",
+            "bytes": "83 EC 28 53 56 8B F1 8B 46 2C 8B 0D AC 2A 50 00",
+            "ref": "first 16 bytes of the native menu function"
+          },
+          "ghidra": "Native menu/widget call traced at 0x42eea0; see docs/evidence/recordings/README.md",
+          "note": "menu service: title draw"
+        },
+        "menu.f_vtable": {
+          "module": "field",
+          "rva": "0x0",
+          "type": "u32",
+          "ghidra": "Native menu/widget layout; see docs/evidence/recordings/README.md",
+          "note": "menu service: vtable"
+        },
+        "menu.f_id": {
+          "module": "field",
+          "rva": "0x4",
+          "type": "u32",
+          "ghidra": "Native menu/widget layout; see docs/evidence/recordings/README.md",
+          "note": "menu service: id"
+        },
+        "menu.f_rect": {
+          "module": "field",
+          "rva": "0x8",
+          "type": "u32",
+          "ghidra": "Native menu/widget layout; see docs/evidence/recordings/README.md",
+          "note": "menu service: rect"
+        },
+        "menu.f_visible": {
+          "module": "field",
+          "rva": "0x1c",
+          "type": "u32",
+          "ghidra": "Native menu/widget layout; see docs/evidence/recordings/README.md",
+          "note": "menu service: visible"
+        },
+        "menu.f_children": {
+          "module": "field",
+          "rva": "0x10",
+          "type": "u32",
+          "ghidra": "Native menu/widget layout; see docs/evidence/recordings/README.md",
+          "note": "menu service: children"
+        },
+        "menu.f_title_manager": {
+          "module": "field",
+          "rva": "0x28",
+          "type": "u32",
+          "ghidra": "Native menu/widget layout; see docs/evidence/recordings/README.md",
+          "note": "menu service: title manager"
+        },
+        "menu.f_stage": {
+          "module": "field",
+          "rva": "0x2c",
+          "type": "u32",
+          "ghidra": "Native menu/widget layout; see docs/evidence/recordings/README.md",
+          "note": "menu service: stage"
+        },
+        "menu.f_active": {
+          "module": "field",
+          "rva": "0x10",
+          "type": "u32",
+          "ghidra": "Native menu/widget layout; see docs/evidence/recordings/README.md",
+          "note": "menu service: active"
+        },
+        "menu.f_previous": {
+          "module": "field",
+          "rva": "0x14",
+          "type": "u32",
+          "ghidra": "Native menu/widget layout; see docs/evidence/recordings/README.md",
+          "note": "menu service: previous"
+        },
+        "menu.f_history": {
+          "module": "field",
+          "rva": "0x3c",
+          "type": "u32",
+          "ghidra": "Native menu/widget layout; see docs/evidence/recordings/README.md",
+          "note": "menu service: history"
+        },
+        "menu.f_pages": {
+          "module": "field",
+          "rva": "0x158",
+          "type": "u32",
+          "ghidra": "Native menu/widget layout; see docs/evidence/recordings/README.md",
+          "note": "menu service: pages"
+        },
+        "menu.f_count": {
+          "module": "field",
+          "rva": "0x4",
+          "type": "u32",
+          "ghidra": "Native menu/widget layout; see docs/evidence/recordings/README.md",
+          "note": "menu service: count"
+        },
+        "menu.f_page_size": {
+          "module": "field",
+          "rva": "0x2c",
+          "type": "u32",
+          "ghidra": "Native menu/widget layout; see docs/evidence/recordings/README.md",
+          "note": "menu service: page size"
+        },
+        "menu.f_row_size": {
+          "module": "field",
+          "rva": "0x378",
+          "type": "u32",
+          "ghidra": "Native menu/widget layout; see docs/evidence/recordings/README.md",
+          "note": "menu service: row size"
+        },
+        "menu.f_row_flag": {
+          "module": "field",
+          "rva": "0x355",
+          "type": "u32",
+          "ghidra": "Native menu/widget layout; see docs/evidence/recordings/README.md",
+          "note": "menu service: row flag"
+        },
+        "menu.f_row_style": {
+          "module": "field",
+          "rva": "0x160",
+          "type": "u32",
+          "ghidra": "Native menu/widget layout; see docs/evidence/recordings/README.md",
+          "note": "menu service: row style"
+        },
+        "menu.f_text": {
+          "module": "field",
+          "rva": "0x4c",
+          "type": "u32",
+          "ghidra": "Native menu/widget layout; see docs/evidence/recordings/README.md",
+          "note": "menu service: text"
+        },
+        "menu.f_text_scale_x": {
+          "module": "field",
+          "rva": "0x144",
+          "type": "u32",
+          "ghidra": "Native menu/widget layout; see docs/evidence/recordings/README.md",
+          "note": "menu service: text scale x"
+        },
+        "menu.f_text_scale_y": {
+          "module": "field",
+          "rva": "0x148",
+          "type": "u32",
+          "ghidra": "Native menu/widget layout; see docs/evidence/recordings/README.md",
+          "note": "menu service: text scale y"
+        },
+        "menu.f_font": {
+          "module": "field",
+          "rva": "0x138",
+          "type": "u32",
+          "ghidra": "Native menu/widget layout; see docs/evidence/recordings/README.md",
+          "note": "menu service: font"
+        },
+        "menu.f_font_frame": {
+          "module": "field",
+          "rva": "0x4",
+          "type": "u32",
+          "ghidra": "Native menu/widget layout; see docs/evidence/recordings/README.md",
+          "note": "menu service: font frame"
+        },
+        "menu.f_vtable_button": {
+          "module": "field",
+          "rva": "0x4",
+          "type": "u32",
+          "ghidra": "Native menu/widget layout; see docs/evidence/recordings/README.md",
+          "note": "menu service: vtable button"
+        },
+        "menu.f_vtable_draw": {
+          "module": "field",
+          "rva": "0xc",
+          "type": "u32",
+          "ghidra": "Native menu/widget layout; see docs/evidence/recordings/README.md",
+          "note": "menu service: vtable draw"
         }
       },
       "classify": {

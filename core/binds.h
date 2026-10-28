@@ -35,8 +35,11 @@ bool KeysLive();
 using KeyCapture = bool (*)(int vk);
 void SetKeyCapture(KeyCapture filter);
 bool KeyCaptured(int vk);
+// Additional independent modal tools retain their active-state filters.
+bool AddKeyCapture(KeyCapture filter);
 // A modal pointer tool takes mouse motion from free-camera look.
 void SetPointerCapture(bool (*filter)());
 bool PointerCaptured();
+bool AddPointerCapture(bool (*filter)());
 
 } // namespace fdcore::binds
